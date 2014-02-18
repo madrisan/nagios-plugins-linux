@@ -9,7 +9,7 @@ This package contains several nagios plugins for monitoring Linux boxes.
 * check_uptime
 
 
-## check_ifmountfsa
+## check_ifmountfs
 
 This Nagios plugin checks whether the given filesystems are mounted.
 
