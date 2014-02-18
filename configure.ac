@@ -94,10 +94,12 @@ AC_CHECK_HEADERS([ \
   sys/param.h \
   sys/sysctl.h \
   sys/sysinfo.h \
-  sys/swap.h])
+  sys/swap.h \
+  mntent.h])
 
 AC_CHECK_FUNCS([ \
   asprintf])
+AC_FUNC_GETMNTENT
 
 AC_ARG_WITH(proc-meminfo,
   AS_HELP_STRING([--with-proc-meminfo=PATH],
@@ -165,5 +167,5 @@ cc_TRY_CFLAGS([-Wunused])
 
 AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
 
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile])
 AC_OUTPUT
