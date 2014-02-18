@@ -313,7 +313,7 @@ main (int argc, char **argv)
 	  if ((fd < 0 || fstat (fd, &stats[i - optind]))
 	      && stat (argv[i], &stats[i - optind]))
 	    {
-	      error (0, 0, "cannot open `%s'\n", argv[i]);
+	      error (STATE_UNKNOWN, 0, "cannot open `%s'\n", argv[i]);
 	      argv[i] = NULL;
 	    }
 	  if (0 <= fd)
