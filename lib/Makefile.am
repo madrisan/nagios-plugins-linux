@@ -32,9 +32,3 @@ libfilesystems_a_SOURCES = \
   xmalloc.c
 
 libnp_a_SOURCES = nputils.c nputils.h
-
-libfilesystems_a_LIBADD = $(LIBOBJS)
-
-
-
-
