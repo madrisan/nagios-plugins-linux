@@ -20,6 +20,8 @@ dnl Checks for programs
 AC_PROG_CC
 AC_PROG_GCC_TRADITIONAL
 
+AC_PROG_RANLIB
+
 dnl Check whether the compiler supports the __attribute__((weak, alias)) feature
 #ac_save_CFLAGS="$CFLAGS"
 #CFLAGS="$CFLAGS -Werror"
