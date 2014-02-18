@@ -2,9 +2,25 @@
 
 This package contains several nagios plugins for monitoring Linux boxes.
 
+* check_ifmountfs
 * check_memory
+* check_readonlyfs
 * check_swap
 * check_uptime
+
+
+## check_ifmountfsa
+
+This Nagios plugin checks whether the given filesystems are mounted.
+
+Usage
+
+	check_ifmountfs [FILESYSTEM]...
+	check_ifmountfs --help
+
+Examples
+
+	check_ifmountfs /mnt/nfs-data /mnt/cdrom
 
 
 ## check_memory, check_swap
@@ -18,9 +34,6 @@ Usage
 	
 	check_memory --help
 	check_swap --help
-
-	check_memory --version
-	check_swap --version
 
 Where
 
@@ -52,6 +65,31 @@ Examples
 	  # swap_pageouts: The number of swap pages the system has brought in and out
 
 
+## check_readonlyfs
+
+This Nagios plugin checks for readonly filesystems.
+
+Usage
+
+	check_readonlyfs [OPTION]... [FILE]...
+	check_readonlyfs --help
+
+Options 
+
+	-l, --local               limit listing to local file systems
+	-L, --list                display the list of checked file systems
+	-T, --type=TYPE           limit listing to file systems of type TYPE
+	-X, --exclude-type=TYPE   limit listing to file systems not of type TYPE
+	-h, --help                display this help and exit
+	-v, --version             output version information and exit
+
+Examples
+
+	check_readonlyfs
+	check_readonlyfs -l -T ext3 -T ext4
+	check_readonlyfs -l -X vfat
+
+
 ## check_uptime
 
 This Nagios plugin checks how long the system has been running.
@@ -60,7 +98,6 @@ Usage
 
 	check_uptime [--warning [@]start:end] [--critical [@]start:end]
 	check_uptime --help
-	check_uptime --version
 
 Where
 
