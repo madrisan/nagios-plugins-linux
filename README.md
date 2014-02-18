@@ -9,7 +9,7 @@ This package contains several nagios plugins for monitoring Linux boxes.
 
 ## check_memory, check_swap
 
-These two nagios plugins respectivery check fir memory and swap usage.
+These two nagios plugins respectivery check for memory and swap usage.
 
 Usage
 
@@ -41,7 +41,7 @@ Examples
 	  # mem_cached   : In-memory cache for files read from the disk (the page cache)
 	  # mem_pageins
 	  # mem_pageouts : The number of memory pages the system has written in and out to disk
-	
+
 	check_swap -w 40% -c 60% -m
 	WARNING: 42.70% (895104 kB) used | swap_total=2096444kB, swap_used=895104kB, swap_free=1201340kB, swap_cached=117024kB, swap_pageins=1593302kB, swap_pageouts=1281649kB
 	  # swap_total   : Total amount of swap space available
