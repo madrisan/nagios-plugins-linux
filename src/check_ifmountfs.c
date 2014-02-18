@@ -48,7 +48,7 @@ static struct option const longopts[] = {
   {NULL, 0, NULL, 0}
 };
 
-static void __attribute__ ((__noreturn__)) usage (FILE * out)
+static void attribute_noreturn usage (FILE * out)
 {
   fprintf (out,
 	   "%s, version %s - check whether the given filesystems are mounted.\n",

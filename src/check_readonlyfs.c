@@ -214,7 +214,7 @@ check_entry (char const *name)
   return STATE_OK;
 }
 
-static void __attribute__ ((__noreturn__)) usage (FILE * out)
+static void attribute_noreturn usage (FILE * out)
 {
   fprintf (out, "%s, version %s - check for readonly filesystems.\n",
 	   program_name, program_version);

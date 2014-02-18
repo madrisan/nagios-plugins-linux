@@ -69,7 +69,7 @@ static char result_line[BUFSIZE + 1], perfdata_line[BUFSIZE + 1];
 double uptime (void);
 char *sprint_uptime (double);
 
-static void __attribute__ ((__noreturn__)) print_version (void)
+static void attribute_noreturn print_version (void)
 {
   printf ("%s, version %s\n", program_name, program_version);
   printf ("%s\n", program_copyright);
@@ -89,7 +89,7 @@ static struct option const longopts[] = {
   {NULL, 0, NULL, 0}
 };
 
-static void __attribute__ ((__noreturn__)) usage (FILE * out)
+static void attribute_noreturn usage (FILE * out)
 {
   fprintf (out,
 	   "%s, version %s - check how long the system has been running.\n",
