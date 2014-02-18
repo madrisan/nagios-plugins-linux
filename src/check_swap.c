@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
 #include "nputils.h"
 #include "meminfo.h"
 
@@ -44,18 +45,18 @@ static void attribute_noreturn usage (FILE * out)
   fprintf (out,
            "Usage: %s [-b,-k,-m,-g] -w PERC -c PERC\n",
            program_name);
-  fprintf (out, "       %s -h\n", program_name);
-  fprintf (out, "       %s -V\n\n", program_name);
+  fprintf (out, "       %s --help\n", program_name);
+  fprintf (out, "       %s --version\n\n", program_name);
   fputs ("\
 Options:\n\
-  -b,-k,-m,-g      show output in bytes, KB (the default), MB, or GB\n\
+  -b,-k,-m,-g     show output in bytes, KB (the default), MB, or GB\n\
   -w, --warning PERCENT   warning threshold\n\
-  -c, --critical PERCENT   critical threshold\n\
-  -h, --help       display this help and exit\n\
-  -v, --version    output version information and exit\n\n", out);
-  fprintf (out, "\
+  -c, --critical PERCENT   critical threshold\n", out);
+  fputs (HELP_OPTION_DESCRIPTION, out);
+  fputs (VERSION_OPTION_DESCRIPTION, out);
+  fprintf (out, "\n\
 Examples:\n\
-  %s -w 30%% -c 50%%\n\n", program_name);
+  %s -w 30%% -c 50%%\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -79,8 +80,8 @@ static struct option const longopts[] = {
   {(char *) "kilobyte", no_argument, NULL, 'k'},
   {(char *) "megabyte", no_argument, NULL, 'm'},
   {(char *) "gigabyte", no_argument, NULL, 'g'},
-  {(char *) "help", no_argument, NULL, 'h'},
-  {(char *) "version", no_argument, NULL, 'V'},
+  {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
+  {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
 };
 
@@ -108,14 +109,14 @@ main (int argc, char **argv)
         case 'w':
           warning = optarg;
           break;
-        case 'h':
-          usage (stdout);
-        case 'V':
-          print_version ();
         case 'b': shift = 0;  units = strdup ("B"); break;
         case 'k': shift = 10; units = strdup ("kB"); break;
         case 'm': shift = 20; units = strdup ("MB"); break;
         case 'g': shift = 30; units = strdup ("GB"); break;
+
+        case_GETOPT_HELP_CHAR
+        case_GETOPT_VERSION_CHAR
+
         }
     }
 

@@ -56,6 +56,7 @@
 #include <sys/types.h>
 #endif
 
+#include "common.h"
 #include "error.h"
 #include "nputils.h"
 
@@ -86,8 +87,8 @@ There is NO WARRANTY, to the extent permitted by law.\n", stdout);
 static struct option const longopts[] = {
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
-  {(char *) "help", no_argument, NULL, 'h'},
-  {(char *) "version", no_argument, NULL, 'V'},
+  {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
+  {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
 };
 
@@ -101,11 +102,11 @@ static void attribute_noreturn usage (FILE * out)
   fputs ("\
 Options:\n\
   -w, --warning [@]start:end]   warning threshold\n\
-  -c, --critical [@]start:end]   critical threshold\n\
-  -h, --help            display this help and exit\n\
-  -v, --version         output version information and exit\n\n", out);
+  -c, --critical [@]start:end]   critical threshold\n", out);
+  fputs (HELP_OPTION_DESCRIPTION, out);
+  fputs (VERSION_OPTION_DESCRIPTION, out);
 
-  fputs ("\
+  fputs ("\n\
 Where:\n\
   1. start <= end\n\
   2. start and \":\" is not required if start=0\n\
@@ -181,12 +182,10 @@ main (int argc, char **argv)
 	case 'w':
 	  warning = optarg;
 	  break;
-	case 'h':
-	  usage (stdout);
-	  break;
-	case 'V':
-	  print_version ();
-	  break;
+
+        case_GETOPT_HELP_CHAR
+        case_GETOPT_VERSION_CHAR
+
 	}
     }
 
