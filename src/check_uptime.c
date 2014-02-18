@@ -21,6 +21,7 @@
 #include "config.h"
 
 #include <assert.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -55,6 +56,7 @@
 #include <sys/types.h>
 #endif
 
+#include "error.h"
 #include "nputils.h"
 
 static const char *program_name = "check_update";
@@ -126,10 +128,7 @@ uptime ()
   struct sysinfo info;
 
   if (0 != sysinfo (&info))
-    {
-      perror ("cannot get the system uptime");
-      return UPTIME_RET_FAIL;
-    }
+    error (STATE_UNKNOWN, errno, "cannot get the system uptime");
 
   return info.uptime;
 }
