@@ -13,7 +13,7 @@ unsigned int error_message_count;
 
 /* The calling program should define program_name and set it to the
    name of the executing program.  */
-extern const char *program_name;
+extern char *program_name;
 
 /* Return non-zero if FD is open.  */
 static inline int
@@ -45,7 +45,7 @@ print_errno_message (int errnum)
   char const *s;
 
   s = strerror (errnum);
-  fprintf (stderr, ": %s", s);
+  fprintf (stdout, " (%s)", s);
 }
 
 /* Print the program name and error message MESSAGE, which is a printf-style
@@ -53,23 +53,25 @@ print_errno_message (int errnum)
    If ERRNUM is nonzero, print its corresponding system error message.
    Exit with status STATUS if it is nonzero.  */
 void
-error (int status, int errnum, const char *message, ...)
+plugin_error (int status, int errnum, const char *message, ...)
 {
   va_list args;
 
   flush_stdout ();
   
-  fprintf (stderr, "%s: ", program_name);
+  fprintf (stdout, "%s: ", program_name);
 
   va_start (args, message);
-  vfprintf (stderr, message, args);
+  vfprintf (stdout, message, args);
   va_end (args);
 
   ++error_message_count;
   if (errnum)
     print_errno_message (errnum);
 
-  fflush (stderr);
+  fputs ("\n", stdout);
+  fflush (stdout);
+
   if (status)
     exit (status);
 }

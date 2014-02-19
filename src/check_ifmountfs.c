@@ -31,10 +31,10 @@
 #include "error.h"
 #include "mountlist.h"
 #include "nputils.h"
+#include "progname.h"
 
 #define STREQ(a, b) (strcmp (a, b) == 0)
 
-const char *program_name = "check_ifmountfs";
 static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
   "Copyright (C) 2013 Davide Madrisan <" PACKAGE_BUGREPORT ">";
@@ -85,6 +85,8 @@ main (int argc, char **argv)
 {
   int c, status = STATE_OK;
 
+  set_program_name (argv[0]);
+
   while ((c = getopt_long (argc, argv, "hv", longopts, NULL)) != -1)
     {
       switch (c)
@@ -103,7 +105,8 @@ main (int argc, char **argv)
 
   if (NULL == mount_list)
     /* Couldn't read the table of mounted file systems. */
-    error (STATE_UNKNOWN, 0, "cannot read table of mounted file systems\n");
+    plugin_error (STATE_UNKNOWN, 0,
+                  "cannot read table of mounted file systems\n");
 
   if (optind < argc)
     {

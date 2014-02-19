@@ -18,17 +18,21 @@
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
 noinst_HEADERS =  \
-  common.h        \
-  error.h         \
-  mountlist.h     \
-  xalloc.h        \
-  nputils.h
+  common.h     \
+  error.h      \
+  mountlist.h  \
+  xalloc.h     \
+  nputils.h    \
+  progname.h
 
-noinst_LIBRARIES = libfilesystems.a libnp.a
+noinst_LIBRARIES = libnagiosplugins.a
 
-libfilesystems_a_SOURCES = \
-  error.c                  \
-  mountlist.c              \
-  xmalloc.c
+libnagiosplugins_a_SOURCES = \
+  error.c      \
+  mountlist.c  \
+  nputils.c    \
+  xmalloc.c    \
+  progname.c
 
-libnp_a_SOURCES = nputils.c nputils.h
+libnagiosplugins_a_LIBADD = $(LIBOBJS)
+libnagiosplugins_a_DEPENDENCIES = $(LIBOBJS)

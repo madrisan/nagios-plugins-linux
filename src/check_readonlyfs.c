@@ -35,10 +35,10 @@
 #include "mountlist.h"
 #include "nputils.h"
 #include "xalloc.h"
+#include "progname.h"
 
 #define STREQ(a, b) (strcmp (a, b) == 0)
 
-const char *program_name = "check_readonlyfs";
 static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
   "Copyright (C) 2013 Davide Madrisan <" PACKAGE_BUGREPORT ">";
@@ -252,6 +252,8 @@ main (int argc, char **argv)
   show_listed_fs = false;
   show_all_fs = false;
 
+  set_program_name (argv[0]);
+
   while ((c = getopt_long (argc, argv, "alLT:X:hv", longopts, NULL)) != -1)
     {
       switch (c)
@@ -290,9 +292,10 @@ main (int argc, char **argv)
 	for (fs_excl = fs_exclude_list; fs_excl; fs_excl = fs_excl->fs_next)
 	  {
 	    if (STREQ (fs_incl->fs_name, fs_excl->fs_name))
-	      error (STATE_UNKNOWN, 0,
-		     "file system type `%s' both selected and excluded\n",
-		     fs_incl->fs_name);
+	      plugin_error (STATE_UNKNOWN, 0,
+		            "file system type `%s' both selected and "
+                            "excluded\n",
+		            fs_incl->fs_name);
 	  }
       }
   }
@@ -313,7 +316,7 @@ main (int argc, char **argv)
 	  if ((fd < 0 || fstat (fd, &stats[i - optind]))
 	      && stat (argv[i], &stats[i - optind]))
 	    {
-	      error (STATE_UNKNOWN, 0, "cannot open `%s'\n", argv[i]);
+	      plugin_error (STATE_UNKNOWN, 0, "cannot open `%s'\n", argv[i]);
 	      argv[i] = NULL;
 	    }
 	  if (0 <= fd)
@@ -328,7 +331,8 @@ main (int argc, char **argv)
 
   if (NULL == mount_list)
     /* Couldn't read the table of mounted file systems. */
-    error (STATE_UNKNOWN, 0, "cannot read table of mounted file systems\n");
+    plugin_error (STATE_UNKNOWN, 0,
+                  "cannot read table of mounted file systems\n");
 
   if (optind < argc)
     {

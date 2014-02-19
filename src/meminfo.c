@@ -63,11 +63,13 @@ static char buf[2048];
 #define FILE_TO_BUF(filename, fd) do{                               \
     static int local_n;                                             \
     if (fd == -1 && (fd = open(filename, O_RDONLY)) == -1) {        \
-        error (STATE_UNKNOWN, 0, "Error: /proc must be mounted\n"); \
+        plugin_error (STATE_UNKNOWN, 0,                             \
+                      "Error: /proc must be mounted\n");            \
     }                                                               \
     lseek(fd, 0L, SEEK_SET);                                        \
     if ((local_n = read(fd, buf, sizeof buf - 1)) < 0) {            \
-        error (STATE_UNKNOWN, 0, "Error reading %s\n", filename);   \
+        plugin_error (STATE_UNKNOWN, 0,                             \
+                      "Error reading %s\n", filename);              \
     }                                                               \
     buf[local_n] = '\0';                                            \
 }while(0)
@@ -484,7 +486,7 @@ get_memory_status (int status, float percent_used, int shift,
                   percent_used, kb_main_used);
 
   if (ret < 0)
-    error (STATE_UNKNOWN, 0, "Error getting memory status\n");
+    plugin_error (STATE_UNKNOWN, 0, "Error getting memory status\n");
   
   return msg;
 }
@@ -500,7 +502,7 @@ get_swap_status (int status, float percent_used, int shift,
                   percent_used, kb_swap_used);
 
   if (ret < 0)
-    error (STATE_UNKNOWN, 0, "Error getting swap status\n");
+    plugin_error (STATE_UNKNOWN, 0, "Error getting swap status\n");
 
   return msg;
 }
@@ -521,7 +523,7 @@ get_memory_perfdata (int shift, const char *units)
                   SU (kb_mem_pageins), SU (kb_mem_pageouts));
 
   if (ret < 0)
-    error (STATE_UNKNOWN, 0, "Error getting memory perfdata\n");
+    plugin_error (STATE_UNKNOWN, 0, "Error getting memory perfdata\n");
 
   return msg;
 }
@@ -542,7 +544,7 @@ get_swap_perfdata (int shift, const char *units)
                   SU (kb_swap_pageins), SU (kb_swap_pageouts));
 
   if (ret < 0)
-    error (STATE_UNKNOWN, 0, "Error getting swap perfdata\n");
+    plugin_error (STATE_UNKNOWN, 0, "Error getting swap perfdata\n");
 
   return msg;
 }

@@ -37,8 +37,8 @@
 #include "common.h"
 #include "error.h"
 #include "nputils.h"
+#include "progname.h"
 
-static const char *program_name = "check_update";
 static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
   "Copyright (C) 2010,2012-2013 Davide Madrisan <" PACKAGE_BUGREPORT ">";
@@ -107,7 +107,7 @@ uptime ()
   struct sysinfo info;
 
   if (0 != sysinfo (&info))
-    error (STATE_UNKNOWN, errno, "cannot get the system uptime");
+    plugin_error (STATE_UNKNOWN, errno, "cannot get the system uptime");
 
   return info.uptime;
 }
@@ -146,6 +146,8 @@ main (int argc, char **argv)
   char *critical = NULL, *warning = NULL;
   double uptime_secs;
   thresholds *my_threshold = NULL;
+
+  set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv, "c:w:hV", longopts, NULL)) != -1)
     {

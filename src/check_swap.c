@@ -30,8 +30,8 @@
 #include "common.h"
 #include "nputils.h"
 #include "meminfo.h"
+#include "progname.h"
 
-static const char *program_name = "check_swap";
 static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">";
@@ -96,6 +96,8 @@ main (int argc, char **argv)
   char *perfdata_msg;
   thresholds *my_threshold = NULL;
   float percent_used = 0;
+
+  set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv, "c:w:bkmghV", longopts, NULL)) != -1)
     {
