@@ -23,7 +23,8 @@ noinst_HEADERS =  \
   mountlist.h  \
   xalloc.h     \
   nputils.h    \
-  progname.h
+  progname.h   \
+  thresholds.h
 
 noinst_LIBRARIES = libnagiosplugins.a
 
@@ -32,7 +33,8 @@ libnagiosplugins_a_SOURCES = \
   mountlist.c  \
   nputils.c    \
   xmalloc.c    \
-  progname.c
+  progname.c   \
+  thresholds.c
 
 libnagiosplugins_a_LIBADD = $(LIBOBJS)
 libnagiosplugins_a_DEPENDENCIES = $(LIBOBJS)

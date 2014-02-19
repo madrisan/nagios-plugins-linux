@@ -38,6 +38,7 @@
 #include "error.h"
 #include "nputils.h"
 #include "progname.h"
+#include "thresholds.h"
 
 static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
