@@ -1,5 +1,4 @@
 AM_CPPFLAGS = -I$(top_srcdir)/lib
-LDADD = ../lib/libnagiosplugins.a $(LIBINTL)
 
 libexec_PROGRAMS = \
    check_ifmountfs \
@@ -13,6 +12,8 @@ check_swap_SOURCES = check_swap.c meminfo.h meminfo.c
 check_uptime_SOURCES = check_uptime.c
 check_readonlyfs_SOURCES = check_readonlyfs.c
 check_ifmountfs_SOURCES = check_ifmountfs.c
+
+LDADD = ../lib/libnagiosplugins.a
 
 check_memory_LDADD = $(LDADD)
 check_swap_LDADD = $(LDADD)

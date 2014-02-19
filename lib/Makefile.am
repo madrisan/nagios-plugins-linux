@@ -15,8 +15,6 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AM_CPPFLAGS = -I$(top_srcdir)/src
-
 noinst_HEADERS =  \
   common.h     \
   error.h      \
@@ -35,6 +33,3 @@ libnagiosplugins_a_SOURCES = \
   xmalloc.c    \
   progname.c   \
   thresholds.c
-
-libnagiosplugins_a_LIBADD = $(LIBOBJS)
-libnagiosplugins_a_DEPENDENCIES = $(LIBOBJS)
