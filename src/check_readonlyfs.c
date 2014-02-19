@@ -294,7 +294,7 @@ main (int argc, char **argv)
 	    if (STREQ (fs_incl->fs_name, fs_excl->fs_name))
 	      plugin_error (STATE_UNKNOWN, 0,
 		            "file system type `%s' both selected and "
-                            "excluded\n",
+                            "excluded",
 		            fs_incl->fs_name);
 	  }
       }
@@ -316,7 +316,7 @@ main (int argc, char **argv)
 	  if ((fd < 0 || fstat (fd, &stats[i - optind]))
 	      && stat (argv[i], &stats[i - optind]))
 	    {
-	      plugin_error (STATE_UNKNOWN, 0, "cannot open `%s'\n", argv[i]);
+	      plugin_error (STATE_UNKNOWN, 0, "cannot open `%s'", argv[i]);
 	      argv[i] = NULL;
 	    }
 	  if (0 <= fd)
@@ -332,7 +332,7 @@ main (int argc, char **argv)
   if (NULL == mount_list)
     /* Couldn't read the table of mounted file systems. */
     plugin_error (STATE_UNKNOWN, 0,
-                  "cannot read table of mounted file systems\n");
+                  "cannot read table of mounted file systems");
 
   if (optind < argc)
     {

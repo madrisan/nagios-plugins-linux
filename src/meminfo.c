@@ -66,12 +66,12 @@ static char buf[2048];
     static int local_n;                                             \
     if (fd == -1 && (fd = open(filename, O_RDONLY)) == -1) {        \
         plugin_error (STATE_UNKNOWN, 0,                             \
-                      "Error: /proc must be mounted\n");            \
+                      "Error: /proc must be mounted");              \
     }                                                               \
     lseek(fd, 0L, SEEK_SET);                                        \
     if ((local_n = read(fd, buf, sizeof buf - 1)) < 0) {            \
         plugin_error (STATE_UNKNOWN, 0,                             \
-                      "Error reading %s\n", filename);              \
+                      "Error reading %s", filename);                \
     }                                                               \
     buf[local_n] = '\0';                                            \
 }while(0)
@@ -488,7 +488,7 @@ get_memory_status (int status, float percent_used, int shift,
                   percent_used, kb_main_used);
 
   if (ret < 0)
-    plugin_error (STATE_UNKNOWN, 0, "Error getting memory status\n");
+    plugin_error (STATE_UNKNOWN, 0, "Error getting memory status");
   
   return msg;
 }
@@ -504,7 +504,7 @@ get_swap_status (int status, float percent_used, int shift,
                   percent_used, kb_swap_used);
 
   if (ret < 0)
-    plugin_error (STATE_UNKNOWN, 0, "Error getting swap status\n");
+    plugin_error (STATE_UNKNOWN, 0, "Error getting swap status");
 
   return msg;
 }
@@ -525,7 +525,7 @@ get_memory_perfdata (int shift, const char *units)
                   SU (kb_mem_pageins), SU (kb_mem_pageouts));
 
   if (ret < 0)
-    plugin_error (STATE_UNKNOWN, 0, "Error getting memory perfdata\n");
+    plugin_error (STATE_UNKNOWN, 0, "Error getting memory perfdata");
 
   return msg;
 }
@@ -546,7 +546,7 @@ get_swap_perfdata (int shift, const char *units)
                   SU (kb_swap_pageins), SU (kb_swap_pageouts));
 
   if (ret < 0)
-    plugin_error (STATE_UNKNOWN, 0, "Error getting swap perfdata\n");
+    plugin_error (STATE_UNKNOWN, 0, "Error getting swap perfdata");
 
   return msg;
 }

@@ -106,7 +106,7 @@ main (int argc, char **argv)
   if (NULL == mount_list)
     /* Couldn't read the table of mounted file systems. */
     plugin_error (STATE_UNKNOWN, 0,
-                  "cannot read table of mounted file systems\n");
+                  "cannot read table of mounted file systems");
 
   if (optind < argc)
     {
