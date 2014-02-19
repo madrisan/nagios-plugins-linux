@@ -19,6 +19,8 @@
  */
 
 #include "config.h"
+
+#include "common.h"
 #include "nputils.h"
 
 const char *

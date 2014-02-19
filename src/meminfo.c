@@ -33,6 +33,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "common.h"
 #include "error.h"
 #include "nputils.h"
 #include "thresholds.h"

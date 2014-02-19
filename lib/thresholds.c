@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "nputils.h"
+#include "common.h"
 #include "thresholds.h"
 
 #ifndef TRUE

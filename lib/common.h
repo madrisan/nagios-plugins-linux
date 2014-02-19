@@ -32,4 +32,14 @@ There is NO WARRANTY, to the extent permitted by law.\n"
     exit (EXIT_SUCCESS);                        \
     break;
 
+/* Nagios Plugins error codes */
+enum
+{
+  STATE_OK,
+  STATE_WARNING,
+  STATE_CRITICAL,
+  STATE_UNKNOWN,
+  STATE_DEPENDENT
+};
+
 #endif

@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "common.h"
 #include "error.h"
-#include "nputils.h"
 
 /* String containing name the program is called with.
    To be initialized by main().  */
