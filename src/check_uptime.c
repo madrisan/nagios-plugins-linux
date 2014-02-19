@@ -20,6 +20,10 @@
 
 #include "config.h"
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE /* activate extra prototypes for glibc */
+#endif
+
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -44,9 +48,8 @@ static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
   "Copyright (C) 2010,2012-2013 Davide Madrisan <" PACKAGE_BUGREPORT ">";
 
-#define BUFSIZE 127
+#define BUFSIZE 0xFF
 static char buf[BUFSIZE + 1];
-static char result_line[BUFSIZE + 1], perfdata_line[BUFSIZE + 1];
 
 double uptime (void);
 char *sprint_uptime (double);
@@ -143,8 +146,9 @@ sprint_uptime (double uptime_secs)
 int
 main (int argc, char **argv)
 {
-  int c, uptime_mins, status;
+  int c, uptime_mins, status, ret;
   char *critical = NULL, *warning = NULL;
+  char *result_line;
   double uptime_secs;
   thresholds *my_threshold = NULL;
 
@@ -174,37 +178,19 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  if (UPTIME_RET_FAIL != (uptime_secs = uptime ()))
-    {
-      uptime_mins = (int) uptime_secs / 60;
-      status = get_status (uptime_mins, my_threshold);
-      free (my_threshold);
+  if (UPTIME_RET_FAIL == (uptime_secs = uptime ()))
+    plugin_error (STATE_UNKNOWN, 0, "can't get system uptime counter");
 
-      switch (status)
-	{
-	case STATE_CRITICAL:
-	  c = snprintf (result_line, BUFSIZE, "UPTIME CRITICAL:");
-	  break;
-	case STATE_WARNING:
-	  c = snprintf (result_line, BUFSIZE, "UPTIME WARNING:");
-	  break;
-	case STATE_OK:
-	  c = snprintf (result_line, BUFSIZE, "UPTIME OK:");
-	  break;
-	}
+  uptime_mins = (int) uptime_secs / 60;
+  status = get_status (uptime_mins, my_threshold);
+  free (my_threshold);
 
-      snprintf (result_line + c, BUFSIZE - c, " %s",
-		sprint_uptime (uptime_secs));
-      snprintf (perfdata_line, BUFSIZE, "uptime=%d", uptime_mins);
+  ret = asprintf (&result_line, "UPTIME %s: %s",
+                  state_text (status), sprint_uptime (uptime_secs));
+  if (ret < 0)
+    plugin_error (STATE_UNKNOWN, 0, "asprintf() has failed");
 
-      printf ("%s|%s\n", result_line, perfdata_line);
-    }
-  else
-    {
-      c = snprintf (result_line, BUFSIZE,
-		    "UPTIME UNKNOWN: can't get system uptime counter");
-      status = STATE_UNKNOWN;
-    }
+  printf ("%s | uptime=%d\n", result_line, uptime_mins);
 
   return status;
 }
