@@ -236,7 +236,8 @@ static void
 print_version (void)
 {
   printf ("%s, version %s\n%s\n", program_name, program_version,
-	  program_copyright);
+          program_copyright);
+  fputs (GPLv3_DISCLAIMER, stdout);
 }
 
 int

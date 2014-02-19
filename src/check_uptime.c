@@ -56,12 +56,9 @@ char *sprint_uptime (double);
 
 static void attribute_noreturn print_version (void)
 {
-  printf ("%s, version %s\n", program_name, program_version);
-  printf ("%s\n", program_copyright);
-  fputs ("\
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\n\
-This is free software; you are free to change and redistribute it.\n\
-There is NO WARRANTY, to the extent permitted by law.\n", stdout);
+  printf ("%s, version %s\n%s\n", program_name, program_version,
+          program_copyright);
+  fputs (GPLv3_DISCLAIMER, stdout);
 
   exit (STATE_OK);
 }
@@ -154,7 +151,7 @@ main (int argc, char **argv)
 
   set_program_name (argv[0]);
 
-  while ((c = getopt_long (argc, argv, "c:w:hV", longopts, NULL)) != -1)
+  while ((c = getopt_long (argc, argv, "c:w:hv", longopts, NULL)) != -1)
     {
       switch (c)
 	{
