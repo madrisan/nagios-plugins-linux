@@ -48,7 +48,7 @@ static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
   "Copyright (C) 2010,2012-2013 Davide Madrisan <" PACKAGE_BUGREPORT ">";
 
-#define BUFSIZE 0xFF
+#define BUFSIZE 0x80
 static char buf[BUFSIZE + 1];
 
 double uptime (void);
