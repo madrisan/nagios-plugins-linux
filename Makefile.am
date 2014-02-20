@@ -1,1 +1,1 @@
-SUBDIRS = lib src
+SUBDIRS = lib plugins

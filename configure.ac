@@ -7,8 +7,8 @@ m4_define(PROG_BUGREPORT, [davide.madrisan@gmail.com])
 AC_INIT([PROG_NAME],[PROG_VERSION],[PROG_BUGREPORT],[PROG_NAME])
 AC_PREREQ([2.59])
 
-AC_CONFIG_SRCDIR([src/check_memory.c])
-AC_CONFIG_HEADERS(src/config.h:src/config.hin)
+AC_CONFIG_SRCDIR([plugins/check_memory.c])
+AC_CONFIG_HEADERS(plugins/config.h:plugins/config.hin)
 
 AC_LANG([C])
 
@@ -168,5 +168,5 @@ cc_TRY_CFLAGS([-Wunused])
 
 AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
 
-AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile lib/Makefile plugins/Makefile])
 AC_OUTPUT
