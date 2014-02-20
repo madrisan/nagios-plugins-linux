@@ -20,21 +20,15 @@
 
 #include "config.h"
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE /* activate extra prototypes for glibc */
-#endif
-
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #if HAVE_SYS_SYSINFO_H
-#include <sys/sysinfo.h>
+# include <sys/sysinfo.h>
 #endif
-
 #include <time.h>
 #include <unistd.h>
 
@@ -43,6 +37,7 @@
 #include "nputils.h"
 #include "progname.h"
 #include "thresholds.h"
+#include "xasprintf.h"
 
 static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
@@ -143,7 +138,7 @@ sprint_uptime (double uptime_secs)
 int
 main (int argc, char **argv)
 {
-  int c, uptime_mins, status, ret;
+  int c, uptime_mins, status;
   char *critical = NULL, *warning = NULL;
   char *result_line;
   double uptime_secs;
@@ -183,11 +178,8 @@ main (int argc, char **argv)
   status = get_status (uptime_mins, my_threshold);
   free (my_threshold);
 
-  ret = asprintf (&result_line, "UPTIME %s: %s",
-                  state_text (status), sprint_uptime (uptime_secs));
-  if (ret < 0)
-    plugin_error (STATE_UNKNOWN, 0, "asprintf() has failed");
-
+  result_line = xasprintf ("UPTIME %s: %s", state_text (status),
+                           sprint_uptime (uptime_secs));
   printf ("%s | uptime=%d\n", result_line, uptime_mins);
 
   return status;

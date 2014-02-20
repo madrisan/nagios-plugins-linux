@@ -22,10 +22,6 @@
 
 #include "config.h"
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE /* activate extra prototypes for glibc */
-#endif
-
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,6 +33,7 @@
 #include "meminfo.h"
 #include "progname.h"
 #include "thresholds.h"
+#include "xasprintf.h"
 
 static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
@@ -104,13 +101,9 @@ get_memory_status (int status, float percent_used, int shift,
                    const char *units)
 {
   char *msg;
-  int ret;
 
-  ret = asprintf (&msg, "%s: %.2f%% (%lu kB) used", state_text (status),
-                  percent_used, kb_main_used);
-
-  if (ret < 0)
-    plugin_error (STATE_UNKNOWN, 0, "Error getting memory status");
+  msg = xasprintf ("%s: %.2f%% (%lu kB) used", state_text (status),
+                   percent_used, kb_main_used);
   
   return msg;
 }
@@ -119,19 +112,14 @@ char *
 get_memory_perfdata (int shift, const char *units)
 {
   char *msg;
-  int ret;
 
-  ret = asprintf (&msg,
-                  "mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
-                  "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
-                  "mem_pageins=%Lu%s, mem_pageouts=%Lu%s\n",
-                  SU (kb_main_total), SU (kb_main_used), SU (kb_main_free),
-                  SU (kb_main_shared), SU (kb_main_buffers),
-                  SU (kb_main_cached),
-                  SU (kb_mem_pageins), SU (kb_mem_pageouts));
-
-  if (ret < 0)
-    plugin_error (STATE_UNKNOWN, 0, "Error getting memory perfdata");
+  msg = xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
+                   "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
+                   "mem_pageins=%Lu%s, mem_pageouts=%Lu%s\n",
+                   SU (kb_main_total), SU (kb_main_used), SU (kb_main_free),
+                   SU (kb_main_shared), SU (kb_main_buffers),
+                   SU (kb_main_cached),
+                   SU (kb_mem_pageins), SU (kb_mem_pageouts));
 
   return msg;
 }
