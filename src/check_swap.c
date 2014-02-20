@@ -22,12 +22,17 @@
 
 #include "config.h"
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE /* activate extra prototypes for glibc */
+#endif
+
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "common.h"
+#include "error.h"
 #include "nputils.h"
 #include "meminfo.h"
 #include "progname.h"
@@ -82,6 +87,50 @@ static struct option const longopts[] = {
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
 };
+
+extern unsigned long kb_swap_used;
+extern unsigned long kb_swap_total;
+extern unsigned long kb_swap_free;
+extern unsigned long kb_swap_cached;
+extern unsigned long kb_swap_pageins;
+extern unsigned long kb_swap_pageouts;
+
+char *
+get_swap_status (int status, float percent_used, int shift,
+                 const char *units)
+{
+  char *msg;
+  int ret;
+
+  ret = asprintf (&msg, "%s: %.2f%% (%lu kB) used", state_text (status),
+                  percent_used, kb_swap_used);
+
+  if (ret < 0)
+    plugin_error (STATE_UNKNOWN, 0, "Error getting swap status");
+
+  return msg;
+}
+
+char *
+get_swap_perfdata (int shift, const char *units)
+{
+  char *msg;
+  int ret;
+
+  ret = asprintf (&msg,
+                  "swap_total=%Lu%s, swap_used=%Lu%s, swap_free=%Lu%s, "
+                  /* The amount of swap, in kB, used as cache memory */
+                  "swap_cached=%Lu%s, "
+                  "swap_pageins=%Lu%s, swap_pageouts=%Lu%s\n",
+                  SU (kb_swap_total), SU (kb_swap_used), SU (kb_swap_free),
+                  SU (kb_swap_cached),
+                  SU (kb_swap_pageins), SU (kb_swap_pageouts));
+
+  if (ret < 0)
+    plugin_error (STATE_UNKNOWN, 0, "Error getting swap perfdata");
+
+  return msg;
+}
 
 int
 main (int argc, char **argv)

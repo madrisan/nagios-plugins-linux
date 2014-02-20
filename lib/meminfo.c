@@ -22,10 +22,6 @@
 
 #include "config.h"
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE /* activate extra prototypes for glibc */
-#endif
-
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -475,78 +471,4 @@ meminfo (int cache_is_free)
       kb_swap_pageins = vm_pswpin;
       kb_swap_pageouts = vm_pswpout;
     }
-}
-
-char *
-get_memory_status (int status, float percent_used, int shift,
-                   const char *units)
-{
-  char *msg;
-  int ret;
-
-  ret = asprintf (&msg, "%s: %.2f%% (%lu kB) used", state_text (status),
-                  percent_used, kb_main_used);
-
-  if (ret < 0)
-    plugin_error (STATE_UNKNOWN, 0, "Error getting memory status");
-  
-  return msg;
-}
-
-char *
-get_swap_status (int status, float percent_used, int shift,
-                 const char *units)
-{
-  char *msg;
-  int ret;
-
-  ret = asprintf (&msg, "%s: %.2f%% (%lu kB) used", state_text (status),
-                  percent_used, kb_swap_used);
-
-  if (ret < 0)
-    plugin_error (STATE_UNKNOWN, 0, "Error getting swap status");
-
-  return msg;
-}
-
-char *
-get_memory_perfdata (int shift, const char *units)
-{
-  char *msg;
-  int ret;
-
-  ret = asprintf (&msg,
-                  "mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
-                  "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
-                  "mem_pageins=%Lu%s, mem_pageouts=%Lu%s\n",
-                  SU (kb_main_total), SU (kb_main_used), SU (kb_main_free),
-                  SU (kb_main_shared), SU (kb_main_buffers),
-                  SU (kb_main_cached),
-                  SU (kb_mem_pageins), SU (kb_mem_pageouts));
-
-  if (ret < 0)
-    plugin_error (STATE_UNKNOWN, 0, "Error getting memory perfdata");
-
-  return msg;
-}
-
-char *
-get_swap_perfdata (int shift, const char *units)
-{
-  char *msg;
-  int ret;
-
-  ret = asprintf (&msg,
-                  "swap_total=%Lu%s, swap_used=%Lu%s, swap_free=%Lu%s, "
-                  /* The amount of swap, in kB, used as cache memory */
-                  "swap_cached=%Lu%s, "
-                  "swap_pageins=%Lu%s, swap_pageouts=%Lu%s\n",
-                  SU (kb_swap_total), SU (kb_swap_used), SU (kb_swap_free),
-                  SU (kb_swap_cached),
-                  SU (kb_swap_pageins), SU (kb_swap_pageouts));
-
-  if (ret < 0)
-    plugin_error (STATE_UNKNOWN, 0, "Error getting swap perfdata");
-
-  return msg;
 }

@@ -18,6 +18,7 @@
 noinst_HEADERS =  \
   common.h     \
   error.h      \
+  meminfo.h    \
   mountlist.h  \
   xalloc.h     \
   nputils.h    \
@@ -28,6 +29,7 @@ noinst_LIBRARIES = libnagiosplugins.a
 
 libnagiosplugins_a_SOURCES = \
   error.c      \
+  meminfo.c    \
   mountlist.c  \
   nputils.c    \
   xmalloc.c    \
