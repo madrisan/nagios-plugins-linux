@@ -34,7 +34,7 @@ There is NO WARRANTY, to the extent permitted by law.\n"
     break;
 
 /* Nagios Plugins error codes */
-enum
+enum nagios_status
 {
   STATE_OK,
   STATE_WARNING,

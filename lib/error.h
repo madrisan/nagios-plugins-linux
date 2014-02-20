@@ -2,6 +2,7 @@
 #define _ERROR_H	1
 
 #include "config.h"
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,7 +12,7 @@ extern "C" {
    if ERRNUM is nonzero, follow it with ": " and strerror (ERRNUM).
    If STATUS is nonzero, terminate the program with 'exit (STATUS)'.  */
 
-extern void plugin_error (int status, int errnum, const char *format, ...)
+extern void plugin_error (enum nagios_status, int, const char *, ...)
      attribute_format_printf(3, 4);
 
 /* This variable is incremented each time 'error' is called.  */

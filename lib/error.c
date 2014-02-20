@@ -1,5 +1,4 @@
 #include "config.h"
-#include "error.h"
 
 #include <fcntl.h>
 #include <stdarg.h>
@@ -7,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#include "common.h"
+#include "error.h"
 
 /* This variable is incremented each time 'error' is called.  */
 unsigned int error_message_count;
@@ -53,7 +55,7 @@ print_errno_message (int errnum)
    If ERRNUM is nonzero, print its corresponding system error message.
    Exit with status STATUS if it is nonzero.  */
 void
-plugin_error (int status, int errnum, const char *message, ...)
+plugin_error (enum nagios_status status, int errnum, const char *message, ...)
 {
   va_list args;
 
