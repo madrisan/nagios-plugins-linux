@@ -255,7 +255,8 @@ main (int argc, char **argv)
 
   set_program_name (argv[0]);
 
-  while ((c = getopt_long (argc, argv, "alLT:X:hv", longopts, NULL)) != -1)
+  while ((c = getopt_long (argc, argv,
+          "alLT:X:" GETOPT_HELP_VERSION_STRING, longopts, NULL)) != -1)
     {
       switch (c)
 	{

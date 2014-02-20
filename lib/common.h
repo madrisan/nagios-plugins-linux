@@ -8,7 +8,8 @@ This is free software; you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n"
 
 #define GETOPT_HELP_CHAR 'h'
-#define GETOPT_VERSION_CHAR 'v'
+#define GETOPT_VERSION_CHAR 'V'
+#define GETOPT_HELP_VERSION_STRING "hV"
 
 #define HELP_OPTION_DESCRIPTION \
   "      --help      display this help and exit\n"
