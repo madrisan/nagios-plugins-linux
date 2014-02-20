@@ -149,4 +149,3 @@ Virtually all Linux distribution are supported.
 
 If you find a bug please create an issue in the project bug tracker at
 https://github.com/madrisan/nagios-plugins-linux/issues
-
