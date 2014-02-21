@@ -86,7 +86,7 @@ check_entry (char const *mountpoint)
 int
 main (int argc, char **argv)
 {
-  int c, status = STATE_OK;
+  int c, status;  
 
   set_program_name (argv[0]);
 
@@ -112,13 +112,17 @@ main (int argc, char **argv)
     plugin_error (STATE_UNKNOWN, 0,
                   "cannot read table of mounted file systems");
 
+  status = STATE_OK;
+
   if (optind < argc)
     {
       int i;
       for (i = optind; i < argc; ++i)
 	if (check_entry (argv[i]) == STATE_CRITICAL)
 	  {
-	    printf ("FILESYSTEM CRITICAL: `%s' not mounted\n", argv[i]);
+	    printf ("%s %s",
+                    (status == STATE_OK) ? "FILESYSTEMS CRITICAL:" : ",",
+                    argv[i]);
 	    status = STATE_CRITICAL;
 	  }
     }
@@ -127,6 +131,8 @@ main (int argc, char **argv)
 
   if (status == STATE_OK)
     printf ("FILESYSTEMS OK\n");
+  else
+    printf (" not mounted!\n");
 
   return status;
 }
