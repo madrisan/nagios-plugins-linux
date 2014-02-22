@@ -48,16 +48,22 @@
 #ifndef ME_DUMMY
 # define ME_DUMMY(Fs_name, Fs_type)             \
     (strcmp (Fs_type, "autofs") == 0            \
-     || strcmp (Fs_type, "binfmt_misc") == 0    \
+     || strcmp (Fs_type, "proc") == 0           \
+   /* for Linux 2.6/3.x */                      \
+     || strcmp (Fs_type, "cgroup") == 0         \
+     || strcmp (Fs_type, "debugfs") == 0        \
      || strcmp (Fs_type, "devpts") == 0         \
      || strcmp (Fs_type, "fusectl") == 0        \
-     || strcmp (Fs_type, "none") == 0           \
-     || strcmp (Fs_type, "proc") == 0           \
-     || strcmp (Fs_type, "subfs") == 0          \
-     /* for NetBSD 3.0 */                       \
-     || strcmp (Fs_type, "kernfs") == 0         \
-     /* for Irix 6.5 */                         \
-     || strcmp (Fs_type, "ignore") == 0)
+     || strcmp (Fs_type, "hugetlbfs") == 0      \
+     || strcmp (Fs_type, "mqueue") == 0         \
+     || strcmp (Fs_type, "pstore") == 0         \
+     || strcmp (Fs_type, "rpc_pipefs") == 0     \
+     || strcmp (Fs_type, "securityfs") == 0     \
+     || strcmp (Fs_type, "sysfs") == 0          \
+   /* Linux 2.4 */                              \
+     || strcmp (Fs_type, "devfs") == 0          \
+     || strcmp (Fs_type, "binfmt_misc") == 0    \
+     || strcmp (Fs_type, "none") == 0)
 #endif
 
 #ifndef ME_REMOTE
