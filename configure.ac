@@ -10,16 +10,33 @@ AC_PREREQ([2.59])
 AC_CONFIG_SRCDIR([plugins/check_memory.c])
 AC_CONFIG_HEADERS(plugins/config.h:plugins/config.hin)
 
-AC_LANG([C])
-
 AM_INIT_AUTOMAKE([gnu dist-bzip2])
-
 AM_MAINTAINER_MODE
-AC_CANONICAL_HOST
+#AC_CANONICAL_HOST
 
 dnl Checks for programs
-AC_PROG_CC
-AC_PROG_GCC_TRADITIONAL
+#AC_USE_SYSTEM_EXTENSIONS(_GNU_SOURCE)
+#AC_PROG_CC
+AC_PROG_CC_STDC
+if test "$cross_compiling" = no; then
+  if test "x$ac_cv_prog_cc_c99" = "xno" || test "x$ac_cv_prog_cc_c99" = "x"; then
+  # We might be on RHEL5 with a git checkout and so broken
+  # autoconf. Check if CC is gcc and if it bails when given -std=gnu99.
+  # If not, use that.  Yuck.
+    if test "x$ac_cv_c_compiler_gnu" = "xyes"; then
+       CC="$CC -std=gnu99"
+       AC_RUN_IFELSE(
+          [AC_LANG_PROGRAM([],[[
+  return 0;
+      ]])],
+      [],
+      [AC_MSG_ERROR([Could not find a C99 compatible compiler])])
+    else
+      AC_MSG_ERROR([Could not find a C99 compatible compiler])
+    fi
+  fi
+fi
+AM_PROG_CC_C_O
 
 AC_PROG_RANLIB
 
