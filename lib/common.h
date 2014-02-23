@@ -33,6 +33,13 @@ There is NO WARRANTY, to the extent permitted by law.\n"
     exit (EXIT_SUCCESS);                        \
     break;
 
+#ifndef TRUE
+# define TRUE 1
+#endif
+#ifndef FALSE
+# define FALSE 0
+#endif
+
 /* Nagios Plugins error codes */
 enum nagios_status
 {

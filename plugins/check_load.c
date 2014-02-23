@@ -1,0 +1,177 @@
+/*
+ * License: GPL
+ * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
+ *
+ * A Nagios plugin that tests the current system load average
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "config.h"
+
+#include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "common.h"
+#include "cpuinfo.h"
+#include "error.h"
+#include "nputils.h"
+#include "progname.h"
+
+static const char *program_version = PACKAGE_VERSION;
+static const char *program_copyright =
+  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">";
+
+static void attribute_noreturn
+print_version (void)
+{
+  printf ("%s, version %s\n%s\n", program_name, program_version,
+	  program_copyright);
+  fputs (GPLv3_DISCLAIMER, stdout);
+
+  exit (STATE_OK);
+}
+
+static struct option const longopts[] = {
+  {(char *) "load1", required_argument, NULL, '1'},
+  {(char *) "load5", required_argument, NULL, '5'},
+  {(char *) "load15", required_argument, NULL, 'L'},
+  {(char *) "percpu", no_argument, NULL, 'r'},
+  {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
+  {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
+  {NULL, 0, NULL, 0}
+};
+
+static void attribute_noreturn
+usage (FILE * out)
+{
+  fprintf (out,
+	   "%s, version %s - checks the current system load average.\n",
+	   program_name, program_version);
+  fprintf (out, "%s\n\n", program_copyright);
+  fprintf (out,
+	   "Usage: %s [-r] [--load1=w,c] [--load5=w,c] [--load15=w,c]\n",
+	   program_name);
+  fputs ("\n\
+Options:\n\
+  -r, --percpu    divide the load averages by the number of CPUs\n\
+      --load1=WLOAD1,CLOAD1   warning and critial thresholds for load1\n\
+      --load5=WLOAD5,CLOAD5   warning and critical thresholds for load5\n\
+      --load15=WLOAD15,CLOAD15   warning and critical thresholds for load15\n",
+         out);
+  fputs (HELP_OPTION_DESCRIPTION, out);
+  fputs (VERSION_OPTION_DESCRIPTION, out);
+
+  fprintf (out, "Examples:\n  %s -r --load1=2,3 --load15=1.5,2.5\n",
+	   program_name);
+
+  exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
+}
+
+static void
+validate_input (int i, double w, double c)
+{
+  if (i != 2 || (w >= c))
+    plugin_error (STATE_UNKNOWN, 0, "command line error: bad thresholds");
+}
+
+int
+main (int argc, char **argv)
+{
+  int c, i, status, numcpus = 1;
+  const unsigned int lamin[3] = { 1, 5, 15 };
+  unsigned int first_perfdata, required[3] = { FALSE, FALSE, FALSE };
+  double loadavg[3];
+  double wload[3] = { 0.0, 0.0, 0.0 };
+  double cload[3] = { 0.0, 0.0, 0.0 };
+
+  set_program_name (argv[0]);
+
+  while ((c = getopt_long (argc, argv, "1:5:L:r" GETOPT_HELP_VERSION_STRING,
+			   longopts, NULL)) != -1)
+    {
+      switch (c)
+	{
+	default:
+	  usage (stderr);
+	  break;
+	case '1':
+	  i = sscanf (optarg, "%lf,%lf", &wload[0], &cload[0]);
+	  validate_input (i, wload[0], cload[0]);
+	  required[0] = TRUE;
+	  break;
+	case '5':
+	  i = sscanf (optarg, "%lf,%lf", &wload[1], &cload[1]);
+	  validate_input (i, wload[1], cload[1]);
+	  required[1] = TRUE;
+	  break;
+	case 'L':
+	  i = sscanf (optarg, "%lf,%lf", &wload[2], &cload[2]);
+	  validate_input (i, wload[2], cload[2]);
+	  required[2] = TRUE;
+	  break;
+	case 'r':
+	  numcpus = get_processor_number ();
+	  break;
+
+	case_GETOPT_HELP_CHAR case_GETOPT_VERSION_CHAR}
+    }
+
+  if (getloadavg (&loadavg[0], 3) != 3)
+    plugin_error (STATE_UNKNOWN, 0,
+		  "the system load average was unobtainable");
+
+  for (i = 0; i < 3; i++)
+    {
+      if (numcpus > 1)
+	loadavg[i] /= numcpus;
+    }
+
+  status = STATE_OK;
+
+  for (i = 0; i < 3; i++)
+    {
+      if (required[i] == FALSE)
+	continue;
+
+      if (loadavg[i] > cload[i])
+	{
+	  status = STATE_CRITICAL;
+	  break;
+	}
+      else if (loadavg[i] > wload[i])
+	status = STATE_WARNING;
+    }
+
+  printf ("LOAD %s - load average %.2lf, %.2lf, %.2lf | ",
+	  state_text (status), loadavg[0], loadavg[1], loadavg[2]);
+
+  first_perfdata = 1;
+  for (i = 0; i < 3; i++)
+    {
+      if (required[i] == FALSE)
+	continue;
+
+      /* performance data format:
+       *'label'=value[UOM];[warn];[crit];[min];[max]  */
+      printf ("%sload%d=%.3lf;%.3lf;%.3lf;0",
+	      first_perfdata ? "" : ", ",
+	      lamin[i], loadavg[i], wload[i], cload[i]);
+      first_perfdata = 0;
+    }
+  printf ("\n");
+
+  return status;
+}

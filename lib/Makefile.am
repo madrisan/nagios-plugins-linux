@@ -17,6 +17,7 @@
 
 noinst_HEADERS =  \
   common.h     \
+  cpuinfo.h    \
   error.h      \
   meminfo.h    \
   mountlist.h  \

@@ -3,6 +3,7 @@
 This package contains several nagios plugins for monitoring Linux boxes.
 
 * check_ifmountfs
+* check_load
 * check_memory
 * check_readonlyfs
 * check_swap
@@ -21,6 +22,26 @@ Usage
 Examples
 
 	check_ifmountfs /mnt/nfs-data /mnt/cdrom
+
+
+## check_load
+
+This Nagios plugin tests the current system load average.
+
+Usage
+
+	check_load [-r] [--load1=w,c] [--load5=w,c] [--load15=w,c]
+
+Where
+
+* -r, --percpu: divide the load averages by the number of CPUs
+* 1,--load1=WLOAD1,CLOAD1: warning and critial thresholds for load1
+* 5,--load5=WLOAD5,CLOAD5. warning and critical thresholds for load5
+* L,--load15=WLOAD15,CLOAD15: warning and critical thresholds for load15
+
+Examples
+
+	check_load -r --load1=2,3 --load15=1.5,2.5
 
 
 ## check_memory, check_swap

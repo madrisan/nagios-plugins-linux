@@ -98,8 +98,7 @@ AC_CHECK_HEADERS([ \
   sys/swap.h \
   mntent.h])
 
-AC_CHECK_FUNCS([ \
-  asprintf])
+AC_CHECK_FUNCS([asprintf])
 AC_FUNC_GETMNTENT
 
 AC_ARG_WITH(proc-meminfo,
@@ -127,6 +126,30 @@ fi
 if test -z "$with_procmeminfo"; then
   AC_MSG_FAILURE([no /proc/meminfo (or equivalent) found])
 fi
+
+dnl Check whether we can get the number of CPU
+AC_CHECK_FUNCS([get_nprocs_conf get_nprocs], [],
+  [AC_MSG_CHECKING([for number of online cpus])
+   AC_TRY_COMPILE(
+     [#include <unistd.h>],
+     [sysconf(_SC_NPROCESSORS_ONLN) > 0;],
+     AC_DEFINE(HAVE_SYSCONF__SC_NPROCESSORS_ONLN, 1,
+               [Define if sysconf returns number of online cpus])
+     AC_MSG_RESULT([sysconf(_SC_NPROCESSORS_ONLN)]),
+     AC_MSG_RESULT([not available]))
+   AC_MSG_CHECKING([for number of available cpus])
+   AC_TRY_COMPILE(
+     [#include <unistd.h>]
+     [sysconf(_SC_NPROCESSORS_CONF) > 0;],
+     AC_DEFINE(HAVE_SYSCONF__SC_NPROCESSORS_CONF, 1,
+               [Define if sysconf returns number of available cpus])
+     AC_MSG_RESULT([sysconf(_SC_NPROCESSORS_CONF)]),
+     AC_MSG_RESULT([not available]))
+  ])
+
+have_func_getloadavg=false
+AC_CHECK_FUNC([getloadavg], [have_func_getloadavg=true])
+AM_CONDITIONAL([HAVE_GETLOADAVG], [test x$have_func_getloadavg = xtrue])
 
 AC_PREFIX_DEFAULT(/usr/local/nagios)
 
