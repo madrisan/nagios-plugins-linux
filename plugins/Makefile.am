@@ -2,6 +2,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/lib
 
 libexec_PROGRAMS = \
    check_ifmountfs \
+   check_io_latency \
    check_memory \
    check_readonlyfs \
    check_swap \
@@ -11,6 +12,7 @@ libexec_PROGRAMS += check_load
 endif
 
 check_ifmountfs_SOURCES = check_ifmountfs.c
+check_io_latency_SOURCES = check_io_latency.c
 if HAVE_GETLOADAVG
 check_load_SOURCES = check_load.c
 endif
@@ -22,6 +24,7 @@ check_uptime_SOURCES = check_uptime.c
 LDADD = ../lib/libnagiosplugins.a
 
 check_ifmountfs_LDADD = $(LDADD)
+check_io_latency_LDADD = $(LDADD)
 if HAVE_GETLOADAVG
 check_load_LDADD = $(LDADD)
 endif

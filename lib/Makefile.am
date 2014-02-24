@@ -30,6 +30,7 @@ noinst_HEADERS =  \
 noinst_LIBRARIES = libnagiosplugins.a
 
 libnagiosplugins_a_SOURCES = \
+  cpuinfo.c    \
   error.c      \
   meminfo.c    \
   mountlist.c  \
