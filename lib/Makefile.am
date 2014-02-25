@@ -18,10 +18,9 @@
 noinst_HEADERS =  \
   common.h     \
   cpuinfo.h    \
-  error.h      \
   meminfo.h    \
   mountlist.h  \
-  nputils.h    \
+  messages.h   \
   progname.h   \
   thresholds.h \
   xalloc.h     \
@@ -31,10 +30,9 @@ noinst_LIBRARIES = libnagiosplugins.a
 
 libnagiosplugins_a_SOURCES = \
   cpuinfo.c    \
-  error.c      \
   meminfo.c    \
+  messages.c   \
   mountlist.c  \
-  nputils.c    \
   progname.c   \
   thresholds.c \
   xasprintf.c  \

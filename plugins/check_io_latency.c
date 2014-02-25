@@ -36,8 +36,7 @@
 
 #include "common.h"
 #include "cpuinfo.h"
-#include "error.h"
-#include "nputils.h"
+#include "messages.h"
 #include "progname.h"
 #include "thresholds.h"
 

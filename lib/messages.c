@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "error.h"
+#include "messages.h"
 
 /* This variable is incremented each time 'error' is called.  */
 unsigned int error_message_count;
@@ -76,4 +76,22 @@ plugin_error (enum nagios_status status, int errnum, const char *message, ...)
 
   if (status)
     exit (status);
+}
+
+const char *
+state_text (enum nagios_status result)
+{
+  switch (result)
+    {
+    case STATE_OK:
+      return "OK";
+    case STATE_WARNING:
+      return "WARNING";
+    case STATE_CRITICAL:
+      return "CRITICAL";
+    case STATE_DEPENDENT:
+      return "DEPENDENT";
+    default:
+      return "UNKNOWN";
+    }
 }

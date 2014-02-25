@@ -1,5 +1,5 @@
-#ifndef _ERROR_H
-#define _ERROR_H	1
+#ifndef _MESSAGES_H
+#define _MESSAGES_H	1
 
 #include "config.h"
 #include "common.h"
@@ -18,8 +18,10 @@ extern void plugin_error (enum nagios_status, int, const char *, ...)
 /* This variable is incremented each time 'error' is called.  */
 extern unsigned int error_message_count;
 
+extern const char *state_text (enum nagios_status result);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* error.h */
+#endif /* _MESSAGES_H */

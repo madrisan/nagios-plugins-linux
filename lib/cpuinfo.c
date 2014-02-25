@@ -10,7 +10,7 @@
 
 #include "common.h"
 #include "cpuinfo.h"
-#include "error.h"
+#include "messages.h"
 
 #define BUFFSIZE 0x1000
 static char buff[BUFFSIZE];

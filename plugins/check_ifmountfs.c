@@ -28,9 +28,8 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "error.h"
+#include "messages.h"
 #include "mountlist.h"
-#include "nputils.h"
 #include "progname.h"
 
 #define STREQ(a, b) (strcmp (a, b) == 0)

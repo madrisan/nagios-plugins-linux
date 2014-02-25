@@ -33,8 +33,7 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "error.h"
-#include "nputils.h"
+#include "messages.h"
 #include "progname.h"
 #include "thresholds.h"
 #include "xasprintf.h"

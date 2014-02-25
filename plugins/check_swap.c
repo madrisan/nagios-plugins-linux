@@ -32,8 +32,7 @@
 #include <string.h>
 
 #include "common.h"
-#include "error.h"
-#include "nputils.h"
+#include "messages.h"
 #include "meminfo.h"
 #include "progname.h"
 #include "thresholds.h"

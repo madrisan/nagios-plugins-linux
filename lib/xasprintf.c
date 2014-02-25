@@ -25,7 +25,7 @@
 #include <stdio.h>
 
 #include "common.h"
-#include "error.h"
+#include "messages.h"
 #include "xasprintf.h"
 
 char *

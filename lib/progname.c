@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "common.h"
-#include "error.h"
+#include "messages.h"
 
 /* String containing name the program is called with.
    To be initialized by main().  */

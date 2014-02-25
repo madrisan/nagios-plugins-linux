@@ -26,8 +26,7 @@
 
 #include "common.h"
 #include "cpuinfo.h"
-#include "error.h"
-#include "nputils.h"
+#include "messages.h"
 #include "progname.h"
 
 static const char *program_version = PACKAGE_VERSION;

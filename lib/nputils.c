@@ -24,7 +24,7 @@
 #include "nputils.h"
 
 const char *
-state_text (int result)
+state_text (enum nagios_status result)
 {
   switch (result)
     {
