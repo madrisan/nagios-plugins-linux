@@ -1,0 +1,26 @@
+    Major changes between "nagios-plugins-linux" versions 2 and 3
+
+* New plugin 'check_cpu'.
+* The plugin 'check_io_latency' has been renamed to 'check_iowait'.
+
+======================================================================
+
+    Major changes between "nagios-plugins-linux" versions 1 and 2
+
+* New plugins 'check_load' and 'check_io_latency'.
+* A C99 compliant compiler is now required for building the source
+  code.
+* The internal library has been reworked and some new functions have
+  been added.
+* Minor fixes and code cleanups.
+
+======================================================================
+
+    Nagios Plugins Linux version 1
+
+* Available plugins:
+ - check_ifmountfs, check_readonlyfs;
+ - chck_memory, check_swap;
+ - check_uptime.
+* An internal static library containing the common code has been
+  created.
