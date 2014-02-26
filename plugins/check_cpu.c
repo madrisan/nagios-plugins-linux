@@ -1,8 +1,8 @@
 /*
- * License: GPLv2
+ * License: GPLv3
  * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A Nagios plugin to check I/O wait bottlenecks.
+ * A Nagios plugin to check the CPU utilization.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,13 @@
 
 #include "config.h"
 
+#include <ctype.h>
 #include <errno.h>
 #include <getopt.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "common.h"
@@ -47,6 +49,8 @@
 static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">";
+
+static const char *program_shorthelp;
 
 static void attribute_noreturn
 print_version (void)
@@ -71,8 +75,8 @@ static void attribute_noreturn
 usage (FILE * out)
 {
   fprintf (out,
-	   "%s, version %s - checks I/O wait bottlenecks.\n", program_name,
-	   program_version);
+	   "%s, version %s - %s.\n", program_name,
+	   program_version, program_shorthelp);
   fprintf (out, "%s\n\n", program_copyright);
   fprintf (out, "Usage: %s [-v] [-w PERC] [-c PERC] [delay [count]]\n",
 	   program_name);
@@ -89,7 +93,7 @@ Options:\n\
   fprintf (out, "  count is the number of updates "
            "(default: %d)\n", COUNT_DEFAULT);
   fputs ("\t1 means the percentages of total CPU time from boottime.\n", out);
-  fprintf (out, "\nExamples:\n  %s -w 10%% -c 20%%\n", program_name);
+  fprintf (out, "\nExamples:\n  %s -w 10%% -c 20%% 1 2\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -120,19 +124,41 @@ int
 main (int argc, char **argv)
 {
   int c, verbose = FALSE;
-  unsigned long i, delay, count;
+  unsigned long i, len, delay, count;
   enum nagios_status status = STATE_OK;
   char *critical = NULL, *warning = NULL;
+  char *p, *cpu_name, *CPU_NAME;
   thresholds *my_threshold = NULL;
 
   jiff cpu_user[2], cpu_nice[2], cpu_system[2], cpu_idle[2], cpu_iowait[2],
     cpu_irq[2], cpu_softirq[2], cpu_steal[2], cpu_guest[2], cpu_guestn[2];
   jiff duser, dsystem, didle, diowait, dsteal, div, divo2;
-  unsigned int iowait_perc, sleep_time = 1,
+  jiff *cpu_value;
+  unsigned int cpu_perc, sleep_time = 1,
                tog = 0;		/* toggle switch for cleaner code */
   int debt = 0;			/* handle idle ticks running backwards */
 
   set_program_name (argv[0]);
+
+  len = strlen (program_name);
+  if (len > 6 && !strncmp (program_name, "check_", 6))
+    p = (char *) program_name + 6;
+
+  if (!strncmp (p, "iowait", 6))	/* check_iowait --> cpu_iowait */
+    {
+      cpu_name = strdup ("iowait");
+      cpu_value = &diowait;
+      program_shorthelp = strdup ("checks I/O wait bottlenecks");
+    }
+  else				/* check_cpu --> cpu_user (the default) */
+    {
+      cpu_name = strdup ("user");;
+      cpu_value = &duser;
+      program_shorthelp = strdup ("checks the CPU (user mode) utilization");
+    }
+  CPU_NAME = strdup (cpu_name);
+  for (i = 0; i < strlen (cpu_name); i++)
+    CPU_NAME[i] = toupper (CPU_NAME[i]);
 
   while ((c = getopt_long (argc, argv,
 			   "c:w:v" GETOPT_HELP_VERSION_STRING,
@@ -239,17 +265,19 @@ main (int argc, char **argv)
            (unsigned) ((100 * dsteal + divo2) / div));
     }
 
-  iowait_perc = (unsigned) ((100 * diowait + divo2) / div);
-  status = get_status (iowait_perc, my_threshold);
+  cpu_perc = (unsigned) ((100 * (*cpu_value) + divo2) / div);
+  status = get_status (cpu_perc, my_threshold);
+
   printf
-    ("IO_LATENCY %s - cpu iowait %u%% | "
+    ("%s %s - cpu %s %u%% | "
      "cpu_user=%u%%, cpu_system=%u%%, cpu_idle=%u%%, cpu_iowait=%u%%, "
-     "cpu_steal=%u%%\n", state_text (status),
-     iowait_perc,
+     "cpu_steal=%u%%\n", CPU_NAME, state_text (status),
+     cpu_name, cpu_perc,
      (unsigned) ((100 * duser + divo2) / div),
      (unsigned) ((100 * dsystem + divo2) / div),
      (unsigned) ((100 * didle + divo2) / div),
-     iowait_perc, (unsigned) ((100 * dsteal + divo2) / div));
+     (unsigned) ((100 * diowait + divo2) / div),
+     (unsigned) ((100 * dsteal + divo2) / div));
 
   return status;
 }

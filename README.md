@@ -2,13 +2,37 @@
 
 This package contains several nagios plugins for monitoring Linux boxes.
 
+* check_cpu
 * check_ifmountfs
-* check_io_latency
+* check_iowait
 * check_load
 * check_memory
 * check_readonlyfs
 * check_swap
 * check_uptime
+
+
+## check_cpu
+
+This Nagios plugin checks the CPU (user mode) utilization.
+
+Usage
+
+	check_cpu [-v] [-w PERC] [-c PERC] [delay [count]]
+
+Where
+
+* -w, --warning PERCENT: warning threshold
+* -c, --critical PERCENT: critical threshold
+* -v, --verbose: show details for command-line debugging (Nagios may truncate output)
+* delay is the delay between updates in seconds (default: 1sec)
+* count is the number of updates (default: 2)
+
+Examples
+
+	check_cpu -w 85% -c 95%
+	# count = 1 means the percentages of total CPU time from boottime
+	check_cpu -w 85% -c 95% 1 1
 
 
 ## check_ifmountfs
@@ -25,13 +49,13 @@ Examples
 	check_ifmountfs /mnt/nfs-data /mnt/cdrom
 
 
-## check_io_latency
+## check_iowait
 
 This Nagios plugin checks for I/O wait bottlenecks.
 
 Usage
 
-	check_io_latency [-v] [-w PERC] [-c PERC] [delay [count]]
+	check_iowait [-v] [-w PERC] [-c PERC] [delay [count]]
 
 Where
 
@@ -43,9 +67,9 @@ Where
 
 Examples
 
-	check_io_latency -w 10% -c 20%
+	check_iowait -w 10% -c 20%
 	# count = 1 means the percentages of total CPU time from boottime
-	check_io_latency -w 10% -c 20% 1 1
+	check_iowait -w 10% -c 20% 1 1
 
 
 ## check_load
