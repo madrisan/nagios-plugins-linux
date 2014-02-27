@@ -1,5 +1,5 @@
 /*
- * License: GPLv2
+ * License: GPLv3+
  * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check the swap usage on unix.

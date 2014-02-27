@@ -1,5 +1,5 @@
 /*
- * License: GPL
+ * License: GPLv3+
  * Copyright (c) 2013 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check for readonly filesystems
