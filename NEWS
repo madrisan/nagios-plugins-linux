@@ -1,3 +1,9 @@
+    Major changes between "nagios-plugins-linux" versions 3 and 4
+
+* New plugin 'check_users'.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 2 and 3
 
 * New plugin 'check_cpu'.

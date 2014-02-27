@@ -10,6 +10,7 @@ This package contains several nagios plugins for monitoring Linux boxes.
 * check_readonlyfs
 * check_swap
 * check_uptime
+* check_user
 
 
 ## check_cpu
@@ -181,6 +182,24 @@ Examples
 
 	check_uptime
 	check_uptime --warning 30: --critical 15:
+
+
+## check_users
+
+This Nagios plugin displays the number of users that are currently logged on.
+
+Usage:
+
+	check_users [-w PERC] [-c PERC]
+
+Where
+
+* -w, --warning PERCENT: warning threshold
+* -c, --critical PERCENT: critical threshold
+
+Examples:
+
+	check_users -w 1
 
 
 ## Source code

@@ -8,7 +8,8 @@ libexec_PROGRAMS = \
    check_memory \
    check_readonlyfs \
    check_swap \
-   check_uptime
+   check_uptime \
+   check_users
 if HAVE_GETLOADAVG
 libexec_PROGRAMS += check_load
 endif
@@ -22,6 +23,7 @@ check_memory_SOURCES = check_memory.c
 check_readonlyfs_SOURCES = check_readonlyfs.c
 check_swap_SOURCES = check_swap.c
 check_uptime_SOURCES = check_uptime.c
+check_users_SOURCES = check_users.c
 
 LDADD = ../lib/libnagiosplugins.a
 
@@ -34,6 +36,7 @@ check_memory_LDADD = $(LDADD)
 check_readonlyfs_LDADD = $(LDADD)
 check_swap_LDADD = $(LDADD)
 check_uptime_LDADD = $(LDADD)
+check_users_LDADD = $(LDADD)
 
 all-local: $(check_cpu_programs)
 
