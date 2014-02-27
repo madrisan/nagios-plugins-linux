@@ -31,47 +31,12 @@
 #include "meminfo.h"
 #include "messages.h"
 #include "progname.h"
+#include "progversion.h"
 #include "thresholds.h"
 #include "xasprintf.h"
 
-static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
-  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">";
-
-static void attribute_noreturn usage (FILE * out)
-{
-  fprintf (out,
-           "%s, version %s - check memory usage.\n",
-           program_name, program_version);
-  fprintf (out, "%s\n\n", program_copyright);
-  fprintf (out,
-           "Usage: %s [-b,-k,-m,-g] [-C] -w PERC -c PERC\n",
-           program_name);
-  fprintf (out, "       %s --help\n", program_name);
-  fprintf (out, "       %s --Version\n\n", program_name);
-  fputs ("\
-Options:\n\
-  -b,-k,-m,-g     show output in bytes, KB (the default), MB, or GB\n\
-  -C, --caches    count buffers and cached memory as free memory\n\
-  -w, --warning PERCENT   warning threshold\n\
-  -c, --critical PERCENT   critical threshold\n", out);
-  fputs (HELP_OPTION_DESCRIPTION, out);
-  fputs (VERSION_OPTION_DESCRIPTION, out);
-  fprintf (out, "\n\
-Examples:\n\
-  %s -C -w 80%% -c90%%\n", program_name);
-
-  exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
-}
-
-static void attribute_noreturn print_version (void)
-{
-  printf ("%s, version %s\n%s\n", program_name, program_version,
-          program_copyright);
-  fputs (GPLv3_DISCLAIMER, stdout);
-
-  exit (STATE_OK);
-}
+  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "caches", no_argument, NULL, 'C'},
@@ -85,6 +50,38 @@ static struct option const longopts[] = {
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
 };
+
+static void attribute_noreturn usage (FILE * out)
+{
+  fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
+  fputs ("This plugin checks the memory utilization.\n", out);
+  fputs (program_copyright, out);
+  fputs (USAGE_HEADER, out);
+  fprintf (out, "  %s [-b,-k,-m,-g] [-C] -w PERC -c PERC\n", program_name);
+  fputs (USAGE_OPTIONS, out);
+  fputs ("  -b,-k,-m,-g     "
+	 "show output in bytes, KB (the default), MB, or GB\n", out);
+  fputs ("  -C, --caches    count buffers and cached memory as free memory\n",
+	 out);
+  fputs ("  -w, --warning PERCENT   warning threshold\n", out);
+  fputs ("  -c, --critical PERCENT   critical threshold\n", out);
+  fputs (USAGE_HELP, out);
+  fputs (USAGE_VERSION, out);
+  fputs (USAGE_EXAMPLES, out);
+  fprintf (out, "  %s -C -w 80%% -c90%%\n", program_name);
+
+  exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
+}
+
+static void attribute_noreturn
+print_version (void)
+{
+  printf ("%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
+  fputs (program_copyright, stdout);
+  fputs (GPLv3_DISCLAIMER, stdout);
+
+  exit (STATE_OK);
+}
 
 extern unsigned long kb_main_used;
 extern unsigned long kb_main_total;

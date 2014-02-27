@@ -15,15 +15,16 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-noinst_HEADERS =  \
-  common.h     \
-  cpuinfo.h    \
-  meminfo.h    \
-  mountlist.h  \
-  messages.h   \
-  progname.h   \
-  thresholds.h \
-  xalloc.h     \
+noinst_HEADERS = \
+  common.h      \
+  cpuinfo.h     \
+  meminfo.h     \
+  mountlist.h   \
+  messages.h    \
+  progname.h    \
+  progversion.h \
+  thresholds.h  \
+  xalloc.h      \
   xasprintf.h
 
 noinst_LIBRARIES = libnagiosplugins.a

@@ -40,27 +40,17 @@
 #include "cpuinfo.h"
 #include "messages.h"
 #include "progname.h"
+#include "progversion.h"
 #include "thresholds.h"
 
 /* by default one iteration with 1sec delay */
 #define DELAY_DEFAULT	1
 #define COUNT_DEFAULT	2
 
-static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
-  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">";
+  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
-static const char *program_shorthelp;
-
-static void attribute_noreturn
-print_version (void)
-{
-  printf ("%s, version %s\n%s\n", program_name, program_version,
-	  program_copyright);
-  fputs (GPLv3_DISCLAIMER, stdout);
-
-  exit (STATE_OK);
-}
+static const char *program_shorthelp = NULL;
 
 static struct option const longopts[] = {
   {(char *) "critical", required_argument, NULL, 'c'},
@@ -74,28 +64,38 @@ static struct option const longopts[] = {
 static void attribute_noreturn
 usage (FILE * out)
 {
-  fprintf (out,
-	   "%s, version %s - %s.\n", program_name,
-	   program_version, program_shorthelp);
-  fprintf (out, "%s\n\n", program_copyright);
-  fprintf (out, "Usage: %s [-v] [-w PERC] [-c PERC] [delay [count]]\n",
+  fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
+  fputs (program_shorthelp, out);
+  fputs (program_copyright, out);
+  fputs (USAGE_HEADER, out);
+  fprintf (out, "  %s [-v] [-w PERC] [-c PERC] [delay [count]]\n",
 	   program_name);
-  fputs ("\n\
-Options:\n\
-  -w, --warning PERCENT   warning threshold\n\
-  -c, --critical PERCENT   critical threshold\n\
-  -v, --verbose   show details for command-line debugging "
-                  "(Nagios may truncate output)\n", out);
-  fputs (HELP_OPTION_DESCRIPTION, out);
-  fputs (VERSION_OPTION_DESCRIPTION, out);
+  fputs (USAGE_OPTIONS, out);
+  fputs ("  -w, --warning PERCENT   warning threshold\n", out);
+  fputs ("  -c, --critical PERCENT   critical threshold\n", out);
+  fputs ("  -v, --verbose   show details for command-line debugging "
+         "(Nagios may truncate output)\n", out);
+  fputs (USAGE_HELP, out);
+  fputs (USAGE_VERSION, out);
   fprintf (out, "  delay is the delay between updates in seconds "
            "(default: %dsec)\n", DELAY_DEFAULT);
   fprintf (out, "  count is the number of updates "
            "(default: %d)\n", COUNT_DEFAULT);
   fputs ("\t1 means the percentages of total CPU time from boottime.\n", out);
-  fprintf (out, "\nExamples:\n  %s -w 10%% -c 20%% 1 2\n", program_name);
+  fputs (USAGE_EXAMPLES, out);
+  fprintf (out, "  %s -w 10%% -c 20%% 1 2\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
+}
+
+static void attribute_noreturn
+print_version (void)
+{
+  printf ("%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
+  fputs (program_copyright, stdout);
+  fputs (GPLv3_DISCLAIMER, stdout);
+
+  exit (STATE_OK);
 }
 
 /*
@@ -148,13 +148,15 @@ main (int argc, char **argv)
     {
       cpu_name = strdup ("iowait");
       cpu_value = &diowait;
-      program_shorthelp = strdup ("checks I/O wait bottlenecks");
+      program_shorthelp =
+	strdup ("This plugin checks I/O wait bottlenecks\n");
     }
   else				/* check_cpu --> cpu_user (the default) */
     {
       cpu_name = strdup ("user");;
       cpu_value = &duser;
-      program_shorthelp = strdup ("checks the CPU (user mode) utilization");
+      program_shorthelp =
+	strdup ("This plugin checks the CPU (user mode) utilization\n");
     }
   CPU_NAME = strdup (cpu_name);
   for (i = 0; i < strlen (cpu_name); i++)

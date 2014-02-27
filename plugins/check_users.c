@@ -29,21 +29,11 @@
 #include "common.h"
 #include "messages.h"
 #include "progname.h"
+#include "progversion.h"
 #include "thresholds.h"
 
-static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
-  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">";
-
-static void attribute_noreturn
-print_version (void)
-{
-  printf ("%s, version %s\n%s\n", program_name, program_version,
-	  program_copyright);
-  fputs (GPLv3_DISCLAIMER, stdout);
-
-  exit (STATE_OK);
-}
+  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "critical", required_argument, NULL, 'c'},
@@ -56,24 +46,31 @@ static struct option const longopts[] = {
 static void attribute_noreturn
 usage (FILE * out)
 {
-  fprintf (out, "%s, version %s - "
-           "display the number of users that are currently logged on.\n",
-           program_name, program_version);
-  fprintf (out, "%s\n\n", program_copyright);
-  fprintf (out, "Usage: %s -w PERC -c PERC\n", program_name);
-  fprintf (out, "       %s --help\n", program_name);
-  fprintf (out, "       %s --Version\n\n", program_name);
-  fputs ("\
-Options:\n\
-  -w, --warning PERCENT   warning threshold\n\
-  -c, --critical PERCENT   critical threshold\n", out);
-  fputs (HELP_OPTION_DESCRIPTION, out);
-  fputs (VERSION_OPTION_DESCRIPTION, out);
-  fprintf (out, "\n\
-Examples:\n\
-  %s -w 1\n", program_name);
+  fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
+  fputs ("This plugin displays the number of users "
+	 "that are currently logged on.\n", out);
+  fputs (program_copyright, out);
+  fputs (USAGE_HEADER, out);
+  fprintf (out, "  %s -w PERC -c PERC\n", program_name);
+  fputs (USAGE_OPTIONS, out);
+  fputs ("  -w, --warning PERCENT   warning threshold\n", out);
+  fputs ("  -c, --critical PERCENT   critical threshold\n", out);
+  fputs (USAGE_HELP, out);
+  fputs (USAGE_VERSION, out);
+  fputs (USAGE_EXAMPLES, out);
+  fprintf (out, "  %s -w 1\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
+}
+
+static void attribute_noreturn
+print_version (void)
+{
+  printf ("%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
+  fputs (program_copyright, stdout);
+  fputs (GPLv3_DISCLAIMER, stdout);
+
+  exit (STATE_OK);
 }
 
 int

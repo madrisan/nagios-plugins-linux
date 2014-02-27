@@ -11,10 +11,18 @@ There is NO WARRANTY, to the extent permitted by law.\n"
 #define GETOPT_VERSION_CHAR 'V'
 #define GETOPT_HELP_VERSION_STRING "hV"
 
-#define HELP_OPTION_DESCRIPTION \
+#define USAGE_HEADER     "Usage:\n"
+#define USAGE_OPTIONS    "Options:\n"
+#define USAGE_EXAMPLES   "Examples:\n"
+#define USAGE_SEPARATOR  "\n"
+#define USAGE_HELP \
   "  -h, --help      display this help and exit\n"
-#define VERSION_OPTION_DESCRIPTION \
+#define USAGE_VERSION \
   "  -v, --version   output version information and exit\n"
+#define USAGE_THRESHOLDS \
+  "\
+See the Nagios Developer Guidelines for range format:\n\
+<https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT>\n"
 
 #define GETOPT_HELP_OPTION_DECL \
   "help", no_argument, NULL, GETOPT_HELP_CHAR

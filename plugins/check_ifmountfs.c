@@ -31,12 +31,12 @@
 #include "messages.h"
 #include "mountlist.h"
 #include "progname.h"
+#include "progversion.h"
 
 #define STREQ(a, b) (strcmp (a, b) == 0)
 
-static const char *program_version = PACKAGE_VERSION;
 static const char *program_copyright =
-  "Copyright (C) 2013 Davide Madrisan <" PACKAGE_BUGREPORT ">";
+  "Copyright (C) 2013-2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 /* Linked list of mounted file systems. */
 static struct mount_entry *mount_list;
@@ -47,24 +47,29 @@ static struct option const longopts[] = {
   {NULL, 0, NULL, 0}
 };
 
-static void attribute_noreturn usage (FILE * out)
+static void attribute_noreturn
+usage (FILE * out)
 {
-  fprintf (out,
-	   "%s, version %s - check whether the given filesystems are mounted.\n",
-	   program_name, program_version);
-  fprintf (out, "%s\n\n", program_copyright);
-  fprintf (out, "Usage: %s [FILESYSTEM]...\n\n", program_name);
-  fputs (HELP_OPTION_DESCRIPTION, out);
-  fputs (VERSION_OPTION_DESCRIPTION, out);
+  fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
+  fputs ("This plugin checks whether the given filesystems are mounted.\n",
+	 out);
+  fputs (program_copyright, out);
+  fputs (USAGE_HEADER, out);
+  fprintf (out, "  %s [FILESYSTEM]...\n", program_name);
+  fputs (USAGE_OPTIONS, out);
+  fputs (USAGE_HELP, out);
+  fputs (USAGE_VERSION, out);
+  fputs (USAGE_EXAMPLES, out);
+  fprintf (out, "  %s /mnt/nfs-data /mnt/cdrom\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
 
-static void
+static void attribute_noreturn
 print_version (void)
 {
-  printf ("%s, version %s\n%s\n", program_name, program_version,
-          program_copyright);
+  printf ("%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
+  fputs (program_copyright, stdout);
   fputs (GPLv3_DISCLAIMER, stdout);
 
   exit (STATE_OK);

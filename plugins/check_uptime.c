@@ -35,27 +35,21 @@
 #include "common.h"
 #include "messages.h"
 #include "progname.h"
+#include "progversion.h"
 #include "thresholds.h"
 #include "xasprintf.h"
 
-static const char *program_version = PACKAGE_VERSION;
+/* assume uptime never be zero seconds in practice */
+#define UPTIME_RET_FAIL  0
+
 static const char *program_copyright =
-  "Copyright (C) 2010,2012-2013 Davide Madrisan <" PACKAGE_BUGREPORT ">";
+  "Copyright (C) 2010,2012-2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 #define BUFSIZE 0x80
 static char buf[BUFSIZE + 1];
 
 double uptime (void);
 char *sprint_uptime (double);
-
-static void attribute_noreturn print_version (void)
-{
-  printf ("%s, version %s\n%s\n", program_name, program_version,
-          program_copyright);
-  fputs (GPLv3_DISCLAIMER, stdout);
-
-  exit (STATE_OK);
-}
 
 static struct option const longopts[] = {
   {(char *) "critical", required_argument, NULL, 'c'},
@@ -65,36 +59,37 @@ static struct option const longopts[] = {
   {NULL, 0, NULL, 0}
 };
 
-static void attribute_noreturn usage (FILE * out)
+static void attribute_noreturn
+usage (FILE * out)
 {
-  fprintf (out,
-	   "%s, version %s - check how long the system has been running.\n",
-	   program_name, program_version);
-  fprintf (out, "%s\n\n", program_copyright);
-  fprintf (out, "Usage: %s [OPTION]\n\n", program_name);
-  fputs ("\
-Options:\n\
-  -w, --warning [@]start:end]   warning threshold\n\
-  -c, --critical [@]start:end]   critical threshold\n", out);
-  fputs (HELP_OPTION_DESCRIPTION, out);
-  fputs (VERSION_OPTION_DESCRIPTION, out);
-
-  fputs ("\n\
-Where:\n\
-  1. start <= end\n\
-  2. start and \":\" is not required if start=0\n\
-  3. if range is of format \"start:\" and end is not specified, assume end is infinity\n\
-  4. to specify negative infinity, use \"~\"\n\
-  5. alert is raised if metric is outside start and end range (inclusive of endpoints)\n\
-  6. if range starts with \"@\", then alert if inside this range (inclusive of endpoints)\n\n", out);
-  fprintf (out, "Examples:\n  %s\n  %s --warning 30: --critical 15:\n",
-	   program_name, program_name);
+  fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
+  fputs ("This plugin checks how long the system has been running.\n", out);
+  fputs (program_copyright, out);
+  fputs (USAGE_HEADER, out);
+  fprintf (out, "  %s [OPTION]\n", program_name);
+  fputs (USAGE_OPTIONS, out);
+  fputs ("  -w, --warning PERCENT   warning threshold\n", out);
+  fputs ("  -c, --critical PERCENT   critical threshold\n", out);
+  fputs (USAGE_HELP, out);
+  fputs (USAGE_VERSION, out);
+  fputs (USAGE_EXAMPLES, out);
+  fprintf (out, "  %s\n", program_name);
+  fprintf (out, "  %s --critical 15: --warning 30:\n", program_name);
+  fputs (USAGE_SEPARATOR, out);
+  fputs (USAGE_THRESHOLDS, out);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
 
-/* assume uptime never be zero seconds in practice */
-#define UPTIME_RET_FAIL  0
+static void attribute_noreturn
+print_version (void)
+{
+  printf ("%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
+  fputs (program_copyright, stdout);
+  fputs (GPLv3_DISCLAIMER, stdout);
+
+  exit (STATE_OK);
+}
 
 double
 uptime ()
