@@ -61,7 +61,7 @@ static struct option const longopts[] = {
   {NULL, 0, NULL, 0}
 };
 
-static void attribute_noreturn
+static _Noreturn void
 usage (FILE * out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
@@ -88,7 +88,7 @@ usage (FILE * out)
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
 
-static void attribute_noreturn
+static _Noreturn void
 print_version (void)
 {
   printf ("%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);

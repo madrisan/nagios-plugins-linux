@@ -65,21 +65,29 @@ ac_cc_attribute_noreturn=
 ac_save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"
 AC_CACHE_CHECK(
-  [if compiler supports __attribute__((__noreturn__))],
+  [if compiler supports the noreturn feature],
   [cc_cv_attribute_noreturn],
   [AC_COMPILE_IFELSE(
     [AC_LANG_PROGRAM([[]],[[
-      void f(void *foo) __attribute__((__noreturn__));]])],
-    [cc_cv_attribute_noreturn=yes],
-    [cc_cv_attribute_noreturn=no])
+      void _Noreturn f(void *foo);]])],
+    [cc_cv_attribute_noreturn="_Noreturn"],
+    [AC_COMPILE_IFELSE(
+      [AC_LANG_PROGRAM([[]],[[
+        void f(void *foo) __attribute__((__noreturn__));]])],
+      [cc_cv_attribute_noreturn="via __attribute__"],
+      [cc_cv_attribute_noreturn=no])
+    ])
   ])
-CFLAGS="$ac_save_CFLAGS"
-if test "x$cc_cv_attribute_noreturn" = "xyes"; then
-  ac_cc_attribute_noreturn='__attribute__((__noreturn__))'
-fi
-AC_DEFINE_UNQUOTED(
-  [attribute_noreturn], [$ac_cc_attribute_noreturn],
-  [Define this if the compiler supports the noreturn attribute])
+AS_CASE([$cc_cv_attribute_noreturn],
+  [_Noreturn], [],
+  ["via __attribute__"],
+    [AC_DEFINE_UNQUOTED(
+      [_Noreturn], [__attribute__((__noreturn__))],
+      [Define this if the compiler supports the noreturn __attribute__])],
+  [no],
+    [AC_DEFINE_UNQUOTED([_Noreturn], [],
+      [Define this if the compiler does not supports any noreturn attribute])]
+  )
 
 dnl Check whether the compiler supports the 
 dnl    __attribute__((__format__ (__printf__, x,y))) feature

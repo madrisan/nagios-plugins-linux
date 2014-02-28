@@ -1,5 +1,5 @@
-#ifndef COMMON_H_
-# define COMMON_H_
+#ifndef _COMMON_H_
+# define _COMMON_H_	1
 
 #define GPLv3_DISCLAIMER \
   "\
@@ -49,6 +49,7 @@ See the Nagios Developer Guidelines for range format:\n\
 #endif
 
 /* Nagios Plugins error codes */
+
 enum nagios_status
 {
   STATE_OK,
@@ -58,4 +59,4 @@ enum nagios_status
   STATE_DEPENDENT
 };
 
-#endif
+#endif	/* _COMMON_H_ */
