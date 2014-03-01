@@ -176,6 +176,16 @@ have_func_getloadavg=false
 AC_CHECK_FUNC([getloadavg], [have_func_getloadavg=true])
 AM_CONDITIONAL([HAVE_GETLOADAVG], [test x$have_func_getloadavg = xtrue])
 
+MULTIPATHD_SOCKET="/var/run/multipathd.sock"
+AC_ARG_WITH(
+  [socketfile],
+  [AS_HELP_STRING(
+    [--with-socketfile],
+    [use a different socket file
+     (default is /var/run/multipathd.sock)])],
+  [MULTIPATHD_SOCKET="$with_socketfile"])
+AC_SUBST(MULTIPATHD_SOCKET)
+
 AC_PREFIX_DEFAULT(/usr/local/nagios)
 
 dnl Checks for typedefs, structures, and compiler characteristics.

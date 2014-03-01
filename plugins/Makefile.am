@@ -1,4 +1,5 @@
 AM_CPPFLAGS = -I$(top_srcdir)/lib
+AM_CFLAGS = -DMULTIPATHD_SOCKET=\"$(MULTIPATHD_SOCKET)\"
 
 check_cpu_programs = check_iowait
 
@@ -6,6 +7,7 @@ libexec_PROGRAMS = \
    check_cpu \
    check_ifmountfs \
    check_memory \
+   check_multipath \
    check_readonlyfs \
    check_swap \
    check_uptime \
@@ -20,6 +22,7 @@ if HAVE_GETLOADAVG
 check_load_SOURCES = check_load.c
 endif
 check_memory_SOURCES = check_memory.c
+check_multipath_SOURCES = check_multipath.c
 check_readonlyfs_SOURCES = check_readonlyfs.c
 check_swap_SOURCES = check_swap.c
 check_uptime_SOURCES = check_uptime.c
@@ -33,6 +36,7 @@ if HAVE_GETLOADAVG
 check_load_LDADD = $(LDADD)
 endif
 check_memory_LDADD = $(LDADD)
+check_multipath_LDADD = $(LDADD)
 check_readonlyfs_LDADD = $(LDADD)
 check_swap_LDADD = $(LDADD)
 check_uptime_LDADD = $(LDADD)

@@ -7,6 +7,7 @@ This package contains several nagios plugins for monitoring Linux boxes.
 * check_iowait
 * check_load
 * check_memory
+* check_multipath
 * check_readonlyfs
 * check_swap
 * check_uptime
@@ -133,6 +134,25 @@ Examples
 	  # swap_cached  : The amount of swap used as cache memory
 	  # swap_pageins 
 	  # swap_pageouts: The number of swap pages the system has brought in and out
+
+
+## check_multipath
+
+This Nagios plugin checks the multipath topology status.
+
+Usage
+
+	check_multipath [-v]
+	check_multipath --help
+
+Where 
+
+* -v, --verbose: show details for command-line debugging (Nagios may truncate output)
+* -h, --help: display this help and exit
+
+Examples
+
+	check_multipath
 
 
 ## check_readonlyfs
