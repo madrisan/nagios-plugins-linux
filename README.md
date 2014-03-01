@@ -21,6 +21,7 @@ This Nagios plugin checks the CPU (user mode) utilization.
 Usage
 
 	check_cpu [-v] [-w PERC] [-c PERC] [delay [count]]
+	check_cpu --help
 
 Where
 
@@ -58,6 +59,7 @@ This Nagios plugin checks for I/O wait bottlenecks.
 Usage
 
 	check_iowait [-v] [-w PERC] [-c PERC] [delay [count]]
+	check_iowait --help
 
 Where
 
@@ -81,13 +83,14 @@ This Nagios plugin tests the current system load average.
 Usage
 
 	check_load [-r] [--load1=w,c] [--load5=w,c] [--load15=w,c]
+	check_load --help
 
 Where
 
 * -r, --percpu: divide the load averages by the number of CPUs
-* 1,--load1=WLOAD1,CLOAD1: warning and critial thresholds for load1
-* 5,--load5=WLOAD5,CLOAD5. warning and critical thresholds for load5
-* L,--load15=WLOAD15,CLOAD15: warning and critical thresholds for load15
+* 1, --load1=WLOAD1,CLOAD1: warning and critial thresholds for load1
+* 5, --load5=WLOAD5,CLOAD5. warning and critical thresholds for load5
+* L, --load15=WLOAD15,CLOAD15: warning and critical thresholds for load15
 
 Examples
 
@@ -171,7 +174,6 @@ Options
 	-T, --type=TYPE           limit listing to file systems of type TYPE
 	-X, --exclude-type=TYPE   limit listing to file systems not of type TYPE
 	-h, --help                display this help and exit
-	-v, --version             output version information and exit
 
 Examples
 
