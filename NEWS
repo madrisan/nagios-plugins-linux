@@ -1,6 +1,7 @@
     Major changes between "nagios-plugins-linux" versions 3 and 4
 
-* New plugin 'check_users'.
+* New plugins 'check_users' and 'check_multipath'.
+* Code cleanups.
 
 ======================================================================
 
