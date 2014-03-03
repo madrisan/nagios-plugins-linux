@@ -22,12 +22,6 @@
 extern "C" {
 # endif
 
-# if __GNUC__ >= 3
-#  define _GL_ATTRIBUTE_MALLOC __attribute__ ((__malloc__))
-# else
-#  define _GL_ATTRIBUTE_MALLOC
-# endif
-
 # if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)
 #  define _GL_ATTRIBUTE_ALLOC_SIZE(args) __attribute__ ((__alloc_size__ args))
 # else
@@ -35,12 +29,12 @@ extern "C" {
 # endif
 
 void *xmalloc (size_t s)
-      _GL_ATTRIBUTE_MALLOC _GL_ATTRIBUTE_ALLOC_SIZE ((1));
+      attribute_malloc _GL_ATTRIBUTE_ALLOC_SIZE ((1));
 void *xmemdup (void const *p, size_t s)
-      _GL_ATTRIBUTE_MALLOC _GL_ATTRIBUTE_ALLOC_SIZE ((2));
+      attribute_malloc _GL_ATTRIBUTE_ALLOC_SIZE ((2));
 char *xstrdup (char const *str)
-      _GL_ATTRIBUTE_MALLOC;
+      attribute_malloc;
 void *xnmalloc (size_t n, size_t s)
-      _GL_ATTRIBUTE_MALLOC _GL_ATTRIBUTE_ALLOC_SIZE ((1, 2));
+      attribute_malloc _GL_ATTRIBUTE_ALLOC_SIZE ((1, 2));
 
 #endif /* !XALLOC_H_ */

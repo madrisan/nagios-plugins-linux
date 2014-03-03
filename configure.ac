@@ -60,6 +60,25 @@ if test "x$cc_cv_attribute_alias" = "xyes"; then
     [Define this if the compiler supports the alias attribute])
 fi
 
+ac_save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Werror"
+AC_CACHE_CHECK(
+  [if compiler supports __attribute__((__malloc__))],
+  [cc_cv_attribute_malloc],
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([[]],[[
+      void *fooalloc(int size) __attribute__((__malloc__));]])],
+    [cc_cv_attribute_malloc=yes],
+    [cc_cv_attribute_malloc=no])
+  ])
+CFLAGS="$ac_save_CFLAGS"
+if test "x$cc_cv_attribute_malloc" = "xyes"; then
+  ac_cc_attribute_malloc='__attribute__((__malloc__))'
+fi
+AC_DEFINE_UNQUOTED(
+  [attribute_malloc], [$ac_cc_attribute_malloc],
+  [Define this if the compiler supports the malloc attribute])
+
 dnl Check whether the compiler supports the __attribute__((__noreturn__)) feature
 ac_cc_attribute_noreturn=
 ac_save_CFLAGS="$CFLAGS"
