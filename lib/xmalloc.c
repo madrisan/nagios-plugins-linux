@@ -17,10 +17,12 @@
 
 #include "config.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+# include "messages.h"
 # include "xalloc.h"
 
 /* Allocate N bytes of memory dynamically, with error checking.  */
@@ -30,7 +32,7 @@ xmalloc (size_t n)
 {
   void *p = malloc (n);
   if (!p && n != 0)
-    perror ("memory exhausted");
+    plugin_error (STATE_UNKNOWN, errno, "memory exhausted");
   return p;
 }
 
