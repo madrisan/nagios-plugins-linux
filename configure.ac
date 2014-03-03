@@ -63,6 +63,25 @@ fi
 ac_save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"
 AC_CACHE_CHECK(
+  [if compiler supports __attribute__((__alloc_size__ args))],
+  [cc_cv_attribute_alloc_size],
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([[]],[[
+      void *fooalloc(int n, int s) __attribute__((__alloc_size__(1, 2)));]])],
+    [cc_cv_attribute_alloc_size=yes],
+    [cc_cv_attribute_alloc_size=no])
+  ])
+CFLAGS="$ac_save_CFLAGS"
+if test "x$cc_cv_attribute_alloc_size" = "xyes"; then
+  ac_cc_attribute_alloc_size='__attribute__((__alloc_size__ args))'
+fi
+AC_DEFINE_UNQUOTED(
+  [attribute_alloc_size(args)], [$ac_cc_attribute_alloc_size],
+  [Define this if the compiler supports the alloc_size attribute])
+
+ac_save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Werror"
+AC_CACHE_CHECK(
   [if compiler supports __attribute__((__malloc__))],
   [cc_cv_attribute_malloc],
   [AC_COMPILE_IFELSE(
