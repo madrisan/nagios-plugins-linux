@@ -76,7 +76,7 @@ if test "x$cc_cv_attribute_alloc_size" = "xyes"; then
   ac_cc_attribute_alloc_size='__attribute__((__alloc_size__ args))'
 fi
 AC_DEFINE_UNQUOTED(
-  [attribute_alloc_size(args)], [$ac_cc_attribute_alloc_size],
+  [_attribute_alloc_size_(args)], [$ac_cc_attribute_alloc_size],
   [Define this if the compiler supports the alloc_size attribute])
 
 ac_save_CFLAGS="$CFLAGS"
@@ -95,7 +95,7 @@ if test "x$cc_cv_attribute_malloc" = "xyes"; then
   ac_cc_attribute_malloc='__attribute__((__malloc__))'
 fi
 AC_DEFINE_UNQUOTED(
-  [attribute_malloc], [$ac_cc_attribute_malloc],
+  [_attribute_malloc_], [$ac_cc_attribute_malloc],
   [Define this if the compiler supports the malloc attribute])
 
 dnl Check whether the compiler supports the __attribute__((__noreturn__)) feature
@@ -147,7 +147,7 @@ if test "x$cc_cv_attribute_format_printf" = "xyes"; then
   ac_cc_attribute_format_printf='__attribute__((__format__ (__printf__, X,Y)))'
 fi
 AC_DEFINE_UNQUOTED(
-  [attribute_format_printf(X,Y)], [$ac_cc_attribute_format_printf],
+  [_attribute_format_printf_(X,Y)], [$ac_cc_attribute_format_printf],
   [Define this if the compiler supports the format printf attribute])
 
 dnl Checks for header files

@@ -23,7 +23,7 @@ extern "C" {
 /* Write formatted output to a string dynamically allocated with malloc(),
    and return it.  On error exit with the STATE_UNKNOWN status  */
 extern char *xasprintf (const char *format, ...)
-       attribute_format_printf(1, 2);
+       _attribute_format_printf_(1, 2);
 
 #ifdef __cplusplus
 }

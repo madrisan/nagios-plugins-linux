@@ -23,12 +23,12 @@ extern "C" {
 # endif
 
 void *xmalloc (size_t s)
-      attribute_malloc attribute_alloc_size ((1));
+      _attribute_malloc_ _attribute_alloc_size_ ((1));
 void *xmemdup (void const *p, size_t s)
-      attribute_malloc attribute_alloc_size ((2));
+      _attribute_malloc_ _attribute_alloc_size_ ((2));
 char *xstrdup (char const *str)
-      attribute_malloc;
+      _attribute_malloc_;
 void *xnmalloc (size_t n, size_t s)
-      attribute_malloc attribute_alloc_size ((1, 2));
+      _attribute_malloc_ _attribute_alloc_size_ ((1, 2));
 
 #endif /* XALLOC_H_ */
