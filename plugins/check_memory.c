@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "common.h"
 #include "meminfo.h"
@@ -90,8 +91,9 @@ extern unsigned long kb_main_free;
 extern unsigned long kb_main_shared;
 extern unsigned long kb_main_buffers;
 extern unsigned long kb_main_cached;
-extern unsigned long kb_mem_pageins;
-extern unsigned long kb_mem_pageouts;
+
+static unsigned long kb_mem_pageins[2];
+static unsigned long kb_mem_pageouts[2];
 
 char *
 get_memory_status (int status, float percent_used, int shift,
@@ -106,17 +108,17 @@ get_memory_status (int status, float percent_used, int shift,
 }
 
 char *
-get_memory_perfdata (int shift, const char *units)
+get_memory_perfdata (int shift, const char *units, unsigned long dpgpgin,
+		     unsigned long dpgpgout)
 {
   char *msg;
 
   msg = xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
                    "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
-                   "mem_pageins=%Lu%s, mem_pageouts=%Lu%s\n",
+                   "mem_pageins/s=%lu, mem_pageouts/s=%lu\n",
                    SU (kb_main_total), SU (kb_main_used), SU (kb_main_free),
                    SU (kb_main_shared), SU (kb_main_buffers),
-                   SU (kb_main_cached),
-                   SU (kb_mem_pageins), SU (kb_mem_pageouts));
+                   SU (kb_main_cached), dpgpgin, dpgpgout);
 
   return msg;
 }
@@ -127,6 +129,7 @@ main (int argc, char **argv)
   int c, status;
   int cache_is_free = 0;
   int shift = 10;
+  unsigned long dpgpgin, dpgpgout;
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
   char *status_msg;
@@ -173,6 +176,13 @@ main (int argc, char **argv)
     units = strdup ("kB");
 
   meminfo (cache_is_free);
+  mempaginginfo (kb_mem_pageins, kb_mem_pageouts);
+
+  sleep (1);
+
+  mempaginginfo (kb_mem_pageins + 1, kb_mem_pageouts + 1);
+  dpgpgin = kb_mem_pageins[1] - kb_mem_pageins[0];
+  dpgpgout = kb_mem_pageouts[1] - kb_mem_pageouts[0];
 
   if (kb_main_total != 0)
     percent_used = (kb_main_used * 100.0 / kb_main_total);
@@ -181,7 +191,7 @@ main (int argc, char **argv)
   free (my_threshold);
 
   status_msg = get_memory_status (status, percent_used, shift, units);
-  perfdata_msg = get_memory_perfdata (shift, units);
+  perfdata_msg = get_memory_perfdata (shift, units, dpgpgin, dpgpgout);
 
   printf ("%s | %s\n", status_msg, perfdata_msg);
 

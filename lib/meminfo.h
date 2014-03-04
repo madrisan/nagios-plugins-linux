@@ -7,5 +7,7 @@
 
 void meminfo (int);
 void swapinfo (void);
+void mempaginginfo (unsigned long *pgpgin, unsigned long *pgpgout);
+void swappaginginfo (unsigned long *pswpin, unsigned long *pswpout);
 
 #endif

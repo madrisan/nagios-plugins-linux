@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "common.h"
 #include "messages.h"
@@ -89,8 +90,9 @@ extern unsigned long kb_swap_used;
 extern unsigned long kb_swap_total;
 extern unsigned long kb_swap_free;
 extern unsigned long kb_swap_cached;
-extern unsigned long kb_swap_pageins;
-extern unsigned long kb_swap_pageouts;
+
+static unsigned long kb_swap_pageins[2];
+static unsigned long kb_swap_pageouts[2];
 
 char *
 get_swap_status (int status, float percent_used, int shift,
@@ -105,17 +107,17 @@ get_swap_status (int status, float percent_used, int shift,
 }
 
 char *
-get_swap_perfdata (int shift, const char *units)
+get_swap_perfdata (int shift, const char *units, unsigned long dpswpin,
+		   unsigned long dpswpout)
 {
   char *msg;
 
   msg = xasprintf ("swap_total=%Lu%s, swap_used=%Lu%s, swap_free=%Lu%s, "
                    /* The amount of swap, in kB, used as cache memory */
                    "swap_cached=%Lu%s, "
-                   "swap_pageins=%Lu%s, swap_pageouts=%Lu%s\n",
+                   "swap_pageins/s=%lu, swap_pageouts/s=%lu\n",
                    SU (kb_swap_total), SU (kb_swap_used), SU (kb_swap_free),
-                   SU (kb_swap_cached),
-                   SU (kb_swap_pageins), SU (kb_swap_pageouts));
+                   SU (kb_swap_cached), dpswpin, dpswpout);
 
   return msg;
 }
@@ -125,6 +127,7 @@ main (int argc, char **argv)
 {
   int c, status;
   int shift = 10;
+  unsigned long dpswpin, dpswpout;
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
   char *status_msg;
@@ -167,6 +170,13 @@ main (int argc, char **argv)
     units = strdup ("kB");
 
   swapinfo ();
+  swappaginginfo (kb_swap_pageins, kb_swap_pageouts);
+
+  sleep (1);
+
+  swappaginginfo (kb_swap_pageins + 1, kb_swap_pageouts + 1);
+  dpswpin = kb_swap_pageins[1] - kb_swap_pageins[0];
+  dpswpout = kb_swap_pageouts[1] - kb_swap_pageouts[0];
 
   if (kb_swap_total != 0)
     percent_used = (kb_swap_used * 100.0 / kb_swap_total);
@@ -175,7 +185,7 @@ main (int argc, char **argv)
   free (my_threshold);
 
   status_msg = get_swap_status (status, percent_used, shift, units);
-  perfdata_msg = get_swap_perfdata (shift, units);
+  perfdata_msg = get_swap_perfdata (shift, units, dpswpin, dpswpout);
 
   printf ("%s | %s\n", status_msg, perfdata_msg);
 

@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <sys/types.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,7 +45,6 @@ void swapinfo () __attribute__ ((weak, alias ("meminfo")));
 /*#define PROC_MEMINFO  "/proc/meminfo"*/
 static int meminfo_fd = -1;
 #define PROC_STAT     "/proc/stat"
-static int stat_fd = -1;
 #define PROC_VMINFO   "/proc/vmstat"
 static int vminfo_fd = -1;
 
@@ -209,14 +209,6 @@ static unsigned long vm_nr_unstable;
 static unsigned long vm_pginodesteal;
 static unsigned long vm_slabs_scanned;
 
-/* Number of swapins and swapouts (since the last boot):*/
-unsigned long kb_swap_pageins;
-unsigned long kb_swap_pageouts;
-
-/* Number of pageins and pageouts (since the last boot) */
-unsigned long kb_mem_pageins;
-unsigned long kb_mem_pageouts;
-
 void
 vminfo (void)
 {
@@ -352,8 +344,6 @@ meminfo (int cache_is_free)
   mem_table_struct *found;
   char *head;
   char *tail;
-  const char* b;
-  int need_vmstat_file = 0;
 
   static const mem_table_struct mem_table[] = {
     { "Active",        &kb_active },             /* important */
@@ -443,31 +433,66 @@ meminfo (int cache_is_free)
     }
 
   kb_swap_used = kb_swap_total - kb_swap_free;
+}
 
-  /* get additional statistics for memory and swap activity */
+/* Get additional statistics for memory activity
+ * Number of swapins and swapouts (since the last boot)	*/
 
-  FILE_TO_BUF (PROC_STAT, stat_fd);
+void
+mempaginginfo (unsigned long *pgpgin, unsigned long *pgpgout)
+{
+  FILE *f;
+  int need_vmstat_file = 1;
 
-  b = strstr(buf, "page ");
-  if(b)
-    sscanf(b, "page %lu %lu", &kb_mem_pageins, &kb_mem_pageouts);
-  else
-    need_vmstat_file = 1;
+  if (!(f = fopen (PROC_STAT, "r")))
+    plugin_error (STATE_UNKNOWN, errno, "Error: /proc must be mounted");
 
-  b = strstr(buf, "swap ");
-  if(b)
-    sscanf(b, "swap %lu %lu", &kb_swap_pageins, &kb_swap_pageouts);
-  else
-    need_vmstat_file = 1;
+  while (fgets (buf, sizeof buf, f))
+    {
+      if (sscanf (buf, "page %lu %lu", pgpgin, pgpgout) == 1)
+	{
+	  need_vmstat_file = 0;
+	  break;
+	}
+    }
+  fclose(f);
 
   if (need_vmstat_file)  /* Linux 2.5.40-bk4 and above */
     {
       vminfo();
 
-      kb_mem_pageins  = vm_pgpgin;
-      kb_mem_pageouts = vm_pgpgout;
+      *pgpgin  = vm_pgpgin;
+      *pgpgout = vm_pgpgout;
+    }
+}
 
-      kb_swap_pageins = vm_pswpin;
-      kb_swap_pageouts = vm_pswpout;
+/* get additional statistics for swap activity
+ * Number of swapins and swapouts (since the last boot)	*/
+
+void
+swappaginginfo (unsigned long *pswpin, unsigned long *pswpout)
+{
+  FILE *f;
+  int need_vmstat_file = 1;
+
+  if (!(f = fopen (PROC_STAT, "r")))
+    plugin_error (STATE_UNKNOWN, errno, "Error: /proc must be mounted");
+
+  while (fgets (buf, sizeof buf, f))
+    {
+      if (sscanf (buf, "swap %lu %lu", pswpin, pswpout) == 1)
+	{
+	  need_vmstat_file = 0;
+	  break;
+	}
+    }
+  fclose(f);
+
+  if (need_vmstat_file)  /* Linux 2.5.40-bk4 and above */
+    {
+      vminfo();
+
+      *pswpin = vm_pswpin;
+      *pswpout = vm_pswpout;
     }
 }
