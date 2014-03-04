@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 /* Return codes for _set_thresholds */
 #define NP_RANGE_UNPARSEABLE 1
 #define NP_WARN_WITHIN_CRIT  2
@@ -8,9 +10,9 @@
 typedef struct range_struct
 {
   double start;
-  int start_infinity;		/* FALSE (default) or TRUE */
   double end;
-  int end_infinity;
+  bool start_infinity;		/* false (default) or true */
+  bool end_infinity;
   int alert_on;			/* OUTSIDE (default) or INSIDE */
 } range;
 

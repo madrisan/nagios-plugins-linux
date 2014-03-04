@@ -21,6 +21,7 @@
 #include "config.h"
 
 #include <getopt.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -91,7 +92,8 @@ main (int argc, char **argv)
 {
   int c, i, status, numcpus = 1;
   const unsigned int lamin[3] = { 1, 5, 15 };
-  unsigned int first_perfdata, required[3] = { FALSE, FALSE, FALSE };
+  bool first_perfdata;
+  bool required[3] = { false, false, false };
   double loadavg[3];
   double wload[3] = { 0.0, 0.0, 0.0 };
   double cload[3] = { 0.0, 0.0, 0.0 };
@@ -109,17 +111,17 @@ main (int argc, char **argv)
 	case '1':
 	  i = sscanf (optarg, "%lf,%lf", &wload[0], &cload[0]);
 	  validate_input (i, wload[0], cload[0]);
-	  required[0] = TRUE;
+	  required[0] = true;
 	  break;
 	case '5':
 	  i = sscanf (optarg, "%lf,%lf", &wload[1], &cload[1]);
 	  validate_input (i, wload[1], cload[1]);
-	  required[1] = TRUE;
+	  required[1] = true;
 	  break;
 	case 'L':
 	  i = sscanf (optarg, "%lf,%lf", &wload[2], &cload[2]);
 	  validate_input (i, wload[2], cload[2]);
-	  required[2] = TRUE;
+	  required[2] = true;
 	  break;
 	case 'r':
 	  numcpus = get_processor_number ();
@@ -142,7 +144,7 @@ main (int argc, char **argv)
 
   for (i = 0; i < 3; i++)
     {
-      if (required[i] == FALSE)
+      if (required[i] == false)
 	continue;
 
       if (loadavg[i] > cload[i])
@@ -157,18 +159,18 @@ main (int argc, char **argv)
   printf ("LOAD %s - load average %.2lf, %.2lf, %.2lf | ",
 	  state_text (status), loadavg[0], loadavg[1], loadavg[2]);
 
-  first_perfdata = 1;
+  first_perfdata = true;
   for (i = 0; i < 3; i++)
     {
-      if (required[i] == FALSE)
+      if (required[i] == false)
 	continue;
 
       /* performance data format:
        *'label'=value[UOM];[warn];[crit];[min];[max]  */
       printf ("%sload%d=%.3lf;%.3lf;%.3lf;0",
-	      first_perfdata ? "" : ", ",
+	      (first_perfdata == true) ? "" : ", ",
 	      lamin[i], loadavg[i], wload[i], cload[i]);
-      first_perfdata = 0;
+      first_perfdata = false;
     }
   printf ("\n");
 

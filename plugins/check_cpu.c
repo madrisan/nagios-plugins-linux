@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -123,7 +124,8 @@ strtol_or_err (const char *str, const char *errmesg)
 int
 main (int argc, char **argv)
 {
-  int c, verbose = FALSE;
+  int c;
+  bool verbose = false;
   unsigned long i, len, delay, count;
   enum nagios_status status = STATE_OK;
   char *critical = NULL, *warning = NULL;
@@ -177,7 +179,7 @@ main (int argc, char **argv)
 	  warning = optarg;
 	  break;
 	case 'v':
-	  verbose = TRUE;
+	  verbose = true;
 	  break;
 
 	case_GETOPT_HELP_CHAR

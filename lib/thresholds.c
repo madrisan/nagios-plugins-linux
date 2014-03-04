@@ -22,6 +22,7 @@
 
 #include <errno.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,32 +39,32 @@
 int
 check_range (double value, range * my_range)
 {
-  int no = FALSE;
-  int yes = TRUE;
+  bool no = false;
+  bool yes = true;
 
   if (my_range->alert_on == INSIDE)
     {
-      no = TRUE;
-      yes = FALSE;
+      no = true;
+      yes = false;
     }
 
-  if (my_range->end_infinity == FALSE && my_range->start_infinity == FALSE)
+  if (my_range->end_infinity == false && my_range->start_infinity == false)
     {
       if ((my_range->start <= value) && (value <= my_range->end))
 	return no;
       else
 	return yes;
     }
-  else if (my_range->start_infinity == FALSE
-	   && my_range->end_infinity == TRUE)
+  else if (my_range->start_infinity == false
+	   && my_range->end_infinity == true)
     {
       if (my_range->start <= value)
 	return no;
       else
 	return yes;
     }
-  else if (my_range->start_infinity == TRUE
-	   && my_range->end_infinity == FALSE)
+  else if (my_range->start_infinity == true
+	   && my_range->end_infinity == false)
     {
       if (value <= my_range->end)
 	return no;
@@ -79,12 +80,12 @@ get_status (double value, thresholds * my_thresholds)
 {
   if (my_thresholds->critical != NULL)
     {
-      if (check_range (value, my_thresholds->critical) == TRUE)
+      if (check_range (value, my_thresholds->critical) == true)
 	return STATE_CRITICAL;
     }
   if (my_thresholds->warning != NULL)
     {
-      if (check_range (value, my_thresholds->warning) == TRUE)
+      if (check_range (value, my_thresholds->warning) == true)
 	return STATE_WARNING;
     }
   return STATE_OK;
@@ -94,14 +95,14 @@ void
 set_range_start (range * this, double value)
 {
   this->start = value;
-  this->start_infinity = FALSE;
+  this->start_infinity = false;
 }
 
 void
 set_range_end (range * this, double value)
 {
   this->end = value;
-  this->end_infinity = FALSE;
+  this->end_infinity = false;
 }
 
 range *
@@ -118,9 +119,9 @@ parse_range_string (char *str)
    * Set defaults 
    */
   temp_range->start = 0;
-  temp_range->start_infinity = FALSE;
+  temp_range->start_infinity = false;
   temp_range->end = 0;
-  temp_range->end_infinity = TRUE;
+  temp_range->end_infinity = true;
   temp_range->alert_on = OUTSIDE;
 
   if (str[0] == '@')
@@ -133,7 +134,7 @@ parse_range_string (char *str)
   if (end_str != NULL)
     {
       if (str[0] == '~')
-	temp_range->start_infinity = TRUE;
+	temp_range->start_infinity = true;
       else
 	{
 	  start = strtod (str, NULL);	/* Will stop at the ':' */
@@ -149,8 +150,8 @@ parse_range_string (char *str)
   if (strcmp (end_str, "") != 0)
     set_range_end (temp_range, end);
 
-  if (temp_range->start_infinity == TRUE ||
-      temp_range->end_infinity == TRUE ||
+  if (temp_range->start_infinity == true ||
+      temp_range->end_infinity == true ||
       temp_range->start <= temp_range->end)
     {
       return temp_range;

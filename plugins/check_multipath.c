@@ -39,7 +39,7 @@
 #define BUFSIZE		2048
 static char buffer[BUFSIZE];
 
-static int verbose = 0;
+static bool verbose = false;
 static const char *multipathd_socket = MULTIPATHD_SOCKET;
 
 static const char *program_copyright =
@@ -228,7 +228,7 @@ main (int argc, char **argv)
 	  usage (stderr);
 	  break;
 	case 'v':
-	  verbose++;
+	  verbose = true;
 	  break;
 
 	case_GETOPT_HELP_CHAR
