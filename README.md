@@ -119,7 +119,7 @@ Where
 Examples
 
 	check_memory -C -m -w 80% -c 90%
-	OK: 79.22% (810964 kB) used | mem_total=999MB, mem_used=791MB, mem_free=207MB, mem_shared=0MB, mem_buffers=1MB, mem_cached=190MB, mem_pageins=33803MB, mem_pageouts=18608MB
+	OK: 79.22% (810964 kB) used | mem_total=999MB, mem_used=791MB, mem_free=207MB, mem_shared=0MB, mem_buffers=1MB, mem_cached=190MB, mem_pageins/s=104, mem_pageouts/s=0
 	  # mem_total    : Total usable physical RAM
 	  # mem_used     : Total amount of physical RAM used by the system
 	  # mem_free     : Amount of RAM that is currently unused
@@ -130,7 +130,7 @@ Examples
 	  # mem_pageouts : The number of memory pages the system has written in and out to disk
 
 	check_swap -w 40% -c 60% -m
-	WARNING: 42.70% (895104 kB) used | swap_total=2096444kB, swap_used=895104kB, swap_free=1201340kB, swap_cached=117024kB, swap_pageins=1593302kB, swap_pageouts=1281649kB
+	WARNING: 42.70% (895104 kB) used | swap_total=2096444kB, swap_used=895104kB, swap_free=1201340kB, swap_cached=117024kB, swap_pageins/s=97, swap_pageouts/s=73
 	  # swap_total   : Total amount of swap space available
 	  # swap_used    : Total amount of swap used by the system
 	  # swap_free    : Amount of swap space that is currently unused
