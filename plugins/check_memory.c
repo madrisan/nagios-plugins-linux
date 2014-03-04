@@ -99,28 +99,20 @@ char *
 get_memory_status (int status, float percent_used, int shift,
                    const char *units)
 {
-  char *msg;
-
-  msg = xasprintf ("%s: %.2f%% (%lu kB) used", state_text (status),
-                   percent_used, kb_main_used);
-  
-  return msg;
+  return xasprintf ("%s: %.2f%% (%lu kB) used", state_text (status),
+		    percent_used, kb_main_used);
 }
 
 char *
 get_memory_perfdata (int shift, const char *units, unsigned long dpgpgin,
 		     unsigned long dpgpgout)
 {
-  char *msg;
-
-  msg = xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
-                   "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
-                   "mem_pageins/s=%lu, mem_pageouts/s=%lu\n",
-                   SU (kb_main_total), SU (kb_main_used), SU (kb_main_free),
-                   SU (kb_main_shared), SU (kb_main_buffers),
-                   SU (kb_main_cached), dpgpgin, dpgpgout);
-
-  return msg;
+  return xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
+		    "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
+		    "mem_pageins/s=%lu, mem_pageouts/s=%lu\n",
+		    SU (kb_main_total), SU (kb_main_used), SU (kb_main_free),
+		    SU (kb_main_shared), SU (kb_main_buffers),
+		    SU (kb_main_cached), dpgpgin, dpgpgout);
 }
 
 int

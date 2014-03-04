@@ -2,6 +2,7 @@
 #define _MEMINFO_H_
 
 #include "config.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C"
