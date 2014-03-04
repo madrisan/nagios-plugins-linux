@@ -337,7 +337,7 @@ compare_mem_table_structs (const void *a, const void *b)
 }
 
 void
-meminfo (int cache_is_free)
+meminfo (bool cache_is_free)
 {
   char namebuf[16];		/* big enough to hold any row name */
   mem_table_struct findme = { namebuf, NULL };

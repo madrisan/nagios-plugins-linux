@@ -10,7 +10,7 @@ extern "C"
 
 #define SU(X) ( ((unsigned long long)(X) << 10) >> shift ), units
 
-  void meminfo (int);
+  void meminfo (bool);
   void swapinfo (void);
   void mempaginginfo (unsigned long *, unsigned long *);
   void swappaginginfo (unsigned long *, unsigned long *);

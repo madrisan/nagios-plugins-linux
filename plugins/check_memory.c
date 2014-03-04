@@ -127,8 +127,8 @@ int
 main (int argc, char **argv)
 {
   int c, status;
-  int cache_is_free = 0;
   int shift = 10;
+  bool cache_is_free = false;
   unsigned long dpgpgin, dpgpgout;
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
@@ -148,7 +148,7 @@ main (int argc, char **argv)
         default:
           usage (stderr);
         case 'C':
-          cache_is_free = 1;
+          cache_is_free = true;
           break;
         case 'c':
           critical = optarg;
