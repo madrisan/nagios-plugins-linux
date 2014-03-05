@@ -40,26 +40,6 @@ AM_PROG_CC_C_O
 
 AC_PROG_RANLIB
 
-dnl Check whether the compiler supports the __attribute__((weak, alias)) feature
-#ac_save_CFLAGS="$CFLAGS"
-#CFLAGS="$CFLAGS -Werror"
-AC_CACHE_CHECK(
-  [if compiler supports __attribute__((weak, alias))],
-  [cc_cv_attribute_alias],
-  [AC_COMPILE_IFELSE(
-    [AC_LANG_PROGRAM([[]],[[
-      void __f() { /* do something */; }
-      void f() __attribute__((weak, alias("__f")));]])],
-    [cc_cv_attribute_alias=yes],
-    [cc_cv_attribute_alias=no])
-  ])
-#CFLAGS="$ac_save_CFLAGS"
-if test "x$cc_cv_attribute_alias" = "xyes"; then
-  AC_DEFINE(
-    [SUPPORT_ATTRIBUTE_ALIAS], 1,
-    [Define this if the compiler supports the alias attribute])
-fi
-
 ac_save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"
 AC_CACHE_CHECK(

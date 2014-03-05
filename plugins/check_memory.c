@@ -85,12 +85,12 @@ print_version (void)
   exit (STATE_OK);
 }
 
-extern unsigned long kb_main_used;
-extern unsigned long kb_main_total;
-extern unsigned long kb_main_free;
-extern unsigned long kb_main_shared;
-extern unsigned long kb_main_buffers;
-extern unsigned long kb_main_cached;
+static unsigned long kb_main_used;
+static unsigned long kb_main_total;
+static unsigned long kb_main_free;
+static unsigned long kb_main_shared;
+static unsigned long kb_main_buffers;
+static unsigned long kb_main_cached;
 
 static unsigned long kb_mem_pageins[2];
 static unsigned long kb_mem_pageouts[2];
@@ -167,7 +167,9 @@ main (int argc, char **argv)
   if (units == NULL)
     units = strdup ("kB");
 
-  meminfo (cache_is_free);
+  meminfo (cache_is_free, &kb_main_used, &kb_main_total, &kb_main_free,
+	   &kb_main_shared, &kb_main_buffers, &kb_main_cached);
+
   mempaginginfo (kb_mem_pageins, kb_mem_pageouts);
 
   sleep (1);

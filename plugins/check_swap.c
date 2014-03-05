@@ -82,10 +82,10 @@ print_version (void)
   exit (STATE_OK);
 }
 
-extern unsigned long kb_swap_used;
-extern unsigned long kb_swap_total;
-extern unsigned long kb_swap_free;
-extern unsigned long kb_swap_cached;
+static unsigned long kb_swap_used;
+static unsigned long kb_swap_total;
+static unsigned long kb_swap_free;
+static unsigned long kb_swap_cached;
 
 static unsigned long kb_swap_pageins[2];
 static unsigned long kb_swap_pageouts[2];
@@ -94,28 +94,20 @@ char *
 get_swap_status (int status, float percent_used, int shift,
                  const char *units)
 {
-  char *msg;
-
-  msg = xasprintf ("%s: %.2f%% (%lu kB) used", state_text (status),
-                   percent_used, kb_swap_used);
-
-  return msg;
+  return xasprintf ("%s: %.2f%% (%lu kB) used", state_text (status),
+		    percent_used, kb_swap_used);
 }
 
 char *
 get_swap_perfdata (int shift, const char *units, unsigned long dpswpin,
 		   unsigned long dpswpout)
 {
-  char *msg;
-
-  msg = xasprintf ("swap_total=%Lu%s, swap_used=%Lu%s, swap_free=%Lu%s, "
-                   /* The amount of swap, in kB, used as cache memory */
-                   "swap_cached=%Lu%s, "
-                   "swap_pageins/s=%lu, swap_pageouts/s=%lu\n",
-                   SU (kb_swap_total), SU (kb_swap_used), SU (kb_swap_free),
-                   SU (kb_swap_cached), dpswpin, dpswpout);
-
-  return msg;
+  return xasprintf ("swap_total=%Lu%s, swap_used=%Lu%s, swap_free=%Lu%s, "
+		    /* The amount of swap, in kB, used as cache memory */
+		    "swap_cached=%Lu%s, "
+		    "swap_pageins/s=%lu, swap_pageouts/s=%lu\n",
+		    SU (kb_swap_total), SU (kb_swap_used), SU (kb_swap_free),
+		    SU (kb_swap_cached), dpswpin, dpswpout);
 }
 
 int
@@ -165,7 +157,7 @@ main (int argc, char **argv)
   if (units == NULL)
     units = strdup ("kB");
 
-  swapinfo ();
+  swapinfo (&kb_swap_used, &kb_swap_total, &kb_swap_free, &kb_swap_cached);
   swappaginginfo (kb_swap_pageins, kb_swap_pageouts);
 
   sleep (1);

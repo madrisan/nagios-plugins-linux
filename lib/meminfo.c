@@ -36,12 +36,6 @@
 
 #define SU(X) ( ((unsigned long long)(X) << 10) >> shift ), units
 
-#ifdef SUPPORT_ATTRIBUTE_ALIAS
-void swapinfo () __attribute__ ((weak, alias ("meminfo")));
-#else
-# pragma weak swapinfo = meminfo
-#endif
-
 /*#define PROC_MEMINFO  "/proc/meminfo"*/
 static int meminfo_fd = -1;
 #define PROC_STAT     "/proc/stat"
@@ -104,38 +98,35 @@ static char buf[2048];
  */
 
 /* obsolete */
-unsigned long kb_main_shared;
+static unsigned long kb_main_shared;
 /* old but still kicking -- the important stuff */
-unsigned long kb_main_buffers;
-unsigned long kb_main_cached;
-unsigned long kb_main_free;
-unsigned long kb_main_total;
-unsigned long kb_swap_free;
-unsigned long kb_swap_total;
+static unsigned long kb_main_buffers;
+static unsigned long kb_main_cached;
+static unsigned long kb_main_free;
+static unsigned long kb_main_total;
+static unsigned long kb_swap_free;
+static unsigned long kb_swap_total;
 /* recently introduced */
-unsigned long kb_high_free;
-unsigned long kb_high_total;
-unsigned long kb_low_free;
-unsigned long kb_low_total;
+static unsigned long kb_high_free;
+static unsigned long kb_high_total;
+static unsigned long kb_low_free;
+static unsigned long kb_low_total;
 /* 2.4.xx era */
-unsigned long kb_active;
-unsigned long kb_inact_laundry;
-unsigned long kb_inact_dirty;
-unsigned long kb_inact_clean;
-unsigned long kb_inact_target;
-unsigned long kb_swap_cached;  /* late 2.4 and 2.6+ only */
-/* derived values */
-unsigned long kb_swap_used;
-unsigned long kb_main_used;
+static unsigned long kb_active;
+static unsigned long kb_inact_laundry;
+static unsigned long kb_inact_dirty;
+static unsigned long kb_inact_clean;
+static unsigned long kb_inact_target;
+static unsigned long kb_swap_cached;  /* late 2.4 and 2.6+ only */
 /* 2.5.41+ */
-unsigned long kb_writeback;
-unsigned long kb_slab;
-unsigned long nr_reversemaps;
-unsigned long kb_committed_as;
-unsigned long kb_dirty;
-unsigned long kb_inactive;
-unsigned long kb_mapped;
-unsigned long kb_pagetables;
+static unsigned long kb_writeback;
+static unsigned long kb_slab;
+static unsigned long nr_reversemaps;
+static unsigned long kb_committed_as;
+static unsigned long kb_dirty;
+static unsigned long kb_inactive;
+static unsigned long kb_mapped;
+static unsigned long kb_pagetables;
 // seen on a 2.6.x kernel:
 static unsigned long kb_vmalloc_chunk;
 static unsigned long kb_vmalloc_total;
@@ -162,31 +153,31 @@ compare_vm_table_structs (const void *a, const void *b)
 }
 
 /* see include/linux/page-flags.h and mm/page_alloc.c */
-unsigned long vm_nr_dirty;           /* dirty writable pages */
-unsigned long vm_nr_writeback;       /* pages under writeback */
-unsigned long vm_nr_pagecache;       /* pages in pagecache -- gone in 2.5.66+ kernels */
-unsigned long vm_nr_page_table_pages;/* pages used for pagetables */
-unsigned long vm_nr_reverse_maps;    /* includes PageDirect */
-unsigned long vm_nr_mapped;          /* mapped into pagetables */
-unsigned long vm_nr_slab;            /* in slab */
-unsigned long vm_pgpgin;             /* kB disk reads  (same as 1st num on /proc/stat page line) */
-unsigned long vm_pgpgout;            /* kB disk writes (same as 2nd num on /proc/stat page line) */
-unsigned long vm_pswpin;             /* swap reads     (same as 1st num on /proc/stat swap line) */
-unsigned long vm_pswpout;            /* swap writes    (same as 2nd num on /proc/stat swap line) */
-unsigned long vm_pgalloc;            /* page allocations */
-unsigned long vm_pgfree;             /* page freeings */
-unsigned long vm_pgactivate;         /* pages moved inactive -> active */
-unsigned long vm_pgdeactivate;       /* pages moved active -> inactive */
-unsigned long vm_pgfault;           /* total faults (major+minor) */
-unsigned long vm_pgmajfault;       /* major faults */
-unsigned long vm_pgscan;          /* pages scanned by page reclaim */
-unsigned long vm_pgrefill;       /* inspected by refill_inactive_zone */
-unsigned long vm_pgsteal;       /* total pages reclaimed */
-unsigned long vm_kswapd_steal; /* pages reclaimed by kswapd */
+static unsigned long vm_nr_dirty;           /* dirty writable pages */
+static unsigned long vm_nr_writeback;       /* pages under writeback */
+static unsigned long vm_nr_pagecache;       /* pages in pagecache -- gone in 2.5.66+ kernels */
+static unsigned long vm_nr_page_table_pages;/* pages used for pagetables */
+static unsigned long vm_nr_reverse_maps;    /* includes PageDirect */
+static unsigned long vm_nr_mapped;          /* mapped into pagetables */
+static unsigned long vm_nr_slab;            /* in slab */
+static unsigned long vm_pgpgin;             /* kB disk reads  (same as 1st num on /proc/stat page line) */
+static unsigned long vm_pgpgout;            /* kB disk writes (same as 2nd num on /proc/stat page line) */
+static unsigned long vm_pswpin;             /* swap reads     (same as 1st num on /proc/stat swap line) */
+static unsigned long vm_pswpout;            /* swap writes    (same as 2nd num on /proc/stat swap line) */
+static unsigned long vm_pgalloc;            /* page allocations */
+static unsigned long vm_pgfree;             /* page freeings */
+static unsigned long vm_pgactivate;         /* pages moved inactive -> active */
+static unsigned long vm_pgdeactivate;       /* pages moved active -> inactive */
+static unsigned long vm_pgfault;           /* total faults (major+minor) */
+static unsigned long vm_pgmajfault;       /* major faults */
+static unsigned long vm_pgscan;          /* pages scanned by page reclaim */
+static unsigned long vm_pgrefill;       /* inspected by refill_inactive_zone */
+static unsigned long vm_pgsteal;       /* total pages reclaimed */
+static unsigned long vm_kswapd_steal; /* pages reclaimed by kswapd */
 /* next 3 as defined by the 2.5.52 kernel */
-unsigned long vm_pageoutrun;  /* times kswapd ran page reclaim */
-unsigned long vm_allocstall;  /* times a page allocator ran direct reclaim */
-unsigned long vm_pgrotated;   /* pages rotated to the tail of the LRU for immediate reclaim */
+static unsigned long vm_pageoutrun;  /* times kswapd ran page reclaim */
+static unsigned long vm_allocstall;  /* times a page allocator ran direct reclaim */
+static unsigned long vm_pgrotated;   /* pages rotated to the tail of the LRU for immediate reclaim */
 /* seen on a 2.6.8-rc1 kernel, apparently replacing old fields */
 static unsigned long vm_pgalloc_dma;
 static unsigned long vm_pgalloc_high;
@@ -337,7 +328,9 @@ compare_mem_table_structs (const void *a, const void *b)
 }
 
 void
-meminfo (bool cache_is_free)
+meminfo (bool cache_is_free, unsigned long *used, unsigned long *total,
+	 unsigned long* free, unsigned long *shared, unsigned long *buffers,
+	 unsigned long *cached)
 {
   char namebuf[16];		/* big enough to hold any row name */
   mem_table_struct findme = { namebuf, NULL };
@@ -373,9 +366,6 @@ meminfo (bool cache_is_free)
     { "SReclaimable",  &kb_swap_reclaimable },   /* "swap reclaimable" (dentry and inode structures) */
     { "SUnreclaim",    &kb_swap_unreclaimable },
     { "Slab",          &kb_slab },               /* kB version of vmstat nr_slab */
-    { "SwapCached",    &kb_swap_cached },
-    { "SwapFree",      &kb_swap_free },          /* important */
-    { "SwapTotal",     &kb_swap_total },         /* important */
     { "VmallocChunk",  &kb_vmalloc_chunk },
     { "VmallocTotal",  &kb_vmalloc_total },
     { "VmallocUsed",   &kb_vmalloc_used },
@@ -425,14 +415,70 @@ meminfo (bool cache_is_free)
       kb_inactive = kb_inact_dirty + kb_inact_clean + kb_inact_laundry;
     }
 
-  kb_main_used = kb_main_total - kb_main_free;
+  *used = kb_main_total - kb_main_free;
+  *total = kb_main_total;
+  *free = kb_main_free;
+  *shared = kb_main_shared;
+  *buffers = kb_main_buffers;
+  *cached = kb_main_cached;
+
   if (cache_is_free)
     {
-      kb_main_used -= (kb_main_cached + kb_main_buffers);
-      kb_main_free += (kb_main_cached + kb_main_buffers);
+      *used -= (kb_main_cached + kb_main_buffers);
+      *free += (kb_main_cached + kb_main_buffers);
+    }
+}
+
+void
+swapinfo (unsigned long *used, unsigned long *total, unsigned long* free,
+	  unsigned long *cached)
+{
+  char namebuf[16];             /* big enough to hold any row name */
+  mem_table_struct findme = { namebuf, NULL };
+  mem_table_struct *found;
+  char *head;
+  char *tail;
+
+  static const mem_table_struct mem_table[] = {
+    { "SwapCached",    &kb_swap_cached },
+    { "SwapFree",      &kb_swap_free },          /* important */
+    { "SwapTotal",     &kb_swap_total },         /* important */
+  };
+  const int mem_table_count = sizeof (mem_table) / sizeof (mem_table_struct);
+
+  FILE_TO_BUF (PROC_MEMINFO, meminfo_fd);
+
+  head = buf;
+  for (;;)
+    {
+      tail = strchr (head, ':');
+      if (!tail)
+        break;
+      *tail = '\0';
+      if (strlen (head) >= sizeof (namebuf))
+        {
+          head = tail + 1;
+          goto nextline;
+        }
+      strcpy (namebuf, head);
+      found = bsearch (&findme, mem_table, mem_table_count,
+                       sizeof (mem_table_struct), compare_mem_table_structs);
+      head = tail + 1;
+      if (!found)
+        goto nextline;
+      *(found->slot) = strtoul (head, &tail, 10);
+
+    nextline:
+      tail = strchr (head, '\n');
+      if (!tail)
+        break;
+      head = tail + 1;
     }
 
-  kb_swap_used = kb_swap_total - kb_swap_free;
+  *cached = kb_swap_cached;
+  *total = kb_swap_total;
+  *free = kb_swap_free;
+  *used = kb_swap_total - kb_swap_free;
 }
 
 /* Get additional statistics for memory activity
