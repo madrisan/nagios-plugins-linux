@@ -98,7 +98,7 @@ main (int argc, char **argv)
   float percent_used = 0;
   thresholds *my_threshold = NULL;
 
-  struct memory_snapshot *mem = NULL;
+  struct memory_status *mem = NULL;
   unsigned long dpgpgin, dpgpgout;
   unsigned long kb_mem_pageins[2];
   unsigned long kb_mem_pageouts[2];

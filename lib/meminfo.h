@@ -9,7 +9,7 @@ extern "C"
 {
 #endif
 
-  typedef struct memory_snapshot
+  typedef struct memory_status
   {
     unsigned long used;
     unsigned long total;
@@ -17,15 +17,23 @@ extern "C"
     unsigned long shared;
     unsigned long buffers;
     unsigned long cached;
-  } memory_snapshot_struct;
+  } memory_status_struct;
+
+  typedef struct swap_status
+  {
+    unsigned long used;
+    unsigned long total;
+    unsigned long free;
+    unsigned long cached;
+  } swap_status_struct;
+
 
 #define SU(X) ( ((unsigned long long)(X) << 10) >> shift ), units
 
-  void get_meminfo (bool, struct memory_snapshot **);
+  void get_meminfo (bool, struct memory_status **);
   void get_mempaginginfo (unsigned long *, unsigned long *);
 
-  void get_swapinfo (unsigned long *, unsigned long *, unsigned long *,
-		     unsigned long *);
+  void get_swapinfo (struct swap_status **);
   void get_swappaginginfo (unsigned long *, unsigned long *);
 
 #ifdef __cplusplus

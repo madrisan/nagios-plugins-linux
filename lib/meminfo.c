@@ -328,14 +328,14 @@ compare_mem_table_structs (const void *a, const void *b)
 }
 
 void
-get_meminfo (bool cache_is_free, struct memory_snapshot **memory)
+get_meminfo (bool cache_is_free, struct memory_status **memory)
 {
   char namebuf[16];		/* big enough to hold any row name */
   mem_table_struct findme = { namebuf, NULL };
   mem_table_struct *found;
   char *head;
   char *tail;
-  struct memory_snapshot *m = *memory;
+  struct memory_status *m = *memory;
 
   static const mem_table_struct mem_table[] = {
     { "Active",        &kb_active },             /* important */
@@ -373,7 +373,7 @@ get_meminfo (bool cache_is_free, struct memory_snapshot **memory)
   const int mem_table_count = sizeof (mem_table) / sizeof (mem_table_struct);
 
   if (!m)
-    m = xmalloc (sizeof (struct memory_snapshot));
+    m = xmalloc (sizeof (struct memory_status));
 
   FILE_TO_BUF (PROC_MEMINFO, meminfo_fd);
 
@@ -434,14 +434,14 @@ get_meminfo (bool cache_is_free, struct memory_snapshot **memory)
 }
 
 void
-get_swapinfo (unsigned long *used, unsigned long *total, unsigned long* free,
-	      unsigned long *cached)
+get_swapinfo (struct swap_status **swap)
 {
   char namebuf[16];             /* big enough to hold any row name */
   mem_table_struct findme = { namebuf, NULL };
   mem_table_struct *found;
   char *head;
   char *tail;
+  struct swap_status *s = *swap;
 
   static const mem_table_struct mem_table[] = {
     { "SwapCached",    &kb_swap_cached },
@@ -449,6 +449,9 @@ get_swapinfo (unsigned long *used, unsigned long *total, unsigned long* free,
     { "SwapTotal",     &kb_swap_total },         /* important */
   };
   const int mem_table_count = sizeof (mem_table) / sizeof (mem_table_struct);
+
+  if (!s)
+    s = xmalloc (sizeof (struct swap_status));
 
   FILE_TO_BUF (PROC_MEMINFO, meminfo_fd);
 
@@ -479,10 +482,12 @@ get_swapinfo (unsigned long *used, unsigned long *total, unsigned long* free,
       head = tail + 1;
     }
 
-  *cached = kb_swap_cached;
-  *total = kb_swap_total;
-  *free = kb_swap_free;
-  *used = kb_swap_total - kb_swap_free;
+  s->cached = kb_swap_cached;
+  s->total = kb_swap_total;
+  s->free = kb_swap_free;
+  s->used = kb_swap_total - kb_swap_free;
+
+  *swap = s;
 }
 
 /* Get additional statistics for memory activity

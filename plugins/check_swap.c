@@ -82,46 +82,22 @@ print_version (void)
   exit (STATE_OK);
 }
 
-static unsigned long kb_swap_used;
-static unsigned long kb_swap_total;
-static unsigned long kb_swap_free;
-static unsigned long kb_swap_cached;
-
-static unsigned long kb_swap_pageins[2];
-static unsigned long kb_swap_pageouts[2];
-
-char *
-get_swap_status (int status, float percent_used, int shift,
-                 const char *units)
-{
-  return xasprintf ("%s: %.2f%% (%lu kB) used", state_text (status),
-		    percent_used, kb_swap_used);
-}
-
-char *
-get_swap_perfdata (int shift, const char *units, unsigned long dpswpin,
-		   unsigned long dpswpout)
-{
-  return xasprintf ("swap_total=%Lu%s, swap_used=%Lu%s, swap_free=%Lu%s, "
-		    /* The amount of swap, in kB, used as cache memory */
-		    "swap_cached=%Lu%s, "
-		    "swap_pageins/s=%lu, swap_pageouts/s=%lu\n",
-		    SU (kb_swap_total), SU (kb_swap_used), SU (kb_swap_free),
-		    SU (kb_swap_cached), dpswpin, dpswpout);
-}
-
 int
 main (int argc, char **argv)
 {
   int c, status;
   int shift = 10;
-  unsigned long dpswpin, dpswpout;
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
   char *status_msg;
   char *perfdata_msg;
-  thresholds *my_threshold = NULL;
   float percent_used = 0;
+  thresholds *my_threshold = NULL;
+
+  struct swap_status *swap = NULL;
+  unsigned long dpswpin, dpswpout;
+  unsigned long kb_swap_pageins[2];
+  unsigned long kb_swap_pageouts[2];
 
   set_program_name (argv[0]);
 
@@ -157,29 +133,37 @@ main (int argc, char **argv)
   if (units == NULL)
     units = strdup ("kB");
 
-  get_swapinfo (&kb_swap_used, &kb_swap_total, &kb_swap_free, &kb_swap_cached);
+  get_swapinfo (&swap);
+
   get_swappaginginfo (kb_swap_pageins, kb_swap_pageouts);
-
   sleep (1);
-
   get_swappaginginfo (kb_swap_pageins + 1, kb_swap_pageouts + 1);
   dpswpin = kb_swap_pageins[1] - kb_swap_pageins[0];
   dpswpout = kb_swap_pageouts[1] - kb_swap_pageouts[0];
 
-  if (kb_swap_total != 0)
-    percent_used = (kb_swap_used * 100.0 / kb_swap_total);
+  if (swap->total != 0)
+    percent_used = (swap->used * 100.0 / swap->total);
 
   status = get_status (percent_used, my_threshold);
   free (my_threshold);
 
-  status_msg = get_swap_status (status, percent_used, shift, units);
-  perfdata_msg = get_swap_perfdata (shift, units, dpswpin, dpswpout);
+  status_msg = xasprintf ("%s: %.2f%% (%lu kB) used", state_text (status),
+			  percent_used, swap->used);
+
+  perfdata_msg =
+    xasprintf ("swap_total=%Lu%s, swap_used=%Lu%s, swap_free=%Lu%s, "
+	       /* The amount of swap, in kB, used as cache memory */
+	       "swap_cached=%Lu%s, "
+	       "swap_pageins/s=%lu, swap_pageouts/s=%lu\n",
+	       SU (swap->total), SU (swap->used), SU (swap->free),
+	       SU (swap->cached), dpswpin, dpswpout);
 
   printf ("%s | %s\n", status_msg, perfdata_msg);
 
   free (units);
   free (status_msg);
   free (perfdata_msg);
+  free (swap);
 
   return status;
 }
