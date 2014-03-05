@@ -157,12 +157,12 @@ main (int argc, char **argv)
   if (units == NULL)
     units = strdup ("kB");
 
-  swapinfo (&kb_swap_used, &kb_swap_total, &kb_swap_free, &kb_swap_cached);
-  swappaginginfo (kb_swap_pageins, kb_swap_pageouts);
+  get_swapinfo (&kb_swap_used, &kb_swap_total, &kb_swap_free, &kb_swap_cached);
+  get_swappaginginfo (kb_swap_pageins, kb_swap_pageouts);
 
   sleep (1);
 
-  swappaginginfo (kb_swap_pageins + 1, kb_swap_pageouts + 1);
+  get_swappaginginfo (kb_swap_pageins + 1, kb_swap_pageouts + 1);
   dpswpin = kb_swap_pageins[1] - kb_swap_pageins[0];
   dpswpout = kb_swap_pageouts[1] - kb_swap_pageouts[0];
 

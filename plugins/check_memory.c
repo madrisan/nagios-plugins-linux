@@ -143,9 +143,9 @@ main (int argc, char **argv)
 
   get_meminfo (cache_is_free, &mem);
 
-  mempaginginfo (kb_mem_pageins, kb_mem_pageouts);
+  get_mempaginginfo (kb_mem_pageins, kb_mem_pageouts);
   sleep (1);
-  mempaginginfo (kb_mem_pageins + 1, kb_mem_pageouts + 1);
+  get_mempaginginfo (kb_mem_pageins + 1, kb_mem_pageouts + 1);
   dpgpgin = kb_mem_pageins[1] - kb_mem_pageins[0];
   dpgpgout = kb_mem_pageouts[1] - kb_mem_pageouts[0];
 

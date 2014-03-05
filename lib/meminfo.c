@@ -434,8 +434,8 @@ get_meminfo (bool cache_is_free, struct memory_snapshot **memory)
 }
 
 void
-swapinfo (unsigned long *used, unsigned long *total, unsigned long* free,
-	  unsigned long *cached)
+get_swapinfo (unsigned long *used, unsigned long *total, unsigned long* free,
+	      unsigned long *cached)
 {
   char namebuf[16];             /* big enough to hold any row name */
   mem_table_struct findme = { namebuf, NULL };
@@ -489,7 +489,7 @@ swapinfo (unsigned long *used, unsigned long *total, unsigned long* free,
  * Number of swapins and swapouts (since the last boot)	*/
 
 void
-mempaginginfo (unsigned long *pgpgin, unsigned long *pgpgout)
+get_mempaginginfo (unsigned long *pgpgin, unsigned long *pgpgout)
 {
   FILE *f;
   int need_vmstat_file = 1;
@@ -520,7 +520,7 @@ mempaginginfo (unsigned long *pgpgin, unsigned long *pgpgout)
  * Number of swapins and swapouts (since the last boot)	*/
 
 void
-swappaginginfo (unsigned long *pswpin, unsigned long *pswpout)
+get_swappaginginfo (unsigned long *pswpin, unsigned long *pswpout)
 {
   FILE *f;
   int need_vmstat_file = 1;
