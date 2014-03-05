@@ -86,7 +86,7 @@ int
 main (int argc, char **argv)
 {
   int c, status;
-  int shift = 10;
+  int shift = k_shift;
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
   char *status_msg;
@@ -114,10 +114,10 @@ main (int argc, char **argv)
         case 'w':
           warning = optarg;
           break;
-        case 'b': shift = 0;  units = strdup ("B"); break;
-        case 'k': shift = 10; units = strdup ("kB"); break;
-        case 'm': shift = 20; units = strdup ("MB"); break;
-        case 'g': shift = 30; units = strdup ("GB"); break;
+        case 'b': shift = b_shift; units = strdup ("B"); break;
+        case 'k': shift = k_shift; units = strdup ("kB"); break;
+        case 'm': shift = m_shift; units = strdup ("MB"); break;
+        case 'g': shift = g_shift; units = strdup ("GB"); break;
 
         case_GETOPT_HELP_CHAR
         case_GETOPT_VERSION_CHAR

@@ -9,6 +9,11 @@ extern "C"
 {
 #endif
 
+  enum unit_shift
+  {
+    b_shift = 0, k_shift = 10, m_shift = 20, g_shift = 30
+  };
+
   typedef struct memory_status
   {
     unsigned long used;
@@ -27,8 +32,7 @@ extern "C"
     unsigned long cached;
   } swap_status_struct;
 
-
-#define SU(X) ( ((unsigned long long)(X) << 10) >> shift ), units
+#define SU(X) ( ((unsigned long long)(X) << k_shift) >> shift ), units
 
   void get_meminfo (bool, struct memory_status **);
   void get_mempaginginfo (unsigned long *, unsigned long *);
