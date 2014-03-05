@@ -32,9 +32,9 @@
 
 #include "common.h"
 #include "messages.h"
+#include "meminfo.h"
 #include "thresholds.h"
-
-#define SU(X) ( ((unsigned long long)(X) << 10) >> shift ), units
+#include "xalloc.h"
 
 /*#define PROC_MEMINFO  "/proc/meminfo"*/
 static int meminfo_fd = -1;
@@ -328,15 +328,14 @@ compare_mem_table_structs (const void *a, const void *b)
 }
 
 void
-meminfo (bool cache_is_free, unsigned long *used, unsigned long *total,
-	 unsigned long* free, unsigned long *shared, unsigned long *buffers,
-	 unsigned long *cached)
+get_meminfo (bool cache_is_free, struct memory_snapshot **memory)
 {
   char namebuf[16];		/* big enough to hold any row name */
   mem_table_struct findme = { namebuf, NULL };
   mem_table_struct *found;
   char *head;
   char *tail;
+  struct memory_snapshot *m = *memory;
 
   static const mem_table_struct mem_table[] = {
     { "Active",        &kb_active },             /* important */
@@ -372,6 +371,9 @@ meminfo (bool cache_is_free, unsigned long *used, unsigned long *total,
     { "Writeback",     &kb_writeback },          /* kB version of vmstat nr_writeback */
   };
   const int mem_table_count = sizeof (mem_table) / sizeof (mem_table_struct);
+
+  if (!m)
+    m = xmalloc (sizeof (struct memory_snapshot));
 
   FILE_TO_BUF (PROC_MEMINFO, meminfo_fd);
 
@@ -415,18 +417,20 @@ meminfo (bool cache_is_free, unsigned long *used, unsigned long *total,
       kb_inactive = kb_inact_dirty + kb_inact_clean + kb_inact_laundry;
     }
 
-  *used = kb_main_total - kb_main_free;
-  *total = kb_main_total;
-  *free = kb_main_free;
-  *shared = kb_main_shared;
-  *buffers = kb_main_buffers;
-  *cached = kb_main_cached;
+  m->used = kb_main_total - kb_main_free;
+  m->total = kb_main_total;
+  m->free = kb_main_free;
+  m->shared = kb_main_shared;
+  m->buffers = kb_main_buffers;
+  m->cached = kb_main_cached;
 
   if (cache_is_free)
     {
-      *used -= (kb_main_cached + kb_main_buffers);
-      *free += (kb_main_cached + kb_main_buffers);
+      (*memory)->used -= (kb_main_cached + kb_main_buffers);
+      (*memory)->free += (kb_main_cached + kb_main_buffers);
     }
+
+  *memory = m;
 }
 
 void

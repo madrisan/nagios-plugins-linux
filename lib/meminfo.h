@@ -9,14 +9,23 @@ extern "C"
 {
 #endif
 
+  struct memory_snapshot
+  {
+    unsigned long used;
+    unsigned long total;
+    unsigned long free;
+    unsigned long shared;
+    unsigned long buffers;
+    unsigned long cached;
+  };
+
 #define SU(X) ( ((unsigned long long)(X) << 10) >> shift ), units
 
-  void meminfo (bool, unsigned long *, unsigned long *, unsigned long *,
-		unsigned long *, unsigned long *, unsigned long *);
+  void get_meminfo (bool, struct memory_snapshot **);
   void mempaginginfo (unsigned long *, unsigned long *);
 
-  void swapinfo (unsigned long *, unsigned long *, unsigned long*,
-		 unsigned long*);
+  void swapinfo (unsigned long *, unsigned long *, unsigned long *,
+		     unsigned long *);
   void swappaginginfo (unsigned long *, unsigned long *);
 
 #ifdef __cplusplus

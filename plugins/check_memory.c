@@ -85,49 +85,23 @@ print_version (void)
   exit (STATE_OK);
 }
 
-static unsigned long kb_main_used;
-static unsigned long kb_main_total;
-static unsigned long kb_main_free;
-static unsigned long kb_main_shared;
-static unsigned long kb_main_buffers;
-static unsigned long kb_main_cached;
-
-static unsigned long kb_mem_pageins[2];
-static unsigned long kb_mem_pageouts[2];
-
-char *
-get_memory_status (int status, float percent_used, int shift,
-                   const char *units)
-{
-  return xasprintf ("%s: %.2f%% (%lu kB) used", state_text (status),
-		    percent_used, kb_main_used);
-}
-
-char *
-get_memory_perfdata (int shift, const char *units, unsigned long dpgpgin,
-		     unsigned long dpgpgout)
-{
-  return xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
-		    "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
-		    "mem_pageins/s=%lu, mem_pageouts/s=%lu\n",
-		    SU (kb_main_total), SU (kb_main_used), SU (kb_main_free),
-		    SU (kb_main_shared), SU (kb_main_buffers),
-		    SU (kb_main_cached), dpgpgin, dpgpgout);
-}
-
 int
 main (int argc, char **argv)
 {
+  bool cache_is_free = false;
   int c, status;
   int shift = 10;
-  bool cache_is_free = false;
-  unsigned long dpgpgin, dpgpgout;
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
   char *status_msg;
   char *perfdata_msg;
-  thresholds *my_threshold = NULL;
   float percent_used = 0;
+  thresholds *my_threshold = NULL;
+
+  struct memory_snapshot *mem = NULL;
+  unsigned long dpgpgin, dpgpgout;
+  unsigned long kb_mem_pageins[2];
+  unsigned long kb_mem_pageouts[2];
 
   set_program_name (argv[0]);
 
@@ -167,31 +141,35 @@ main (int argc, char **argv)
   if (units == NULL)
     units = strdup ("kB");
 
-  meminfo (cache_is_free, &kb_main_used, &kb_main_total, &kb_main_free,
-	   &kb_main_shared, &kb_main_buffers, &kb_main_cached);
+  get_meminfo (cache_is_free, &mem);
 
   mempaginginfo (kb_mem_pageins, kb_mem_pageouts);
-
   sleep (1);
-
   mempaginginfo (kb_mem_pageins + 1, kb_mem_pageouts + 1);
   dpgpgin = kb_mem_pageins[1] - kb_mem_pageins[0];
   dpgpgout = kb_mem_pageouts[1] - kb_mem_pageouts[0];
 
-  if (kb_main_total != 0)
-    percent_used = (kb_main_used * 100.0 / kb_main_total);
+  if (mem->total != 0)
+    percent_used = (mem->used * 100.0 / mem->total);
 
   status = get_status (percent_used, my_threshold);
   free (my_threshold);
 
-  status_msg = get_memory_status (status, percent_used, shift, units);
-  perfdata_msg = get_memory_perfdata (shift, units, dpgpgin, dpgpgout);
+  status_msg = xasprintf ("%s: %.2f%% (%lu kB) used", state_text (status),
+			  percent_used, mem->used);
+  perfdata_msg =
+    xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
+	       "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
+	       "mem_pageins/s=%lu, mem_pageouts/s=%lu\n", SU (mem->total),
+	       SU (mem->used), SU (mem->free), SU (mem->shared),
+	       SU (mem->buffers), SU (mem->cached), dpgpgin, dpgpgout);
 
   printf ("%s | %s\n", status_msg, perfdata_msg);
 
   free (units);
   free (status_msg);
   free (perfdata_msg);
+  free (mem);
 
   return status;
 }
