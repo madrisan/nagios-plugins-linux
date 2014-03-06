@@ -1,5 +1,6 @@
 AM_CPPFLAGS = \
    -include $(top_builddir)/config.h \
+   -I$(top_srcdir)/include \
    -I$(top_srcdir)/lib \
    -DMULTIPATHD_SOCKET=\"$(MULTIPATHD_SOCKET)\"
 

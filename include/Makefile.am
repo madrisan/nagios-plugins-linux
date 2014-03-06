@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-## Copyright (C) 2003 Davide Madrisan <davide.madrisan@gmail.com>
+## Copyright (C) 2004 Davide Madrisan <davide.madrisan@gmail.com>
 
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -15,19 +15,17 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AM_CPPFLAGS = \
-  -include $(top_builddir)/config.h \
-  -I$(top_srcdir)/include
+AM_CPPFLAGS = -include $(top_builddir)/config.h
 
-noinst_LIBRARIES = libnagiosplugins.a
-
-libnagiosplugins_a_SOURCES = \
-  cpuinfo.c    \
-  meminfo.c    \
-  messages.c   \
-  mountlist.c  \
-  procparser.c \
-  progname.c   \
-  thresholds.c \
-  xasprintf.c  \
-  xmalloc.c
+noinst_HEADERS = \
+  common.h      \
+  cpuinfo.h     \
+  meminfo.h     \
+  mountlist.h   \
+  messages.h    \
+  procparser.h  \
+  progname.h    \
+  progversion.h \
+  thresholds.h  \
+  xalloc.h      \
+  xasprintf.h

@@ -244,5 +244,10 @@ cc_TRY_CFLAGS([-Wunused])
 
 AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
 
-AC_CONFIG_FILES([Makefile lib/Makefile plugins/Makefile])
+AC_CONFIG_FILES([\
+  Makefile \
+  include/Makefile \
+  lib/Makefile \
+  plugins/Makefile])
+
 AC_OUTPUT
