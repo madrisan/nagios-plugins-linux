@@ -1,7 +1,6 @@
 #ifndef _CPUINFO_H
 #define _CPUINFO_H
 
-#include "config.h"
 #include <sys/sysinfo.h>
 
 #ifdef __cplusplus

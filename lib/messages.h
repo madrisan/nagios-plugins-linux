@@ -1,7 +1,6 @@
 #ifndef _MESSAGES_H
 #define _MESSAGES_H	1
 
-#include "config.h"
 #include "common.h"
 
 #ifdef __cplusplus

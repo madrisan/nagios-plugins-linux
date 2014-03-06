@@ -20,8 +20,6 @@
  * This software is based on the source code of the tool "free" (procps 3.2.8)
  */
 
-#include "config.h"
-
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>

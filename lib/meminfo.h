@@ -1,7 +1,6 @@
 #ifndef _MEMINFO_H_
 #define _MEMINFO_H_
 
-#include "config.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus

@@ -20,8 +20,6 @@
  * This module is based on the code of procps 3.2.8
  */
 
-#include "config.h"
-
 #include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>

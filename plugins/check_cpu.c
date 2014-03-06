@@ -25,8 +25,6 @@
   *   there was at least one outstanding (disk or network) I/O operation
   *   requested by a task scheduled on that CPU.  */
 
-#include "config.h"
-
 #include <ctype.h>
 #include <errno.h>
 #include <getopt.h>

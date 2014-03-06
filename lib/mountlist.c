@@ -1,5 +1,5 @@
 /*
- * License: GPL
+ * License: GPLv3+
  * Copyright (c) 2013 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check for readonly filesystems
@@ -20,8 +20,6 @@
 
 /* This library was largely based on and inspired by the coreutils code.
  */
-
-#include "config.h"
 
 #include <errno.h>
 #include <fcntl.h>

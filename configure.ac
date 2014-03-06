@@ -7,8 +7,8 @@ m4_define(PROG_BUGREPORT, [davide.madrisan@gmail.com])
 AC_INIT([PROG_NAME],[PROG_VERSION],[PROG_BUGREPORT],[PROG_NAME])
 AC_PREREQ([2.59])
 
-AC_CONFIG_SRCDIR([plugins/check_memory.c])
-AC_CONFIG_HEADERS(plugins/config.h:plugins/config.hin)
+AC_CONFIG_SRCDIR([plugins/check_cpu.c])
+AC_CONFIG_HEADERS(config.h:config.hin)
 
 AM_INIT_AUTOMAKE([gnu dist-bzip2])
 AM_MAINTAINER_MODE
