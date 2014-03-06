@@ -1,7 +1,7 @@
 AM_CPPFLAGS = \
    -include $(top_builddir)/config.h \
-   -I$(top_srcdir)/lib
-AM_CFLAGS = -DMULTIPATHD_SOCKET=\"$(MULTIPATHD_SOCKET)\"
+   -I$(top_srcdir)/lib \
+   -DMULTIPATHD_SOCKET=\"$(MULTIPATHD_SOCKET)\"
 
 check_cpu_programs = check_iowait
 
