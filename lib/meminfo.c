@@ -33,37 +33,13 @@
 #include "common.h"
 #include "messages.h"
 #include "meminfo.h"
+#include "procparser.h"
 #include "thresholds.h"
 #include "xalloc.h"
 
 /*#define PROC_MEMINFO  "/proc/meminfo"*/
-static int meminfo_fd = -1;
 #define PROC_STAT     "/proc/stat"
 #define PROC_VMINFO   "/proc/vmstat"
-static int vminfo_fd = -1;
-
-/* As of 2.6.24 /proc/meminfo seems to need 888 on 64-bit,
- * and would need 1258 if the obsolete fields were there.
- */
-static char buf[2048];
-
-/* This macro opens filename only if necessary and seeks to 0 so
- * that successive calls to the functions are more efficient.
- * It also reads the current contents of the file into the global buf.
- */
-#define FILE_TO_BUF(filename, fd) do{                               \
-    static int local_n;                                             \
-    if (fd == -1 && (fd = open(filename, O_RDONLY)) == -1) {        \
-        plugin_error (STATE_UNKNOWN, 0,                             \
-                      "Error: /proc must be mounted");              \
-    }                                                               \
-    lseek(fd, 0L, SEEK_SET);                                        \
-    if ((local_n = read(fd, buf, sizeof buf - 1)) < 0) {            \
-        plugin_error (STATE_UNKNOWN, 0,                             \
-                      "Error reading %s", filename);                \
-    }                                                               \
-    buf[local_n] = '\0';                                            \
-}while(0)
 
 /* example data, following junk, with comments added:
  *
@@ -141,17 +117,6 @@ static unsigned long kb_swap_unreclaimable;
 
 /* read /proc/vminfo only for 2.5.41 and above */
 
-typedef struct vm_table_struct {
-  const char *name;     /* VM statistic name */
-  unsigned long *slot;       /* slot in return struct */
-} vm_table_struct;
-
-static int
-compare_vm_table_structs (const void *a, const void *b)
-{
-  return strcmp (((const vm_table_struct*)a)->name, ((const vm_table_struct*)b)->name);
-}
-
 /* see include/linux/page-flags.h and mm/page_alloc.c */
 static unsigned long vm_nr_dirty;           /* dirty writable pages */
 static unsigned long vm_nr_writeback;       /* pages under writeback */
@@ -203,13 +168,7 @@ static unsigned long vm_slabs_scanned;
 void
 vminfo (void)
 {
-  char namebuf[16];             /* big enough to hold any row name */
-  vm_table_struct findme = { namebuf, NULL };
-  vm_table_struct *found;
-  char *head;
-  char *tail;
-
-  static const vm_table_struct vm_table[] = {
+  static const proc_table_struct proc_table[] = {
     { "allocstall",           &vm_allocstall },
     { "kswapd_inodesteal",    &vm_kswapd_inodesteal },
     { "kswapd_steal",         &vm_kswapd_steal },
@@ -254,52 +213,15 @@ vminfo (void)
     { "pswpout",              &vm_pswpout },             /* important */
     { "slabs_scanned",        &vm_slabs_scanned },
   };
-  const int vm_table_count = sizeof (vm_table) / sizeof (vm_table_struct);
-
-#if __SIZEOF_LONG__ == 4
-  unsigned long long slotll;
-#endif
+  const int proc_table_count =
+    sizeof (proc_table) / sizeof (proc_table_struct);
 
   vm_pgalloc = 0;
   vm_pgrefill = 0;
   vm_pgscan = 0;
   vm_pgsteal = 0;
 
-  FILE_TO_BUF (PROC_VMINFO, vminfo_fd);
-
-  head = buf;
-  for (;;)
-    {
-      tail = strchr (head, ' ');
-      if (!tail) break;
-      *tail = '\0';
-      if (strlen (head) >= sizeof (namebuf))
-        {
-          head = tail+1;
-          goto nextline;
-        }
-      strcpy (namebuf, head);
-      found = bsearch (&findme, vm_table, vm_table_count,
-                       sizeof (vm_table_struct), compare_vm_table_structs);
-      head = tail + 1;
-      if (!found) goto nextline;
-
-#if __SIZEOF_LONG__ == 4
-      /* A 32 bit kernel would have already truncated the value, a 64 bit kernel
-       * doesn't need to.  Truncate here to let 32 bit programs to continue to get
-       * truncated values.  It's that or change the API for a larger data type.
-       */
-      slotll = strtoull (head, &tail, 10);
-      *(found->slot) = (unsigned long) slotll;
-#else
-      *(found->slot) = strtoul (head, &tail, 10);
-#endif
-
-nextline:
-      tail = strchr (head, '\n');
-      if (!tail) break;
-      head = tail + 1;
-    }
+  procparser (PROC_VMINFO, proc_table, proc_table_count, ' ');
 
   if (!vm_pgalloc)
     vm_pgalloc  = vm_pgalloc_dma + vm_pgalloc_high + vm_pgalloc_normal;
@@ -315,37 +237,20 @@ nextline:
     vm_pgsteal  = vm_pgsteal_dma + vm_pgsteal_high + vm_pgsteal_normal;
 }
 
-typedef struct mem_table_struct {
-  const char *name;     /* memory type name */
-  unsigned long *slot; /* slot in return struct */
-} mem_table_struct;
-
-static int
-compare_mem_table_structs (const void *a, const void *b)
-{
-  return strcmp (((const mem_table_struct*)a)->name,
-                 ((const mem_table_struct*)b)->name);
-}
-
 void
 get_meminfo (bool cache_is_free, struct memory_status **memory)
 {
-  char namebuf[16];		/* big enough to hold any row name */
-  mem_table_struct findme = { namebuf, NULL };
-  mem_table_struct *found;
-  char *head;
-  char *tail;
   struct memory_status *m = *memory;
 
-  static const mem_table_struct mem_table[] = {
-    { "Active",        &kb_active },             /* important */
+  static const proc_table_struct proc_table[] = {
+    { "Active",        &kb_active },            /* important */
     { "AnonPages",     &kb_anon_pages },
     { "Bounce",        &kb_bounce },
-    { "Buffers",       &kb_main_buffers },       /* important */
-    { "Cached",        &kb_main_cached },        /* important */
+    { "Buffers",       &kb_main_buffers },      /* important */
+    { "Cached",        &kb_main_cached },       /* important */
     { "CommitLimit",   &kb_commit_limit },
     { "Committed_AS",  &kb_committed_as },
-    { "Dirty",         &kb_dirty },              /* kB version of vmstat nr_dirty */
+    { "Dirty",         &kb_dirty },             /* kB version of vmstat nr_dirty */
     { "HighFree",      &kb_high_free },
     { "HighTotal",     &kb_high_total },
     { "Inact_clean",   &kb_inact_clean },
@@ -355,56 +260,30 @@ get_meminfo (bool cache_is_free, struct memory_status **memory)
     { "Inactive",      &kb_inactive },	        /* important */
     { "LowFree",       &kb_low_free },
     { "LowTotal",      &kb_low_total },
-    { "Mapped",        &kb_mapped },             /* kB version of vmstat nr_mapped */
+    { "Mapped",        &kb_mapped },            /* kB version of vmstat nr_mapped */
     { "MemFree",       &kb_main_free },	        /* important */
-    { "MemShared",     &kb_main_shared },        /* important, but now gone! */
-    { "MemTotal",      &kb_main_total },	        /* important */
+    { "MemShared",     &kb_main_shared },       /* important, but now gone! */
+    { "MemTotal",      &kb_main_total },        /* important */
     { "NFS_Unstable",  &kb_nfs_unstable },
-    { "PageTables",    &kb_pagetables },	        /* kB version of vmstat nr_page_table_pages */
-    { "ReverseMaps",   &nr_reversemaps },        /* same as vmstat nr_page_table_pages */
-    { "SReclaimable",  &kb_swap_reclaimable },   /* "swap reclaimable" (dentry and inode structures) */
+    { "PageTables",    &kb_pagetables },        /* kB version of vmstat nr_page_table_pages */
+    { "ReverseMaps",   &nr_reversemaps },       /* same as vmstat nr_page_table_pages */
+    { "SReclaimable",  &kb_swap_reclaimable },  /* "swap reclaimable" (dentry and inode structures) */
     { "SUnreclaim",    &kb_swap_unreclaimable },
-    { "Slab",          &kb_slab },               /* kB version of vmstat nr_slab */
+    { "Slab",          &kb_slab },              /* kB version of vmstat nr_slab */
     { "VmallocChunk",  &kb_vmalloc_chunk },
     { "VmallocTotal",  &kb_vmalloc_total },
     { "VmallocUsed",   &kb_vmalloc_used },
-    { "Writeback",     &kb_writeback },          /* kB version of vmstat nr_writeback */
+    { "Writeback",     &kb_writeback },         /* kB version of vmstat nr_writeback */
   };
-  const int mem_table_count = sizeof (mem_table) / sizeof (mem_table_struct);
+  const int proc_table_count =
+    sizeof (proc_table) / sizeof (proc_table_struct);
 
   if (!m)
     m = xmalloc (sizeof (struct memory_status));
 
-  FILE_TO_BUF (PROC_MEMINFO, meminfo_fd);
-
   kb_inactive = ~0UL;
 
-  head = buf;
-  for (;;)
-    {
-      tail = strchr (head, ':');
-      if (!tail)
-	break;
-      *tail = '\0';
-      if (strlen (head) >= sizeof (namebuf))
-	{
-	  head = tail + 1;
-	  goto nextline;
-	}
-      strcpy (namebuf, head);
-      found = bsearch (&findme, mem_table, mem_table_count,
-		       sizeof (mem_table_struct), compare_mem_table_structs);
-      head = tail + 1;
-      if (!found)
-	goto nextline;
-      *(found->slot) = strtoul (head, &tail, 10);
-
-    nextline:
-      tail = strchr (head, '\n');
-      if (!tail)
-	break;
-      head = tail + 1;
-    }
+  procparser (PROC_MEMINFO, proc_table, proc_table_count, ':');
 
   if (!kb_low_total)
     {				/* low==main except with large-memory support */
@@ -436,51 +315,20 @@ get_meminfo (bool cache_is_free, struct memory_status **memory)
 void
 get_swapinfo (struct swap_status **swap)
 {
-  char namebuf[16];             /* big enough to hold any row name */
-  mem_table_struct findme = { namebuf, NULL };
-  mem_table_struct *found;
-  char *head;
-  char *tail;
   struct swap_status *s = *swap;
 
-  static const mem_table_struct mem_table[] = {
-    { "SwapCached",    &kb_swap_cached },
+  static const proc_table_struct proc_table[] = {
+    { "SwapCached",    &kb_swap_cached },        /* late 2.4 and 2.6+ only */
     { "SwapFree",      &kb_swap_free },          /* important */
     { "SwapTotal",     &kb_swap_total },         /* important */
   };
-  const int mem_table_count = sizeof (mem_table) / sizeof (mem_table_struct);
+  const int proc_table_count =
+    sizeof (proc_table) / sizeof (proc_table_struct);
 
   if (!s)
     s = xmalloc (sizeof (struct swap_status));
 
-  FILE_TO_BUF (PROC_MEMINFO, meminfo_fd);
-
-  head = buf;
-  for (;;)
-    {
-      tail = strchr (head, ':');
-      if (!tail)
-        break;
-      *tail = '\0';
-      if (strlen (head) >= sizeof (namebuf))
-        {
-          head = tail + 1;
-          goto nextline;
-        }
-      strcpy (namebuf, head);
-      found = bsearch (&findme, mem_table, mem_table_count,
-                       sizeof (mem_table_struct), compare_mem_table_structs);
-      head = tail + 1;
-      if (!found)
-        goto nextline;
-      *(found->slot) = strtoul (head, &tail, 10);
-
-    nextline:
-      tail = strchr (head, '\n');
-      if (!tail)
-        break;
-      head = tail + 1;
-    }
+  procparser (PROC_MEMINFO, proc_table, proc_table_count, ':');
 
   s->cached = kb_swap_cached;
   s->total = kb_swap_total;
@@ -489,6 +337,8 @@ get_swapinfo (struct swap_status **swap)
 
   *swap = s;
 }
+
+static char buf[2048];
 
 /* Get additional statistics for memory activity
  * Number of swapins and swapouts (since the last boot)	*/

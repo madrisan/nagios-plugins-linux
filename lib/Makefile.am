@@ -21,6 +21,7 @@ noinst_HEADERS = \
   meminfo.h     \
   mountlist.h   \
   messages.h    \
+  procparser.h  \
   progname.h    \
   progversion.h \
   thresholds.h  \
@@ -34,6 +35,7 @@ libnagiosplugins_a_SOURCES = \
   meminfo.c    \
   messages.c   \
   mountlist.c  \
+  procparser.c \
   progname.c   \
   thresholds.c \
   xasprintf.c  \

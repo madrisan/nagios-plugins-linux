@@ -22,13 +22,17 @@
 extern "C" {
 # endif
 
-void *xmalloc (size_t s)
-      _attribute_malloc_ _attribute_alloc_size_ ((1));
-void *xmemdup (void const *p, size_t s)
-      _attribute_malloc_ _attribute_alloc_size_ ((2));
-char *xstrdup (char const *str)
-      _attribute_malloc_;
-void *xnmalloc (size_t n, size_t s)
-      _attribute_malloc_ _attribute_alloc_size_ ((1, 2));
+  void *xmalloc (size_t s)
+	_attribute_malloc_ _attribute_alloc_size_ ((1));
+  void *xmemdup (void const *p, size_t s)
+	_attribute_malloc_ _attribute_alloc_size_ ((2));
+  char *xstrdup (char const *str)
+	_attribute_malloc_;
+  void *xnmalloc (size_t n, size_t s)
+	_attribute_malloc_ _attribute_alloc_size_ ((1, 2));
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* XALLOC_H_ */
