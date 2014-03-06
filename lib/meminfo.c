@@ -39,7 +39,7 @@
 
 /*#define PROC_MEMINFO  "/proc/meminfo"*/
 #define PROC_STAT     "/proc/stat"
-#define PROC_VMINFO   "/proc/vmstat"
+#define PROC_VMSTAT   "/proc/vmstat"
 
 /* example data, following junk, with comments added:
  *
@@ -166,9 +166,9 @@ static unsigned long vm_pginodesteal;
 static unsigned long vm_slabs_scanned;
 
 void
-vminfo (void)
+get_vminfo (void)
 {
-  static const proc_table_struct proc_table[] = {
+  static const proc_table_struct vm_table[] = {
     { "allocstall",           &vm_allocstall },
     { "kswapd_inodesteal",    &vm_kswapd_inodesteal },
     { "kswapd_steal",         &vm_kswapd_steal },
@@ -213,15 +213,15 @@ vminfo (void)
     { "pswpout",              &vm_pswpout },             /* important */
     { "slabs_scanned",        &vm_slabs_scanned },
   };
-  const int proc_table_count =
-    sizeof (proc_table) / sizeof (proc_table_struct);
+  const int vm_table_count =
+    sizeof (vm_table) / sizeof (proc_table_struct);
 
   vm_pgalloc = 0;
   vm_pgrefill = 0;
   vm_pgscan = 0;
   vm_pgsteal = 0;
 
-  procparser (PROC_VMINFO, proc_table, proc_table_count, ' ');
+  procparser (PROC_VMSTAT, vm_table, vm_table_count, ' ');
 
   if (!vm_pgalloc)
     vm_pgalloc  = vm_pgalloc_dma + vm_pgalloc_high + vm_pgalloc_normal;
@@ -242,7 +242,7 @@ get_meminfo (bool cache_is_free, struct memory_status **memory)
 {
   struct memory_status *m = *memory;
 
-  static const proc_table_struct proc_table[] = {
+  static const proc_table_struct meminfo_table[] = {
     { "Active",        &kb_active },            /* important */
     { "AnonPages",     &kb_anon_pages },
     { "Bounce",        &kb_bounce },
@@ -275,15 +275,15 @@ get_meminfo (bool cache_is_free, struct memory_status **memory)
     { "VmallocUsed",   &kb_vmalloc_used },
     { "Writeback",     &kb_writeback },         /* kB version of vmstat nr_writeback */
   };
-  const int proc_table_count =
-    sizeof (proc_table) / sizeof (proc_table_struct);
+  const int meminfo_table_count =
+    sizeof (meminfo_table) / sizeof (proc_table_struct);
 
   if (!m)
     m = xmalloc (sizeof (struct memory_status));
 
   kb_inactive = ~0UL;
 
-  procparser (PROC_MEMINFO, proc_table, proc_table_count, ':');
+  procparser (PROC_MEMINFO, meminfo_table, meminfo_table_count, ':');
 
   if (!kb_low_total)
     {				/* low==main except with large-memory support */
@@ -364,7 +364,7 @@ get_mempaginginfo (unsigned long *pgpgin, unsigned long *pgpgout)
 
   if (need_vmstat_file)  /* Linux 2.5.40-bk4 and above */
     {
-      vminfo();
+      get_vminfo();
 
       *pgpgin  = vm_pgpgin;
       *pgpgout = vm_pgpgout;
@@ -395,7 +395,7 @@ get_swappaginginfo (unsigned long *pswpin, unsigned long *pswpout)
 
   if (need_vmstat_file)  /* Linux 2.5.40-bk4 and above */
     {
-      vminfo();
+      get_vminfo();
 
       *pswpin = vm_pswpin;
       *pswpout = vm_pswpout;
