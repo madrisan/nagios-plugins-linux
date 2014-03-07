@@ -197,7 +197,7 @@ AC_CHECK_FUNCS([get_nprocs_conf get_nprocs], [],
      AC_MSG_RESULT([not available]))
    AC_MSG_CHECKING([for number of available cpus])
    AC_TRY_COMPILE(
-     [#include <unistd.h>]
+     [#include <unistd.h>],
      [sysconf(_SC_NPROCESSORS_CONF) > 0;],
      AC_DEFINE(HAVE_SYSCONF__SC_NPROCESSORS_CONF, 1,
                [Define if sysconf returns number of available cpus])
