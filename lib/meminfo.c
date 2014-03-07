@@ -352,7 +352,7 @@ get_mempaginginfo (unsigned long *pgpgin, unsigned long *pgpgout)
 
   while (fgets (buf, sizeof buf, f))
     {
-      if (sscanf (buf, "page %lu %lu", pgpgin, pgpgout) == 1)
+      if (sscanf (buf, "page %lu %lu", pgpgin, pgpgout) == 2)
 	{
 	  need_vmstat_file = 0;
 	  break;
@@ -383,7 +383,7 @@ get_swappaginginfo (unsigned long *pswpin, unsigned long *pswpout)
 
   while (fgets (buf, sizeof buf, f))
     {
-      if (sscanf (buf, "swap %lu %lu", pswpin, pswpout) == 1)
+      if (sscanf (buf, "swap %lu %lu", pswpin, pswpout) == 2)
 	{
 	  need_vmstat_file = 0;
 	  break;
