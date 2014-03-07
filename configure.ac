@@ -121,6 +121,7 @@ AS_CASE([$cc_cv_attribute_noreturn],
     [AC_DEFINE_UNQUOTED([_Noreturn], [],
       [Define this if the compiler does not supports any noreturn attribute])]
   )
+CFLAGS="$ac_save_CFLAGS"
 
 dnl Check whether the compiler supports the 
 dnl    __attribute__((__format__ (__printf__, x,y))) feature
