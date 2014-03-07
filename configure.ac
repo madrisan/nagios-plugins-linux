@@ -4,19 +4,34 @@ m4_define(PROG_VERSION, 4)
 m4_define(PROG_NAME, [nagios-plugins-linux])
 m4_define(PROG_BUGREPORT, [davide.madrisan@gmail.com])
 
-AC_INIT([PROG_NAME],[PROG_VERSION],[PROG_BUGREPORT],[PROG_NAME])
 AC_PREREQ([2.59])
+
+AC_INIT([PROG_NAME],
+        [PROG_VERSION],
+        [PROG_BUGREPORT],
+        [PROG_NAME])
+
+AM_INIT_AUTOMAKE([
+        check-news
+        gnu
+        1.11
+        silent-rules
+        tar-pax
+        no-dist-gzip
+        dist-bzip2
+        dist-xz
+        subdir-objects])
 
 AC_CONFIG_SRCDIR([plugins/check_cpu.c])
 AC_CONFIG_HEADERS(config.h:config.hin)
+AC_CONFIG_LIBOBJ_DIR([lib])
 
-AM_INIT_AUTOMAKE([gnu dist-bzip2])
 AM_MAINTAINER_MODE
-#AC_CANONICAL_HOST
+AM_SILENT_RULES([yes])
 
 dnl Checks for programs
 #AC_USE_SYSTEM_EXTENSIONS(_GNU_SOURCE)
-#AC_PROG_CC
+
 AC_PROG_CC_STDC
 if test "$cross_compiling" = no; then
   if test "x$ac_cv_prog_cc_c99" = "xno" || test "x$ac_cv_prog_cc_c99" = "x"; then
@@ -36,9 +51,9 @@ if test "$cross_compiling" = no; then
     fi
   fi
 fi
-AM_PROG_CC_C_O
-
 AC_PROG_RANLIB
+
+AM_PROG_CC_C_O
 
 ac_save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"

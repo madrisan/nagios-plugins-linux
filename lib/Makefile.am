@@ -16,18 +16,18 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 AM_CPPFLAGS = \
-  -include $(top_builddir)/config.h \
-  -I$(top_srcdir)/include
+	-include $(top_builddir)/config.h \
+	-I$(top_srcdir)/include
 
-noinst_LIBRARIES = libnagiosplugins.a
+noinst_LIBRARIES = libutils.a
 
-libnagiosplugins_a_SOURCES = \
-  cpuinfo.c    \
-  meminfo.c    \
-  messages.c   \
-  mountlist.c  \
-  procparser.c \
-  progname.c   \
-  thresholds.c \
-  xasprintf.c  \
-  xmalloc.c
+libutils_a_SOURCES = \
+	cpuinfo.c    \
+	meminfo.c    \
+	messages.c   \
+	mountlist.c  \
+	procparser.c \
+	progname.c   \
+	thresholds.c \
+	xasprintf.c  \
+	xmalloc.c
