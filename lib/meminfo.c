@@ -173,7 +173,6 @@ get_meminfo (bool cache_is_free, struct memory_status **memory)
    *
    * MemTotal:        61768 kB    old
    * MemFree:          1436 kB    old
-   * MemShared:           0 kB    old (now always zero; not calculated)
    * Buffers:          1312 kB    old
    * Cached:          20932 kB    old
    * Active:          12464 kB    new
@@ -201,8 +200,8 @@ get_meminfo (bool cache_is_free, struct memory_status **memory)
    * Hugepagesize:     4096 kB    2.5.??+
    */
 
-  /* obsolete */
-  unsigned long kb_main_shared;
+  /* Shmem in 2.6.32+ */
+  unsigned long kb_main_shared = 0;
   /* old but still kicking -- the important stuff */
   unsigned long kb_main_buffers;
   unsigned long kb_main_cached;
@@ -260,13 +259,13 @@ get_meminfo (bool cache_is_free, struct memory_status **memory)
     { "LowTotal",      &kb_low_total },
     { "Mapped",        &kb_mapped },            /* kB version of vmstat nr_mapped */
     { "MemFree",       &kb_main_free },	        /* important */
-    { "MemShared",     &kb_main_shared },       /* important, but now gone! */
     { "MemTotal",      &kb_main_total },        /* important */
     { "NFS_Unstable",  &kb_nfs_unstable },
     { "PageTables",    &kb_pagetables },        /* kB version of vmstat nr_page_table_pages */
     { "ReverseMaps",   &nr_reversemaps },       /* same as vmstat nr_page_table_pages */
     { "SReclaimable",  &kb_swap_reclaimable },  /* "swap reclaimable" (dentry and inode structures) */
     { "SUnreclaim",    &kb_swap_unreclaimable },
+    { "Shmem",         &kb_main_shared},        /* kernel 2.6.32 and later */
     { "Slab",          &kb_slab },              /* kB version of vmstat nr_slab */
     { "VmallocChunk",  &kb_vmalloc_chunk },
     { "VmallocTotal",  &kb_vmalloc_total },
@@ -293,6 +292,9 @@ get_meminfo (bool cache_is_free, struct memory_status **memory)
     {
       kb_inactive = kb_inact_dirty + kb_inact_clean + kb_inact_laundry;
     }
+
+  /* "Cached" includes "Shmem" - we want only the page cache here */
+  kb_main_cached -= kb_main_shared;
 
   m->used = kb_main_total - kb_main_free;
   m->total = kb_main_total;
