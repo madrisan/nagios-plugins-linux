@@ -83,7 +83,7 @@ print_version (void)
 int
 main (int argc, char **argv)
 {
-  int c, status;
+  int c, status, err;
   int shift = k_shift;
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
@@ -92,7 +92,12 @@ main (int argc, char **argv)
   float percent_used = 0;
   thresholds *my_threshold = NULL;
 
-  struct swap_status *swap = NULL;
+  struct proc_sysmem *sysmem = NULL;
+  unsigned long kb_swap_cached;
+  unsigned long kb_swap_free;
+  unsigned long kb_swap_total;
+  unsigned long kb_swap_used;
+ 
   unsigned long dpswpin, dpswpout;
   unsigned long kb_swap_pageins[2];
   unsigned long kb_swap_pageouts[2];
@@ -131,7 +136,16 @@ main (int argc, char **argv)
   if (units == NULL)
     units = strdup ("kB");
 
-  get_swapinfo (&swap);
+  err = proc_sysmem_new (&sysmem);
+  if (err < 0)
+    plugin_error (STATE_UNKNOWN, err, "memory exhausted");
+
+  proc_sysmem_read (sysmem);
+
+  kb_swap_cached = proc_sysmem_get_swap_cached (sysmem);
+  kb_swap_free = proc_sysmem_get_swap_free (sysmem);
+  kb_swap_total = proc_sysmem_get_swap_total (sysmem);
+  kb_swap_used = proc_sysmem_get_swap_used (sysmem);
 
   get_swappaginginfo (kb_swap_pageins, kb_swap_pageouts);
   sleep (1);
@@ -139,29 +153,29 @@ main (int argc, char **argv)
   dpswpin = kb_swap_pageins[1] - kb_swap_pageins[0];
   dpswpout = kb_swap_pageouts[1] - kb_swap_pageouts[0];
 
-  if (swap->total != 0)
-    percent_used = (swap->used * 100.0 / swap->total);
+  if (kb_swap_total != 0)
+    percent_used = (kb_swap_used * 100.0 / kb_swap_total);
 
   status = get_status (percent_used, my_threshold);
   free (my_threshold);
 
-  status_msg = xasprintf ("%s: %.2f%% (%lu kB) used", state_text (status),
-			  percent_used, swap->used);
+  status_msg = xasprintf ("%s: %.2f%% (%Lu %s) used", state_text (status),
+			  percent_used, SU (kb_swap_used));
 
   perfdata_msg =
     xasprintf ("swap_total=%Lu%s, swap_used=%Lu%s, swap_free=%Lu%s, "
 	       /* The amount of swap, in kB, used as cache memory */
 	       "swap_cached=%Lu%s, "
 	       "swap_pageins/s=%lu, swap_pageouts/s=%lu\n",
-	       SU (swap->total), SU (swap->used), SU (swap->free),
-	       SU (swap->cached), dpswpin, dpswpout);
+	       SU (kb_swap_total), SU (kb_swap_used), SU (kb_swap_free),
+	       SU (kb_swap_cached), dpswpin, dpswpout);
 
   printf ("%s | %s\n", status_msg, perfdata_msg);
 
   free (units);
   free (status_msg);
   free (perfdata_msg);
-  free (swap);
+  free (sysmem);
 
   return status;
 }

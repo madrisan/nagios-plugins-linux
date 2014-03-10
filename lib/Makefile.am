@@ -29,5 +29,6 @@ libutils_a_SOURCES = \
 	procparser.c \
 	progname.c   \
 	thresholds.c \
+	vminfo.c     \
 	xasprintf.c  \
 	xmalloc.c

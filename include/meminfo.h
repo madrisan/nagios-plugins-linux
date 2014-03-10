@@ -1,3 +1,18 @@
+/* Library for getting system memory informations
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
 #ifndef _MEMINFO_H_
 #define _MEMINFO_H_
 
@@ -13,31 +28,34 @@ extern "C"
     b_shift = 0, k_shift = 10, m_shift = 20, g_shift = 30
   };
 
-  typedef struct memory_status
-  {
-    unsigned long used;
-    unsigned long total;
-    unsigned long free;
-    unsigned long shared;
-    unsigned long buffers;
-    unsigned long cached;
-  } memory_status_struct;
-
-  typedef struct swap_status
-  {
-    unsigned long used;
-    unsigned long total;
-    unsigned long free;
-    unsigned long cached;
-  } swap_status_struct;
-
 #define SU(X) ( ((unsigned long long)(X) << k_shift) >> shift ), units
 
-  void get_meminfo (bool, struct memory_status **);
   void get_mempaginginfo (unsigned long *, unsigned long *);
-
-  void get_swapinfo (struct swap_status **);
   void get_swappaginginfo (unsigned long *, unsigned long *);
+
+  struct proc_sysmem;
+
+  /* Allocates space for a new sysmem object.
+   * Returns 0 if all went ok. Errors are returned as negative values.  */
+  int proc_sysmem_new (struct proc_sysmem **sysmem);
+
+  /* Fill the proc_sysmem structure pointed will the values found in the
+   * proc filesystem.  */
+  void proc_sysmem_read (struct proc_sysmem *sysmem);
+
+  /* Accessing the values from proc_sysmem */
+
+  unsigned long proc_sysmem_get_main_buffers (struct proc_sysmem *sysmem);
+  unsigned long proc_sysmem_get_main_cached (struct proc_sysmem *sysmem);
+  unsigned long proc_sysmem_get_main_free (struct proc_sysmem *sysmem);
+  unsigned long proc_sysmem_get_main_shared (struct proc_sysmem *sysmem);
+  unsigned long proc_sysmem_get_main_total (struct proc_sysmem *sysmem);
+  unsigned long proc_sysmem_get_main_used (struct proc_sysmem *sysmem);
+
+  unsigned long proc_sysmem_get_swap_cached (struct proc_sysmem *sysmem);
+  unsigned long proc_sysmem_get_swap_free (struct proc_sysmem *sysmem);
+  unsigned long proc_sysmem_get_swap_total (struct proc_sysmem *sysmem);
+  unsigned long proc_sysmem_get_swap_used (struct proc_sysmem *sysmem);
 
 #ifdef __cplusplus
 }

@@ -87,7 +87,7 @@ int
 main (int argc, char **argv)
 {
   bool cache_is_free = false;
-  int c, status;
+  int c, status, err;
   int shift = k_shift;
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
@@ -96,7 +96,14 @@ main (int argc, char **argv)
   float percent_used = 0;
   thresholds *my_threshold = NULL;
 
-  struct memory_status *mem = NULL;
+  struct proc_sysmem *sysmem = NULL;
+  unsigned long kb_mem_main_buffers;
+  unsigned long kb_mem_main_cached;
+  unsigned long kb_mem_main_free;
+  unsigned long kb_mem_main_shared;
+  unsigned long kb_mem_main_total;
+  unsigned long kb_mem_main_used;
+
   unsigned long dpgpgin, dpgpgout;
   unsigned long kb_mem_pageins[2];
   unsigned long kb_mem_pageouts[2];
@@ -139,7 +146,24 @@ main (int argc, char **argv)
   if (units == NULL)
     units = strdup ("kB");
 
-  get_meminfo (cache_is_free, &mem);
+  err = proc_sysmem_new (&sysmem);
+  if (err < 0)
+    plugin_error (STATE_UNKNOWN, err, "memory exhausted");
+
+  proc_sysmem_read (sysmem);
+
+  kb_mem_main_buffers = proc_sysmem_get_main_buffers (sysmem);
+  kb_mem_main_cached = proc_sysmem_get_main_cached (sysmem);
+  kb_mem_main_free = proc_sysmem_get_main_free (sysmem);
+  kb_mem_main_shared = proc_sysmem_get_main_shared (sysmem);
+  kb_mem_main_total = proc_sysmem_get_main_total (sysmem);
+  kb_mem_main_used = proc_sysmem_get_main_used (sysmem);
+
+  if (cache_is_free)
+    {
+      kb_mem_main_used -= (kb_mem_main_cached + kb_mem_main_buffers);
+      kb_mem_main_free += (kb_mem_main_cached + kb_mem_main_buffers);
+    }
 
   get_mempaginginfo (kb_mem_pageins, kb_mem_pageouts);
   sleep (1);
@@ -147,27 +171,29 @@ main (int argc, char **argv)
   dpgpgin = kb_mem_pageins[1] - kb_mem_pageins[0];
   dpgpgout = kb_mem_pageouts[1] - kb_mem_pageouts[0];
 
-  if (mem->total != 0)
-    percent_used = (mem->used * 100.0 / mem->total);
+  if (kb_mem_main_total != 0)
+    percent_used = (kb_mem_main_used * 100.0 / kb_mem_main_total);
 
   status = get_status (percent_used, my_threshold);
   free (my_threshold);
 
-  status_msg = xasprintf ("%s: %.2f%% (%lu kB) used", state_text (status),
-			  percent_used, mem->used);
+  status_msg = xasprintf ("%s: %.2f%% (%Lu %s) used", state_text (status),
+			  percent_used, SU (kb_mem_main_used));
   perfdata_msg =
     xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
 	       "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
-	       "mem_pageins/s=%lu, mem_pageouts/s=%lu\n", SU (mem->total),
-	       SU (mem->used), SU (mem->free), SU (mem->shared),
-	       SU (mem->buffers), SU (mem->cached), dpgpgin, dpgpgout);
+	       "mem_pageins/s=%lu, mem_pageouts/s=%lu\n",
+	       SU (kb_mem_main_total), SU (kb_mem_main_used),
+	       SU (kb_mem_main_free), SU (kb_mem_main_shared),
+	       SU (kb_mem_main_buffers), SU (kb_mem_main_cached),
+	       dpgpgin, dpgpgout);
 
   printf ("%s | %s\n", status_msg, perfdata_msg);
 
   free (units);
   free (status_msg);
   free (perfdata_msg);
-  free (mem);
+  free (sysmem);
 
   return status;
 }
