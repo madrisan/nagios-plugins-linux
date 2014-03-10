@@ -161,62 +161,30 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
   sysmem->kb_main_cached -= sysmem->kb_main_shared;
 }
 
-unsigned long
-proc_sysmem_get_main_buffers (struct proc_sysmem *sysmem)
-{
-  return sysmem->kb_main_buffers;
+#define proc_sysmem_get(arg)                    \
+unsigned long                                   \
+proc_sysmem_get_ ## arg (struct proc_sysmem *p) \
+{                                               \
+  return (p == NULL) ? 0 : p->kb_ ## arg;       \
 }
 
-unsigned long
-proc_sysmem_get_main_cached (struct proc_sysmem *sysmem)
-{
-  return sysmem->kb_main_cached;
-}
-
-unsigned long
-proc_sysmem_get_main_free (struct proc_sysmem *sysmem)
-{
-  return sysmem->kb_main_free;
-}
-
-unsigned long
-proc_sysmem_get_main_shared (struct proc_sysmem *sysmem)
-{
-  return sysmem->kb_main_shared;
-}
-
-unsigned long
-proc_sysmem_get_main_total (struct proc_sysmem *sysmem)
-{
-  return sysmem->kb_main_total;
-}
+proc_sysmem_get(main_buffers)
+proc_sysmem_get(main_cached)
+proc_sysmem_get(main_free)
+proc_sysmem_get(main_shared)
+proc_sysmem_get(main_total)
+proc_sysmem_get(swap_cached)
+proc_sysmem_get(swap_free)
+proc_sysmem_get(swap_total)
 
 unsigned long
 proc_sysmem_get_main_used (struct proc_sysmem *sysmem)
 {
-  return sysmem->kb_main_total - sysmem->kb_main_free;
-}
-
-unsigned long
-proc_sysmem_get_swap_cached (struct proc_sysmem *sysmem)
-{
-  return sysmem->kb_swap_cached;
-}
-
-unsigned long
-proc_sysmem_get_swap_free (struct proc_sysmem *sysmem)
-{
-  return sysmem->kb_swap_free;
-}
-
-unsigned long
-proc_sysmem_get_swap_total (struct proc_sysmem *sysmem)
-{
-  return sysmem->kb_swap_total;
+  return (sysmem == NULL) ? 0 : sysmem->kb_main_total - sysmem->kb_main_free;
 }
 
 unsigned long
 proc_sysmem_get_swap_used (struct proc_sysmem *sysmem)
 {
-  return sysmem->kb_swap_total - sysmem->kb_swap_free;
+  return (sysmem == NULL) ? 0 : sysmem->kb_swap_total - sysmem->kb_swap_free;
 }
