@@ -43,6 +43,10 @@ extern "C"
    * proc filesystem.  */
   void proc_sysmem_read (struct proc_sysmem *sysmem);
 
+  /* Drop a reference of the memory library context. If the refcount of
+   * reaches zero, the resources of the context will be released.  */
+  struct proc_sysmem *proc_sysmem_unref (struct proc_sysmem *sysmem);
+
   /* Accessing the values from proc_sysmem */
 
   unsigned long proc_sysmem_get_main_buffers (struct proc_sysmem *sysmem);

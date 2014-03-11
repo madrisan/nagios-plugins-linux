@@ -36,6 +36,8 @@
 
 struct proc_sysmem
 {
+  int refcount;
+
   /* old but still kicking -- the important stuff */
   unsigned long kb_main_buffers;
   unsigned long kb_main_cached;
@@ -90,6 +92,8 @@ proc_sysmem_new (struct proc_sysmem **sysmem)
   m = calloc (1, sizeof (struct proc_sysmem));
   if (!m)
     return -ENOMEM;
+
+  m->refcount = 1;
 
   *sysmem = m;
   return 0;
@@ -159,6 +163,21 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
 
   /* "Cached" includes "Shmem" - we want only the page cache here */
   sysmem->kb_main_cached -= sysmem->kb_main_shared;
+}
+
+/* Drop a reference of the memory library context. If the refcount of
+ * reaches zero, the resources of the context will be released.  */
+struct proc_sysmem *proc_sysmem_unref (struct proc_sysmem *sysmem)
+{
+  if (sysmem == NULL)
+    return NULL;
+
+  sysmem->refcount--;
+  if (sysmem->refcount > 0)
+    return sysmem;
+
+  free (sysmem);
+  return NULL;
 }
 
 #define proc_sysmem_get(arg)                    \

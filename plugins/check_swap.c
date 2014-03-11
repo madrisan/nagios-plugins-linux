@@ -175,7 +175,7 @@ main (int argc, char **argv)
   free (units);
   free (status_msg);
   free (perfdata_msg);
-  free (sysmem);
+  proc_sysmem_unref (sysmem);
 
   return status;
 }
