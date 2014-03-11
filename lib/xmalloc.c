@@ -28,7 +28,7 @@
 void *
 xmalloc (size_t n)
 {
-  void *p = malloc (n);
+  void *p = calloc (1, n);
   if (!p && n != 0)
     plugin_error (STATE_UNKNOWN, errno, "memory exhausted");
   return p;
