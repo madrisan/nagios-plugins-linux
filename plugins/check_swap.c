@@ -147,9 +147,9 @@ main (int argc, char **argv)
   kb_swap_total = proc_sysmem_get_swap_total (sysmem);
   kb_swap_used = proc_sysmem_get_swap_used (sysmem);
 
-  get_swappaginginfo (kb_swap_pageins, kb_swap_pageouts);
+  proc_vmem_get_swap_io (kb_swap_pageins, kb_swap_pageouts);
   sleep (1);
-  get_swappaginginfo (kb_swap_pageins + 1, kb_swap_pageouts + 1);
+  proc_vmem_get_swap_io (kb_swap_pageins + 1, kb_swap_pageouts + 1);
   dpswpin = kb_swap_pageins[1] - kb_swap_pageins[0];
   dpswpout = kb_swap_pageouts[1] - kb_swap_pageouts[0];
 

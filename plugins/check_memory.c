@@ -165,9 +165,9 @@ main (int argc, char **argv)
       kb_mem_main_free += (kb_mem_main_cached + kb_mem_main_buffers);
     }
 
-  get_mempaginginfo (kb_mem_pageins, kb_mem_pageouts);
+  proc_vmem_get_disk_io (kb_mem_pageins, kb_mem_pageouts);
   sleep (1);
-  get_mempaginginfo (kb_mem_pageins + 1, kb_mem_pageouts + 1);
+  proc_vmem_get_disk_io (kb_mem_pageins + 1, kb_mem_pageouts + 1);
   dpgpgin = kb_mem_pageins[1] - kb_mem_pageins[0];
   dpgpgout = kb_mem_pageouts[1] - kb_mem_pageouts[0];
 

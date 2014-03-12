@@ -30,8 +30,8 @@ extern "C"
 
 #define SU(X) ( ((unsigned long long)(X) << k_shift) >> shift ), units
 
-  void get_mempaginginfo (unsigned long *, unsigned long *);
-  void get_swappaginginfo (unsigned long *, unsigned long *);
+  void proc_vmem_get_disk_io (unsigned long *pgpgin, unsigned long *pgpgout);
+  void proc_vmem_get_swap_io (unsigned long *pswpin, unsigned long *pswpout);
 
   struct proc_sysmem;
 

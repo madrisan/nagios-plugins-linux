@@ -19,18 +19,11 @@
 
 #include <sys/types.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
-#include "common.h"
 #include "messages.h"
 #include "meminfo.h"
 #include "procparser.h"
-#include "thresholds.h"
-#include "xalloc.h"
 
 /*#define PROC_MEMINFO  "/proc/meminfo"*/
 
@@ -167,6 +160,7 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
 
 /* Drop a reference of the memory library context. If the refcount of
  * reaches zero, the resources of the context will be released.  */
+
 struct proc_sysmem *proc_sysmem_unref (struct proc_sysmem *sysmem)
 {
   if (sysmem == NULL)
@@ -180,12 +174,9 @@ struct proc_sysmem *proc_sysmem_unref (struct proc_sysmem *sysmem)
   return NULL;
 }
 
-#define proc_sysmem_get(arg)                    \
-unsigned long                                   \
-proc_sysmem_get_ ## arg (struct proc_sysmem *p) \
-{                                               \
-  return (p == NULL) ? 0 : p->kb_ ## arg;       \
-}
+#define proc_sysmem_get(arg) \
+unsigned long proc_sysmem_get_ ## arg (struct proc_sysmem *p) \
+  { return (p == NULL) ? 0 : p->kb_ ## arg; }
 
 proc_sysmem_get(main_buffers)
 proc_sysmem_get(main_cached)
