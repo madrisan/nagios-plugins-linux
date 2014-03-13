@@ -127,11 +127,10 @@ main (int argc, char **argv)
   unsigned long i, len, delay, count;
   enum nagios_status status = STATE_OK;
   char *critical = NULL, *warning = NULL;
-  char *p, *cpu_name, *CPU_NAME;
+  char *p, *cpu_progname, *CPU_PROGNAME;
   thresholds *my_threshold = NULL;
 
-  jiff cpu_user[2], cpu_nice[2], cpu_system[2], cpu_idle[2], cpu_iowait[2],
-    cpu_irq[2], cpu_softirq[2], cpu_steal[2], cpu_guest[2], cpu_guestn[2];
+  struct proc_cpu cpu[2];
   jiff duser, dsystem, didle, diowait, dsteal, div, divo2;
   jiff *cpu_value;
   unsigned int cpu_perc, sleep_time = 1,
@@ -146,21 +145,21 @@ main (int argc, char **argv)
 
   if (!strncmp (p, "iowait", 6))	/* check_iowait --> cpu_iowait */
     {
-      cpu_name = strdup ("iowait");
+      cpu_progname = strdup ("iowait");
       cpu_value = &diowait;
       program_shorthelp =
 	strdup ("This plugin checks I/O wait bottlenecks\n");
     }
   else				/* check_cpu --> cpu_user (the default) */
     {
-      cpu_name = strdup ("user");;
+      cpu_progname = strdup ("user");;
       cpu_value = &duser;
       program_shorthelp =
 	strdup ("This plugin checks the CPU (user mode) utilization\n");
     }
-  CPU_NAME = strdup (cpu_name);
-  for (i = 0; i < strlen (cpu_name); i++)
-    CPU_NAME[i] = toupper (CPU_NAME[i]);
+  CPU_PROGNAME = strdup (cpu_progname);
+  for (i = 0; i < strlen (cpu_progname); i++)
+    CPU_PROGNAME[i] = toupper (CPU_PROGNAME[i]);
 
   while ((c = getopt_long (argc, argv,
 			   "c:w:v" GETOPT_HELP_VERSION_STRING,
@@ -207,14 +206,13 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  cpuinfo (cpu_user, cpu_nice, cpu_system, cpu_idle, cpu_iowait, cpu_irq,
-	   cpu_softirq, cpu_steal, cpu_guest, cpu_guestn);
+  proc_cpu_read (&cpu[0]);
 
-  duser = *cpu_user + *cpu_nice;
-  dsystem = *cpu_system + *cpu_irq + *cpu_softirq;
-  didle = *cpu_idle;
-  diowait = *cpu_iowait;
-  dsteal = *cpu_steal;
+  duser   = cpu[0].user + cpu[0].nice;
+  dsystem = cpu[0].system + cpu[0].irq + cpu[0].softirq;
+  didle   = cpu[0].idle;
+  diowait = cpu[0].iowait;
+  dsteal  = cpu[0].steal;
 
   div = duser + dsystem + didle + diowait + dsteal;
   if (!div)
@@ -226,18 +224,17 @@ main (int argc, char **argv)
       sleep (sleep_time);
 
       tog = !tog;
-      cpuinfo (cpu_user + tog, cpu_nice + tog, cpu_system + tog,
-	       cpu_idle + tog, cpu_iowait + tog, cpu_irq + tog,
-	       cpu_softirq + tog, cpu_steal + tog, cpu_guest + tog,
-	       cpu_guestn + tog);
+      proc_cpu_read (&cpu[tog]);
 
-      duser = cpu_user[tog] - cpu_user[!tog] + cpu_nice[tog] - cpu_nice[!tog];
+      duser = cpu[tog].user - cpu[!tog].user +
+	cpu[tog].nice - cpu[!tog].nice;
       dsystem =
-	cpu_system[tog] - cpu_system[!tog] + cpu_irq[tog] - cpu_irq[!tog] +
-	cpu_softirq[tog] - cpu_softirq[!tog];
-      didle = cpu_idle[tog] - cpu_idle[!tog];
-      diowait = cpu_iowait[tog] - cpu_iowait[!tog];
-      dsteal = cpu_steal[tog] - cpu_steal[!tog];
+	cpu[tog].system  - cpu[!tog].system +
+	cpu[tog].irq     - cpu[!tog].irq +
+	cpu[tog].softirq - cpu[!tog].softirq;
+      didle   = cpu[tog].idle   - cpu[!tog].idle;
+      diowait = cpu[tog].iowait - cpu[!tog].iowait;
+      dsteal  = cpu[tog].steal  - cpu[!tog].steal;
 
       /* idle can run backwards for a moment -- kernel "feature" */
       if (debt)
@@ -259,12 +256,12 @@ main (int argc, char **argv)
       if (verbose)
         printf
           ("cpu_user=%u%%, cpu_system=%u%%, cpu_idle=%u%%, cpu_iowait=%u%%, "
-           "cpu_steal=%u%%\n",
-           (unsigned) ((100 * duser + divo2) / div),
-           (unsigned) ((100 * dsystem + divo2) / div),
-           (unsigned) ((100 * didle + divo2) / div),
-           (unsigned) ((100 * diowait + divo2) / div),
-           (unsigned) ((100 * dsteal + divo2) / div));
+           "cpu_steal=%u%%\n"
+           , (unsigned) ((100 * duser   + divo2) / div)
+           , (unsigned) ((100 * dsystem + divo2) / div)
+           , (unsigned) ((100 * didle   + divo2) / div)
+           , (unsigned) ((100 * diowait + divo2) / div)
+           , (unsigned) ((100 * dsteal  + divo2) / div));
     }
 
   cpu_perc = (unsigned) ((100 * (*cpu_value) + divo2) / div);
@@ -273,13 +270,13 @@ main (int argc, char **argv)
   printf
     ("%s %s - cpu %s %u%% | "
      "cpu_user=%u%%, cpu_system=%u%%, cpu_idle=%u%%, cpu_iowait=%u%%, "
-     "cpu_steal=%u%%\n", CPU_NAME, state_text (status),
-     cpu_name, cpu_perc,
-     (unsigned) ((100 * duser + divo2) / div),
-     (unsigned) ((100 * dsystem + divo2) / div),
-     (unsigned) ((100 * didle + divo2) / div),
-     (unsigned) ((100 * diowait + divo2) / div),
-     (unsigned) ((100 * dsteal + divo2) / div));
+     "cpu_steal=%u%%\n"
+     , CPU_PROGNAME, state_text (status), cpu_progname, cpu_perc
+     , (unsigned) ((100 * duser   + divo2) / div)
+     , (unsigned) ((100 * dsystem + divo2) / div)
+     , (unsigned) ((100 * didle   + divo2) / div)
+     , (unsigned) ((100 * diowait + divo2) / div)
+     , (unsigned) ((100 * dsteal  + divo2) / div));
 
   return status;
 }

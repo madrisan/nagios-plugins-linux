@@ -39,7 +39,7 @@ extern "C"
    * Returns 0 if all went ok. Errors are returned as negative values.  */
   int proc_sysmem_new (struct proc_sysmem **sysmem);
 
-  /* Fill the proc_sysmem structure pointed will the values found in the
+  /* Fill the proc_sysmem structure pointed with the values found in the
    * proc filesystem.  */
   void proc_sysmem_read (struct proc_sysmem *sysmem);
 

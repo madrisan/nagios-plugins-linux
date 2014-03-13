@@ -15,12 +15,11 @@ static char buff[BUFFSIZE];
 
 #define PROC_STAT   "/proc/stat"
 
+/* Fill the proc_cpu structure pointed with the values found in the 
+ * proc filesystem */
+
 void
-cpuinfo (jiff * restrict cuser, jiff * restrict cnice,
-	 jiff * restrict csystem, jiff * restrict cidle,
-	 jiff * restrict ciowait, jiff * restrict cirq,
-	 jiff * restrict csoftirq, jiff * restrict csteal,
-	 jiff * restrict cguest, jiff * restrict cguestn)
+proc_cpu_read (struct proc_cpu *cpuinfo)
 {
   static int fd;
   const char *b;
@@ -36,17 +35,19 @@ cpuinfo (jiff * restrict cuser, jiff * restrict cnice,
 
   read (fd, buff, BUFFSIZE - 1);
 
-  *ciowait = 0;			/* not separated out until the 2.5.41 kernel */
-  *cirq = 0;			/* not separated out until the 2.6.0-test4 */
-  *csoftirq = 0;		/* not separated out until the 2.6.0-test4 */
-  *csteal = 0;			/* not separated out until the 2.6.11 */
-  *cguest = 0;			/* since Linux 2.6.24 */
-  *cguestn = 0;			/* since Linux 2.6.33 */
+  cpuinfo->iowait = 0;	/* not separated out until the 2.5.41 kernel */
+  cpuinfo->irq = 0;	/* not separated out until the 2.6.0-test4 */
+  cpuinfo->softirq = 0;	/* not separated out until the 2.6.0-test4 */
+  cpuinfo->steal = 0;	/* not separated out until the 2.6.11 */
+  cpuinfo->guest = 0;	/* since Linux 2.6.24 */
+  cpuinfo->guestn = 0;	/* since Linux 2.6.33 */
 
   b = strstr (buff, "cpu ");
   if (b)
-    sscanf (b, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu", cuser, cnice,
-	    csystem, cidle, ciowait, cirq, csoftirq, csteal, cguest, cguestn);
+    sscanf (b, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu", &cpuinfo->user,
+	    &cpuinfo->nice, &cpuinfo->system, &cpuinfo->idle,
+	    &cpuinfo->iowait, &cpuinfo->irq, &cpuinfo->softirq,
+	    &cpuinfo->steal, &cpuinfo->guest, &cpuinfo->guestn);
   else
     plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PROC_STAT);
 }
