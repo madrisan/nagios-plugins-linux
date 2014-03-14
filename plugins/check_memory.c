@@ -135,7 +135,7 @@ main (int argc, char **argv)
         case_GETOPT_HELP_CHAR
         case_GETOPT_VERSION_CHAR
 
-        }
+	}
     }
 
   status = set_thresholds (&my_threshold, warning, critical);

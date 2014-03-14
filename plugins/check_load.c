@@ -125,7 +125,10 @@ main (int argc, char **argv)
 	  numcpus = get_processor_number ();
 	  break;
 
-	case_GETOPT_HELP_CHAR case_GETOPT_VERSION_CHAR}
+	case_GETOPT_HELP_CHAR
+	case_GETOPT_VERSION_CHAR
+
+	}
     }
 
   if (getloadavg (&loadavg[0], 3) != 3)

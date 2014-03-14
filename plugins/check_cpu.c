@@ -180,7 +180,9 @@ main (int argc, char **argv)
 	  break;
 
 	case_GETOPT_HELP_CHAR
-	case_GETOPT_VERSION_CHAR}
+	case_GETOPT_VERSION_CHAR
+
+	}
     }
 
   delay = DELAY_DEFAULT, count = COUNT_DEFAULT;
