@@ -1,6 +1,11 @@
 # Nagios Plugins for Linux
 
-This package contains several nagios plugins for monitoring Linux boxes.
+## About
+
+This package contains several `nagios plugins` for monitoring Linux boxes.
+Nagios is an open source computer system monitoring, network monitoring and infrastructure monitoring software application.
+
+Here is the list of the available plugins:
 
 * check_cpu
 * check_ifmountfs
@@ -13,17 +18,18 @@ This package contains several nagios plugins for monitoring Linux boxes.
 * check_uptime
 * check_user
 
+## The plugins in detail 
 
-## check_cpu
+**check_cpu**
 
 This Nagios plugin checks the CPU (user mode) utilization.
 
-Usage
+*Usage*
 
 	check_cpu [-v] [-w PERC] [-c PERC] [delay [count]]
 	check_cpu --help
 
-Where
+*Where*
 
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
@@ -31,37 +37,37 @@ Where
 * delay is the delay between updates in seconds (default: 1sec)
 * count is the number of updates (default: 2)
 
-Examples
+*Examples*
 
 	check_cpu -w 85% -c 95%
 	# count = 1 means the percentages of total CPU time from boottime
 	check_cpu -w 85% -c 95% 1 1
 
 
-## check_ifmountfs
+**check_ifmountfs**
 
 This Nagios plugin checks whether the given filesystems are mounted.
 
-Usage
+*Usage*
 
 	check_ifmountfs [FILESYSTEM]...
 	check_ifmountfs --help
 
-Examples
+*Examples*
 
 	check_ifmountfs /mnt/nfs-data /mnt/cdrom
 
 
-## check_iowait
+**check_iowait**
 
 This Nagios plugin checks for I/O wait bottlenecks.
 
-Usage
+*Usage*
 
 	check_iowait [-v] [-w PERC] [-c PERC] [delay [count]]
 	check_iowait --help
 
-Where
+*Where*
 
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
@@ -69,39 +75,39 @@ Where
 * delay is the delay between updates in seconds (default: 1sec)
 * count is the number of updates (default: 2)
 
-Examples
+*Examples*
 
 	check_iowait -w 10% -c 20%
 	# count = 1 means the percentages of total CPU time from boottime
 	check_iowait -w 10% -c 20% 1 1
 
 
-## check_load
+**check_load**
 
 This Nagios plugin tests the current system load average.
 
-Usage
+*Usage*
 
 	check_load [-r] [--load1=w,c] [--load5=w,c] [--load15=w,c]
 	check_load --help
 
-Where
+*Where*
 
 * -r, --percpu: divide the load averages by the number of CPUs
 * 1, --load1=WLOAD1,CLOAD1: warning and critial thresholds for load1
 * 5, --load5=WLOAD5,CLOAD5. warning and critical thresholds for load5
 * L, --load15=WLOAD15,CLOAD15: warning and critical thresholds for load15
 
-Examples
+*Examples*
 
 	check_load -r --load1=2,3 --load15=1.5,2.5
 
 
-## check_memory, check_swap
+**check_memory, check_swap**
 
 These two nagios plugins respectivery check for memory and swap usage.
 
-Usage
+*Usage*
 
 	check_memory [-C] [-b,-k,-m,-g] [-w PERC] [-c PERC]
 	check_swap [-b,-k,-m,-g] [-w PERC] [-c PERC]
@@ -109,14 +115,14 @@ Usage
 	check_memory --help
 	check_swap --help
 
-Where
+*Where*
 
 * -C, --caches: count buffers and cached memory as free memory
 * -b,-k,-m,-g: show output in bytes, KB (the default), MB, or GB
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
 
-Examples
+*Examples*
 
 	check_memory -C -m -w 80% -c 90%
 	OK: 79.22% (810964 kB) used | mem_total=999MB, mem_used=791MB, mem_free=207MB, mem_shared=0MB, mem_buffers=1MB, mem_cached=190MB, mem_pageins/s=104, mem_pageouts/s=0
@@ -139,35 +145,35 @@ Examples
 	  # swap_pageouts: The number of swap pages the system has brought in and out
 
 
-## check_multipath
+**check_multipath**
 
 This Nagios plugin checks the multipath topology status.
 
-Usage
+*Usage*
 
 	check_multipath [-v]
 	check_multipath --help
 
-Where 
+*Where*
 
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
 * -h, --help: display this help and exit
 
-Examples
+*Examples*
 
 	check_multipath
 
 
-## check_readonlyfs
+**check_readonlyfs**
 
 This Nagios plugin checks for readonly filesystems.
 
-Usage
+*Usage*
 
 	check_readonlyfs [OPTION]... [FILE]...
 	check_readonlyfs --help
 
-Options 
+*Options* 
 
 	-l, --local               limit listing to local file systems
 	-L, --list                display the list of checked file systems
@@ -175,23 +181,23 @@ Options
 	-X, --exclude-type=TYPE   limit listing to file systems not of type TYPE
 	-h, --help                display this help and exit
 
-Examples
+*Examples*
 
 	check_readonlyfs
 	check_readonlyfs -l -T ext3 -T ext4
 	check_readonlyfs -l -X vfat
 
 
-## check_uptime
+**check_uptime**
 
 This Nagios plugin checks how long the system has been running.
 
-Usage
+*Usage*
 
 	check_uptime [--warning [@]start:end] [--critical [@]start:end]
 	check_uptime --help
 
-Where
+*Where*
 
 * start <= end
 * start and ":" is not required if start=0
@@ -200,17 +206,17 @@ Where
 * alert is raised if metric is outside start and end range (inclusive of endpoints)
 * if range starts with "@", then alert if inside this range (inclusive of endpoints)
 
-Examples
+*Examples*
 
 	check_uptime
 	check_uptime --warning 30: --critical 15:
 
 
-## check_users
+**check_users**
 
 This Nagios plugin displays the number of users that are currently logged on.
 
-Usage:
+*Usage*
 
 	check_users [-w PERC] [-c PERC]
 
@@ -219,7 +225,7 @@ Where
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
 
-Examples:
+*Examples*
 
 	check_users -w 1
 
@@ -231,7 +237,7 @@ The source code can be also found at https://sites.google.com/site/davidemadrisa
 
 ## Installation
 
-This package uses GNU autotools for configuration and installation.
+This package uses `GNU autotools` for configuration and installation.
 
 If you have cloned the git repository then you will need to run
 `autoreconf --install` to generate the required files.
@@ -251,8 +257,8 @@ you're done!
 ## Supported Platforms
 
 This package is written in plain C, making as few assumptions as possible, and
-sticking closely to ANSI C/POSIX.
-Virtually all Linux distribution are supported.
+sticking closely to ANSI C/POSIX. 
+A C99-compliant compiler is required anyway.
 
 
 ## Bugs
