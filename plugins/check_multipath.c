@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <stdbool.h>
+#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -32,11 +33,6 @@
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
-
-#define STREQ(a, b) (strcmp (a, b) == 0)
-
-#define BUFSIZE		2048
-static char buffer[BUFSIZE];
 
 static bool verbose = false;
 static const char *multipathd_socket = MULTIPATHD_SOCKET;
@@ -61,7 +57,7 @@ usage (FILE * out)
   fprintf (out, "  %s [OPTION]...\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -v, --verbose   show details for command-line debugging "
-         "(Nagios may truncate output)\n", out);
+	 "(Nagios may truncate output)\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
@@ -96,6 +92,7 @@ write_all (int fd, const void *buf, size_t len)
 	}
       if (!n)
 	return total;
+
       buf = n + (char *) buf;
       len -= n;
       total += n;
@@ -120,6 +117,7 @@ read_all (int fd, void *buf, size_t len)
 	}
       if (!n)
 	return total;
+
       buf = n + (char *) buf;
       len -= n;
       total += n;
@@ -143,10 +141,8 @@ multipathd_query (const char *query, char *buf, size_t bufsize)
   sun.sun_path[sizeof (sun.sun_path) - 1] = 0;
 
   if (connect (sock, (struct sockaddr *) &sun, sizeof (sun)) < 0)
-    {
-      plugin_error (STATE_UNKNOWN, errno, "cannot connect to %s",
-		    multipathd_socket);
-    }
+    plugin_error (STATE_UNKNOWN, errno, "cannot connect to %s",
+		  multipathd_socket);
 
   if (write_all (sock, &len, sizeof (len)) != sizeof (len))
     plugin_error (STATE_UNKNOWN, 0, "failed to send message to multipathd");
@@ -155,19 +151,15 @@ multipathd_query (const char *query, char *buf, size_t bufsize)
     plugin_error (STATE_UNKNOWN, 0, "failed to send message to multipathd");
 
   if (read_all (sock, &len, sizeof (len)) != sizeof (len))
-    {
-      plugin_error (STATE_UNKNOWN, 0,
-		    "failed to receive message from multipathd");
-    }
+    plugin_error (STATE_UNKNOWN, 0,
+		  "failed to receive message from multipathd");
 
   if (len > bufsize)
     plugin_error (STATE_UNKNOWN, 0, "reply from multipathd too long");
 
   if (read_all (sock, buf, len) != len)
-    {
-      plugin_error (STATE_UNKNOWN, 0,
-		    "failed to receive message from multipathd");
-    }
+    plugin_error (STATE_UNKNOWN, 0,
+		  "failed to receive message from multipathd");
 
   close (sock);
 }
@@ -175,36 +167,36 @@ multipathd_query (const char *query, char *buf, size_t bufsize)
 static int
 check_for_faulty_paths (char *buf)
 {
-  char *str1, *str2, *token, *subtoken;
-  char *saveptr1, *saveptr2;
-  int row, col, faulty_paths = 0;
+  char *str1, *token, *saveptr1;
+  char *dm_st_ok_pattern = "[ \t]+[?active]?[ \t]*[?ready]?[ \t]+";
+  int rc, row, faulty_paths = 0;
+  regex_t regex;
+
+  if ((rc = regcomp (&regex, dm_st_ok_pattern, REG_EXTENDED | REG_NOSUB)))
+    {
+      regerror (rc, &regex, buf, sizeof (buf));
+      plugin_error (STATE_UNKNOWN, 0, "regcomp() failed: %s", buf);
+    }
 
   /* data format:
-   * hcil    dev dev_t pri dm_st   chk_st  next_check 
-   */
+   *       hcil    dev dev_t  pri dm_st   chk_st  next_check
+   *   ex: 4:0:0:0 sdb 8:16   10  [active][ready] XXX....... 7/20
+   * -or-
+   *       hcil    dev dev_t pri dm_st  chk_st dev_st  next_check
+   *   ex: 6:0:0:0 sdf 8:80  1   active ready  running XXXX...... 9/20  */
+
   for (row = 1, str1 = buf;; row++, str1 = NULL)
     {
       token = strtok_r (str1, "\n", &saveptr1);
       if (token == NULL)
 	break;
-
       if (verbose)
 	printf ("%s\n", token);
-
-      for (col = 1, str2 = token;; col++, str2 = NULL)
+      if (row > 1 && regexec (&regex, token, (size_t) 0, NULL, 0))
 	{
-	  subtoken = strtok_r (str2, " \t", &saveptr2);
-	  if (subtoken == NULL)
-	    break;
-
-	  /* skip the heading and check the 'dm_st' column
-	   */
-	  if (row > 1 && col == 5 && (!STREQ (subtoken, "[active][ready]")))
-	    {
-	      if (verbose)
-		printf (" \\ faulty path detected!\n");
-	      faulty_paths++;
-	    }
+	  faulty_paths++;
+	  if (verbose)
+	    printf (" \\ faulty path detected!\n");
 	}
     }
 
@@ -215,11 +207,12 @@ int
 main (int argc, char **argv)
 {
   int c, faulty_paths;
+  static char buffer[2048];
 
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv, "v" GETOPT_HELP_VERSION_STRING,
-                           longopts, NULL)) != -1)
+			   longopts, NULL)) != -1)
     {
       switch (c)
 	{
@@ -231,9 +224,7 @@ main (int argc, char **argv)
 	  break;
 
 	case_GETOPT_HELP_CHAR
-        case_GETOPT_VERSION_CHAR
-
-        }
+        case_GETOPT_VERSION_CHAR}
     }
 
   if (getuid () != 0)
