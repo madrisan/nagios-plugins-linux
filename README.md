@@ -20,7 +20,7 @@ Here is the list of the available plugins:
 
 ## The plugins in detail 
 
-**check_cpu**
+**The check_cpu plugin**
 
 This Nagios plugin checks the CPU (user mode) utilization.
 
@@ -44,7 +44,7 @@ This Nagios plugin checks the CPU (user mode) utilization.
 	check_cpu -w 85% -c 95% 1 1
 
 
-**check_ifmountfs**
+**The check_ifmountfs plugin**
 
 This Nagios plugin checks whether the given filesystems are mounted.
 
@@ -58,7 +58,7 @@ This Nagios plugin checks whether the given filesystems are mounted.
 	check_ifmountfs /mnt/nfs-data /mnt/cdrom
 
 
-**check_iowait**
+**The check_iowait plugin**
 
 This Nagios plugin checks for I/O wait bottlenecks.
 
@@ -82,7 +82,7 @@ This Nagios plugin checks for I/O wait bottlenecks.
 	check_iowait -w 10% -c 20% 1 1
 
 
-**check_load**
+**The check_load plugin**
 
 This Nagios plugin tests the current system load average.
 
@@ -103,7 +103,7 @@ This Nagios plugin tests the current system load average.
 	check_load -r --load1=2,3 --load15=1.5,2.5
 
 
-**check_memory, check_swap**
+**The check_memory and check_swap plugins**
 
 These two nagios plugins respectivery check for memory and swap usage.
 
@@ -145,7 +145,7 @@ These two nagios plugins respectivery check for memory and swap usage.
 	  # swap_pageouts: The number of swap pages the system has brought in and out
 
 
-**check_multipath**
+**The check_multipath plugin**
 
 This Nagios plugin checks the multipath topology status.
 
@@ -164,7 +164,7 @@ This Nagios plugin checks the multipath topology status.
 	check_multipath
 
 
-**check_readonlyfs**
+**The check_readonlyfs plugin**
 
 This Nagios plugin checks for readonly filesystems.
 
@@ -188,7 +188,7 @@ This Nagios plugin checks for readonly filesystems.
 	check_readonlyfs -l -X vfat
 
 
-**check_uptime**
+**The check_uptime plugin**
 
 This Nagios plugin checks how long the system has been running.
 
@@ -212,7 +212,7 @@ This Nagios plugin checks how long the system has been running.
 	check_uptime --warning 30: --critical 15:
 
 
-**check_users**
+**The check_users plugin**
 
 This Nagios plugin displays the number of users that are currently logged on.
 
