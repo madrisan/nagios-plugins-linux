@@ -1,2 +1,2 @@
 AM_MAKEFLAGS = --no-print-directory
-SUBDIRS = lib plugins
+SUBDIRS = include lib plugins
