@@ -27,7 +27,7 @@
 
 /*#define PROC_MEMINFO  "/proc/meminfo"*/
 
-struct proc_sysmem
+typedef struct proc_sysmem
 {
   int refcount;
 
@@ -72,7 +72,7 @@ struct proc_sysmem
   unsigned long kb_nfs_unstable;
   unsigned long kb_swap_reclaimable;
   unsigned long kb_swap_unreclaimable;
-};
+} proc_sysmem_t;
 
 /* Allocates space for a new sysmem object.
  * Returns 0 if all went ok. Errors are returned as negative values. */

@@ -199,9 +199,6 @@ main (int argc, char **argv)
   if (optind < argc)
     count = strtol_or_err (argv[optind++], "failed to parse argument");
 
-  if (optind < argc)
-    usage (stderr);
-
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
