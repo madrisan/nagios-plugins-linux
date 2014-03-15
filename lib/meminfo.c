@@ -178,10 +178,19 @@ struct proc_sysmem *proc_sysmem_unref (struct proc_sysmem *sysmem)
 unsigned long proc_sysmem_get_ ## arg (struct proc_sysmem *p) \
   { return (p == NULL) ? 0 : p->kb_ ## arg; }
 
-/* The amount of memory presently allocated on the system */
+/* Memory that has been used more recently and usually not reclaimed unless
+ * absolutely necessary.  */
+proc_sysmem_get(active)
+/* The amount of memory presently allocated on the system. */
 proc_sysmem_get(committed_as)
-/* Memory which is waiting to get written back to the disk */
+/* Memory which is waiting to get written back to the disk. */
 proc_sysmem_get(dirty)
+/* Memory which has been less recently used.
+ * Inactive memory is the best candidate for reclaiming memory and so low
+ * inactive memory would mean that you are low on memory and the kernel may
+ + have to swap out process pages, or swap out the cache to disk or in the
+ * worst case if it runs out of swap space then begin killing processes.  */
+proc_sysmem_get(inactive)
 
 proc_sysmem_get(main_buffers)
 proc_sysmem_get(main_cached)

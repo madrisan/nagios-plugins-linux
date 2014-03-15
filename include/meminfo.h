@@ -46,8 +46,10 @@ extern "C"
 
   /* Accessing the values from proc_sysmem */
 
+  unsigned long proc_sysmem_get_active (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_committed_as (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_dirty (struct proc_sysmem *sysmem);
+  unsigned long proc_sysmem_get_inactive (struct proc_sysmem *sysmem);
 
   unsigned long proc_sysmem_get_main_buffers (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_main_cached (struct proc_sysmem *sysmem);
