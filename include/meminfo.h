@@ -47,6 +47,7 @@ extern "C"
   /* Accessing the values from proc_sysmem */
 
   unsigned long proc_sysmem_get_active (struct proc_sysmem *sysmem);
+  unsigned long proc_sysmem_get_anon_pages (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_committed_as (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_dirty (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_inactive (struct proc_sysmem *sysmem);

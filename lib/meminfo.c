@@ -181,6 +181,11 @@ unsigned long proc_sysmem_get_ ## arg (struct proc_sysmem *p) \
 /* Memory that has been used more recently and usually not reclaimed unless
  * absolutely necessary.  */
 proc_sysmem_get(active)
+/* Non-file backed pages mapped into user-space page tables.
+ * High AnonPages means too much memory been allocated (mostly by malloc call)
+ * but not released yet (by instance because of memory leaks - process(es)
+ * that allocate but never free memory.  */
+proc_sysmem_get(anon_pages)
 /* The amount of memory presently allocated on the system. */
 proc_sysmem_get(committed_as)
 /* Memory which is waiting to get written back to the disk. */

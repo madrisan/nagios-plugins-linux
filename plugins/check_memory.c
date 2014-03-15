@@ -105,6 +105,7 @@ main (int argc, char **argv)
   unsigned long kb_mem_main_total;
   unsigned long kb_mem_main_used;
   unsigned long kb_mem_active;
+  unsigned long kb_mem_anon_pages;
   unsigned long kb_mem_committed_as;
   unsigned long kb_mem_dirty;
   unsigned long kb_mem_inactive;
@@ -158,9 +159,10 @@ main (int argc, char **argv)
 
   proc_sysmem_read (sysmem);
 
+  kb_mem_active       = proc_sysmem_get_active (sysmem);
+  kb_mem_anon_pages   = proc_sysmem_get_anon_pages (sysmem);
   kb_mem_committed_as = proc_sysmem_get_committed_as (sysmem);
   kb_mem_dirty        = proc_sysmem_get_dirty (sysmem);
-  kb_mem_active       = proc_sysmem_get_active (sysmem);
   kb_mem_inactive     = proc_sysmem_get_inactive (sysmem);
   kb_mem_main_buffers = proc_sysmem_get_main_buffers (sysmem);
   kb_mem_main_cached  = proc_sysmem_get_main_cached (sysmem);
@@ -206,13 +208,15 @@ main (int argc, char **argv)
   perfdata_msg =
     xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
 	       "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
-	       "mem_active=%Lu%s, mem_committed=%Lu%s, mem_dirty=%Lu%s, "
-	       "mem_inactive=%Lu%s, vmem_pageins/s=%lu, vmem_pageouts/s=%lu, "
+	       "mem_active=%Lu%s, mem_anonpages=%Lu%s, mem_committed=%Lu%s, "
+	       "mem_dirty=%Lu%s, mem_inactive=%Lu%s, "
+	       "vmem_pageins/s=%lu, vmem_pageouts/s=%lu, "
 	       "vmem_pgmajfault/s=%lu\n",
 	       SU (kb_mem_main_total), SU (kb_mem_main_used),
 	       SU (kb_mem_main_free), SU (kb_mem_main_shared),
 	       SU (kb_mem_main_buffers), SU (kb_mem_main_cached),
-	       SU (kb_mem_active), SU (kb_mem_committed_as), SU (kb_mem_dirty),
+	       SU (kb_mem_active), SU (kb_mem_anon_pages),
+	       SU (kb_mem_committed_as), SU (kb_mem_dirty),
 	       SU (kb_mem_inactive), dpgpgin, dpgpgout, dpgmajfault);
 
   printf ("%s | %s\n", status_msg, perfdata_msg);
