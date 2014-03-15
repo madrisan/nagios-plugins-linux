@@ -42,16 +42,16 @@ extern "C"
 
   /* Accessing the values from proc_vmem */
 
-  unsigned long proc_vmem_get_pgalloc (struct proc_sysmem *vmem);
-  unsigned long proc_vmem_get_pgfault (struct proc_sysmem *vmem);
-  unsigned long proc_vmem_get_pgfree (struct proc_sysmem *vmem);
-  unsigned long proc_vmem_get_pgmajfault (struct proc_sysmem *vmem);
-  unsigned long proc_vmem_get_pgpgin (struct proc_sysmem *vmem);
-  unsigned long proc_vmem_get_pgpgout (struct proc_sysmem *vmem);
-  unsigned long proc_vmem_get_pgrefill (struct proc_sysmem *vmem);
-  unsigned long proc_vmem_get_pgscan (struct proc_sysmem *vmem);
-  unsigned long proc_vmem_get_pswpin (struct proc_sysmem *vmem);
-  unsigned long proc_vmem_get_pswpout (struct proc_sysmem *vmem);
+  unsigned long proc_vmem_get_pgalloc (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pgfault (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pgfree (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pgmajfault (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pgpgin (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pgpgout (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pgrefill (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pgscan (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pswpin (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pswpout (struct proc_vmem *vmem);
 
 #ifdef __cplusplus
 }

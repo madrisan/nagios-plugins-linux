@@ -110,6 +110,7 @@ main (int argc, char **argv)
   unsigned long kb_mem_dirty;
   unsigned long kb_mem_inactive;
 
+  struct proc_vmem *vmem = NULL;
   unsigned long dpgpgin, dpgpgout, dpgmajfault;
   unsigned long kb_vmem_pgpgin[2];
   unsigned long kb_vmem_pgpgout[2];
@@ -177,13 +178,19 @@ main (int argc, char **argv)
       kb_mem_main_free += (kb_mem_main_cached + kb_mem_main_buffers);
     }
 
+  err = proc_vmem_new (&vmem);
+  if (err < 0)
+    plugin_error (STATE_UNKNOWN, err, "memory exhausted");
+
+  proc_vmem_read (vmem);
   proc_vmem_get_disk_io (kb_vmem_pgpgin, kb_vmem_pgpgout);
-  nr_vmem_pgmajfault[0] = proc_vmem_get_pgmajfault (sysmem);
+  nr_vmem_pgmajfault[0] = proc_vmem_get_pgmajfault (vmem);
 
   sleep (1);
 
+  proc_vmem_read (vmem);
   proc_vmem_get_disk_io (kb_vmem_pgpgin + 1, kb_vmem_pgpgout + 1);
-  nr_vmem_pgmajfault[1] = proc_vmem_get_pgmajfault (sysmem);
+  nr_vmem_pgmajfault[1] = proc_vmem_get_pgmajfault (vmem);
 
   dpgpgin = kb_vmem_pgpgin[1] - kb_vmem_pgpgin[0];
   dpgpgout = kb_vmem_pgpgout[1] - kb_vmem_pgpgout[0];
@@ -225,6 +232,7 @@ main (int argc, char **argv)
   free (status_msg);
   free (perfdata_msg);
   proc_sysmem_unref (sysmem);
+  proc_vmem_unref (vmem);
 
   return status;
 }
