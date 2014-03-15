@@ -178,11 +178,17 @@ struct proc_sysmem *proc_sysmem_unref (struct proc_sysmem *sysmem)
 unsigned long proc_sysmem_get_ ## arg (struct proc_sysmem *p) \
   { return (p == NULL) ? 0 : p->kb_ ## arg; }
 
+/* The amount of memory presently allocated on the system */
+proc_sysmem_get(committed_as)
+/* Memory which is waiting to get written back to the disk */
+proc_sysmem_get(dirty)
+
 proc_sysmem_get(main_buffers)
 proc_sysmem_get(main_cached)
 proc_sysmem_get(main_free)
 proc_sysmem_get(main_shared)
 proc_sysmem_get(main_total)
+
 proc_sysmem_get(swap_cached)
 proc_sysmem_get(swap_free)
 proc_sysmem_get(swap_total)
