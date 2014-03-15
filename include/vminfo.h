@@ -23,6 +23,9 @@ extern "C"
 {
 #endif
 
+  /* Get memory page size */
+  long get_vmem_pagesize (void);
+
   void proc_vmem_get_swap_io (unsigned long *pswpin, unsigned long *pswpout);
 
   struct proc_vmem;

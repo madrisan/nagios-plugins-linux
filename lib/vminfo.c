@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "messages.h"
 #include "meminfo.h"
@@ -31,6 +32,14 @@
 
 #define PROC_STAT     "/proc/stat"
 #define PROC_VMSTAT   "/proc/vmstat"
+
+/* get_vmem_pagesize - get memory page size */
+
+long
+get_vmem_pagesize (void)
+{
+  return sysconf (_SC_PAGESIZE);
+}
 
 struct proc_vmem
 {
