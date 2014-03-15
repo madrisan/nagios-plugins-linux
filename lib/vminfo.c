@@ -212,12 +212,57 @@ proc_vmem_get (pgalloc)
 proc_vmem_get (pgfault)
 proc_vmem_get (pgfree)
 proc_vmem_get (pgmajfault)
-proc_vmem_get (pgpgin)
-proc_vmem_get (pgpgout)
 proc_vmem_get (pgrefill)
 proc_vmem_get (pgscan)
+proc_vmem_get (pgsteal)
 proc_vmem_get (pswpin)
 proc_vmem_get (pswpout)
+
+unsigned proc_vmem_get_pgpgin (struct proc_vmem *vmem)
+{
+  FILE *f;
+  int need_vmstat_file = 1;
+  unsigned long pgpgin, pgpgout;
+  static char buf[2048];
+
+  if (!(f = fopen (PROC_STAT, "r")))
+    need_vmstat_file = 1;
+
+  while (fgets (buf, sizeof buf, f))
+    {
+      if (sscanf (buf, "page %lu %lu", &pgpgin, &pgpgout) == 2)
+	{
+	  need_vmstat_file = 0;
+	  break;
+	}
+    }
+  fclose (f);
+
+  return need_vmstat_file ? vmem->vm_pgpgin : pgpgin;
+}
+
+unsigned proc_vmem_get_pgpgout (struct proc_vmem *vmem)
+{
+  FILE *f;
+  int need_vmstat_file = 1;
+  unsigned long pgpgin, pgpgout;
+  static char buf[2048];
+
+  if (!(f = fopen (PROC_STAT, "r")))
+    need_vmstat_file = 1;
+
+  while (fgets (buf, sizeof buf, f))
+    {
+      if (sscanf (buf, "page %lu %lu", &pgpgin, &pgpgout) == 2)
+	{
+	  need_vmstat_file = 0;
+	  break;
+	}
+    }
+  fclose (f);
+
+  return need_vmstat_file ? vmem->vm_pgpgout : pgpgout;
+}
 
 unsigned long
 proc_vmem_get_pgscand (struct proc_vmem *vmem)
@@ -235,48 +280,6 @@ proc_vmem_get_pgscank (struct proc_vmem *vmem)
     vmem->vm_pgscan_kswapd_high + vmem->vm_pgscan_kswapd_normal;
 }
 
-proc_vmem_get (pgsteal)
-
-
-static char buf[2048];
-
-/* Get additional statistics for memory activity
- * Number of swapins and swapouts (since the last boot)	*/
-
-void
-proc_vmem_get_disk_io (unsigned long *pgpgin, unsigned long *pgpgout)
-{
-  FILE *f;
-  int err, need_vmstat_file = 1;
-  struct proc_vmem *vmem = NULL;
-
-  if (!(f = fopen (PROC_STAT, "r")))
-    plugin_error (STATE_UNKNOWN, errno, "Error: /proc must be mounted");
-
-  while (fgets (buf, sizeof buf, f))
-    {
-      if (sscanf (buf, "page %lu %lu", pgpgin, pgpgout) == 2)
-	{
-	  need_vmstat_file = 0;
-	  break;
-	}
-    }
-  fclose (f);
-
-  if (need_vmstat_file)		/* Linux 2.5.40-bk4 and above */
-    {
-      err = proc_vmem_new (&vmem);
-      if (err < 0)
-	plugin_error (STATE_UNKNOWN, err, "memory exhausted");
-
-      proc_vmem_read (vmem);
-
-      *pgpgin = proc_vmem_get_pgpgin (vmem);
-      *pgpgout = proc_vmem_get_pgpgout (vmem);
-
-      proc_vmem_unref (vmem);
-    }
-}
 
 /* get additional statistics for swap activity
  * Number of swapins and swapouts (since the last boot)	*/
@@ -287,6 +290,7 @@ proc_vmem_get_swap_io (unsigned long *pswpin, unsigned long *pswpout)
   FILE *f;
   int err, need_vmstat_file = 1;
   struct proc_vmem *vmem = NULL;
+  static char buf[2048];
 
   if (!(f = fopen (PROC_STAT, "r")))
     plugin_error (STATE_UNKNOWN, errno, "Error: /proc must be mounted");

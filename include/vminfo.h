@@ -23,7 +23,6 @@ extern "C"
 {
 #endif
 
-  void proc_vmem_get_disk_io (unsigned long *pgpgin, unsigned long *pgpgout);
   void proc_vmem_get_swap_io (unsigned long *pswpin, unsigned long *pswpout);
 
   struct proc_vmem;

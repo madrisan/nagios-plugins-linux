@@ -112,8 +112,8 @@ main (int argc, char **argv)
 
   struct proc_vmem *vmem = NULL;
   unsigned long dpgpgin, dpgpgout, dpgmajfault;
-  unsigned long kb_vmem_pgpgin[2];
-  unsigned long kb_vmem_pgpgout[2];
+  unsigned long nr_vmem_pgpgin[2];
+  unsigned long nr_vmem_pgpgout[2];
   unsigned long nr_vmem_pgmajfault[2];
 
   set_program_name (argv[0]);
@@ -183,17 +183,19 @@ main (int argc, char **argv)
     plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
   proc_vmem_read (vmem);
-  proc_vmem_get_disk_io (kb_vmem_pgpgin, kb_vmem_pgpgout);
+  nr_vmem_pgpgin[0] = proc_vmem_get_pgpgin (vmem);
+  nr_vmem_pgpgout[0] = proc_vmem_get_pgpgout (vmem);
   nr_vmem_pgmajfault[0] = proc_vmem_get_pgmajfault (vmem);
 
   sleep (1);
 
   proc_vmem_read (vmem);
-  proc_vmem_get_disk_io (kb_vmem_pgpgin + 1, kb_vmem_pgpgout + 1);
+  nr_vmem_pgpgin[1] = proc_vmem_get_pgpgin (vmem);
+  nr_vmem_pgpgout[1] = proc_vmem_get_pgpgout (vmem);
   nr_vmem_pgmajfault[1] = proc_vmem_get_pgmajfault (vmem);
 
-  dpgpgin = kb_vmem_pgpgin[1] - kb_vmem_pgpgin[0];
-  dpgpgout = kb_vmem_pgpgout[1] - kb_vmem_pgpgout[0];
+  dpgpgin = nr_vmem_pgpgin[1] - nr_vmem_pgpgin[0];
+  dpgpgout = nr_vmem_pgpgout[1] - nr_vmem_pgpgout[0];
   dpgmajfault = nr_vmem_pgmajfault[1] - nr_vmem_pgmajfault[0];
 
   /* Note: we should perhaps implement the following tests instead: 
