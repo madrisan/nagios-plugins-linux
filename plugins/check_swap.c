@@ -32,6 +32,7 @@
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
+#include "vminfo.h"
 #include "xasprintf.h"
 
 static const char *program_copyright =

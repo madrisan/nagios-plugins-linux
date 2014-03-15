@@ -30,9 +30,6 @@ extern "C"
 
 #define SU(X) ( ((unsigned long long)(X) << k_shift) >> shift ), units
 
-  void proc_vmem_get_disk_io (unsigned long *pgpgin, unsigned long *pgpgout);
-  void proc_vmem_get_swap_io (unsigned long *pswpin, unsigned long *pswpout);
-
   struct proc_sysmem;
 
   /* Allocates space for a new sysmem object.

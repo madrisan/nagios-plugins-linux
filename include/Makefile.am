@@ -27,5 +27,6 @@ noinst_HEADERS = \
   progname.h    \
   progversion.h \
   thresholds.h  \
+  vminfo.h      \
   xalloc.h      \
   xasprintf.h

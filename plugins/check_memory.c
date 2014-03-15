@@ -32,6 +32,7 @@
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
+#include "vminfo.h"
 #include "xasprintf.h"
 
 static const char *program_copyright =
@@ -104,9 +105,10 @@ main (int argc, char **argv)
   unsigned long kb_mem_main_total;
   unsigned long kb_mem_main_used;
 
-  unsigned long dpgpgin, dpgpgout;
-  unsigned long kb_mem_pageins[2];
-  unsigned long kb_mem_pageouts[2];
+  unsigned long dpgpgin, dpgpgout, dpgmajfault;
+  unsigned long kb_vmem_pgpgin[2];
+  unsigned long kb_vmem_pgpgout[2];
+  unsigned long nr_vmem_pgmajfault[2];
 
   set_program_name (argv[0]);
 
@@ -165,11 +167,25 @@ main (int argc, char **argv)
       kb_mem_main_free += (kb_mem_main_cached + kb_mem_main_buffers);
     }
 
-  proc_vmem_get_disk_io (kb_mem_pageins, kb_mem_pageouts);
+  proc_vmem_get_disk_io (kb_vmem_pgpgin, kb_vmem_pgpgout);
+  nr_vmem_pgmajfault[0] = proc_vmem_get_pgmajfault (sysmem);
+
   sleep (1);
-  proc_vmem_get_disk_io (kb_mem_pageins + 1, kb_mem_pageouts + 1);
-  dpgpgin = kb_mem_pageins[1] - kb_mem_pageins[0];
-  dpgpgout = kb_mem_pageouts[1] - kb_mem_pageouts[0];
+
+  proc_vmem_get_disk_io (kb_vmem_pgpgin + 1, kb_vmem_pgpgout + 1);
+  nr_vmem_pgmajfault[1] = proc_vmem_get_pgmajfault (sysmem);
+
+  dpgpgin = kb_vmem_pgpgin[1] - kb_vmem_pgpgin[0];
+  dpgpgout = kb_vmem_pgpgout[1] - kb_vmem_pgpgout[0];
+  dpgmajfault = nr_vmem_pgmajfault[1] - nr_vmem_pgmajfault[0];
+
+  /* Note: we should perhaps implement the following tests instead: 
+   *  1. The Main Memory Test
+   *     (MemFree + Buffers + Cached) / MemTotal < threshold
+   *  2. The Page Fault Test 
+   *     Major pagefaults > threshold 
+   *
+   * See. http://doc.qt.digia.com/qtextended4.4/syscust-oom.html	*/
 
   if (kb_mem_main_total != 0)
     percent_used = (kb_mem_main_used * 100.0 / kb_mem_main_total);
@@ -182,11 +198,12 @@ main (int argc, char **argv)
   perfdata_msg =
     xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
 	       "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
-	       "mem_pageins/s=%lu, mem_pageouts/s=%lu\n",
+	       "vmem_pageins/s=%lu, vmem_pageouts/s=%lu, "
+	       "vmem_pgmajfault/s=%lu\n",
 	       SU (kb_mem_main_total), SU (kb_mem_main_used),
 	       SU (kb_mem_main_free), SU (kb_mem_main_shared),
 	       SU (kb_mem_main_buffers), SU (kb_mem_main_cached),
-	       dpgpgin, dpgpgout);
+	       dpgpgin, dpgpgout, dpgmajfault);
 
   printf ("%s | %s\n", status_msg, perfdata_msg);
 
