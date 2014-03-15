@@ -218,7 +218,7 @@ main (int argc, char **argv)
 	       "mem_active=%Lu%s, mem_anonpages=%Lu%s, mem_committed=%Lu%s, "
 	       "mem_dirty=%Lu%s, mem_inactive=%Lu%s, "
 	       "vmem_pageins/s=%lu, vmem_pageouts/s=%lu, "
-	       "vmem_pgmajfault/s=%lu\n",
+	       "vmem_pgmajfault/s=%lu",
 	       SU (kb_mem_main_total), SU (kb_mem_main_used),
 	       SU (kb_mem_main_free), SU (kb_mem_main_shared),
 	       SU (kb_mem_main_buffers), SU (kb_mem_main_cached),
