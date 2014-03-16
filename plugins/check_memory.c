@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A Nagios plugin to check memory usage on unix.
+ * A Nagios plugin to check sysem memory usage on Linux.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * This software is based on the source code of the tool "free" (procps 3.2.8)
+ * This software takes some ideas and code from procps-3.2.8 (free).
  */
 
 #include <getopt.h>
@@ -40,6 +40,7 @@ static const char *program_copyright =
 
 static struct option const longopts[] = {
   {(char *) "caches", no_argument, NULL, 'C'},
+  {(char *) "vmstats", no_argument, NULL, 's'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "byte", no_argument, NULL, 'b'},
@@ -55,21 +56,23 @@ static _Noreturn void
 usage (FILE * out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
-  fputs ("This plugin checks the memory utilization.\n", out);
+  fputs ("This plugin checks the system memory utilization.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-b,-k,-m,-g] [-C] -w PERC -c PERC\n", program_name);
+  fprintf (out, "  %s [-b,-k,-m,-g] [-C] [-s] -w PERC -c PERC\n",
+	   program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs ("  -C, --caches    count buffers and cached memory as free memory\n",
 	 out);
+  fputs ("  -s, --vmstats   enable the virtual memory perfdata\n", out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s -C -w 80%% -c90%%\n", program_name);
+  fprintf (out, "  %s -C --vmstats -w 80%% -c90%%\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -87,13 +90,13 @@ print_version (void)
 int
 main (int argc, char **argv)
 {
-  bool cache_is_free = false;
+  bool cache_is_free = false, vmem_perfdata = false;
   int c, status, err;
   int shift = k_shift;
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
   char *status_msg;
-  char *perfdata_msg;
+  char *perfdata_mem_msg, *perfdata_vmem_msg = NULL;
   float percent_used = 0;
   thresholds *my_threshold = NULL;
 
@@ -119,7 +122,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-                           "MSCc:w:bkmg" GETOPT_HELP_VERSION_STRING,
+                           "MSCsc:w:bkmg" GETOPT_HELP_VERSION_STRING,
                            longopts, NULL)) != -1)
     {
       switch (c)
@@ -128,6 +131,9 @@ main (int argc, char **argv)
           usage (stderr);
         case 'C':
           cache_is_free = true;
+          break;
+        case 's':
+          vmem_perfdata = true;
           break;
         case 'c':
           critical = optarg;
@@ -178,25 +184,32 @@ main (int argc, char **argv)
       kb_mem_main_free += (kb_mem_main_cached + kb_mem_main_buffers);
     }
 
-  err = proc_vmem_new (&vmem);
-  if (err < 0)
-    plugin_error (STATE_UNKNOWN, err, "memory exhausted");
+  if (vmem_perfdata)
+    {
+      err = proc_vmem_new (&vmem);
+      if (err < 0)
+	plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
-  proc_vmem_read (vmem);
-  nr_vmem_pgpgin[0] = proc_vmem_get_pgpgin (vmem);
-  nr_vmem_pgpgout[0] = proc_vmem_get_pgpgout (vmem);
-  nr_vmem_pgmajfault[0] = proc_vmem_get_pgmajfault (vmem);
+      proc_vmem_read (vmem);
+      nr_vmem_pgpgin[0] = proc_vmem_get_pgpgin (vmem);
+      nr_vmem_pgpgout[0] = proc_vmem_get_pgpgout (vmem);
+      nr_vmem_pgmajfault[0] = proc_vmem_get_pgmajfault (vmem);
 
-  sleep (1);
+      sleep (1);
 
-  proc_vmem_read (vmem);
-  nr_vmem_pgpgin[1] = proc_vmem_get_pgpgin (vmem);
-  nr_vmem_pgpgout[1] = proc_vmem_get_pgpgout (vmem);
-  nr_vmem_pgmajfault[1] = proc_vmem_get_pgmajfault (vmem);
+      proc_vmem_read (vmem);
+      nr_vmem_pgpgin[1] = proc_vmem_get_pgpgin (vmem);
+      nr_vmem_pgpgout[1] = proc_vmem_get_pgpgout (vmem);
+      nr_vmem_pgmajfault[1] = proc_vmem_get_pgmajfault (vmem);
 
-  dpgpgin = nr_vmem_pgpgin[1] - nr_vmem_pgpgin[0];
-  dpgpgout = nr_vmem_pgpgout[1] - nr_vmem_pgpgout[0];
-  dpgmajfault = nr_vmem_pgmajfault[1] - nr_vmem_pgmajfault[0];
+      dpgpgin = nr_vmem_pgpgin[1] - nr_vmem_pgpgin[0];
+      dpgpgout = nr_vmem_pgpgout[1] - nr_vmem_pgpgout[0];
+      dpgmajfault = nr_vmem_pgmajfault[1] - nr_vmem_pgmajfault[0];
+
+      perfdata_vmem_msg =
+	xasprintf ("vmem_pageins/s=%lu, vmem_pageouts/s=%lu, "
+		   "vmem_pgmajfault/s=%lu", dpgpgin, dpgpgout, dpgmajfault);
+    }
 
   /* Note: we should perhaps implement the following tests instead: 
    *  1. The Main Memory Test
@@ -214,25 +227,26 @@ main (int argc, char **argv)
 
   status_msg = xasprintf ("%s: %.2f%% (%Lu %s) used", state_text (status),
 			  percent_used, SU (kb_mem_main_used));
-  perfdata_msg =
+  perfdata_mem_msg =
     xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
 	       "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
 	       "mem_active=%Lu%s, mem_anonpages=%Lu%s, mem_committed=%Lu%s, "
 	       "mem_dirty=%Lu%s, mem_inactive=%Lu%s, "
-	       "vmem_pageins/s=%lu, vmem_pageouts/s=%lu, "
-	       "vmem_pgmajfault/s=%lu",
-	       SU (kb_mem_main_total), SU (kb_mem_main_used),
-	       SU (kb_mem_main_free), SU (kb_mem_main_shared),
-	       SU (kb_mem_main_buffers), SU (kb_mem_main_cached),
-	       SU (kb_mem_active), SU (kb_mem_anon_pages),
-	       SU (kb_mem_committed_as), SU (kb_mem_dirty),
-	       SU (kb_mem_inactive), dpgpgin, dpgpgout, dpgmajfault);
+	       , SU (kb_mem_main_total)
+	       , SU (kb_mem_main_used)
+	       , SU (kb_mem_main_free)
+	       , SU (kb_mem_main_shared)
+	       , SU (kb_mem_main_buffers)
+	       , SU (kb_mem_main_cached)
+	       , SU (kb_mem_active)
+	       , SU (kb_mem_anon_pages)
+	       , SU (kb_mem_committed_as)
+	       , SU (kb_mem_dirty)
+	       , SU (kb_mem_inactive));
 
-  printf ("%s | %s\n", status_msg, perfdata_msg);
+  printf ("%s | %s%s\n", status_msg, perfdata_mem_msg,
+	  vmem_perfdata ? perfdata_vmem_msg : "");
 
-  free (units);
-  free (status_msg);
-  free (perfdata_msg);
   proc_sysmem_unref (sysmem);
   proc_vmem_unref (vmem);
 
