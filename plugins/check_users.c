@@ -76,9 +76,9 @@ main (int argc, char **argv)
 {
   int c, numuser;
   char *critical = NULL, *warning = NULL;
-  thresholds *my_threshold = NULL;
   struct utmpx *utmpxstruct;
-  enum nagios_status status = STATE_OK;
+  nagstatus status = STATE_OK;
+  thresholds *my_threshold = NULL;
 
   set_program_name (argv[0]);
 

@@ -125,9 +125,9 @@ main (int argc, char **argv)
   int c;
   bool verbose = false;
   unsigned long i, len, delay, count;
-  enum nagios_status status = STATE_OK;
   char *critical = NULL, *warning = NULL;
   char *p, *cpu_progname, *CPU_PROGNAME;
+  nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
   struct proc_cpu cpu[2];

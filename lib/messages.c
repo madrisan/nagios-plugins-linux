@@ -53,7 +53,7 @@ print_errno_message (int errnum)
    If ERRNUM is nonzero, print its corresponding system error message.
    Exit with status STATUS if it is nonzero.  */
 void
-plugin_error (enum nagios_status status, int errnum, const char *message, ...)
+plugin_error (nagstatus status, int errnum, const char *message, ...)
 {
   va_list args;
 
@@ -77,7 +77,7 @@ plugin_error (enum nagios_status status, int errnum, const char *message, ...)
 }
 
 const char *
-state_text (enum nagios_status result)
+state_text (nagstatus result)
 {
   switch (result)
     {

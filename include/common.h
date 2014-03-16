@@ -43,13 +43,13 @@ See the Nagios Developer Guidelines for range format:\n\
 
 /* Nagios Plugins error codes */
 
-enum nagios_status
+typedef enum nagstatus
 {
   STATE_OK,
   STATE_WARNING,
   STATE_CRITICAL,
   STATE_UNKNOWN,
   STATE_DEPENDENT
-};
+} nagstatus;
 
 #endif	/* _COMMON_H_ */
