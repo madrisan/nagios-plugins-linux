@@ -40,8 +40,11 @@ This Nagios plugin checks the CPU (user mode) utilization.
 *Examples*
 
 	check_cpu -w 85% -c 95%
-	# count = 1 means the percentages of total CPU time from boottime
+	USER OK - cpu user 23% | cpu_user=23%, cpu_system=10%, cpu_idle=66%, cpu_iowait=0%, cpu_steal=0%
+	
+	*# count = 1 means the percentages of total CPU time from boottime*
 	check_cpu -w 85% -c 95% 1 1
+	USER OK - cpu user 34% | cpu_user=34%, cpu_system=11%, cpu_idle=49%, cpu_iowait=7%, cpu_steal=0%
 
 
 **The check_ifmountfs plugin**
@@ -78,8 +81,11 @@ This Nagios plugin checks for I/O wait bottlenecks.
 *Examples*
 
 	check_iowait -w 10% -c 20%
-	# count = 1 means the percentages of total CPU time from boottime
+	IOWAIT OK - cpu iowait 0% | cpu_user=31%, cpu_system=13%, cpu_idle=56%, cpu_iowait=0%, cpu_steal=0%
+	
+	*# count = 1 means the percentages of total CPU time from boottime*
 	check_iowait -w 10% -c 20% 1 1
+	IOWAIT OK - cpu iowait 7% | cpu_user=34%, cpu_system=11%, cpu_idle=49%, cpu_iowait=7%, cpu_steal=0%
 
 
 **The check_load plugin**
@@ -109,7 +115,7 @@ These two nagios plugins respectivery check for memory and swap usage.
 
 *Usage*
 
-	check_memory [-C] [-b,-k,-m,-g] [-w PERC] [-c PERC]
+	check_memory [-C] [-s] [-b,-k,-m,-g] [-w PERC] [-c PERC]
 	check_swap [-b,-k,-m,-g] [-w PERC] [-c PERC]
 	
 	check_memory --help
@@ -118,22 +124,29 @@ These two nagios plugins respectivery check for memory and swap usage.
 *Where*
 
 * -C, --caches: count buffers and cached memory as free memory
+* -s, --vmstats: display the virtual memory perfdata
 * -b,-k,-m,-g: show output in bytes, KB (the default), MB, or GB
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
 
 *Examples*
 
-	check_memory -C -m -w 80% -c 90%
-	OK: 79.22% (810964 kB) used | mem_total=999MB, mem_used=791MB, mem_free=207MB, mem_shared=0MB, mem_buffers=1MB, mem_cached=190MB, mem_pageins/s=104, mem_pageouts/s=0
+	check_memory -C --vmstats -m -w 80% -c 90%
+        WARNING: 86.44% (884864 kB) used | mem_total=1023632kB, mem_used=884864kB, mem_free=138768kB, mem_shared=48052kB, mem_buffers=3892kB, mem_cached=118396kB, mem_active=471324kB, mem_anonpages=653996kB, mem_committed=4939408kB, mem_dirty=8848kB, mem_inactive=471808kB, vmem_pageins/s=368, vmem_pageouts/s=1684, vmem_pgmajfault/s=1
 	  # mem_total    : Total usable physical RAM
 	  # mem_used     : Total amount of physical RAM used by the system
 	  # mem_free     : Amount of RAM that is currently unused
 	  # mem_shared   : Now always zero; not calculated
 	  # mem_buffers  : Amount of physical RAM used for file buffers
 	  # mem_cached   : In-memory cache for files read from the disk (the page cache)
-	  # mem_pageins
-	  # mem_pageouts : The number of memory pages the system has written in and out to disk
+	  # mem_active   : Memory that has been used more recently
+	  # mem_anonpages: Non-file backed pages mapped into user-space page tables
+	  # mem_committed: The amount of memory presently allocated on the system
+	  # mem_dirty    : Memory which is waiting to get written back to the disk
+	  # mem_inactive : Memory which has been less recently used
+	  # vmem_pageins
+	  # vmem_pageouts: The number of memory pages the system has written in and out to disk
+	  # vmem_pgmajfault: The number of memory major pagefaults
 
 	check_swap -w 40% -c 60% -m
 	WARNING: 42.70% (895104 kB) used | swap_total=2096444kB, swap_used=895104kB, swap_free=1201340kB, swap_cached=117024kB, swap_pageins/s=97, swap_pageouts/s=73

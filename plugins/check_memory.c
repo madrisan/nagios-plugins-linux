@@ -66,7 +66,7 @@ usage (FILE * out)
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs ("  -C, --caches    count buffers and cached memory as free memory\n",
 	 out);
-  fputs ("  -s, --vmstats   enable the virtual memory perfdata\n", out);
+  fputs ("  -s, --vmstats   display the virtual memory perfdata\n", out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs (USAGE_HELP, out);
