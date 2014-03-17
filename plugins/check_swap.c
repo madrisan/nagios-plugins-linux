@@ -167,7 +167,7 @@ main (int argc, char **argv)
     xasprintf ("swap_total=%Lu%s, swap_used=%Lu%s, swap_free=%Lu%s, "
 	       /* The amount of swap, in kB, used as cache memory */
 	       "swap_cached=%Lu%s, "
-	       "swap_pageins/s=%lu, swap_pageouts/s=%lu\n",
+	       "swap_pageins/s=%lu, swap_pageouts/s=%lu",
 	       SU (kb_swap_total), SU (kb_swap_used), SU (kb_swap_free),
 	       SU (kb_swap_cached), dpswpin, dpswpout);
 
