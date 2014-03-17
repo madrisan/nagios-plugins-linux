@@ -39,6 +39,7 @@ static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
+  {(char *) "vmstats", no_argument, NULL, 's'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "byte", no_argument, NULL, 'b'},
@@ -57,16 +58,17 @@ usage (FILE * out)
   fputs ("This plugin checks the swap utilization.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-b,-k,-m,-g] -w PERC -c PERC\n", program_name);
+  fprintf (out, "  %s [-b,-k,-m,-g] [-s] -w PERC -c PERC\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
+  fputs ("  -s, --vmstats   display the virtual memory perfdata\n", out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s -w 30%% -c 50%%\n", program_name);
+  fprintf (out, "  %s --vmstats -w 30%% -c 50%%\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -84,12 +86,13 @@ print_version (void)
 int
 main (int argc, char **argv)
 {
+  bool vmem_perfdata = false;
   int c, status, err;
   int shift = k_shift;
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
   char *status_msg;
-  char *perfdata_msg;
+  char *perfdata_swap_msg, *perfdata_vmem_msg = NULL;
   float percent_used = 0;
   thresholds *my_threshold = NULL;
 
@@ -112,6 +115,9 @@ main (int argc, char **argv)
         {
         default:
           usage (stderr);
+        case 's':
+          vmem_perfdata = true;
+          break;
         case 'c':
           critical = optarg;
           break;
@@ -148,11 +154,19 @@ main (int argc, char **argv)
   kb_swap_total = proc_sysmem_get_swap_total (sysmem);
   kb_swap_used = proc_sysmem_get_swap_used (sysmem);
 
-  proc_vmem_get_swap_io (kb_swap_pageins, kb_swap_pageouts);
-  sleep (1);
-  proc_vmem_get_swap_io (kb_swap_pageins + 1, kb_swap_pageouts + 1);
-  dpswpin = kb_swap_pageins[1] - kb_swap_pageins[0];
-  dpswpout = kb_swap_pageouts[1] - kb_swap_pageouts[0];
+  if (vmem_perfdata)
+    {
+      proc_vmem_get_swap_io (kb_swap_pageins, kb_swap_pageouts);
+      sleep (1);
+      proc_vmem_get_swap_io (kb_swap_pageins + 1, kb_swap_pageouts + 1);
+
+      dpswpin = kb_swap_pageins[1] - kb_swap_pageins[0];
+      dpswpout = kb_swap_pageouts[1] - kb_swap_pageouts[0];
+
+      perfdata_vmem_msg =
+	xasprintf (", swap_pageins/s=%lu, swap_pageouts/s=%lu",
+		   dpswpin, dpswpout);
+    }
 
   if (kb_swap_total != 0)
     percent_used = (kb_swap_used * 100.0 / kb_swap_total);
@@ -163,19 +177,15 @@ main (int argc, char **argv)
   status_msg = xasprintf ("%s: %.2f%% (%Lu %s) used", state_text (status),
 			  percent_used, SU (kb_swap_used));
 
-  perfdata_msg =
+  perfdata_swap_msg =
     xasprintf ("swap_total=%Lu%s, swap_used=%Lu%s, swap_free=%Lu%s, "
 	       /* The amount of swap, in kB, used as cache memory */
-	       "swap_cached=%Lu%s, "
-	       "swap_pageins/s=%lu, swap_pageouts/s=%lu",
-	       SU (kb_swap_total), SU (kb_swap_used), SU (kb_swap_free),
-	       SU (kb_swap_cached), dpswpin, dpswpout);
+	       "swap_cached=%Lu%s", SU (kb_swap_total), SU (kb_swap_used),
+	       SU (kb_swap_free), SU (kb_swap_cached));
 
-  printf ("%s | %s\n", status_msg, perfdata_msg);
+  printf ("%s | %s%s\n", status_msg, perfdata_swap_msg,
+	  vmem_perfdata ? perfdata_vmem_msg : "");
 
-  free (units);
-  free (status_msg);
-  free (perfdata_msg);
   proc_sysmem_unref (sysmem);
 
   return status;
