@@ -207,7 +207,7 @@ main (int argc, char **argv)
       dpgmajfault = nr_vmem_pgmajfault[1] - nr_vmem_pgmajfault[0];
 
       perfdata_vmem_msg =
-	xasprintf ("vmem_pageins/s=%lu, vmem_pageouts/s=%lu, "
+	xasprintf (", vmem_pageins/s=%lu, vmem_pageouts/s=%lu, "
 		   "vmem_pgmajfault/s=%lu", dpgpgin, dpgpgout, dpgmajfault);
     }
 
@@ -231,7 +231,7 @@ main (int argc, char **argv)
     xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
 	       "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
 	       "mem_active=%Lu%s, mem_anonpages=%Lu%s, mem_committed=%Lu%s, "
-	       "mem_dirty=%Lu%s, mem_inactive=%Lu%s, "
+	       "mem_dirty=%Lu%s, mem_inactive=%Lu%s"
 	       , SU (kb_mem_main_total)
 	       , SU (kb_mem_main_used)
 	       , SU (kb_mem_main_free)
