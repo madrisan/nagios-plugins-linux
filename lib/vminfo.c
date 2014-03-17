@@ -41,10 +41,8 @@ get_vmem_pagesize (void)
   return sysconf (_SC_PAGESIZE);
 }
 
-struct proc_vmem
+typedef struct proc_vmem_data
 {
-  int refcount;
-
   /* read /proc/vminfo only for 2.5.41 and above */
   /* see include/linux/page-flags.h and mm/page_alloc.c */
   unsigned long vm_nr_dirty;	/* dirty writable pages */
@@ -93,7 +91,13 @@ struct proc_vmem
   unsigned long vm_nr_unstable;
   unsigned long vm_pginodesteal;
   unsigned long vm_slabs_scanned;
-};
+} proc_vmem_data_t;
+
+typedef struct proc_vmem
+{
+  int refcount;
+  struct proc_vmem_data *data;
+} proc_vmem_t;
 
 /* Allocates space for a new vmem object.
  * Returns 0 if all went ok. Errors are returned as negative values. */
@@ -108,6 +112,12 @@ proc_vmem_new (struct proc_vmem **vmem)
     return -ENOMEM;
 
   vm->refcount = 1;
+  vm->data = calloc (1, sizeof (struct proc_vmem_data));
+  if (!vm->data)
+    {
+      free (vm);
+      return -ENOMEM;
+    }
 
   *vmem = vm;
   return 0;
@@ -122,78 +132,80 @@ proc_vmem_read (struct proc_vmem *vmem)
   if (vmem == NULL)
     return;
 
+  struct proc_vmem_data *data = vmem->data;
+
   const proc_table_struct vmem_table[] = {
-    {"allocstall", &vmem->vm_allocstall},
-    {"kswapd_inodesteal", &vmem->vm_kswapd_inodesteal},
-    {"kswapd_steal", &vmem->vm_kswapd_steal},
-    {"nr_dirty", &vmem->vm_nr_dirty},	/* page version of meminfo Dirty */
-    {"nr_mapped", &vmem->vm_nr_mapped},	/* page version of meminfo Mapped */
-    {"nr_page_table_pages", &vmem->vm_nr_page_table_pages},	/* same as meminfo PageTables */
-    {"nr_pagecache", &vmem->vm_nr_pagecache},	/* gone in 2.5.66+ kernels */
-    {"nr_reverse_maps", &vmem->vm_nr_reverse_maps},	/* page version of meminfo ReverseMaps GONE */
-    {"nr_slab", &vmem->vm_nr_slab},	/* page version of meminfo Slab */
-    {"nr_unstable", &vmem->vm_nr_unstable},
-    {"nr_writeback", &vmem->vm_nr_writeback},	/* page version of meminfo Writeback */
-    {"pageoutrun", &vmem->vm_pageoutrun},
-    {"pgactivate", &vmem->vm_pgactivate},
-    {"pgalloc", &vmem->vm_pgalloc},	/* GONE (now separate dma,high,normal) */
-    {"pgalloc_dma", &vmem->vm_pgalloc_dma},
-    {"pgalloc_high", &vmem->vm_pgalloc_high},
-    {"pgalloc_normal", &vmem->vm_pgalloc_normal},
-    {"pgdeactivate", &vmem->vm_pgdeactivate},
-    {"pgfault", &vmem->vm_pgfault},
-    {"pgfree", &vmem->vm_pgfree},
-    {"pginodesteal", &vmem->vm_pginodesteal},
-    {"pgmajfault", &vmem->vm_pgmajfault},
-    {"pgpgin", &vmem->vm_pgpgin},	/* important */
-    {"pgpgout", &vmem->vm_pgpgout},	/* important */
-    {"pgrefill", &vmem->vm_pgrefill},	/* GONE (now separate dma,high,normal) */
-    {"pgrefill_dma", &vmem->vm_pgrefill_dma},
-    {"pgrefill_high", &vmem->vm_pgrefill_high},
-    {"pgrefill_normal", &vmem->vm_pgrefill_normal},
-    {"pgrotated", &vmem->vm_pgrotated},
-    {"pgscan", &vmem->vm_pgscan},	/* GONE (now separate direct,kswapd and dma,high,normal) */
-    {"pgscan_direct_dma", &vmem->vm_pgscan_direct_dma},
-    {"pgscan_direct_high", &vmem->vm_pgscan_direct_high},
-    {"pgscan_direct_normal", &vmem->vm_pgscan_direct_normal},
-    {"pgscan_kswapd_dma", &vmem->vm_pgscan_kswapd_dma},
-    {"pgscan_kswapd_high", &vmem->vm_pgscan_kswapd_high},
-    {"pgscan_kswapd_normal", &vmem->vm_pgscan_kswapd_normal},
-    {"pgsteal", &vmem->vm_pgsteal},	/* GONE (now separate dma,high,normal) */
-    {"pgsteal_dma", &vmem->vm_pgsteal_dma},
-    {"pgsteal_high", &vmem->vm_pgsteal_high},
-    {"pgsteal_normal", &vmem->vm_pgsteal_normal},
-    {"pswpin", &vmem->vm_pswpin},	/* important */
-    {"pswpout", &vmem->vm_pswpout},	/* important */
-    {"slabs_scanned", &vmem->vm_slabs_scanned},
+    {"allocstall", &data->vm_allocstall},
+    {"kswapd_inodesteal", &data->vm_kswapd_inodesteal},
+    {"kswapd_steal", &data->vm_kswapd_steal},
+    {"nr_dirty", &data->vm_nr_dirty},	/* page version of meminfo Dirty */
+    {"nr_mapped", &data->vm_nr_mapped},	/* page version of meminfo Mapped */
+    {"nr_page_table_pages", &data->vm_nr_page_table_pages},	/* same as meminfo PageTables */
+    {"nr_pagecache", &data->vm_nr_pagecache},	/* gone in 2.5.66+ kernels */
+    {"nr_reverse_maps", &data->vm_nr_reverse_maps},	/* page version of meminfo ReverseMaps GONE */
+    {"nr_slab", &data->vm_nr_slab},	/* page version of meminfo Slab */
+    {"nr_unstable", &data->vm_nr_unstable},
+    {"nr_writeback", &data->vm_nr_writeback},	/* page version of meminfo Writeback */
+    {"pageoutrun", &data->vm_pageoutrun},
+    {"pgactivate", &data->vm_pgactivate},
+    {"pgalloc", &data->vm_pgalloc},	/* GONE (now separate dma,high,normal) */
+    {"pgalloc_dma", &data->vm_pgalloc_dma},
+    {"pgalloc_high", &data->vm_pgalloc_high},
+    {"pgalloc_normal", &data->vm_pgalloc_normal},
+    {"pgdeactivate", &data->vm_pgdeactivate},
+    {"pgfault", &data->vm_pgfault},
+    {"pgfree", &data->vm_pgfree},
+    {"pginodesteal", &data->vm_pginodesteal},
+    {"pgmajfault", &data->vm_pgmajfault},
+    {"pgpgin", &data->vm_pgpgin},	/* important */
+    {"pgpgout", &data->vm_pgpgout},	/* important */
+    {"pgrefill", &data->vm_pgrefill},	/* GONE (now separate dma,high,normal) */
+    {"pgrefill_dma", &data->vm_pgrefill_dma},
+    {"pgrefill_high", &data->vm_pgrefill_high},
+    {"pgrefill_normal", &data->vm_pgrefill_normal},
+    {"pgrotated", &data->vm_pgrotated},
+    {"pgscan", &data->vm_pgscan},	/* GONE (now separate direct,kswapd and dma,high,normal) */
+    {"pgscan_direct_dma", &data->vm_pgscan_direct_dma},
+    {"pgscan_direct_high", &data->vm_pgscan_direct_high},
+    {"pgscan_direct_normal", &data->vm_pgscan_direct_normal},
+    {"pgscan_kswapd_dma", &data->vm_pgscan_kswapd_dma},
+    {"pgscan_kswapd_high", &data->vm_pgscan_kswapd_high},
+    {"pgscan_kswapd_normal", &data->vm_pgscan_kswapd_normal},
+    {"pgsteal", &data->vm_pgsteal},	/* GONE (now separate dma,high,normal) */
+    {"pgsteal_dma", &data->vm_pgsteal_dma},
+    {"pgsteal_high", &data->vm_pgsteal_high},
+    {"pgsteal_normal", &data->vm_pgsteal_normal},
+    {"pswpin", &data->vm_pswpin},	/* important */
+    {"pswpout", &data->vm_pswpout},	/* important */
+    {"slabs_scanned", &data->vm_slabs_scanned},
   };
   const int vmem_table_count =
     sizeof (vmem_table) / sizeof (proc_table_struct);
 
-  vmem->vm_pgalloc = 0;
-  vmem->vm_pgrefill = 0;
-  vmem->vm_pgscan = 0;
-  vmem->vm_pgsteal = 0;
+  data->vm_pgalloc = 0;
+  data->vm_pgrefill = 0;
+  data->vm_pgscan = 0;
+  data->vm_pgsteal = 0;
 
   procparser (PROC_VMSTAT, vmem_table, vmem_table_count, ' ');
 
-  if (!vmem->vm_pgalloc)
-    vmem->vm_pgalloc =
-      vmem->vm_pgalloc_dma + vmem->vm_pgalloc_high + vmem->vm_pgalloc_normal;
+  if (!data->vm_pgalloc)
+    data->vm_pgalloc =
+      data->vm_pgalloc_dma + data->vm_pgalloc_high + data->vm_pgalloc_normal;
 
-  if (!vmem->vm_pgrefill)
-    vmem->vm_pgrefill =
-      vmem->vm_pgrefill_dma + vmem->vm_pgrefill_high +
-      vmem->vm_pgrefill_normal;
+  if (!data->vm_pgrefill)
+    data->vm_pgrefill =
+      data->vm_pgrefill_dma + data->vm_pgrefill_high +
+      data->vm_pgrefill_normal;
 
-  if (!vmem->vm_pgscan)
-    vmem->vm_pgscan = vmem->vm_pgscan_direct_dma + vmem->vm_pgscan_direct_high
-      + vmem->vm_pgscan_direct_normal + vmem->vm_pgscan_kswapd_dma
-      + vmem->vm_pgscan_kswapd_high + vmem->vm_pgscan_kswapd_normal;
+  if (!data->vm_pgscan)
+    data->vm_pgscan = data->vm_pgscan_direct_dma + data->vm_pgscan_direct_high
+      + data->vm_pgscan_direct_normal + data->vm_pgscan_kswapd_dma
+      + data->vm_pgscan_kswapd_high + data->vm_pgscan_kswapd_normal;
 
-  if (!vmem->vm_pgsteal)
-    vmem->vm_pgsteal =
-      vmem->vm_pgsteal_dma + vmem->vm_pgsteal_high + vmem->vm_pgsteal_normal;
+  if (!data->vm_pgsteal)
+    data->vm_pgsteal =
+      data->vm_pgsteal_dma + data->vm_pgsteal_high + data->vm_pgsteal_normal;
 }
 
 /* Drop a reference of the memory library context. If the refcount of
@@ -209,13 +221,14 @@ proc_vmem_unref (struct proc_vmem *vmem)
   if (vmem->refcount > 0)
     return vmem;
 
+  free (vmem->data);
   free (vmem);
   return NULL;
 }
 
 #define proc_vmem_get(arg) \
 unsigned long proc_vmem_get_ ## arg (struct proc_vmem *p) \
-  { return (p == NULL) ? 0 : p->vm_ ## arg; }
+  { return (p == NULL) ? 0 : p->data->vm_ ## arg; }
 
 proc_vmem_get (pgalloc)
 proc_vmem_get (pgfault)
@@ -247,7 +260,7 @@ unsigned proc_vmem_get_pgpgin (struct proc_vmem *vmem)
     }
   fclose (f);
 
-  return need_vmstat_file ? vmem->vm_pgpgin : pgpgin;
+  return need_vmstat_file ? vmem->data->vm_pgpgin : pgpgin;
 }
 
 unsigned proc_vmem_get_pgpgout (struct proc_vmem *vmem)
@@ -270,23 +283,23 @@ unsigned proc_vmem_get_pgpgout (struct proc_vmem *vmem)
     }
   fclose (f);
 
-  return need_vmstat_file ? vmem->vm_pgpgout : pgpgout;
+  return need_vmstat_file ? vmem->data->vm_pgpgout : pgpgout;
 }
 
 unsigned long
 proc_vmem_get_pgscand (struct proc_vmem *vmem)
 {
   return (vmem ==
-	  NULL) ? 0 : vmem->vm_pgscan_direct_dma +
-    vmem->vm_pgscan_direct_high + vmem->vm_pgscan_direct_normal;
+	  NULL) ? 0 : vmem->data->vm_pgscan_direct_dma +
+    vmem->data->vm_pgscan_direct_high + vmem->data->vm_pgscan_direct_normal;
 }
 
 unsigned long
 proc_vmem_get_pgscank (struct proc_vmem *vmem)
 {
   return (vmem ==
-	  NULL) ? 0 : vmem->vm_pgscan_kswapd_dma +
-    vmem->vm_pgscan_kswapd_high + vmem->vm_pgscan_kswapd_normal;
+	  NULL) ? 0 : vmem->data->vm_pgscan_kswapd_dma +
+    vmem->data->vm_pgscan_kswapd_high + vmem->data->vm_pgscan_kswapd_normal;
 }
 
 

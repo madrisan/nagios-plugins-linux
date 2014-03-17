@@ -27,10 +27,8 @@
 
 /*#define PROC_MEMINFO  "/proc/meminfo"*/
 
-typedef struct proc_sysmem
+typedef struct proc_sysmem_data
 {
-  int refcount;
-
   /* old but still kicking -- the important stuff */
   unsigned long kb_main_buffers;
   unsigned long kb_main_cached;
@@ -72,6 +70,12 @@ typedef struct proc_sysmem
   unsigned long kb_nfs_unstable;
   unsigned long kb_swap_reclaimable;
   unsigned long kb_swap_unreclaimable;
+} proc_sysmem_data_t;
+
+typedef struct proc_sysmem
+{
+  int refcount;
+  struct proc_sysmem_data *data;
 } proc_sysmem_t;
 
 /* Allocates space for a new sysmem object.
@@ -87,6 +91,12 @@ proc_sysmem_new (struct proc_sysmem **sysmem)
     return -ENOMEM;
 
   m->refcount = 1;
+  m->data = calloc (1, sizeof (struct proc_sysmem_data));
+  if (!m->data)
+    {
+      free (m);
+      return -ENOMEM;
+    }
 
   *sysmem = m;
   return 0;
@@ -100,62 +110,64 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
   if (sysmem == NULL)
     return;
 
+  struct proc_sysmem_data *data = sysmem->data;
+
   const struct proc_table_struct sysmem_table[] = {
-    { "Active",        &sysmem->kb_active },            /* important */
-    { "AnonPages",     &sysmem->kb_anon_pages },
-    { "Bounce",        &sysmem->kb_bounce },
-    { "Buffers",       &sysmem->kb_main_buffers },      /* important */
-    { "Cached",        &sysmem->kb_main_cached },       /* important */
-    { "CommitLimit",   &sysmem->kb_commit_limit },
-    { "Committed_AS",  &sysmem->kb_committed_as },
-    { "Dirty",         &sysmem->kb_dirty },             /* kB version of vmstat nr_dirty */
-    { "HighFree",      &sysmem->kb_high_free },
-    { "HighTotal",     &sysmem->kb_high_total },
-    { "Inact_clean",   &sysmem->kb_inact_clean },
-    { "Inact_dirty",   &sysmem->kb_inact_dirty },
-    { "Inact_laundry", &sysmem->kb_inact_laundry },
-    { "Inact_target",  &sysmem->kb_inact_target },
-    { "Inactive",      &sysmem->kb_inactive },	        /* important */
-    { "LowFree",       &sysmem->kb_low_free },
-    { "LowTotal",      &sysmem->kb_low_total },
-    { "Mapped",        &sysmem->kb_mapped },            /* kB version of vmstat nr_mapped */
-    { "MemFree",       &sysmem->kb_main_free },	        /* important */
-    { "MemTotal",      &sysmem->kb_main_total },        /* important */
-    { "NFS_Unstable",  &sysmem->kb_nfs_unstable },
-    { "PageTables",    &sysmem->kb_pagetables },        /* kB version of vmstat nr_page_table_pages */
-    { "ReverseMaps",   &sysmem->nr_reversemaps },       /* same as vmstat nr_page_table_pages */
-    { "SReclaimable",  &sysmem->kb_swap_reclaimable },  /* "swap reclaimable" (dentry and inode structures) */
-    { "SUnreclaim",    &sysmem->kb_swap_unreclaimable },
-    { "Shmem",         &sysmem->kb_main_shared},        /* kernel 2.6.32 and later */
-    { "Slab",          &sysmem->kb_slab },              /* kB version of vmstat nr_slab */
-    { "SwapCached",    &sysmem->kb_swap_cached },       /* late 2.4 and 2.6+ only */
-    { "SwapFree",      &sysmem->kb_swap_free },         /* important */
-    { "SwapTotal",     &sysmem->kb_swap_total },        /* important */
-    { "VmallocChunk",  &sysmem->kb_vmalloc_chunk },
-    { "VmallocTotal",  &sysmem->kb_vmalloc_total },
-    { "VmallocUsed",   &sysmem->kb_vmalloc_used },
-    { "Writeback",     &sysmem->kb_writeback },         /* kB version of vmstat nr_writeback */
+    { "Active", &data->kb_active },        /* important */
+    { "AnonPages", &data->kb_anon_pages },
+    { "Bounce", &data->kb_bounce },
+    { "Buffers", &data->kb_main_buffers }, /* important */
+    { "Cached", &data->kb_main_cached },   /* important */
+    { "CommitLimit", &data->kb_commit_limit },
+    { "Committed_AS", &data->kb_committed_as },
+    { "Dirty", &data->kb_dirty },  /* kB version of vmstat nr_dirty */
+    { "HighFree", &data->kb_high_free },
+    { "HighTotal", &data->kb_high_total },
+    { "Inact_clean", &data->kb_inact_clean },
+    { "Inact_dirty", &data->kb_inact_dirty },
+    { "Inact_laundry", &data->kb_inact_laundry },
+    { "Inact_target", &data->kb_inact_target },
+    { "Inactive", &data->kb_inactive },	 /* important */
+    { "LowFree", &data->kb_low_free },
+    { "LowTotal", &data->kb_low_total },
+    { "Mapped", &data->kb_mapped },        /* kB version of vmstat nr_mapped */
+    { "MemFree", &data->kb_main_free },	    /* important */
+    { "MemTotal", &data->kb_main_total },    /* important */
+    { "NFS_Unstable", &data->kb_nfs_unstable },
+    { "PageTables", &data->kb_pagetables },   /* kB version of vmstat nr_page_table_pages */
+    { "ReverseMaps", &data->nr_reversemaps }, /* same as vmstat nr_page_table_pages */
+    { "SReclaimable", &data->kb_swap_reclaimable },  /* "swap reclaimable" (dentry and inode structures) */
+    { "SUnreclaim", &data->kb_swap_unreclaimable },
+    { "Shmem", &data->kb_main_shared},        /* kernel 2.6.32 and later */
+    { "Slab", &data->kb_slab },               /* kB version of vmstat nr_slab */
+    { "SwapCached", &data->kb_swap_cached },  /* late 2.4 and 2.6+ only */
+    { "SwapFree", &data->kb_swap_free },      /* important */
+    { "SwapTotal", &data->kb_swap_total },    /* important */
+    { "VmallocChunk", &data->kb_vmalloc_chunk },
+    { "VmallocTotal", &data->kb_vmalloc_total },
+    { "VmallocUsed", &data->kb_vmalloc_used },
+    { "Writeback", &data->kb_writeback },     /* kB version of vmstat nr_writeback */
   };
   const int sysmem_table_count = sizeof (sysmem_table) / sizeof (proc_table_struct);
 
-  sysmem->kb_inactive = ~0UL;
+  data->kb_inactive = ~0UL;
   procparser (PROC_MEMINFO, sysmem_table, sysmem_table_count, ':');
 
-  if (!sysmem->kb_low_total)
+  if (!data->kb_low_total)
     {				/* low==main except with large-memory support */
-      sysmem->kb_low_total = sysmem->kb_main_total;
-      sysmem->kb_low_free = sysmem->kb_main_free;
+      data->kb_low_total = data->kb_main_total;
+      data->kb_low_free = data->kb_main_free;
     }
 
-  if (sysmem->kb_inactive == ~0UL)
+  if (data->kb_inactive == ~0UL)
     {
-      sysmem->kb_inactive =
-	sysmem->kb_inact_dirty + sysmem->kb_inact_clean +
-	sysmem->kb_inact_laundry;
+      data->kb_inactive =
+	data->kb_inact_dirty + data->kb_inact_clean +
+	data->kb_inact_laundry;
     }
 
   /* "Cached" includes "Shmem" - we want only the page cache here */
-  sysmem->kb_main_cached -= sysmem->kb_main_shared;
+  data->kb_main_cached -= data->kb_main_shared;
 }
 
 /* Drop a reference of the memory library context. If the refcount of
@@ -170,13 +182,14 @@ struct proc_sysmem *proc_sysmem_unref (struct proc_sysmem *sysmem)
   if (sysmem->refcount > 0)
     return sysmem;
 
+  free (sysmem->data);
   free (sysmem);
   return NULL;
 }
 
 #define proc_sysmem_get(arg) \
 unsigned long proc_sysmem_get_ ## arg (struct proc_sysmem *p) \
-  { return (p == NULL) ? 0 : p->kb_ ## arg; }
+  { return (p == NULL) ? 0 : p->data->kb_ ## arg; }
 
 /* Memory that has been used more recently and usually not reclaimed unless
  * absolutely necessary.  */
@@ -210,11 +223,13 @@ proc_sysmem_get(swap_total)
 unsigned long
 proc_sysmem_get_main_used (struct proc_sysmem *sysmem)
 {
-  return (sysmem == NULL) ? 0 : sysmem->kb_main_total - sysmem->kb_main_free;
+  return (sysmem == NULL) ? 0 :
+    sysmem->data->kb_main_total - sysmem->data->kb_main_free;
 }
 
 unsigned long
 proc_sysmem_get_swap_used (struct proc_sysmem *sysmem)
 {
-  return (sysmem == NULL) ? 0 : sysmem->kb_swap_total - sysmem->kb_swap_free;
+  return (sysmem == NULL) ? 0 :
+    sysmem->data->kb_swap_total - sysmem->data->kb_swap_free;
 }
