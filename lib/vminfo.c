@@ -129,6 +129,12 @@ proc_vmem_new (struct proc_vmem **vmem)
 void
 proc_vmem_read (struct proc_vmem *vmem)
 {
+  FILE *fp;
+  char *line = NULL;
+  size_t len = 0;
+  ssize_t read;
+  bool found_pgpg_data = false, found_pswp_data = false;
+
   if (vmem == NULL)
     return;
 
@@ -187,6 +193,9 @@ proc_vmem_read (struct proc_vmem *vmem)
   data->vm_pgscan = 0;
   data->vm_pgsteal = 0;
 
+  data->vm_pgpgin = data->vm_pgpgout = ~0UL;
+  data->vm_pswpin = data->vm_pswpout = ~0UL;
+
   procparser (PROC_VMSTAT, vmem_table, vmem_table_count, ' ');
 
   if (!data->vm_pgalloc)
@@ -206,6 +215,39 @@ proc_vmem_read (struct proc_vmem *vmem)
   if (!data->vm_pgsteal)
     data->vm_pgsteal =
       data->vm_pgsteal_dma + data->vm_pgsteal_high + data->vm_pgsteal_normal;
+
+  if (data->vm_pgpgin != ~0UL && data->vm_pswpin != ~0UL)
+    return;
+  else if (data->vm_pgpgin != ~0UL)
+    found_pgpg_data = true;
+  else if (data->vm_pswpin != ~0UL)
+    found_pswp_data = true;
+
+  /* Linux kernels < 2.5.40-bk4 */
+
+  if ((fp = fopen (PROC_STAT, "r")))
+    {
+      while ((read = getline (&line, &len, fp)) != -1)
+        {
+          if (2 == sscanf (line, "page %lu %lu",
+                           &data->vm_pgpgin, &data->vm_pgpgout))
+            found_pgpg_data = true;
+          else if (2 == sscanf (line, "swap %lu %lu",
+                                &data->vm_pswpin, &data->vm_pswpout))
+            found_pswp_data = true;
+
+          if (found_pgpg_data && found_pswp_data)
+            break;
+        }
+      fclose (fp);
+      free (line);
+    }
+
+    /* This should never occur */
+    if (!found_pgpg_data)
+      data->vm_pgpgin = data->vm_pgpgout = 0;
+    if (!found_pswp_data)
+      data->vm_pswpin = data->vm_pswpout = 0;
 }
 
 /* Drop a reference of the memory library context. If the refcount of
@@ -234,57 +276,13 @@ proc_vmem_get (pgalloc)
 proc_vmem_get (pgfault)
 proc_vmem_get (pgfree)
 proc_vmem_get (pgmajfault)
+proc_vmem_get (pgpgin)
+proc_vmem_get (pgpgout)
 proc_vmem_get (pgrefill)
 proc_vmem_get (pgscan)
 proc_vmem_get (pgsteal)
 proc_vmem_get (pswpin)
 proc_vmem_get (pswpout)
-
-unsigned proc_vmem_get_pgpgin (struct proc_vmem *vmem)
-{
-  FILE *f;
-  int need_vmstat_file = 1;
-  unsigned long pgpgin, pgpgout;
-  static char buf[2048];
-
-  if (!(f = fopen (PROC_STAT, "r")))
-    need_vmstat_file = 1;
-
-  while (fgets (buf, sizeof buf, f))
-    {
-      if (sscanf (buf, "page %lu %lu", &pgpgin, &pgpgout) == 2)
-	{
-	  need_vmstat_file = 0;
-	  break;
-	}
-    }
-  fclose (f);
-
-  return need_vmstat_file ? vmem->data->vm_pgpgin : pgpgin;
-}
-
-unsigned proc_vmem_get_pgpgout (struct proc_vmem *vmem)
-{
-  FILE *f;
-  int need_vmstat_file = 1;
-  unsigned long pgpgin, pgpgout;
-  static char buf[2048];
-
-  if (!(f = fopen (PROC_STAT, "r")))
-    need_vmstat_file = 1;
-
-  while (fgets (buf, sizeof buf, f))
-    {
-      if (sscanf (buf, "page %lu %lu", &pgpgin, &pgpgout) == 2)
-	{
-	  need_vmstat_file = 0;
-	  break;
-	}
-    }
-  fclose (f);
-
-  return need_vmstat_file ? vmem->data->vm_pgpgout : pgpgout;
-}
 
 unsigned long
 proc_vmem_get_pgscand (struct proc_vmem *vmem)
@@ -300,44 +298,4 @@ proc_vmem_get_pgscank (struct proc_vmem *vmem)
   return (vmem ==
 	  NULL) ? 0 : vmem->data->vm_pgscan_kswapd_dma +
     vmem->data->vm_pgscan_kswapd_high + vmem->data->vm_pgscan_kswapd_normal;
-}
-
-
-/* get additional statistics for swap activity
- * Number of swapins and swapouts (since the last boot)	*/
-
-void
-proc_vmem_get_swap_io (unsigned long *pswpin, unsigned long *pswpout)
-{
-  FILE *f;
-  int err, need_vmstat_file = 1;
-  struct proc_vmem *vmem = NULL;
-  static char buf[2048];
-
-  if (!(f = fopen (PROC_STAT, "r")))
-    plugin_error (STATE_UNKNOWN, errno, "Error: /proc must be mounted");
-
-  while (fgets (buf, sizeof buf, f))
-    {
-      if (sscanf (buf, "swap %lu %lu", pswpin, pswpout) == 2)
-	{
-	  need_vmstat_file = 0;
-	  break;
-	}
-    }
-  fclose (f);
-
-  if (need_vmstat_file)		/* Linux 2.5.40-bk4 and above */
-    {
-      err = proc_vmem_new (&vmem);
-      if (err < 0)
-	plugin_error (STATE_UNKNOWN, err, "memory exhausted");
-
-      proc_vmem_read (vmem);
-
-      *pswpin = proc_vmem_get_pswpin (vmem);
-      *pswpout = proc_vmem_get_pswpout (vmem);
-
-      proc_vmem_unref (vmem);
-    }
 }

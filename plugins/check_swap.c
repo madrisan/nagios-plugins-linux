@@ -101,7 +101,8 @@ main (int argc, char **argv)
   unsigned long kb_swap_free;
   unsigned long kb_swap_total;
   unsigned long kb_swap_used;
- 
+
+  struct proc_vmem *vmem = NULL;
   unsigned long dpswpin, dpswpout;
   unsigned long kb_swap_pageins[2];
   unsigned long kb_swap_pageouts[2];
@@ -156,9 +157,19 @@ main (int argc, char **argv)
 
   if (vmem_perfdata)
     {
-      proc_vmem_get_swap_io (kb_swap_pageins, kb_swap_pageouts);
+      err = proc_vmem_new (&vmem);
+      if (err < 0)
+        plugin_error (STATE_UNKNOWN, err, "memory exhausted");
+
+      proc_vmem_read (vmem);
+      kb_swap_pageins[0] = proc_vmem_get_pswpin (vmem);
+      kb_swap_pageouts[0] = proc_vmem_get_pswpout (vmem);
+
       sleep (1);
-      proc_vmem_get_swap_io (kb_swap_pageins + 1, kb_swap_pageouts + 1);
+
+      proc_vmem_read (vmem);
+      kb_swap_pageins[1] = proc_vmem_get_pswpin (vmem);
+      kb_swap_pageouts[1] = proc_vmem_get_pswpout (vmem);
 
       dpswpin = kb_swap_pageins[1] - kb_swap_pageins[0];
       dpswpout = kb_swap_pageouts[1] - kb_swap_pageouts[0];
