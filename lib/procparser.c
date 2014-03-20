@@ -19,15 +19,15 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "messages.h"
 #include "procparser.h"
-
-static char buf[2048];
 
 static int
 compare_proc_table_structs (const void *a, const void *b)
@@ -43,40 +43,34 @@ procparser (char *filename, const proc_table_struct *proc_table,
   char namebuf[16];		/* big enough to hold any row name */
   proc_table_struct findme = { namebuf, NULL };
   proc_table_struct *found;
-  char *head;
-  char *tail;
-  int fd, local_n;
+  char *line = NULL, *head, *tail;
+  FILE *fp;
+  size_t len = 0;
+  ssize_t chread;
 
 #if __SIZEOF_LONG__ == 4
   unsigned long long slotll;
 #endif
 
-  if ((fd = open (filename, O_RDONLY)) == -1)
-    plugin_error (STATE_UNKNOWN, 0, "Error: /proc must be mounted");
-  if ((local_n = read (fd, buf, sizeof buf - 1)) < 0)
-    plugin_error (STATE_UNKNOWN, 0, "Error reading %s", filename);
-  buf[local_n] = '\0';
-  close (fd);
+  if ((fp = fopen (filename,  "r")) < 0)
+    plugin_error (STATE_UNKNOWN, errno, "Error: /proc must be mounted");
 
-  head = buf;
-  for (;;)
+  while ((chread = getline (&line, &len, fp)) != -1)
     {
-      tail = strchr (head, separator);
+      head = line;
+      tail = strchr (line, separator);
       if (!tail)
-	break;
+	continue;
       *tail = '\0';
       if (strlen (head) >= sizeof (namebuf))
-	{
-	  head = tail + 1;
-	  goto nextline;
-	}
+	continue;
       strcpy (namebuf, head);
       found = bsearch (&findme, proc_table, proc_table_count,
 		       sizeof (proc_table_struct),
 		       compare_proc_table_structs);
       head = tail + 1;
       if (!found)
-	goto nextline;
+	continue;
 
 #if __SIZEOF_LONG__ == 4
       /* A 32 bit kernel would have already truncated the value, a 64 bit kernel
@@ -88,11 +82,7 @@ procparser (char *filename, const proc_table_struct *proc_table,
 #else
       *(found->slot) = strtoul (head, &tail, 10);
 #endif
-
-    nextline:
-      tail = strchr (head, '\n');
-      if (!tail)
-	break;
-      head = tail + 1;
     }
+
+  free (line);
 }
