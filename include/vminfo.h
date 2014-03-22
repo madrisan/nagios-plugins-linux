@@ -50,6 +50,9 @@ extern "C"
   unsigned long proc_vmem_get_pgpgout (struct proc_vmem *vmem);
   unsigned long proc_vmem_get_pgrefill (struct proc_vmem *vmem);
   unsigned long proc_vmem_get_pgscan (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pgscand (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pgscank (struct proc_vmem *vmem);
+  unsigned long proc_vmem_get_pgsteal (struct proc_vmem *vmem);
   unsigned long proc_vmem_get_pswpin (struct proc_vmem *vmem);
   unsigned long proc_vmem_get_pswpout (struct proc_vmem *vmem);
 
