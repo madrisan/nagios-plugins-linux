@@ -170,8 +170,9 @@ main (int argc, char **argv)
   status = get_status (uptime_mins, my_threshold);
   free (my_threshold);
 
-  result_line = xasprintf ("UPTIME %s: %s", state_text (status),
-                           sprint_uptime (uptime_secs));
+  result_line =
+    xasprintf ("%s %s: %s", program_name_short,
+	       state_text (status), sprint_uptime (uptime_secs));
   printf ("%s | uptime=%d\n", result_line, uptime_mins);
 
   return status;
