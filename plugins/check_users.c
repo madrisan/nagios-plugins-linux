@@ -120,6 +120,7 @@ main (int argc, char **argv)
   status = get_status (numuser, my_threshold);
   free (my_threshold);
 
-  printf ("USERS %s - %d user%s logged on | logged_users=%d\n",
-	  state_text (status), numuser, (numuser == 1 ) ? "" : "s", numuser);
+  printf ("%s %s - %d user%s logged on | logged_users=%d\n",
+	  program_name_short, state_text (status), numuser,
+	  (numuser == 1 ) ? "" : "s", numuser);
 }
