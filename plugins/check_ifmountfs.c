@@ -73,7 +73,7 @@ print_version (void)
   exit (STATE_OK);
 }
 
-static int
+static nagstatus
 check_entry (char const *mountpoint)
 {
   struct mount_entry *me;
@@ -88,7 +88,8 @@ check_entry (char const *mountpoint)
 int
 main (int argc, char **argv)
 {
-  int c, status;  
+  int c, i;
+  nagstatus status = STATE_OK;
 
   set_program_name (argv[0]);
 
@@ -107,6 +108,9 @@ main (int argc, char **argv)
 	}
     }
 
+  if (argc <= optind)
+    usage (stderr);
+
   mount_list = read_file_system_list (false);
 
   if (NULL == mount_list)
@@ -114,27 +118,22 @@ main (int argc, char **argv)
     plugin_error (STATE_UNKNOWN, 0,
                   "cannot read table of mounted file systems");
 
-  status = STATE_OK;
+  for (i = optind; i < argc; ++i)
+    if (STATE_CRITICAL == check_entry (argv[i]))
+      status = STATE_CRITICAL;
+    else
+      /* This is allowed. See:
+       * http://www.open-std.org/JTC1/sc22/wg14/www/docs/n1256.pdf */
+      argv[i] = NULL;
 
-  if (optind < argc)
-    {
-      int i;
-      for (i = optind; i < argc; ++i)
-	if (check_entry (argv[i]) == STATE_CRITICAL)
-	  {
-	    printf ("%s %s",
-                    (status == STATE_OK) ? "FILESYSTEMS CRITICAL:" : ",",
-                    argv[i]);
-	    status = STATE_CRITICAL;
-	  }
-    }
-  else
-    usage (stderr);
+  printf ("filesystems %s", state_text (status));
+  for (i = optind; i < argc; ++i)
+    if (argv[i])
+      printf (" %s", argv[i]);
 
-  if (status == STATE_OK)
-    printf ("FILESYSTEMS OK\n");
-  else
-    printf (" not mounted!\n");
+  if (STATE_CRITICAL == status)
+    printf (" unmounted!");
+  putchar ('\n');
 
   return status;
 }
