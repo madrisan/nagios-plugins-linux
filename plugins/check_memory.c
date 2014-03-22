@@ -244,7 +244,7 @@ main (int argc, char **argv)
 	       , SU (kb_mem_dirty)
 	       , SU (kb_mem_inactive));
 
-  printf ("%s | %s%s\n", status_msg, perfdata_mem_msg,
+  printf ("%s %s | %s%s\n", program_name_short, status_msg, perfdata_mem_msg,
 	  vmem_perfdata ? perfdata_vmem_msg : "");
 
   proc_sysmem_unref (sysmem);
