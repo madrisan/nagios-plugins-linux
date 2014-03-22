@@ -126,7 +126,7 @@ main (int argc, char **argv)
   bool verbose = false;
   unsigned long i, len, delay, count;
   char *critical = NULL, *warning = NULL;
-  char *p, *cpu_progname, *CPU_PROGNAME;
+  char *p, *cpu_progname;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
@@ -157,9 +157,6 @@ main (int argc, char **argv)
       program_shorthelp =
 	strdup ("This plugin checks the CPU (user mode) utilization\n");
     }
-  CPU_PROGNAME = strdup (cpu_progname);
-  for (i = 0; i < strlen (cpu_progname); i++)
-    CPU_PROGNAME[i] = toupper (CPU_PROGNAME[i]);
 
   while ((c = getopt_long (argc, argv,
 			   "c:w:v" GETOPT_HELP_VERSION_STRING,
@@ -270,7 +267,7 @@ main (int argc, char **argv)
     ("%s %s - cpu %s %u%% | "
      "cpu_user=%u%%, cpu_system=%u%%, cpu_idle=%u%%, cpu_iowait=%u%%, "
      "cpu_steal=%u%%\n"
-     , CPU_PROGNAME, state_text (status), cpu_progname, cpu_perc
+     , program_name_short, state_text (status), cpu_progname, cpu_perc
      , (unsigned) ((100 * duser   + divo2) / div)
      , (unsigned) ((100 * dsystem + divo2) / div)
      , (unsigned) ((100 * didle   + divo2) / div)
