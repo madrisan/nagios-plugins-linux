@@ -194,7 +194,7 @@ main (int argc, char **argv)
 	       "swap_cached=%Lu%s", SU (kb_swap_total), SU (kb_swap_used),
 	       SU (kb_swap_free), SU (kb_swap_cached));
 
-  printf ("%s | %s%s\n", status_msg, perfdata_swap_msg,
+  printf ("%s %s | %s%s\n", program_name_short, status_msg, perfdata_swap_msg,
 	  vmem_perfdata ? perfdata_vmem_msg : "");
 
   proc_sysmem_unref (sysmem);

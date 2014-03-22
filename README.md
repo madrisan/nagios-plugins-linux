@@ -149,7 +149,7 @@ These two nagios plugins respectivery check for memory and swap usage.
 	  # vmem_pgmajfault: The number of memory major pagefaults
 
 	check_swap -w 40% -c 60% -m
-	WARNING: 42.70% (895104 kB) used | swap_total=2096444kB, swap_used=895104kB, swap_free=1201340kB, swap_cached=117024kB, swap_pageins/s=97, swap_pageouts/s=73
+	swap WARNING: 42.70% (895104 kB) used | swap_total=2096444kB, swap_used=895104kB, swap_free=1201340kB, swap_cached=117024kB, swap_pageins/s=97, swap_pageouts/s=73
 	  # swap_total   : Total amount of swap space available
 	  # swap_used    : Total amount of swap used by the system
 	  # swap_free    : Amount of swap space that is currently unused
