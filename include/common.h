@@ -18,7 +18,7 @@ There is NO WARRANTY, to the extent permitted by law.\n"
 #define USAGE_HELP \
   "  -h, --help      display this help and exit\n"
 #define USAGE_VERSION \
-  "  -v, --version   output version information and exit\n"
+  "  -V, --version   output version information and exit\n"
 #define USAGE_THRESHOLDS \
   "\
 See the Nagios Developer Guidelines for range format:\n\

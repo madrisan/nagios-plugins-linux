@@ -77,14 +77,14 @@ static bool show_local_fs;
 
 /* If true, show each file system corresponding to the
    command line arguments.  */
-static bool show_listed_fs;
+static bool verbose = false;
 
 static struct option const longopts[] = {
   {(char *) "all", no_argument, NULL, 'a'},
   {(char *) "local", no_argument, NULL, 'l'},
-  {(char *) "list", no_argument, NULL, 'L'},
   {(char *) "type", required_argument, NULL, 'T'},
   {(char *) "exclude-type", required_argument, NULL, 'X'},
+  {(char *) "verbose", no_argument, NULL, 'v'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -102,11 +102,12 @@ usage (FILE * out)
   fputs ("  -a, --all       include dummy file systems\n", out);
   fputs ("  -l, --local     limit listing to local file systems\n",
 	 out);
-  fputs ("  -L, --list      display the list of checked file systems\n", out);
   fputs ("  -T, --type=TYPE   limit listing to file systems of type TYPE\n",
 	 out);
   fputs ("  -X, --exclude-type=TYPE   "
 	 "limit listing to file systems not of type TYPE\n", out);
+  fputs ("  -v, --verbose   show details for command-line debugging "
+         "(Nagios may truncate output)\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
@@ -210,7 +211,7 @@ check_all_entries (char **ro_filesystems)
       if (skip_mount_entry (me))
 	continue;
 
-      if (show_listed_fs)
+      if (verbose)
 	printf ("%-10s %s type %s (%s) %s\n",
 		me->me_devname, me->me_mountdir, me->me_type, me->me_opts,
 		(me->me_readonly) ? "<< read-only" : "");
@@ -246,7 +247,7 @@ check_entry (char const *name)
 	if (skip_mount_entry (me))
 	  return STATE_OK;
 
-	if (show_listed_fs)
+	if (verbose)
 	  printf ("%-10s %s type %s (%s) %s\n",
 		  me->me_devname, me->me_mountdir, me->me_type, me->me_opts,
 		  (me->me_readonly) ? "<< read-only" : "");
@@ -270,13 +271,12 @@ main (int argc, char **argv)
   fs_exclude_list = NULL;
 
   show_local_fs = false;
-  show_listed_fs = false;
   show_all_fs = false;
 
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-          "alLT:X:" GETOPT_HELP_VERSION_STRING, longopts, NULL)) != -1)
+          "alT:X:v" GETOPT_HELP_VERSION_STRING, longopts, NULL)) != -1)
     {
       switch (c)
 	{
@@ -289,14 +289,14 @@ main (int argc, char **argv)
 	case 'l':
 	  show_local_fs = true;
 	  break;
-	case 'L':
-	  show_listed_fs = true;
-	  break;
 	case 'T':
 	  add_fs_type (optarg);
 	  break;
 	case 'X':
 	  add_excluded_fs_type (optarg);
+	  break;
+	case 'v':
+	  verbose = true;
 	  break;
 
 	case_GETOPT_HELP_CHAR
