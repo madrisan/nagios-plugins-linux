@@ -28,6 +28,7 @@
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
+#include "xasprintf.h"
 
 static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
@@ -88,13 +89,15 @@ validate_input (int i, double w, double c)
 int
 main (int argc, char **argv)
 {
-  int c, i, status, numcpus = 1;
+  int c, i;
+  int status = STATE_OK;
+  int numcpus = 1;
   const unsigned int lamin[3] = { 1, 5, 15 };
-  bool first_perfdata;
   bool required[3] = { false, false, false };
   double loadavg[3];
   double wload[3] = { 0.0, 0.0, 0.0 };
   double cload[3] = { 0.0, 0.0, 0.0 };
+  char *status_msg, *perfdata_msg;
 
   set_program_name (argv[0]);
 
@@ -141,8 +144,6 @@ main (int argc, char **argv)
 	loadavg[i] /= numcpus;
     }
 
-  status = STATE_OK;
-
   for (i = 0; i < 3; i++)
     {
       if (required[i] == false)
@@ -157,23 +158,21 @@ main (int argc, char **argv)
 	status = STATE_WARNING;
     }
 
-  printf ("LOAD %s - load average %.2lf, %.2lf, %.2lf | ",
-	  state_text (status), loadavg[0], loadavg[1], loadavg[2]);
+  status_msg =
+    xasprintf ("%s - average: %.2lf, %.2lf, %.2lf",
+	       state_text (status), loadavg[0], loadavg[1], loadavg[2]);
 
-  first_perfdata = true;
-  for (i = 0; i < 3; i++)
-    {
-      if (required[i] == false)
-	continue;
+  /* performance data format:
+   *'label'=value[UOM];[warn];[crit];[min];[max]  */
+  perfdata_msg =
+    xasprintf ("load%d=%.3lf;%.3lf;%.3lf;0, "
+	       "load%d=%.3lf;%.3lf;%.3lf;0, "
+	       "load%d=%.3lf;%.3lf;%.3lf;0"
+	       , lamin[0], loadavg[0], wload[0], cload[0]
+	       , lamin[1], loadavg[1], wload[1], cload[1]
+	       , lamin[2], loadavg[2], wload[2], cload[2]);
 
-      /* performance data format:
-       *'label'=value[UOM];[warn];[crit];[min];[max]  */
-      printf ("%sload%d=%.3lf;%.3lf;%.3lf;0",
-	      (first_perfdata == true) ? "" : ", ",
-	      lamin[i], loadavg[i], wload[i], cload[i]);
-      first_perfdata = false;
-    }
-  printf ("\n");
+  printf ("%s %s | %s\n", program_name_short, status_msg, perfdata_msg);
 
   return status;
 }
