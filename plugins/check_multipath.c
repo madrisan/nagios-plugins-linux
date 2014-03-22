@@ -230,7 +230,7 @@ main (int argc, char **argv)
     }
 
   if (getuid () != 0)
-    plugin_error (STATE_UNKNOWN, 0, "need to be root\n");
+    plugin_error (STATE_UNKNOWN, 0, "need to be root");
 
   multipathd_query ("show paths", buffer, sizeof (buffer));
   faulty_paths = check_for_faulty_paths (buffer);
