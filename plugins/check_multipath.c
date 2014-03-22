@@ -237,10 +237,11 @@ main (int argc, char **argv)
 
   if (faulty_paths > 0)
     {
-      printf ("MULTIPATH CRITICAL: found %d faulty path(s)\n", faulty_paths);
+      printf ("%s %s: found %d faulty path(s)\n", program_name_short,
+	      state_text (STATE_CRITICAL), faulty_paths);
       return STATE_CRITICAL;
     }
 
-  printf ("MULTIPATH OK\n");
+  printf ("%s %s\n", program_name_short, state_text (STATE_OK));
   return STATE_OK;
 }
