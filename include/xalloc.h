@@ -22,14 +22,16 @@
 extern "C" {
 # endif
 
-  void *xmalloc (size_t s)
+  void *xmalloc (const size_t s)
 	_attribute_malloc_ _attribute_alloc_size_ ((1));
-  void *xmemdup (void const *p, size_t s)
+  void *xmemdup (void const *p, const size_t s)
 	_attribute_malloc_ _attribute_alloc_size_ ((2));
   char *xstrdup (char const *str)
 	_attribute_malloc_;
-  void *xnmalloc (size_t n, size_t s)
+  void *xnmalloc (const size_t n, const size_t s)
 	_attribute_malloc_ _attribute_alloc_size_ ((1, 2));
+  void *xrealloc (void *p, const size_t s)
+	_attribute_malloc_ _attribute_alloc_size_ ((2));
 
 #ifdef __cplusplus
 }

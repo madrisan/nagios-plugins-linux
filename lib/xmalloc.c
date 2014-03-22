@@ -26,7 +26,7 @@
 /* Allocate N bytes of memory dynamically, with error checking.  */
 
 void *
-xmalloc (size_t n)
+xmalloc (const size_t n)
 {
   void *p = calloc (1, n);
   if (!p && n != 0)
@@ -39,7 +39,7 @@ xmalloc (size_t n)
  *       need for an arithmetic overflow check.  */
 
 void *
-xmemdup (void const *p, size_t s)
+xmemdup (void const *p, const size_t s)
 {
   return memcpy (xmalloc (s), p, s);
 }
@@ -56,7 +56,18 @@ xstrdup (char const *string)
  *    dynamically, with error checking.  S must be nonzero.  */
 
 void *
-xnmalloc (size_t n, size_t s)
+xnmalloc (const size_t n, const size_t s)
 {
   return xmalloc (n * s);
+}
+
+/* Memory allocation wrapper for realloc */
+
+void *
+xrealloc (void *ptr, const size_t size)
+{
+  void *ret = realloc (ptr, size);
+  if (!ret && size)
+    plugin_error (STATE_UNKNOWN, errno, "memory exhausted");
+  return ret;
 }

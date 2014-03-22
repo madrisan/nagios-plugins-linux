@@ -198,10 +198,12 @@ skip_mount_entry (struct mount_entry *me)
 }
 
 static int
-check_all_entries (void)
+check_all_entries (char **ro_filesystems)
 {
   struct mount_entry *me;
   int status = STATE_OK;
+  char *p;
+  size_t len;
 
   for (me = mount_list; me; me = me->me_next)
     {
@@ -212,13 +214,19 @@ check_all_entries (void)
 	printf ("%-10s %s type %s (%s) %s\n",
 		me->me_devname, me->me_mountdir, me->me_type, me->me_opts,
 		(me->me_readonly) ? "<< read-only" : "");
-      else if (me->me_readonly && (status == STATE_OK))
-	printf ("FILESYSTEMS CRITICAL: %s", me->me_mountdir);
-      else if (me->me_readonly)
-	printf (",%s", me->me_mountdir);
-
       if (me->me_readonly)
-	status = STATE_CRITICAL;
+	{
+	  if (*ro_filesystems == NULL)
+	    *ro_filesystems = xstrdup (me->me_mountdir);
+	  else
+	    {
+	      len = strlen (*ro_filesystems) + strlen (me->me_mountdir) + 2;
+	      p = xrealloc (*ro_filesystems, len);
+	      sprintf (p, "%s %s", *ro_filesystems, me->me_mountdir);
+	      *ro_filesystems = p;
+	    }
+	  status = STATE_CRITICAL;
+	}
     }
 
   return status;
@@ -228,6 +236,9 @@ static int
 check_entry (char const *name)
 {
   struct mount_entry *me;
+
+  if (name == NULL)
+    return STATE_OK;
 
   for (me = mount_list; me; me = me->me_next)
     if (STREQ (me->me_mountdir, name))
@@ -250,7 +261,9 @@ check_entry (char const *name)
 int
 main (int argc, char **argv)
 {
-  int c, status = STATE_OK;
+  int c, i;
+  int status = STATE_OK;
+  char *ro_filesystems = NULL;
   struct stat *stats = 0;
 
   fs_select_list = NULL;
@@ -311,8 +324,6 @@ main (int argc, char **argv)
 
   if (optind < argc)
     {
-      int i;
-
       /* Open each of the given entries to make sure any corresponding
        * partition is automounted.  This must be done before reading the
        * file system table.  */
@@ -345,23 +356,31 @@ main (int argc, char **argv)
 
   if (optind < argc)
     {
-      int i;
-
       for (i = optind; i < argc; ++i)
-	if (argv[i] && (check_entry (argv[i]) == STATE_CRITICAL))
-	  {
-	    if (!show_listed_fs)
-	      printf ("%s%s",
-		      status == STATE_OK ? "FILESYSTEMS CRITICAL: " : ",",
-		      argv[i]);
+	{
+	  if (STATE_CRITICAL == check_entry (argv[i]))
 	    status = STATE_CRITICAL;
-	  }
+	  else
+	    argv[i] = NULL;
+	}
+
+      printf ("%s %s", program_name_short, state_text (status));
+      if (STATE_CRITICAL == status)
+	{
+	  for (i = optind; i < argc; ++i)
+	    if (argv[i])
+	      printf (" %s", argv[i]);
+	  printf (" readonly!");
+	}
+
+      putchar ('\n');
+      return status;
     }
   else
-    status = check_all_entries ();
+    status = check_all_entries (&ro_filesystems);
 
-  if (!show_listed_fs)
-    printf ("%s\n", (status == STATE_OK) ? "FILESYSTEMS OK" : " readonly!");
-
+  printf ("%s %s %s readonly!\n", program_name_short, state_text (status),
+	  ro_filesystems);
+  free (ro_filesystems);
   return status;
 }
