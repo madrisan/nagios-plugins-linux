@@ -13,6 +13,7 @@ Here is the list of the available plugins:
 * check_load
 * check_memory
 * check_multipath
+* check_paging
 * check_readonlyfs
 * check_swap
 * check_uptime
@@ -40,11 +41,11 @@ This Nagios plugin checks the CPU (user mode) utilization.
 *Examples*
 
 	check_cpu -w 85% -c 95%
-	USER OK - cpu user 23% | cpu_user=23%, cpu_system=10%, cpu_idle=66%, cpu_iowait=0%, cpu_steal=0%
+	cpu OK - cpu user 23% | cpu_user=23%, cpu_system=10%, cpu_idle=66%, cpu_iowait=0%, cpu_steal=0%
 	
 	# count = 1 means the percentages of total CPU time from boottime
 	check_cpu -w 85% -c 95% 1 1
-	USER OK - cpu user 34% | cpu_user=34%, cpu_system=11%, cpu_idle=49%, cpu_iowait=7%, cpu_steal=0%
+	cpu OK - cpu user 34% | cpu_user=34%, cpu_system=11%, cpu_idle=49%, cpu_iowait=7%, cpu_steal=0%
 
 
 **The check_ifmountfs plugin**
@@ -81,11 +82,11 @@ This Nagios plugin checks for I/O wait bottlenecks.
 *Examples*
 
 	check_iowait -w 10% -c 20%
-	IOWAIT OK - cpu iowait 0% | cpu_user=31%, cpu_system=13%, cpu_idle=56%, cpu_iowait=0%, cpu_steal=0%
+	iowait OK - cpu iowait 0% | cpu_user=31%, cpu_system=13%, cpu_idle=56%, cpu_iowait=0%, cpu_steal=0%
 	
 	# count = 1 means the percentages of total CPU time from boottime
 	check_iowait -w 10% -c 20% 1 1
-	IOWAIT OK - cpu iowait 7% | cpu_user=34%, cpu_system=11%, cpu_idle=49%, cpu_iowait=7%, cpu_steal=0%
+	iowait OK - cpu iowait 7% | cpu_user=34%, cpu_system=11%, cpu_idle=49%, cpu_iowait=7%, cpu_steal=0%
 
 
 **The check_load plugin**
@@ -175,6 +176,26 @@ This Nagios plugin checks the multipath topology status.
 *Examples*
 
 	check_multipath
+
+
+**The check_paging plugin**
+
+This Nagios plugin checks for memory and swap paging.
+
+*Usage*
+
+	check_paging [--paging] [--swapping]
+	check_paging --help
+
+*Options* 
+
+	-p, --paging    display the page reads and writes
+	-s, --swapping  display the swap reads amd writes
+	-h, --help      display this help and exit
+
+*Examples*
+
+	check_paging --paging --swapping -w 10 -c 25
 
 
 **The check_readonlyfs plugin**
