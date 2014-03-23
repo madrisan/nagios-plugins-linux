@@ -33,6 +33,7 @@
 #include "progversion.h"
 #include "thresholds.h"
 #include "vminfo.h"
+#include "xalloc.h"
 #include "xasprintf.h"
 
 static const char *program_copyright =
@@ -141,10 +142,10 @@ main (int argc, char **argv)
         case 'w':
           warning = optarg;
           break;
-        case 'b': shift = b_shift; units = strdup ("B"); break;
-        case 'k': shift = k_shift; units = strdup ("kB"); break;
-        case 'm': shift = m_shift; units = strdup ("MB"); break;
-        case 'g': shift = g_shift; units = strdup ("GB"); break;
+        case 'b': shift = b_shift; units = xstrdup ("B"); break;
+        case 'k': shift = k_shift; units = xstrdup ("kB"); break;
+        case 'm': shift = m_shift; units = xstrdup ("MB"); break;
+        case 'g': shift = g_shift; units = xstrdup ("GB"); break;
 
         case_GETOPT_HELP_CHAR
         case_GETOPT_VERSION_CHAR
@@ -158,7 +159,7 @@ main (int argc, char **argv)
 
   /* output in kilobytes by default */
   if (units == NULL)
-    units = strdup ("kB");
+    units = xstrdup ("kB");
 
   err = proc_sysmem_new (&sysmem);
   if (err < 0)

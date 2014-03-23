@@ -41,6 +41,7 @@
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
+#include "xalloc.h"
 
 /* by default one iteration with 1sec delay */
 #define DELAY_DEFAULT	1
@@ -145,17 +146,17 @@ main (int argc, char **argv)
 
   if (!strncmp (p, "iowait", 6))	/* check_iowait --> cpu_iowait */
     {
-      cpu_progname = strdup ("iowait");
+      cpu_progname = xstrdup ("iowait");
       cpu_value = &diowait;
       program_shorthelp =
-	strdup ("This plugin checks I/O wait bottlenecks\n");
+	xstrdup ("This plugin checks I/O wait bottlenecks\n");
     }
   else				/* check_cpu --> cpu_user (the default) */
     {
-      cpu_progname = strdup ("user");;
+      cpu_progname = xstrdup ("user");;
       cpu_value = &duser;
       program_shorthelp =
-	strdup ("This plugin checks the CPU (user mode) utilization\n");
+	xstrdup ("This plugin checks the CPU (user mode) utilization\n");
     }
 
   while ((c = getopt_long (argc, argv,
