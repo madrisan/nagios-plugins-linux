@@ -52,8 +52,8 @@ procparser (char *filename, const proc_table_struct *proc_table,
   unsigned long long slotll;
 #endif
 
-  if ((fp = fopen (filename,  "r")) < 0)
-    plugin_error (STATE_UNKNOWN, errno, "Error: /proc must be mounted");
+  if ((fp = fopen (filename,  "r")) == NULL)
+    plugin_error (STATE_UNKNOWN, errno, "error: cannot read %s", filename);
 
   while ((chread = getline (&line, &len, fp)) != -1)
     {

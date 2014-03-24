@@ -109,8 +109,8 @@ proc_tcptable_read (struct proc_tcptable *tcptable)
 
   struct proc_tcptable_data *data = tcptable->data;
 
-  if ((fp = fopen (PROC_TCPINFO, "r")) < 0)
-    plugin_error (STATE_UNKNOWN, errno, "Error: /proc must be mounted");
+  if ((fp = fopen (PROC_TCPINFO, "r")) == NULL)
+    plugin_error (STATE_UNKNOWN, errno, "error: cannot read %s", PROC_TCPINFO);
 
   /* sl local_addr:local_port rem_addr:rem_port st ... */
   while ((nread = getline (&line, &len, fp)) != -1)
