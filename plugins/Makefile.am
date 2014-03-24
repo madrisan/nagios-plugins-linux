@@ -14,6 +14,7 @@ libexec_PROGRAMS =       \
 	check_paging     \
 	check_readonlyfs \
 	check_swap       \
+	check_tcpcount   \
 	check_uptime     \
 	check_users
 if HAVE_GETLOADAVG
@@ -30,6 +31,7 @@ check_multipath_SOURCES  = check_multipath.c
 check_paging_SOURCES     = check_paging.c
 check_readonlyfs_SOURCES = check_readonlyfs.c
 check_swap_SOURCES       = check_swap.c
+check_tcpcount_SOURCES   = check_tcpcount.c
 check_uptime_SOURCES     = check_uptime.c
 check_users_SOURCES      = check_users.c
 
@@ -45,6 +47,7 @@ check_multipath_LDADD    = $(LDADD)
 check_paging_LDADD       = $(LDADD)
 check_readonlyfs_LDADD   = $(LDADD)
 check_swap_LDADD         = $(LDADD)
+check_tcpcount_LDADD     = $(LDADD)
 check_uptime_LDADD       = $(LDADD)
 check_users_LDADD        = $(LDADD)
 
