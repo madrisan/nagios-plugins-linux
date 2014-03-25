@@ -16,6 +16,7 @@ Here is the list of the available plugins:
 * check_paging
 * check_readonlyfs
 * check_swap
+* check_tcpcount
 * check_uptime
 * check_user
 
@@ -207,7 +208,7 @@ This Nagios plugin checks for readonly filesystems.
 	check_readonlyfs [OPTION]... [FILE]...
 	check_readonlyfs --help
 
-*Options* 
+*Options*
 
 	-l, --local               limit listing to local file systems
 	-L, --list                display the list of checked file systems
@@ -220,6 +221,28 @@ This Nagios plugin checks for readonly filesystems.
 	check_readonlyfs
 	check_readonlyfs -l -T ext3 -T ext4
 	check_readonlyfs -l -X vfat
+
+
+**The check_tcpcount plugin**
+
+This plugin displays TCP network and socket informations.
+
+*Usage*
+
+	check_tcpcount [--tcp] [--tcp6] --warning COUNTER --critical COUNTER
+	check_tcpcount --help
+
+*Options*
+
+	-t, --tcp     display the statistics for the TCP protocol (the default)
+	-6, --tcp6    display the statistics for the TCPv6 protocol
+	-h, --help    display this help and exit
+
+*Examples*
+
+	check_tcpcount -w 1000 -c 1500
+	check_tcpcount --tcp6 -w 1000 -c 1500
+	check_tcpcount --tcp --tcp6 -w 1500 -c 2000
 
 
 **The check_uptime plugin**
