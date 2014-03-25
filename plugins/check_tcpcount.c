@@ -50,17 +50,22 @@ usage (FILE * out)
   fputs ("This plugin displays TCP network and socket informations.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s -w COUNTER -c COUNTER\n", program_name);
+  fprintf (out, "  %s [--tcp] [--tcp6] -w COUNTER -c COUNTER\n",
+	   program_name);
   fputs (USAGE_OPTIONS, out);
-  fputs ("  -t, --tcp     Display the statistics for the TCP protocol "
+  fputs ("  -t, --tcp     display the statistics for the TCP protocol "
 	 "(the default)\n", out);
-  fputs ("  -6, --tcp6    Display the statistics for the TCPv6 protocol\n", out);
+  fputs ("  -6, --tcp6    display the statistics for the TCPv6 protocol\n", out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s --tcp --tcp6 -w 1500 -c 2000\n", program_name);
+  fprintf (out, "  %s --tcp -w 1000 -c 1500    # TCPv4 only (the default)\n",
+	   program_name);
+  fprintf (out, "  %s --tcp --tcp6 -w 1500 -c 2000   # TCPv4 and TCPv6\n",
+	   program_name);
+  fprintf (out, "  %s --tcp6 -w 1500 -c 2000   # TCPv6 only\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
