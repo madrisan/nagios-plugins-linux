@@ -19,6 +19,7 @@
 
 #include <sys/types.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -26,7 +27,11 @@
 #include "messages.h"
 
 #define PROC_TCPINFO  "/proc/net/tcp"
-/*#define PROC_TCP6INFO  "/proc/net/tcp6"*/
+#define PROC_TCP6INFO  "/proc/net/tcp6"
+
+#define TCP_UNSET  0
+#define TCP_v4     1
+#define TCP_v6     2
 
 typedef enum tcp_status
 {
@@ -64,35 +69,10 @@ typedef struct proc_tcptable
   struct proc_tcptable_data *data;
 } proc_tcptable_t;
 
-/* Allocates space for a new tcptable object.
- * Returns 0 if all went ok. Errors are returned as negative values. */
+/* Parses /proc/net/tcp and /proc/net/tcp6 */
 
-int
-proc_tcptable_new (struct proc_tcptable **tcptable)
-{
-  struct proc_tcptable *t;
-
-  t = calloc (1, sizeof (struct proc_tcptable));
-  if (!t)
-    return -ENOMEM;
-
-  t->refcount = 1;
-  t->data = calloc (1, sizeof (struct proc_tcptable_data));
-  if (!t->data)
-    {
-      free (t);
-      return -ENOMEM;
-    }
-
-  *tcptable = t;
-  return 0;
-}
-
-/* Fill the proc_tcptable structure pointed will the values found in the
- * proc filesystem. */
-
-void
-proc_tcptable_read (struct proc_tcptable *tcptable)
+static void
+procparser_tcp (const char *procfile, struct proc_tcptable_data *data)
 {
   FILE *fp;
   char *line = NULL;
@@ -100,17 +80,12 @@ proc_tcptable_read (struct proc_tcptable *tcptable)
   ssize_t nread;
 
   char local_addr[128], rem_addr[128];
-  int linenum = 1;
   int slot, num, local_port, rem_port, state, timer_run, uid, timeout;
+  int linenum = 1;
   unsigned long rxq, txq, time_len, retr, inode;
 
-  if (tcptable == NULL)
-    return;
-
-  struct proc_tcptable_data *data = tcptable->data;
-
-  if ((fp = fopen (PROC_TCPINFO, "r")) == NULL)
-    plugin_error (STATE_UNKNOWN, errno, "error: cannot read %s", PROC_TCPINFO);
+  if ((fp = fopen (procfile, "r")) == NULL)
+    plugin_error (STATE_UNKNOWN, errno, "error opening %s", procfile);
 
   /* sl local_addr:local_port rem_addr:rem_port st ... */
   while ((nread = getline (&line, &len, fp)) != -1)
@@ -168,6 +143,48 @@ proc_tcptable_read (struct proc_tcptable *tcptable)
     }
 
   free (line);
+}
+
+/* Allocates space for a new tcptable object.
+ * Returns 0 if all went ok. Errors are returned as negative values. */
+
+int
+proc_tcptable_new (struct proc_tcptable **tcptable)
+{
+  struct proc_tcptable *t;
+
+  t = calloc (1, sizeof (struct proc_tcptable));
+  if (!t)
+    return -ENOMEM;
+
+  t->refcount = 1;
+  t->data = calloc (1, sizeof (struct proc_tcptable_data));
+  if (!t->data)
+    {
+      free (t);
+      return -ENOMEM;
+    }
+
+  *tcptable = t;
+  return 0;
+}
+
+/* Fill the proc_tcptable structure pointed will the values found in the
+ * proc filesystem. */
+
+void
+proc_tcptable_read (struct proc_tcptable *tcptable, int flags)
+{
+  if (tcptable == NULL)
+    return;
+
+  struct proc_tcptable_data *data = tcptable->data;
+
+  if (flags & TCP_v4)
+    procparser_tcp (PROC_TCPINFO, data);
+
+  if (flags & TCP_v6)
+    procparser_tcp (PROC_TCP6INFO, data);
 }
 
 struct proc_tcptable *

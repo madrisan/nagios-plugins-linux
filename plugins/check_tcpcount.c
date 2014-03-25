@@ -34,6 +34,8 @@ static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
+  {(char *) "tcp", no_argument, NULL, 't'},
+  {(char *) "tcp6", no_argument, NULL, '6'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
@@ -50,12 +52,15 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s -w COUNTER -c COUNTER\n", program_name);
   fputs (USAGE_OPTIONS, out);
+  fputs ("  -t, --tcp     Display the statistics for the TCP protocol "
+	 "(the default)\n", out);
+  fputs ("  -6, --tcp6    Display the statistics for the TCPv6 protocol\n", out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s -w 1500 -c 2000\n", program_name);
+  fprintf (out, "  %s --tcp --tcp6 -w 1500 -c 2000\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -74,6 +79,7 @@ int
 main (int argc, char **argv)
 {
   int c, err;
+  unsigned int tcp_flags = TCP_UNSET;
   char *critical = NULL, *warning = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
@@ -94,13 +100,19 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "c:w" GETOPT_HELP_VERSION_STRING,
+			   "t6c:w" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
 	{
 	default:
 	  usage (stderr);
+	case 't':
+	  tcp_flags |= TCP_v4;
+	  break;
+	case '6':
+	  tcp_flags |= TCP_v6;
+	  break;
 	case 'c':
 	  critical = optarg;
 	  break;
@@ -114,6 +126,9 @@ main (int argc, char **argv)
 	}
     }
 
+  if (tcp_flags == TCP_UNSET)
+    tcp_flags = TCP_v4;
+
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
@@ -122,7 +137,7 @@ main (int argc, char **argv)
   if (err < 0)
     plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
-  proc_tcptable_read (tcptable);
+  proc_tcptable_read (tcptable, tcp_flags);
 
   tcp_established = proc_tcp_get_tcp_established (tcptable);
   tcp_syn_sent    = proc_tcp_get_tcp_syn_sent (tcptable);

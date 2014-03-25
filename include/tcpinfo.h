@@ -18,6 +18,10 @@
 
 #include <stdbool.h>
 
+#define TCP_UNSET  0
+#define TCP_v4     1
+#define TCP_v6     2
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -31,7 +35,7 @@ extern "C"
 
   /* Fill the proc_tcptable structure pointed with the values found in the
    * proc filesystem.  */
-  void proc_tcptable_read (struct proc_tcptable *tcptable);
+  void proc_tcptable_read (struct proc_tcptable *tcptable, int flags);
 
   /* Drop a reference of the tcptable library context. If the refcount of
    * reaches zero, the resources of the context will be released.  */
