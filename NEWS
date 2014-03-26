@@ -1,3 +1,18 @@
+    Major changes between "nagios-plugins-linux" versions 4 and 5
+
+* New plugins 'check_paging' and 'check_tcpcount'.
+* The plugun 'check_load' now always display the three loads (1, 5,
+  and 15 minuts load) in the perfdata.
+* Plugins 'check_memory', 'check_swap': new argument '--vmstats'.
+* Plugin 'check_memory': properly handle memory used by tmpfs.
+* Reports the paging activity per second instead of the value since
+  last boot in 'check_memory', and 'check_swap'.
+* The internal libraries have been completely reworked.
+* Build system: rework the build system and enable the silent mode.
+* Several fixes.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 3 and 4
 
 * New plugins 'check_users' and 'check_multipath'.
