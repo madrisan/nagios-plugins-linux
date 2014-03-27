@@ -198,6 +198,7 @@ main (int argc, char **argv)
   printf ("%s %s | %s%s\n", program_name_short, status_msg, perfdata_swap_msg,
 	  vmem_perfdata ? perfdata_vmem_msg : "");
 
+  proc_vmem_unref (vmem);
   proc_sysmem_unref (sysmem);
 
   return status;
