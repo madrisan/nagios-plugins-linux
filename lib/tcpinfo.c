@@ -22,6 +22,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h>
+#if HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
 
 #include "common.h"
 #include "messages.h"
@@ -29,9 +34,10 @@
 #define PROC_TCPINFO  "/proc/net/tcp"
 #define PROC_TCP6INFO  "/proc/net/tcp6"
 
-#define TCP_UNSET  0
-#define TCP_v4     1
-#define TCP_v6     2
+#define TCP_UNSET   0
+#define TCP_VERBOSE 1
+#define TCP_v4      4
+#define TCP_v6      6
 
 typedef enum tcp_status
 {
@@ -47,6 +53,22 @@ typedef enum tcp_status
   TCP_LISTEN,
   TCP_CLOSING			/* now a valid state */
 } tcp_status;
+
+static const char *tcp_state[] =
+{
+    "",
+    "ESTABLISHED",
+    "SYN_SENT",
+    "SYN_RECV",
+    "FIN_WAIT1",
+    "FIN_WAIT2",
+    "TIME_WAIT",
+    "CLOSE",
+    "CLOSE_WAIT",
+    "LAST_ACK",
+    "LISTEN",
+    "CLOSING"
+};
 
 typedef struct proc_tcptable_data
 {
@@ -69,20 +91,29 @@ typedef struct proc_tcptable
   struct proc_tcptable_data *data;
 } proc_tcptable_t;
 
+
 /* Parses /proc/net/tcp and /proc/net/tcp6 */
 
 static void
-procparser_tcp (const char *procfile, struct proc_tcptable_data *data)
+procparser_tcp (const char *procfile, struct proc_tcptable_data *data,
+	        bool verbose)
 {
   FILE *fp;
   char *line = NULL;
   size_t len = 0;
   ssize_t nread;
 
-  char local_addr[128], rem_addr[128];
+  char local_addr_buf[128], rem_addr_buf[128];
   int slot, num, local_port, rem_port, state, timer_run, uid, timeout;
-  int linenum = 1;
+  unsigned long lnr = 0;
   unsigned long rxq, txq, time_len, retr, inode;
+#if HAVE_AFINET6
+  char lbuffer[INET6_ADDRSTRLEN], rbuffer[INET6_ADDRSTRLEN];
+  struct in6_addr in6;
+#else
+  char lbuffer[INET_ADDRSTRLEN], rbuffer[INET_ADDRSTRLEN];
+#endif
+  struct sockaddr_in in;
 
   if ((fp = fopen (procfile, "r")) == NULL)
     plugin_error (STATE_UNKNOWN, errno, "error opening %s", procfile);
@@ -90,17 +121,25 @@ procparser_tcp (const char *procfile, struct proc_tcptable_data *data)
   /* sl local_addr:local_port rem_addr:rem_port st ... */
   while ((nread = getline (&line, &len, fp)) != -1)
     {
+      if (++lnr == 1) /* Skip the heading line */
+	{
+	  if (verbose)
+//          printf(" tcp   %-11s %15s:%-6d  %15s:%-6d\n", tcpstate (state),
+
+	    printf ("[%s]\nproto  %-11s %20s %22s\n", procfile,
+		    "status", "local-addr:port", "remote-addr:port");
+	  continue;
+	}
+
       num =
 	sscanf (line,
 		"%d: %64[0-9A-Fa-f]:%X %64[0-9A-Fa-f]:%X %X "
 		"%lX:%lX %X:%lX %lX %d %d %lu %*s\n",
-		&slot, local_addr, &local_port, rem_addr, &rem_port, &state,
-		&txq, &rxq, &timer_run, &time_len, &retr, &uid, &timeout,
-		&inode);
-
-      if ((linenum > 1) /* Skip the heading line */
-	   && (num < 11))
-	fprintf (stderr, "warning, got bogus tcp line.\n%s\n", line);
+		&slot, local_addr_buf, &local_port, rem_addr_buf, &rem_port,
+		&state, &txq, &rxq, &timer_run, &time_len, &retr, &uid,
+		&timeout, &inode);
+      if (num < 11)
+	fprintf (stderr, "warning, got bogus tcp line.\n%s", line);
 
       switch (state)
 	{
@@ -139,7 +178,38 @@ procparser_tcp (const char *procfile, struct proc_tcptable_data *data)
 	  break;
 	}
 
-      linenum++;
+      if (verbose == false)
+	continue;
+
+      /* Demangle what the kernel gives us */
+      if (strlen (local_addr_buf) > 8)
+	{
+#if HAVE_AFINET6
+	  sscanf (local_addr_buf, "%08X%08X%08X%08X",
+		  &in6.s6_addr32[0], &in6.s6_addr32[1],
+		  &in6.s6_addr32[2], &in6.s6_addr32[3]);
+          /*in6.sin6_family = AF_INET6;*/
+	  inet_ntop (AF_INET6, &in6, lbuffer, sizeof (lbuffer));
+	  sscanf (rem_addr_buf, "%08X%08X%08X%08X",
+		  &in6.s6_addr32[0], &in6.s6_addr32[1],
+		  &in6.s6_addr32[2], &in6.s6_addr32[3]);
+	  inet_ntop (AF_INET6, &in6, rbuffer, sizeof (rbuffer));
+
+	  printf(" tcp6  %-11s %15s:%-6d %15s:%-6d\n", tcp_state[state],
+		 lbuffer, local_port, rbuffer, rem_port);
+#endif
+	}
+      else
+	{
+	  sscanf (local_addr_buf, "%X", &in.sin_addr.s_addr);
+	  /*in.sa_family = AF_INET;*/
+	  inet_ntop (AF_INET, &in.sin_addr, lbuffer, sizeof (lbuffer));
+	  sscanf (rem_addr_buf, "%X", &in.sin_addr.s_addr);
+	  inet_ntop (AF_INET, &in.sin_addr, rbuffer, sizeof (rbuffer));
+
+	  printf(" tcp   %-11s %15s:%-6d %15s:%-6d\n", tcp_state[state],
+		 lbuffer, local_port, rbuffer, rem_port);
+	}
     }
 
   free (line);
@@ -178,13 +248,14 @@ proc_tcptable_read (struct proc_tcptable *tcptable, int flags)
   if (tcptable == NULL)
     return;
 
+  bool verbose = (flags & TCP_VERBOSE) ? true : false;
   struct proc_tcptable_data *data = tcptable->data;
 
   if (flags & TCP_v4)
-    procparser_tcp (PROC_TCPINFO, data);
+    procparser_tcp (PROC_TCPINFO, data, verbose);
 
   if (flags & TCP_v6)
-    procparser_tcp (PROC_TCP6INFO, data);
+    procparser_tcp (PROC_TCP6INFO, data, verbose);
 }
 
 struct proc_tcptable *

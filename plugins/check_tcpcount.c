@@ -38,6 +38,7 @@ static struct option const longopts[] = {
   {(char *) "tcp6", no_argument, NULL, '6'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
+  {(char *) "verbose", no_argument, NULL, 'v'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -53,11 +54,14 @@ usage (FILE * out)
   fprintf (out, "  %s [--tcp] [--tcp6] -w COUNTER -c COUNTER\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
-  fputs ("  -t, --tcp     display the statistics for the TCP protocol "
+  fputs ("  -t, --tcp       display the statistics for the TCP protocol "
 	 "(the default)\n", out);
-  fputs ("  -6, --tcp6    display the statistics for the TCPv6 protocol\n", out);
+  fputs ("  -6, --tcp6      display the statistics for the TCPv6 protocol\n",
+	 out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
+  fputs ("  -v, --verbose   show details for command-line debugging "
+	 "(Nagios may truncate output)\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
@@ -84,6 +88,7 @@ int
 main (int argc, char **argv)
 {
   int c, err;
+  bool verbose = false;
   unsigned int tcp_flags = TCP_UNSET;
   char *critical = NULL, *warning = NULL;
   nagstatus status = STATE_OK;
@@ -105,7 +110,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "t6c:w" GETOPT_HELP_VERSION_STRING,
+			   "t6c:w:v" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -124,6 +129,9 @@ main (int argc, char **argv)
 	case 'w':
 	  warning = optarg;
 	  break;
+	case 'v':
+	  verbose = true;
+	  break;
 
 	case_GETOPT_HELP_CHAR
 	case_GETOPT_VERSION_CHAR
@@ -133,6 +141,9 @@ main (int argc, char **argv)
 
   if (tcp_flags == TCP_UNSET)
     tcp_flags = TCP_v4;
+
+  if (verbose)
+    tcp_flags |= TCP_VERBOSE;
 
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)

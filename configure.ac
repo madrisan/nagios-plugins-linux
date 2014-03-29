@@ -150,6 +150,7 @@ dnl Checks for header files
 AC_HEADER_STDC
 
 AC_CHECK_HEADERS([ \
+  netinet/in.h \
   sys/mount.h \
   sys/param.h \
   sys/sysctl.h \
@@ -209,6 +210,13 @@ AC_CHECK_FUNCS([get_nprocs_conf get_nprocs], [],
 have_func_getloadavg=false
 AC_CHECK_FUNC([getloadavg], [have_func_getloadavg=true])
 AM_CONDITIONAL([HAVE_GETLOADAVG], [test x$have_func_getloadavg = xtrue])
+
+AC_CHECK_TYPE(struct sockaddr_in6,
+  [AC_DEFINE(HAVE_AFINET6, 1,
+    [Define to 1 if struct sockaddr_in6 is available])],
+  [working_ipv6=no],
+  [#include <sys/types.h>
+   #include <netinet/in.h>])
 
 MULTIPATHD_SOCKET="/var/run/multipathd.sock"
 AC_ARG_WITH(
