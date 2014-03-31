@@ -11,6 +11,7 @@ libexec_PROGRAMS =       \
 	check_ifmountfs  \
 	check_memory     \
 	check_multipath  \
+	check_nbprocs    \
 	check_paging     \
 	check_readonlyfs \
 	check_swap       \
@@ -28,6 +29,7 @@ check_load_SOURCES       = check_load.c
 endif
 check_memory_SOURCES     = check_memory.c
 check_multipath_SOURCES  = check_multipath.c
+check_nbprocs_SOURCES    = check_nbprocs.c
 check_paging_SOURCES     = check_paging.c
 check_readonlyfs_SOURCES = check_readonlyfs.c
 check_swap_SOURCES       = check_swap.c
@@ -43,6 +45,7 @@ if HAVE_GETLOADAVG
 check_load_LDADD         = $(LDADD)
 endif
 check_memory_LDADD       = $(LDADD)
+check_nbprocs_LDADD      = $(LDADD)
 check_multipath_LDADD    = $(LDADD)
 check_paging_LDADD       = $(LDADD)
 check_readonlyfs_LDADD   = $(LDADD)
