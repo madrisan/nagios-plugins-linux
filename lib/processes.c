@@ -34,11 +34,6 @@
 #define PROC_ROOT  "/proc"
 #define MAX_LINE   1000
 
-#define proc_list_node_foreach(list_entry, list) \
-        for (list_entry = list->next; \
-             list_entry != list_entry->next; \
-             list_entry = procs_list_node_get_next(list_entry))
-
 /* Return name corresponding to 'uid', or NULL on error */
 
 char *
@@ -56,6 +51,29 @@ struct procs_list_node
   struct procs_list_node *next;
 };
 
+long
+procs_list_node_get_nbr (struct procs_list_node *node)
+{
+  return node->nbr;
+}
+
+char *
+procs_list_node_get_username (struct procs_list_node *node)
+{
+  return node->username;
+}
+
+struct procs_list_node *
+procs_list_node_get_next (struct procs_list_node *node)
+{
+  return node->next;
+}
+
+long procs_list_node_get_total_procs_nbr (struct procs_list_node *list)
+{
+  return list->nbr;
+}
+
 void
 procs_list_node_init (struct procs_list_node **list)
 {
@@ -63,14 +81,9 @@ procs_list_node_init (struct procs_list_node **list)
   
   /* The list's head points to itself if empty */
   new->uid = -1;
+  new->nbr = 0;		/* will hold the total number of processes */
   new->next = new;
   *list = new;
-}
-
-struct procs_list_node *
-procs_list_node_get_next (struct procs_list_node *node)
-{
-  return node->next;
 }
 
 struct procs_list_node *
@@ -87,9 +100,12 @@ procs_list_node_add (uid_t uid, struct procs_list_node *plist)
 	{
 	  p->nbr++;
 	  //printf ("DEBUG: found uid %d (now #%ld)\n", uid, p->nbr);
+	  plist->nbr++;
 	  return p;
 	}
     }
+
+  plist->nbr++;
 
   struct procs_list_node *new = xmalloc (sizeof (struct procs_list_node));
   //printf ("DEBUG: new uid --> append uid %d #1\n", uid);
@@ -181,16 +197,4 @@ procs_list_getall (bool verbose)
 		dp->d_name, cmd);
     }
   return plist;
-}
-
-void
-procs_list_print_perfdata (struct procs_list_node *list)
-{
-  struct procs_list_node *list_node;
-
-  proc_list_node_foreach (list_node, list)
-   {
-      printf ("nbr_%s=%ld ", list_node->username, list_node->nbr);
-   }
-  putchar ('\n');
 }

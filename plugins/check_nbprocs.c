@@ -83,7 +83,7 @@ main (int argc, char **argv)
   char *critical = NULL, *warning = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
-  struct procs_list_node *procs_list;
+  struct procs_list_node *procs_list, *node;
 
   set_program_name (argv[0]);
 
@@ -117,11 +117,16 @@ main (int argc, char **argv)
 
   procs_list = procs_list_getall (verbose);
 
-//status = get_status (..., my_threshold);
+  status = get_status (procs_list_node_get_total_procs_nbr (procs_list),
+		       my_threshold);
   free (my_threshold);
 
-  printf ("%s %s | ",
-	  program_name_short, state_text (status));
-  procs_list_print_perfdata (procs_list);
+  printf ("%s %s - %ld running processes | ",
+	  program_name_short, state_text (status),
+	  procs_list_node_get_total_procs_nbr (procs_list));
 
+  proc_list_node_foreach (node, procs_list)
+    printf ("nbr_%s=%ld ", procs_list_node_get_username (node),
+	    procs_list_node_get_nbr (node));
+  putchar ('\n');
 }

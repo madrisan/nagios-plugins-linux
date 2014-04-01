@@ -33,10 +33,16 @@ extern "C"
   struct procs_list_node *procs_list_getall (bool verbose);
 
   /* Access to procs generated lists */
-  struct procs_list_node *procs_list_node_get_next (struct procs_list_node
-						    *list);
+  long procs_list_node_get_nbr (struct procs_list_node *node);
+  char *procs_list_node_get_username (struct procs_list_node *node);
+  struct procs_list_node * procs_list_node_get_next (struct procs_list_node
+						    *node);
+  long procs_list_node_get_total_procs_nbr (struct procs_list_node *list);
 
-  void procs_list_print_perfdata (struct procs_list_node *list);
+#define proc_list_node_foreach(list_entry, list) \
+        for (list_entry = procs_list_node_get_next (list); \
+             list_entry != procs_list_node_get_next(list_entry); \
+             list_entry = procs_list_node_get_next(list_entry))
 
 #ifdef __cplusplus
 }
