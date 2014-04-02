@@ -125,10 +125,13 @@ procs_list_getall (bool verbose)
 {
   DIR *dirp;
   FILE *fp;
+  size_t len = 0;
+  ssize_t chread;
   struct dirent *dp;
+
   bool gotname, gotuid;
   char path[PATH_MAX];
-  char line[MAX_LINE], cmd[MAX_LINE];
+  char *line, cmd[MAX_LINE];
   char *p;
   uid_t uid = -1;
   struct procs_list_node *plist = NULL;
@@ -163,12 +166,8 @@ procs_list_getall (bool verbose)
 				   process has just terminated */
 
       gotname = gotuid = false;
-
-      while (!gotname || !gotuid)
+      while ((chread = getline (&line, &len, fp)) != -1)
 	{
-	  if (fgets (line, MAX_LINE, fp) == NULL)
-	    break;
-
 	  /* The "Name:" line contains the name of the command that
 	     this process is running */
 	  if (strncmp (line, "Name:", 5) == 0)
@@ -188,6 +187,9 @@ procs_list_getall (bool verbose)
 	      procs_list_node_add (uid, plist);
 	      gotuid = true;
 	    }
+
+	  if (gotname && gotuid)
+	    break;
 	}
 
       fclose (fp);
@@ -196,5 +198,7 @@ procs_list_getall (bool verbose)
 	printf ("%12s:  pid: %5s  cmd: %s", uid_to_username (uid),
 		dp->d_name, cmd);
     }
+
+  free (line);
   return plist;
 }
