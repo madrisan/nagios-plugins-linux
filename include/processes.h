@@ -16,6 +16,7 @@
 #ifndef _PROCESSES_H_
 #define _PROCESSES_H_
 
+#include <sys/resource.h>
 #include <sys/types.h>
 #include <stdbool.h>
 
@@ -33,8 +34,15 @@ extern "C"
   struct procs_list_node *procs_list_getall (bool verbose);
 
   /* Access to procs generated lists */
-  long procs_list_node_get_nbr (struct procs_list_node *node);
   char *procs_list_node_get_username (struct procs_list_node *node);
+  long procs_list_node_get_nbr (struct procs_list_node *node);
+
+#ifdef RLIMIT_NPROC
+  unsigned long procs_list_node_get_rlimit_nproc_soft (struct procs_list_node
+						      *node);
+  unsigned long procs_list_node_get_rlimit_nproc_hard (struct procs_list_node
+						      *node);
+#endif
   struct procs_list_node * procs_list_node_get_next (struct procs_list_node
 						    *node);
   long procs_list_node_get_total_procs_nbr (struct procs_list_node *list);

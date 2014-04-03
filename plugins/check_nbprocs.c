@@ -19,6 +19,8 @@
  *
  */
 
+#include <sys/resource.h>
+#include <sys/time.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -126,7 +128,15 @@ main (int argc, char **argv)
 	  procs_list_node_get_total_procs_nbr (procs_list));
 
   proc_list_node_foreach (node, procs_list)
+#ifdef RLIMIT_NPROC
+    /* 'label'=value[UOM];[warn];[crit];[min];[max] */
+    printf ("nbr_%s=%ld;%lu;%lu;0 ", procs_list_node_get_username (node),
+	    procs_list_node_get_nbr (node),
+	    procs_list_node_get_rlimit_nproc_soft (node),
+	    procs_list_node_get_rlimit_nproc_hard (node));
+#else
     printf ("nbr_%s=%ld ", procs_list_node_get_username (node),
 	    procs_list_node_get_nbr (node));
+#endif
   putchar ('\n');
 }

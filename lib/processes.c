@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <sys/resource.h>
 #include <sys/types.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -31,8 +32,10 @@
 #include "messages.h"
 #include "xalloc.h"
 
-#define PROC_ROOT  "/proc"
-#define MAX_LINE   1000
+#define PROC_ROOT	"/proc"
+#ifndef RLIM_INFINITY
+# define RLIM_INFINITY	65535
+#endif
 
 /* Return name corresponding to 'uid', or NULL on error */
 
@@ -46,10 +49,20 @@ uid_to_username (uid_t uid)
 struct procs_list_node
 {
   uid_t uid;
-  long nbr;		/* number of the occurrences */
   char *username;
+  long nbr;		/* number of the occurrences */
+#ifdef RLIMIT_NPROC
+  rlim_t rlimit_nproc_soft;	/* ulimit -Su */
+  rlim_t rlimit_nproc_hard;	/* ulimit -Hu */
+#endif
   struct procs_list_node *next;
 };
+
+char *
+procs_list_node_get_username (struct procs_list_node *node)
+{
+  return node->username;
+}
 
 long
 procs_list_node_get_nbr (struct procs_list_node *node)
@@ -57,11 +70,19 @@ procs_list_node_get_nbr (struct procs_list_node *node)
   return node->nbr;
 }
 
-char *
-procs_list_node_get_username (struct procs_list_node *node)
+#ifdef RLIMIT_NPROC
+unsigned long
+procs_list_node_get_rlimit_nproc_soft (struct procs_list_node *node)
 {
-  return node->username;
+  return node->rlimit_nproc_soft;
 }
+
+unsigned long
+procs_list_node_get_rlimit_nproc_hard (struct procs_list_node *node)
+{
+  return node->rlimit_nproc_hard;
+}
+#endif
 
 struct procs_list_node *
 procs_list_node_get_next (struct procs_list_node *node)
@@ -112,6 +133,21 @@ procs_list_node_add (uid_t uid, struct procs_list_node *plist)
   new->uid = uid;
   new->nbr = 1;
   new->username = xstrdup (uid_to_username (uid));
+#ifdef RLIMIT_NPROC
+  struct rlimit rlim;
+  int res;
+
+  if ((res = getrlimit (RLIMIT_NPROC, &rlim)) < 0)
+    {
+      new->rlimit_nproc_soft = new->rlimit_nproc_hard = RLIM_INFINITY;
+    }
+  else
+    {
+      //printf ("DEBUG: new uid (%d) with rlimits: %ld %ld\n", uid, rlim.rlim_cur, rlim.rlim_max);
+      new->rlimit_nproc_soft = rlim.rlim_cur;
+      new->rlimit_nproc_hard = rlim.rlim_max;
+    }
+#endif
   new->next = new;
   p->next = new;
 
@@ -130,11 +166,12 @@ procs_list_getall (bool verbose)
   struct dirent *dp;
 
   bool gotname, gotuid;
-  char path[PATH_MAX];
-  char *line, cmd[MAX_LINE];
-  char *p;
+  char *line, *p, path[PATH_MAX];
   uid_t uid = -1;
   struct procs_list_node *plist = NULL;
+
+#define MAX_LINE   128
+  char *cmd = xmalloc (MAX_LINE);
 
   if ((dirp = opendir (PROC_ROOT)) == NULL)
     plugin_error (STATE_UNKNOWN, errno, "Cannot open %s", PROC_ROOT);
@@ -199,6 +236,7 @@ procs_list_getall (bool verbose)
 		dp->d_name, cmd);
     }
 
+  free (cmd);
   free (line);
   return plist;
 }
