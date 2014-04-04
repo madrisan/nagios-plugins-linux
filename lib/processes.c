@@ -37,6 +37,10 @@
 # define RLIM_INFINITY	65535
 #endif
 
+#define NBPROCS_NONE	0x00
+#define NBPROCS_VERBOSE	0x01
+#define NBPROCS_THREADS	0x02
+
 /* Return name corresponding to 'uid', or NULL on error */
 
 char *
@@ -108,42 +112,42 @@ procs_list_node_init (struct procs_list_node **list)
 }
 
 struct procs_list_node *
-procs_list_node_add (uid_t uid, struct procs_list_node *plist)
+procs_list_node_add (uid_t uid, unsigned long inc,
+		     struct procs_list_node *plist)
 {
   struct procs_list_node *p = plist;
 
-  //printf ("DEBUG: *** procs_list_node_add (uid %d)\n", uid);
+  /* printf ("DEBUG: *** procs_list_node_add (uid %d, #threads %lu)\n", uid,
+	  threads_nbr);  */
   while (p != p->next)
     {
       p = p->next;
-      //printf ("DEBUG: iterate (uid = %d)\n", p->uid);
+      /*printf ("DEBUG: iterate (uid = %d)\n", p->uid);  */
       if (p->uid == uid)
 	{
-	  p->nbr++;
-	  //printf ("DEBUG: found uid %d (now #%ld)\n", uid, p->nbr);
-	  plist->nbr++;
+	  p->nbr += inc;
+	  plist->nbr += inc;
+	  /*printf ("DEBUG: found uid %d (now #%ld)\n", uid, p->nbr);  */
 	  return p;
 	}
     }
 
-  plist->nbr++;
-
   struct procs_list_node *new = xmalloc (sizeof (struct procs_list_node));
-  //printf ("DEBUG: new uid --> append uid %d #1\n", uid);
+  /*printf ("DEBUG: new uid --> append uid %d #1\n", uid);  */
   new->uid = uid;
-  new->nbr = 1;
+  new->nbr = inc;
+  plist->nbr += inc;
   new->username = xstrdup (uid_to_username (uid));
 #ifdef RLIMIT_NPROC
   struct rlimit rlim;
   int res;
 
   if ((res = getrlimit (RLIMIT_NPROC, &rlim)) < 0)
-    {
-      new->rlimit_nproc_soft = new->rlimit_nproc_hard = RLIM_INFINITY;
-    }
+    new->rlimit_nproc_soft = new->rlimit_nproc_hard = RLIM_INFINITY;
   else
     {
-      //printf ("DEBUG: new uid (%d) with rlimits: %ld %ld\n", uid, rlim.rlim_cur, rlim.rlim_max);
+      /*printf ("DEBUG: new uid (%d) with rlimits: %ld %ld\n", uid,
+		rlim.rlim_cur, rlim.rlim_max);	*/
       new->rlimit_nproc_soft = rlim.rlim_cur;
       new->rlimit_nproc_hard = rlim.rlim_max;
     }
@@ -157,17 +161,19 @@ procs_list_node_add (uid_t uid, struct procs_list_node *plist)
 /* Parses /proc/PID/status files to produce a list of the running processes */
 
 struct procs_list_node *
-procs_list_getall (bool verbose)
+procs_list_getall (unsigned int flags)
 {
   DIR *dirp;
   FILE *fp;
   size_t len = 0;
   ssize_t chread;
   struct dirent *dp;
-
-  bool gotname, gotuid;
+  bool gotname, gotuid, gotthreads,
+       threads = (flags & NBPROCS_THREADS) ? true : false,
+       verbose = (flags & NBPROCS_VERBOSE) ? true : false;
   char *line, *p, path[PATH_MAX];
   uid_t uid = -1;
+  unsigned long threads_nbr;
   struct procs_list_node *plist = NULL;
 
 #define MAX_LINE   128
@@ -202,7 +208,8 @@ procs_list_getall (bool verbose)
 	continue;		/* Ignore errors: fopen() might fail if
 				   process has just terminated */
 
-      gotname = gotuid = false;
+      gotname = gotuid = gotthreads = false;
+      threads_nbr = 0;
       while ((chread = getline (&line, &len, fp)) != -1)
 	{
 	  /* The "Name:" line contains the name of the command that
@@ -216,24 +223,34 @@ procs_list_getall (bool verbose)
 	      gotname = true;
 	    }
 
+	  /* The "Threads:" line contains the number of threads in process
+	     containing this thread: check with 'ps -e -o pid,user,nlwp' */
+	  if (strncmp (line, "Threads:", 8) == 0)
+	    {
+	      threads_nbr = strtol (line + 8, NULL, 10);
+	      gotthreads = true;
+	    }
+
 	  /* The "Uid:" line contains the real, effective, saved set-,
 	     and file-system user IDs */
 	  if (strncmp (line, "Uid:", 4) == 0)
 	    {
 	      uid = strtol (line + 4, NULL, 10);
-	      procs_list_node_add (uid, plist);
 	      gotuid = true;
 	    }
 
-	  if (gotname && gotuid)
-	    break;
+	  if (gotname && gotuid && gotthreads)
+	    {
+	      procs_list_node_add (uid, (threads ? threads_nbr : 1), plist);
+	      break;
+	    }
 	}
 
       fclose (fp);
 
-      if (gotname && gotuid && verbose)
-	printf ("%12s:  pid: %5s  cmd: %s", uid_to_username (uid),
-		dp->d_name, cmd);
+      if (gotname && gotuid && gotthreads && verbose)
+	printf ("%12s:  pid: %5s  threads: %5lu, cmd: %s",
+		uid_to_username (uid), dp->d_name, threads_nbr, cmd);
     }
 
   free (cmd);

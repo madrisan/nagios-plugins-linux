@@ -36,6 +36,7 @@ static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
+  {(char *) "threads", no_argument, NULL, 't'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "verbose", no_argument, NULL, 'v'},
@@ -55,6 +56,7 @@ usage (FILE * out)
   fprintf (out, "  %s -w COUNTER -c COUNTER\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
+  fputs ("  -t, --threads   display the number of threads\n", out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs ("  -v, --verbose   show details for command-line debugging "
@@ -63,6 +65,7 @@ usage (FILE * out)
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
+  fprintf (out, "  %s --threads -w 1500 -c 2000\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -81,7 +84,7 @@ int
 main (int argc, char **argv)
 {
   int c;
-  bool verbose = false;
+  unsigned int nbprocs_flags = NBPROCS_NONE;
   char *critical = NULL, *warning = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
@@ -97,6 +100,9 @@ main (int argc, char **argv)
 	{
 	default:
 	  usage (stderr);
+	case 't':
+	  nbprocs_flags |= NBPROCS_THREADS;
+	  break;
 	case 'c':
 	  critical = optarg;
 	  break;
@@ -104,7 +110,7 @@ main (int argc, char **argv)
 	  warning = optarg;
 	  break;
 	case 'v':
-	  verbose = true;
+	  nbprocs_flags |= NBPROCS_VERBOSE;
 	  break;
 
 	case_GETOPT_HELP_CHAR
@@ -117,7 +123,7 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  procs_list = procs_list_getall (verbose);
+  procs_list = procs_list_getall (nbprocs_flags);
 
   status = get_status (procs_list_node_get_total_procs_nbr (procs_list),
 		       my_threshold);

@@ -20,6 +20,10 @@
 #include <sys/types.h>
 #include <stdbool.h>
 
+#define NBPROCS_NONE	0x00
+#define NBPROCS_VERBOSE	0x01
+#define NBPROCS_THREADS 0x02
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -31,7 +35,7 @@ extern "C"
   char *uid_to_username (uid_t uid);
 
   /* Return the list of the users with running processes */
-  struct procs_list_node *procs_list_getall (bool verbose);
+  struct procs_list_node *procs_list_getall (unsigned int flags);
 
   /* Access to procs generated lists */
   char *procs_list_node_get_username (struct procs_list_node *node);
