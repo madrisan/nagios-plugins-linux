@@ -189,11 +189,11 @@ This Nagios plugin checks for memory and swap paging.
 	check_paging [--paging] [--swapping]
 	check_paging --help
 
-*Options* 
+*Where* 
 
-	-p, --paging    display the page reads and writes
-	-s, --swapping  display the swap reads amd writes
-	-h, --help      display this help and exit
+* -p, --paging: display the page reads and writes
+* -s, --swapping: display the swap reads amd writes
+* -h, --help: display this help and exit
 
 *Examples*
 
@@ -232,11 +232,11 @@ This Nagios plugin checks for readonly filesystems.
 
 *Options*
 
-	-l, --local               limit listing to local file systems
-	-L, --list                display the list of checked file systems
-	-T, --type=TYPE           limit listing to file systems of type TYPE
-	-X, --exclude-type=TYPE   limit listing to file systems not of type TYPE
-	-h, --help                display this help and exit
+* -l, --local: limit listing to local file systems
+* -L, --list: display the list of checked file systems
+* -T, --type=TYPE: limit listing to file systems of type TYPE
+* -X, --exclude-type=TYPE: limit listing to file systems not of type TYPE
+* -h, --help: display this help and exit
 
 *Examples*
 
@@ -254,11 +254,11 @@ This plugin displays TCP network and socket informations.
 	check_tcpcount [--tcp] [--tcp6] --warning COUNTER --critical COUNTER
 	check_tcpcount --help
 
-*Options*
+*Where*
 
-	-t, --tcp     display the statistics for the TCP protocol (the default)
-	-6, --tcp6    display the statistics for the TCPv6 protocol
-	-h, --help    display this help and exit
+* -t, --tcp: display the statistics for the TCP protocol (the default)
+* -6, --tcp6: display the statistics for the TCPv6 protocol
+* -h, --help: display this help and exit
 
 *Examples*
 
