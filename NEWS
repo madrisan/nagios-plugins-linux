@@ -1,3 +1,11 @@
+    Major changes between "nagios-plugins-linux" versions 5 and 6
+
+* New plugin 'check_nbprocs'.
+* The verbose mode is not avaiblable in the plugin 'check_tcpcount'. 
+* Minor fixes.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 4 and 5
 
 * New plugins 'check_paging' and 'check_tcpcount'.
