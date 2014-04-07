@@ -8,9 +8,6 @@ extern "C"
 {
 #endif
 
-/* The amount of time, measured in units of USER_HZ (1/100ths of a second on
- * most architectures, use sysconf(_SC_CLK_TCK) to obtain the right value)  */
-
   typedef unsigned long long jiff;
 
 /* cuser:    Time spent running non-kernel code. (user time, including nice time)
