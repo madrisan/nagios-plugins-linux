@@ -284,6 +284,8 @@ proc_vmem_get (pgsteal)
 proc_vmem_get (pswpin)
 proc_vmem_get (pswpout)
 
+#undef proc_vmem_get
+
 unsigned long
 proc_vmem_get_pgscand (struct proc_vmem *vmem)
 {

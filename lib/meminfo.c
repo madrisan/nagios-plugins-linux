@@ -220,6 +220,8 @@ proc_sysmem_get(swap_cached)
 proc_sysmem_get(swap_free)
 proc_sysmem_get(swap_total)
 
+#undef proc_sysmem_get
+
 unsigned long
 proc_sysmem_get_main_used (struct proc_sysmem *sysmem)
 {
