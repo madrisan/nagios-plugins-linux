@@ -35,7 +35,7 @@
 
 /* get_vmem_pagesize - get memory page size */
 
-long
+inline long
 get_vmem_pagesize (void)
 {
   return sysconf (_SC_PAGESIZE);

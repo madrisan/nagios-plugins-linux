@@ -23,9 +23,6 @@ extern "C"
 {
 #endif
 
-  /* Get memory page size */
-  long get_vmem_pagesize (void);
-
   struct proc_vmem;
 
   /* Allocates space for a new vmem object.
