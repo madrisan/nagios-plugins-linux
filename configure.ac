@@ -268,6 +268,13 @@ cc_TRY_CFLAGS([-Wunused])
 
 AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
 
+AC_ARG_ENABLE([debug],
+   AS_HELP_STRING([--enable-debug],
+      [enable debug messages @<:@default=disabled@:>@]),
+      [], [enable_debug=no])
+AS_IF([test "x$enable_debug" = "xyes"], [
+   AC_DEFINE(ENABLE_DEBUG, [1], [Debug messages.])])
+
 AC_CONFIG_FILES([\
   Makefile \
   include/Makefile \
