@@ -16,6 +16,8 @@
 #ifndef _LOGGING_H_
 #define _LOGGING_H_
 
+#include <stdio.h>
+
 void logging (const char *format, ...);
 
 static inline void __attribute__ ((always_inline, format (printf, 1, 2)))
