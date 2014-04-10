@@ -27,6 +27,7 @@
 
 #include "common.h"
 #include "thresholds.h"
+#include "xalloc.h"
 
 #define OUTSIDE 0
 #define INSIDE  1
@@ -111,7 +112,7 @@ parse_range_string (char *str)
   double end;
   char *end_str;
 
-  temp_range = (range *) malloc (sizeof (range));
+  temp_range = (range *) xmalloc (sizeof (range));
 
   /*
    * Set defaults 
