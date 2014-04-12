@@ -7,6 +7,7 @@ AM_CPPFLAGS = \
 check_cpu_programs = check_iowait
 
 libexec_PROGRAMS =       \
+	check_clock      \
 	check_cpu        \
 	check_ifmountfs  \
 	check_memory     \
@@ -22,6 +23,7 @@ if HAVE_GETLOADAVG
 libexec_PROGRAMS += check_load
 endif
 
+check_clock_SOURCES      = check_clock.c
 check_cpu_SOURCES        = check_cpu.c
 check_ifmountfs_SOURCES  = check_ifmountfs.c
 if HAVE_GETLOADAVG
@@ -39,6 +41,7 @@ check_users_SOURCES      = check_users.c
 
 LDADD = $(top_srcdir)/lib/libutils.a
 
+check_clock_LDADD        = $(LDADD)
 check_cpu_LDADD          = $(LDADD)
 check_ifmountfs_LDADD    = $(LDADD)
 if HAVE_GETLOADAVG
