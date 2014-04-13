@@ -2,7 +2,8 @@
  * License: GPLv3+
  * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A Nagios plugin that calculates the time lag with the nagios server.
+ * A Nagios plugin that returns the number of seconds elapsed between
+ * local time and Nagios time.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +49,8 @@ static _Noreturn void
 usage (FILE * out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
-  fputs ("This plugin displays TCP network and socket informations.\n", out);
+  fputs ("This plugin returns the number of seconds elapsed between\n", out);
+  fputs ("the host local time and Nagios time.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [-w COUNTER] [-c COUNTER] --refclock TIME\n",
@@ -68,7 +70,7 @@ usage (FILE * out)
 	   program_name);
   fputs ("  # where $ARG1$ is the number of seconds since the Epoch: "
 	 "\"$(date '+%s')\"\n", out);
-  fputs ("  # provided by the nagios poller\n", out);
+  fputs ("  # provided by the Nagios poller\n", out);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }

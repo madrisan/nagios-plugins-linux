@@ -7,6 +7,7 @@ Nagios is an open source computer system monitoring, network monitoring and infr
 
 Here is the list of the available plugins:
 
+* check_clock
 * check_cpu
 * check_ifmountfs
 * check_iowait
@@ -22,6 +23,29 @@ Here is the list of the available plugins:
 * check_user
 
 ## The plugins in detail 
+
+**The check_clock plugin**
+
+This Nagios plugin returns the number of seconds elapsed between the host local
+time and Nagios time.
+
+*Usage*
+
+	check_clock [-w COUNTER] [-c COUNTER] --refclock TIME
+	check_clock --help
+
+*Where*
+
+* -r, --refclock TIME: the clock reference (in seconds since the Epoch)
+* -w, --warning COUNTER: warning threshold
+* -c, --critical COUNTER: critical threshold
+
+*Examples*
+
+	# $ARG1$ is the number of seconds since the Epoch --
+	# "$(date '+%s')" -- provided by the Nagios poller
+	check_clock -w 60 -c 120 --refclock $ARG1$
+
 
 **The check_cpu plugin**
 
