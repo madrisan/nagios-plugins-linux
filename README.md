@@ -20,7 +20,7 @@ Here is the list of the available plugins:
 * check_swap
 * check_tcpcount
 * check_uptime
-* check_user
+* check_users
 
 ## The plugins in detail 
 
