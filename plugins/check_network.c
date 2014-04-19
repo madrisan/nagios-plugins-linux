@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A Nagios plugin that checks the status of the network interfaces.
+ * A Nagios plugin that displays some network interfaces.statistics.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ static _Noreturn void
 usage (FILE * out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
-  fputs ("This plugin checks the network interfaces status.\n", out);
+  fputs ("This plugin displays some network interfaces.statistics.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s -w COUNTER|PERC -c COUNTER|PERC\n", program_name);
