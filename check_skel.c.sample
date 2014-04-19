@@ -76,7 +76,7 @@ print_version (void)
 int
 main (int argc, char **argv)
 {
-  int c, err;
+  int c;
   bool verbose = false;
   char *critical = NULL, *warning = NULL;
   nagstatus status = STATE_OK;
@@ -109,17 +109,15 @@ main (int argc, char **argv)
     }
 
   if (verbose)
-    /*...*/;
+    /*ADDME*/;
 
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  status = get_status (/*...*/, my_threshold);
+  status = get_status (0/*FIXME*/, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - %lu ... | "
-	  "perfdata1=%lu, perfdata2=%lu\n",
-	  program_name_short, state_text (status), /*...*/,
-	  /*perfdata1*/, /*perfdata2)*/;
+  printf ("%s %s - <STATUS-MSG> | <PERFDATA>\n",
+	  program_name_short, state_text (status));
 }
