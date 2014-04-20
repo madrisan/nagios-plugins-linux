@@ -75,7 +75,7 @@ print_version (void)
 int
 main (int argc, char **argv)
 {
-  int c, n, family;
+  int c, family;
   char *critical = NULL, *warning = NULL;
   thresholds *my_threshold = NULL;
   nagstatus status = STATE_OK;
@@ -117,7 +117,7 @@ main (int argc, char **argv)
 
   printf ("%s %s | ", program_name_short, state_text (status));
 
-  for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++)
+  for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
     {
       if (ifa->ifa_addr == NULL || ifa->ifa_data == NULL)
         continue;
