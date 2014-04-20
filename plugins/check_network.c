@@ -38,7 +38,6 @@ static const char *program_copyright =
 static struct option const longopts[] = {
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
-  {(char *) "verbose", no_argument, NULL, 'v'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -55,13 +54,10 @@ usage (FILE * out)
   fputs (USAGE_OPTIONS, out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
-  fputs ("  -v, --verbose   show details for command-line debugging "
-	 "(Nagios may truncate output)\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s ... -w ... -c ...\n",
-	   program_name);
+  fprintf (out, "  %s\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -80,7 +76,6 @@ int
 main (int argc, char **argv)
 {
   int c, n, family;
-  bool verbose = false;
   char *critical = NULL, *warning = NULL;
   thresholds *my_threshold = NULL;
   nagstatus status = STATE_OK;
@@ -90,7 +85,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "c:w:v" GETOPT_HELP_VERSION_STRING,
+			   "c:w:" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -103,18 +98,12 @@ main (int argc, char **argv)
 	case 'w':
 	  warning = optarg;
 	  break;
-	case 'v':
-	  verbose = true;
-	  break;
 
 	case_GETOPT_HELP_CHAR
 	case_GETOPT_VERSION_CHAR
 
 	}
     }
-
-  if (verbose)
-    /*...*/;
 
   if (getifaddrs (&ifaddr) == -1)
     plugin_error (STATE_UNKNOWN, errno, "getifaddrs() failed");
