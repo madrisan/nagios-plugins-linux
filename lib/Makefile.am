@@ -26,6 +26,7 @@ libutils_a_SOURCES = \
 	meminfo.c    \
 	messages.c   \
 	mountlist.c  \
+	netinfo.c    \
 	processes.c  \
 	procparser.c \
 	progname.c   \
