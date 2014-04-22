@@ -1,3 +1,9 @@
+    Major changes between "nagios-plugins-linux" versions 7 and 8
+
+* New plugin 'check_network'.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 6 and 7
 
 * New plugin 'check_clock'.
