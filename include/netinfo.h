@@ -18,9 +18,6 @@
 #ifndef _NETINFO_H
 #define _NETINFO_H
 
-#include <ifaddrs.h>
-#include <linux/if_link.h>
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -42,7 +39,7 @@ extern "C"
     struct iflist *next;
   } iflist_t;
 
-  struct iflist *netinfo (void);
+  struct iflist *netinfo (unsigned int seconds);
   void freeiflist (struct iflist *iflhead);
 
 #ifdef __cplusplus

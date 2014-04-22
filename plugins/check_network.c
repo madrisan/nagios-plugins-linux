@@ -81,7 +81,7 @@ main (int argc, char **argv)
   //char *critical = NULL, *warning = NULL;
   //thresholds *my_threshold = NULL;
   nagstatus status = STATE_OK;
-  //unsigned int sleep_time = 1;
+  const unsigned int sleep_time = 1;
 
   set_program_name (argv[0]);
 
@@ -113,19 +113,13 @@ main (int argc, char **argv)
   //status = get_status (..., my_threshold);
   //free (my_threshold);
 
+  struct iflist *ifl, *iflhead = netinfo (sleep_time);
+  
   printf ("%s %s | ", program_name_short, state_text (status));
-
-  iflist_t *ifl, *iflhead = netinfo ();
-
-  /* lo-rxkB/s=0.00;;;; lo-txkB/s=0.00;;;; lo-rxerr/s=0.00;;;;
-   *  lo-txerr/s=0.00;;;; lo-rxdrop/s=0.00;;;; lo-txdrop/s=0.00;;;;
-   * eth1-rxkB/s=231.39;;;; eth1-txkB/s=196.18;;;; eth1-rxerr/s=0.00;;;; 
-   *  eth1-txerr/s=0.00;;;; eth1-rxdrop/s=0.00;;;; eth1-txdrop/s=0.00;;;;
-   */
   for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
-    printf ("%s_txpck=%u %s_rxpck=%u %s_txbyte=%u %s_rxbyte=%u "
-	    "%s_txerr=%u %s_rxerr=%u %s_txdrop=%u %s_rxdrop=%u "
-	    "%s_mcast=%u %s_coll=%u ",
+    printf ("%s_txpck/s=%u %s_rxpck/s=%u %s_txbyte/s=%u %s_rxbyte/s=%u "
+	    "%s_txerr/s=%u %s_rxerr/s=%u %s_txdrop/s=%u %s_rxdrop/s=%u "
+	    "%s_mcast/s=%u %s_coll/s=%u ",
 	    ifl->ifname, ifl->tx_packets, ifl->ifname, ifl->rx_packets,
 	    ifl->ifname, ifl->tx_bytes,   ifl->ifname, ifl->rx_bytes,
 	    ifl->ifname, ifl->tx_errors,  ifl->ifname, ifl->rx_errors,

@@ -23,30 +23,18 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <ifaddrs.h>
 #include <linux/if_link.h>
 
 #include "common.h"
+#include "logging.h"
 #include "messages.h"
+#include "netinfo.h"
 #include "xalloc.h"
 
-typedef struct iflist
-{
-  char *ifname;
-  unsigned int tx_packets;
-  unsigned int rx_packets;
-  unsigned int tx_bytes;
-  unsigned int rx_bytes;
-  unsigned int tx_errors;
-  unsigned int rx_errors;
-  unsigned int tx_dropped;
-  unsigned int rx_dropped;
-  unsigned int multicast;
-  unsigned int collisions;
-  struct iflist *next;
-} iflist_t;
-
-struct iflist* netinfo (void)
+static struct iflist* get_netinfo_snapshot (void)
 {
   int family;
   struct ifaddrs *ifaddr, *ifa;
@@ -54,7 +42,7 @@ struct iflist* netinfo (void)
   if (getifaddrs (&ifaddr) == -1)
     plugin_error (STATE_UNKNOWN, errno, "getifaddrs() failed");
 
-  iflist_t *iflhead = NULL, *iflprev = NULL, *ifl;
+  struct iflist *iflhead = NULL, *iflprev = NULL, *ifl;
 
   for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
     {
@@ -65,11 +53,6 @@ struct iflist* netinfo (void)
       if (family != AF_PACKET)
 	continue;
 
-      /* lo-rxkB/s=0.00;;;; lo-txkB/s=0.00;;;; lo-rxerr/s=0.00;;;;
-       *  lo-txerr/s=0.00;;;; lo-rxdrop/s=0.00;;;; lo-txdrop/s=0.00;;;;
-       * eth1-rxkB/s=231.39;;;; eth1-txkB/s=196.18;;;; eth1-rxerr/s=0.00;;;; 
-       *  eth1-txerr/s=0.00;;;; eth1-rxdrop/s=0.00;;;; eth1-txdrop/s=0.00;;;;
-       */
       struct rtnl_link_stats *stats = ifa->ifa_data;
       ifl = xmalloc (sizeof (struct iflist));
 
@@ -94,6 +77,58 @@ struct iflist* netinfo (void)
     }
 
   freeifaddrs (ifaddr);
+  return iflhead;
+}
+
+struct iflist* netinfo (unsigned int seconds)
+{
+  struct iflist *iflhead = get_netinfo_snapshot ();
+
+  if (seconds > 0)
+   {
+      sleep (seconds);
+      struct iflist *ifl, *ifl2, *iflhead2 = get_netinfo_snapshot ();
+
+      for (ifl = iflhead, ifl2 = iflhead2; ifl != NULL && ifl2 != NULL;
+	   ifl = ifl->next, ifl2 = ifl2->next)
+	{
+	  dbg ("network interface '%s'\n", ifl->ifname);
+	  if (strcmp (ifl->ifname, ifl2->ifname) != 0)
+	    plugin_error (STATE_UNKNOWN, 0,
+			  "bug in netinfo(), please contact the developer");
+
+	  dbg ("\ttx_packets : %u %u\n", ifl->tx_packets, ifl2->tx_packets);
+	  ifl->tx_packets = (ifl2->tx_packets - ifl->tx_packets) / seconds;
+
+	  dbg ("\trx_packets : %u %u\n", ifl->rx_packets, ifl2->rx_packets);
+	  ifl->rx_packets = (ifl2->rx_packets - ifl->rx_packets) / seconds;
+
+	  dbg ("\ttx_bytes   : %u %u\n", ifl->tx_bytes, ifl2->tx_bytes);
+	  ifl->tx_bytes   = (ifl2->tx_bytes   - ifl->tx_bytes  ) / seconds;
+
+	  dbg ("\trx_bytes   : %u %u\n", ifl->rx_bytes, ifl2->rx_bytes);
+	  ifl->rx_bytes   = (ifl2->rx_bytes   - ifl->rx_bytes  ) / seconds;
+
+	  dbg ("\ttx_errors  : %u %u\n", ifl->tx_errors, ifl2->tx_errors);
+	  ifl->tx_errors  = (ifl2->tx_errors  - ifl->tx_errors ) / seconds;
+
+	  dbg ("\trx_errors  : %u %u\n", ifl->rx_errors, ifl2->rx_errors);
+	  ifl->rx_errors  = (ifl2->rx_errors  - ifl->rx_errors ) / seconds;
+
+	  ifl->tx_dropped = (ifl2->tx_dropped - ifl->tx_dropped) / seconds;
+	  dbg ("\ttx_dropped : %u %u\n", ifl->tx_dropped, ifl2->tx_dropped);
+
+	  dbg ("\trx_dropped : %u %u\n", ifl->rx_dropped, ifl2->rx_dropped);
+	  ifl->rx_dropped = (ifl2->rx_dropped - ifl->rx_dropped) / seconds;
+
+	  dbg ("\tmulticast  : %u %u\n", ifl->multicast, ifl2->multicast);
+	  ifl->multicast  = (ifl2->multicast  - ifl->multicast ) / seconds;
+
+	  dbg ("\tcollisions : %u %u\n", ifl->collisions, ifl2->collisions);
+	  ifl->collisions = (ifl2->collisions - ifl->collisions) / seconds;
+	}
+      freeiflist (iflhead2);
+   }
 
   return iflhead;
 }
