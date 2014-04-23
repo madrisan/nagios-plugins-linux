@@ -24,6 +24,7 @@ noinst_HEADERS = \
   meminfo.h     \
   mountlist.h   \
   messages.h    \
+  netinfo.h     \
   processes.h   \
   procparser.h  \
   progname.h    \
