@@ -124,8 +124,6 @@ procparser_tcp (const char *procfile, struct proc_tcptable_data *data,
       if (++lnr == 1) /* Skip the heading line */
 	{
 	  if (verbose)
-//          printf(" tcp   %-11s %15s:%-6d  %15s:%-6d\n", tcpstate (state),
-
 	    printf ("[%s]\nproto  %-11s %20s %22s\n", procfile,
 		    "status", "local-addr:port", "remote-addr:port");
 	  continue;
