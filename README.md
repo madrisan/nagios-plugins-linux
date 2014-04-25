@@ -15,6 +15,7 @@ Here is the list of the available plugins:
 * check_memory
 * check_multipath
 * check_nbprocs
+* check_network
 * check_paging
 * check_readonlyfs
 * check_swap
@@ -225,6 +226,20 @@ This Nagios plugin displays the number of running processes per user.
 	check_nbprocs --threads -w 1500 -c 2000
 
 
+**The check_network plugin**
+
+This Nagios plugin checks displays some network interfaces.statistics.
+
+*Usage*
+
+	check_network
+	check_network --help
+
+*Where*
+
+* -h, --help: display this help and exit
+
+
 **The check_paging plugin**
 
 This Nagios plugin checks for memory and swap paging.
@@ -234,7 +249,7 @@ This Nagios plugin checks for memory and swap paging.
 	check_paging [--paging] [--swapping]
 	check_paging --help
 
-*Where* 
+*Where*
 
 * -p, --paging: display the page reads and writes
 * -s, --swapping: display the swap reads amd writes
