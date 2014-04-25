@@ -204,26 +204,6 @@ This Nagios plugin checks the multipath topology status.
 	check_multipath
 
 
-**The check_paging plugin**
-
-This Nagios plugin checks for memory and swap paging.
-
-*Usage*
-
-	check_paging [--paging] [--swapping]
-	check_paging --help
-
-*Where* 
-
-* -p, --paging: display the page reads and writes
-* -s, --swapping: display the swap reads amd writes
-* -h, --help: display this help and exit
-
-*Examples*
-
-	check_paging --paging --swapping -w 10 -c 25
-
-
 **The check_nbprocs plugin**
 
 This Nagios plugin displays the number of running processes per user.
@@ -243,6 +223,26 @@ This Nagios plugin displays the number of running processes per user.
 
 	check_nbprocs
 	check_nbprocs --threads -w 1500 -c 2000
+
+
+**The check_paging plugin**
+
+This Nagios plugin checks for memory and swap paging.
+
+*Usage*
+
+	check_paging [--paging] [--swapping]
+	check_paging --help
+
+*Where* 
+
+* -p, --paging: display the page reads and writes
+* -s, --swapping: display the swap reads amd writes
+* -h, --help: display this help and exit
+
+*Examples*
+
+	check_paging --paging --swapping -w 10 -c 25
 
 
 **The check_readonlyfs plugin**
