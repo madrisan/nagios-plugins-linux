@@ -22,7 +22,7 @@ AM_CPPFLAGS = \
 noinst_LIBRARIES = libutils.a
 
 libutils_a_SOURCES = \
-	cpuinfo.c    \
+	cpustats.c   \
 	meminfo.c    \
 	messages.c   \
 	mountlist.c  \

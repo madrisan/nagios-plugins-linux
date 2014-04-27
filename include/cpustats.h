@@ -1,5 +1,5 @@
-#ifndef _CPUINFO_H
-#define _CPUINFO_H
+#ifndef _CPUSTATS_H
+#define _CPUSTATS_H
 
 #include <sys/sysinfo.h>
 
@@ -66,4 +66,4 @@ extern "C"
 }
 #endif
 
-#endif /* _CPUINFO_H */
+#endif /* _CPUSTATS_H */

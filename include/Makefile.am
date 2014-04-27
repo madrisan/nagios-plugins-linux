@@ -19,7 +19,7 @@ AM_CPPFLAGS = -include $(top_builddir)/config.h
 
 noinst_HEADERS = \
   common.h      \
-  cpuinfo.h     \
+  cpustats.h    \
   logging.h     \
   meminfo.h     \
   mountlist.h   \
