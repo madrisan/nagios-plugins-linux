@@ -188,7 +188,7 @@ main (int argc, char **argv)
   bool verbose = false;
   unsigned long i, len, delay, count;
   char *critical = NULL, *warning = NULL;
-  char *p, *cpu_progname;
+  char *p = NULL, *cpu_progname;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
@@ -210,20 +210,23 @@ main (int argc, char **argv)
   len = strlen (program_name);
   if (len > 6 && !strncmp (program_name, "check_", 6))
     p = (char *) program_name + 6;
+  else
+    plugin_error (STATE_UNKNOWN, 0,
+		  "bug: the plugin does not have a standard name");
 
   if (!strncmp (p, "iowait", 6))	/* check_iowait --> cpu_iowait */
     {
       cpu_progname = xstrdup ("iowait");
       cpu_value = &diowait;
       program_shorthelp =
-	xstrdup ("This plugin checks I/O wait bottlenecks\n");
+      xstrdup ("This plugin checks I/O wait bottlenecks\n");
     }
   else				/* check_cpu --> cpu_user (the default) */
     {
       cpu_progname = xstrdup ("user");;
       cpu_value = &duser;
       program_shorthelp =
-	xstrdup ("This plugin checks the CPU (user mode) utilization\n");
+      xstrdup ("This plugin checks the CPU (user mode) utilization\n");
     }
 
   while ((c = getopt_long (
