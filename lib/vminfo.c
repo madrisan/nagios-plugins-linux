@@ -132,7 +132,7 @@ proc_vmem_read (struct proc_vmem *vmem)
   FILE *fp;
   char *line = NULL;
   size_t len = 0;
-  ssize_t read;
+  ssize_t nread;
   bool found_pgpg_data = false, found_pswp_data = false;
 
   if (vmem == NULL)
@@ -227,7 +227,7 @@ proc_vmem_read (struct proc_vmem *vmem)
 
   if ((fp = fopen (PROC_STAT, "r")))
     {
-      while ((read = getline (&line, &len, fp)) != -1)
+      while ((nread = getline (&line, &len, fp)) != -1)
         {
           if (2 == sscanf (line, "page %lu %lu",
                            &data->vm_pgpgin, &data->vm_pgpgout))
