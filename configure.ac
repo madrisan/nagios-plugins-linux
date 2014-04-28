@@ -207,6 +207,15 @@ AC_CHECK_FUNCS([get_nprocs_conf get_nprocs], [],
      AC_MSG_RESULT([not available]))
   ])
 
+PKG_CHECK_EXISTS([libcpuinfo],
+  [PKG_CHECK_MODULES(
+     [libcpuinfo],
+     [libcpuinfo],
+     [AC_DEFINE([HAVE_CPUINFO_H], [1],
+                [Define to 1 if you have the libcpuinfo development files])],
+     [AC_MSG_WARN([libcpuinfo not found by pkg-config])])],
+  [AC_MSG_WARN([libcpuinfo not found by pkg-config])])
+
 have_func_getloadavg=false
 AC_CHECK_FUNC([getloadavg], [have_func_getloadavg=true])
 AM_CONDITIONAL([HAVE_GETLOADAVG], [test x$have_func_getloadavg = xtrue])

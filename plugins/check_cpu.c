@@ -34,6 +34,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#if defined(HAVE_CPUINFO_H)
+# include <cpuinfo.h>
+#endif
 
 #include "common.h"
 #include "cpustats.h"
@@ -42,6 +45,7 @@
 #include "progversion.h"
 #include "thresholds.h"
 #include "xalloc.h"
+#include "xasprintf.h"
 
 /* by default one iteration with 1sec delay */
 #define DELAY_DEFAULT	1
@@ -53,6 +57,9 @@ static const char *program_copyright =
 static const char *program_shorthelp = NULL;
 
 static struct option const longopts[] = {
+#if defined(HAVE_CPUINFO_H)
+  {(char *) "cpuinfo", no_argument, NULL, 'i'},
+#endif
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "verbose", no_argument, NULL, 'v'},
@@ -70,11 +77,18 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [-v] [-w PERC] [-c PERC] [delay [count]]\n",
 	   program_name);
+#if defined(HAVE_CPUINFO_H)
+  fprintf (out, "  %s --cpuinfo\n", program_name);
+#endif
   fputs (USAGE_OPTIONS, out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs ("  -v, --verbose   show details for command-line debugging "
          "(Nagios may truncate output)\n", out);
+#if defined(HAVE_CPUINFO_H)
+  fputs ("  -i, --cpuinfo   show the CPU characteristics (for debugging)\n",
+	 out);
+#endif
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fprintf (out, "  delay is the delay between updates in seconds "
@@ -84,6 +98,9 @@ usage (FILE * out)
   fputs ("\t1 means the percentages of total CPU time from boottime.\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -w 10%% -c 20%% 1 2\n", program_name);
+#if defined(HAVE_CPUINFO_H)
+  fprintf (out, "  %s --cpuinfo\n", program_name);
+#endif
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -119,6 +136,48 @@ strtol_or_err (const char *str, const char *errmesg)
   return 0;
 }
 
+static void show_cpuinfo (cpuinfo_t *cip)
+{
+  cpuinfo_feature_t feature;
+  const cpuinfo_cache_t *cache = cpuinfo_get_caches (cip);
+  int i;
+
+  printf ("-= CPU Info =-\n");
+  printf ("Name: %s %s @ %d MHz\n",
+	  cpuinfo_string_of_vendor (cpuinfo_get_vendor (cip)),
+	  cpuinfo_get_model (cip),
+	  cpuinfo_get_frequency (cip));
+  printf ("Threads per core : %d\n", cpuinfo_get_threads (cip));
+  printf ("Core(s) per socket: %d\n", cpuinfo_get_cores (cip));
+
+  printf ("Socket model: %s\n",
+	  cpuinfo_string_of_socket (cpuinfo_get_socket (cip)));
+
+  for (i = 0; i < cache->count; i++)
+    {
+      /* see: /sys/devices/system/cpu/cpu0/cache/index<i> */
+      printf ("L%d cache: level %d, size %5dK, type %s\n", (i + 1),
+	      cache->descriptors[i].level,
+	      cache->descriptors[i].size,
+	      cpuinfo_string_of_cache_type (cache->descriptors[i].type)
+      );
+    }
+
+  printf ("Capabilities: ");
+  for (feature = cpuinfo_feature_common;
+       feature != cpuinfo_feature_architecture_max; feature++)
+    {
+      if (feature == cpuinfo_feature_common_max)
+	feature = cpuinfo_feature_architecture;
+	if (cpuinfo_has_feature (cip, feature))
+	  {
+	    const char *name = cpuinfo_string_of_feature (feature);
+	    if (name)
+	      printf ("%s ", name);
+	  }
+    }
+  printf ("\n");
+}
 
 int
 main (int argc, char **argv)
@@ -137,6 +196,12 @@ main (int argc, char **argv)
   unsigned int cpu_perc, sleep_time = 1,
                tog = 0;		/* toggle switch for cleaner code */
   int debt = 0;			/* handle idle ticks running backwards */
+
+#if defined(HAVE_CPUINFO_H)
+  cpuinfo_t *cip = cpuinfo_new ();
+  int cpu_freq;
+#endif
+  char *cpuinfo = NULL;
 
   set_program_name (argv[0]);
 
@@ -159,14 +224,24 @@ main (int argc, char **argv)
 	xstrdup ("This plugin checks the CPU (user mode) utilization\n");
     }
 
-  while ((c = getopt_long (argc, argv,
-			   "c:w:v" GETOPT_HELP_VERSION_STRING,
-			   longopts, NULL)) != -1)
+  while ((c = getopt_long (
+		argc, argv, "c:w:v"
+#if defined(HAVE_CPUINFO_H)
+		"i"
+#endif
+		GETOPT_HELP_VERSION_STRING, longopts, NULL)) != -1)
     {
       switch (c)
 	{
 	default:
 	  usage (stderr);
+#if defined(HAVE_CPUINFO_H)
+	case 'i':
+	  show_cpuinfo (cip);
+	  cpuinfo_destroy (cip);
+	  return STATE_UNKNOWN;
+	  break;
+#endif
 	case 'c':
 	  critical = optarg;
 	  break;
@@ -264,16 +339,35 @@ main (int argc, char **argv)
   cpu_perc = (unsigned) ((100 * (*cpu_value) + divo2) / div);
   status = get_status (cpu_perc, my_threshold);
 
+#if defined(HAVE_CPUINFO_H)
+  cpu_freq = cpuinfo_get_frequency (cip);
+  cpuinfo = xasprintf ("(CPU: %s %s @ %d MHz) ",
+		       cpuinfo_string_of_vendor (cpuinfo_get_vendor (cip)),
+		       cpuinfo_get_model (cip), cpu_freq);
+#endif
   printf
-    ("%s %s - cpu %s %u%% | "
-     "cpu_user=%u%%, cpu_system=%u%%, cpu_idle=%u%%, cpu_iowait=%u%%, "
-     "cpu_steal=%u%%\n"
-     , program_name_short, state_text (status), cpu_progname, cpu_perc
+    ("%s %s%s - cpu %s %u%% | "
+     "cpu_user=%u%% cpu_system=%u%% cpu_idle=%u%% cpu_iowait=%u%% "
+     "cpu_steal=%u%%"
+#if defined(HAVE_CPUINFO_H)
+     " cpu_freq=%dMHz"
+#endif
+     "\n"
+     , program_name_short, cpuinfo ? cpuinfo : "", state_text (status)
+     , cpu_progname, cpu_perc
      , (unsigned) ((100 * duser   + divo2) / div)
      , (unsigned) ((100 * dsystem + divo2) / div)
      , (unsigned) ((100 * didle   + divo2) / div)
      , (unsigned) ((100 * diowait + divo2) / div)
-     , (unsigned) ((100 * dsteal  + divo2) / div));
+     , (unsigned) ((100 * dsteal  + divo2) / div)
+#if defined(HAVE_CPUINFO_H)
+     , cpu_freq
+#endif
+  );
+
+#if defined(HAVE_CPUINFO_H)
+  cpuinfo_destroy (cip);
+#endif
 
   return status;
 }
