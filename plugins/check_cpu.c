@@ -136,6 +136,7 @@ strtol_or_err (const char *str, const char *errmesg)
   return 0;
 }
 
+#if defined(HAVE_CPUINFO_H)
 static void show_cpuinfo (cpuinfo_t *cip)
 {
   cpuinfo_feature_t feature;
@@ -178,6 +179,7 @@ static void show_cpuinfo (cpuinfo_t *cip)
     }
   printf ("\n");
 }
+#endif
 
 int
 main (int argc, char **argv)
