@@ -1,0 +1,82 @@
+
+  cpuinfo
+  A cross-platform CPU information extractor
+
+  Copyright (C) 2005-2007 Gwenole Beauchesne
+
+
+Licenses
+--------
+
+The cpuinfo library is available under the terms of the GNU Lesser
+General Public License. See the file "COPYING.LIB" that is included
+in the distribution for details.
+
+The cpuinfo sample programs and bindings are available under the terms
+of the GNU General Public License. See the file "COPYING" that is
+included in the distribution for details.
+
+
+Overview
+--------
+
+cpuinfo consists in an API/library used by programs to get information
+about the underlying CPU. Such information include CPU vendor, model
+name, cache hierarchy, and supported features (e.g. CMP, SMT, SIMD).
+
+A sample application "cpuinfo" is also available to demonstrate the
+use of the library.
+
+
+Quick build notes
+-----------------
+
+It's generally enough to proceed as follows:
+
+$ ./configure
+$ make
+# make install
+
+Or, if you prefer from a source package:
+$ rpm --rebuild cpuinfo.src.rpm
+
+Standard configure options:
+--prefix=PREFIX             install in PREFIX [/usr]
+--libdir=LIBDIR             use LIBDIR for native libraries [/usr/lib64]
+--enable-static             build static libraries [no]
+--enable-shared             build shared libraries [no]
+--install-sdk               install headers and libraries [no]
+
+
+Supported Systems
+-----------------
+
+cpuinfo has been built and tested on the following platforms:
+- i386-linux
+- i386-netbsd
+- i386-freebsd
+- i386-cygwin
+- x86_64-linux
+- ia64-linux
+- ia64-hpux
+- ia64-freebsd
+- ppc-linux
+- ppc-darwin
+- mips-irix
+
+NOTE: some API may not be implemented completely. Please refer to the
+TODO file for further details.
+
+
+History
+-------
+
+Please consult the file "NEWS" for the release history.
+An auto-generated "ChangeLog" is also available in this distribution.
+
+
+Author
+------
+
+Gwenole Beauchesne,
+<gb.public@free.fr>
