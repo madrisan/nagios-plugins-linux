@@ -192,7 +192,7 @@ main (int argc, char **argv)
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
-  struct proc_cpu cpu[2];
+  struct cpu_stats cpu[2];
   jiff duser, dsystem, didle, diowait, dsteal, ratio, half_ratio;
   jiff *cpu_value;
   unsigned int cpu_perc, sleep_time = 1,
@@ -283,7 +283,7 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  proc_cpu_read (&cpu[0]);
+  cpu_stats_read (&cpu[0]);
 
   duser   = cpu[0].user + cpu[0].nice;
   dsystem = cpu[0].system + cpu[0].irq + cpu[0].softirq;
@@ -301,7 +301,7 @@ main (int argc, char **argv)
       sleep (sleep_time);
 
       tog = !tog;
-      proc_cpu_read (&cpu[tog]);
+      cpu_stats_read (&cpu[tog]);
 
       duser = cpu[tog].user - cpu[!tog].user +
 	cpu[tog].nice - cpu[!tog].nice;

@@ -25,7 +25,7 @@ extern "C"
  *            operating systems under the control of the Linux kernel).
  *            (since Linux 2.6.33)	*/
 
-  struct proc_cpu
+  struct cpu_stats
   {
     jiff user;
     jiff nice;
@@ -57,10 +57,10 @@ extern "C"
 #endif
   }
 
-  /* Fill the proc_cpu structure pointed with the values found in the 
+  /* Fill the proc_stats structure pointed with the values found in the 
    * proc filesystem */
 
-  extern void proc_cpu_read (struct proc_cpu * __restrict cpuinfo);
+  extern void cpu_stats_read (struct cpu_stats * __restrict cpustats);
 
 #ifdef __cplusplus
 }

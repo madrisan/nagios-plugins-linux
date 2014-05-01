@@ -32,13 +32,13 @@
 #define BUFFSIZE 0x1000
 static char buff[BUFFSIZE];
 
-#define PROC_STAT   "/proc/stat"
+#define PATH_PROC_STAT   "/proc/stat"
 
 /* Fill the proc_cpu structure pointed with the values found in the 
  * proc filesystem */
 
 void
-proc_cpu_read (struct proc_cpu *cpuinfo)
+cpu_stats_read (struct cpu_stats *cpustats)
 {
   static int fd;
   const char *b;
@@ -47,26 +47,27 @@ proc_cpu_read (struct proc_cpu *cpuinfo)
     lseek (fd, 0L, SEEK_SET);
   else
     {
-      fd = open (PROC_STAT, O_RDONLY, 0);
+      fd = open (PATH_PROC_STAT, O_RDONLY, 0);
       if (fd == -1)
-	plugin_error (STATE_UNKNOWN, errno, "Error opening %s", PROC_STAT);
+	plugin_error (STATE_UNKNOWN, errno, "Error opening %s", PATH_PROC_STAT);
     }
 
   read (fd, buff, BUFFSIZE - 1);
 
-  cpuinfo->iowait = 0;	/* not separated out until the 2.5.41 kernel */
-  cpuinfo->irq = 0;	/* not separated out until the 2.6.0-test4 */
-  cpuinfo->softirq = 0;	/* not separated out until the 2.6.0-test4 */
-  cpuinfo->steal = 0;	/* not separated out until the 2.6.11 */
-  cpuinfo->guest = 0;	/* since Linux 2.6.24 */
-  cpuinfo->guestn = 0;	/* since Linux 2.6.33 */
+  cpustats->iowait = 0;	/* not separated out until the 2.5.41 kernel */
+  cpustats->irq = 0;	/* not separated out until the 2.6.0-test4 */
+  cpustats->softirq = 0;	/* not separated out until the 2.6.0-test4 */
+  cpustats->steal = 0;	/* not separated out until the 2.6.11 */
+  cpustats->guest = 0;	/* since Linux 2.6.24 */
+  cpustats->guestn = 0;	/* since Linux 2.6.33 */
 
   b = strstr (buff, "cpu ");
   if (b)
-    sscanf (b, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu", &cpuinfo->user,
-	    &cpuinfo->nice, &cpuinfo->system, &cpuinfo->idle,
-	    &cpuinfo->iowait, &cpuinfo->irq, &cpuinfo->softirq,
-	    &cpuinfo->steal, &cpuinfo->guest, &cpuinfo->guestn);
+    sscanf (b, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
+	    &cpustats->user, &cpustats->nice, &cpustats->system,
+	    &cpustats->idle, &cpustats->iowait, &cpustats->irq,
+	    &cpustats->softirq, &cpustats->steal, &cpustats->guest,
+	    &cpustats->guestn);
   else
-    plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PROC_STAT);
+    plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PATH_PROC_STAT);
 }
