@@ -212,41 +212,6 @@ AC_CHECK_FUNCS([get_nprocs_conf get_nprocs], [],
      AC_MSG_RESULT([not available]))
   ])
 
-libcpuinfo_static_build=
-PKG_CHECK_EXISTS([libcpuinfo],
-  [PKG_CHECK_MODULES(
-     [libcpuinfo],
-     [libcpuinfo],
-     [AC_DEFINE([HAVE_CPUINFO_H], [1],
-                [Define to 1 if you have the development files of libcpuinfo])
-      AC_DEFINE([HAVE_LIBCPUINFO], [1],
-                [Define to 1 if the library 'libcpuinfo' is installed])
-     ],
-     [AC_MSG_WARN([libcpuinfo not found by pkg-config])])],
-  [cpuinfo_arch_target=
-   case "$target_cpu" in
-     i386|i486|i586|i686|i86pc|BePC|x86_64)
-       cpuinfo_arch_target="cpuinfo-x86.c" ;;
-     ppc|ppc64)
-       cpuinfo_arch_target="cpuinfo-ppc.c" ;;
-     mips|mips64)
-       cpuinfo_arch_target="cpuinfo-mips.c" ;;
-     ia64)
-       cpuinfo_arch_target="cpuinfo-ia64.c" ;;
-   esac
-   rm -f libcpuinfo/cpuinfo-arch.c
-   if test "${cpuinfo_arch_target+set}" = set; then
-     $as_ln_s $cpuinfo_arch_target libcpuinfo/cpuinfo-arch.c
-     AC_MSG_WARN([libcpuinfo not found by pkg-config: a local copy will be used])
-     libcpuinfo_static_build="yes"
-     AC_DEFINE([HAVE_LIBCPUINFO], [1],
-               [Define to 1 if the library 'libcpuinfo' is installed])
-   else
-     AC_MSG_WARN([libcpuinfo not found by pkg-config])
-   fi
-  ])
-AM_CONDITIONAL([libcpuinfo_static_build], [test x$libcpuinfo_static_build = xyes])
-
 have_func_getloadavg=false
 AC_CHECK_FUNC([getloadavg], [have_func_getloadavg=true])
 AM_CONDITIONAL([HAVE_GETLOADAVG], [test x$have_func_getloadavg = xtrue])
@@ -319,7 +284,6 @@ AC_CONFIG_FILES([\
   Makefile \
   include/Makefile \
   lib/Makefile \
-  libcpuinfo/Makefile \
   plugins/Makefile])
 
 AC_OUTPUT

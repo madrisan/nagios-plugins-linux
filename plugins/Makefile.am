@@ -1,7 +1,6 @@
 AM_CPPFLAGS = \
 	-include $(top_builddir)/config.h \
 	-I$(top_srcdir)/include \
-	-I$(top_srcdir)/libcpuinfo $(libcpuinfo_CFLAGS) \
 	-DMULTIPATHD_SOCKET=\"$(MULTIPATHD_SOCKET)\"
 
 check_cpu_programs = check_iowait
@@ -44,10 +43,7 @@ check_users_SOURCES      = check_users.c
 LDADD = $(top_srcdir)/lib/libutils.a
 
 check_clock_LDADD        = $(LDADD)
-check_cpu_LDADD          = $(LDADD) $(libcpuinfo_LIBS)
-if libcpuinfo_static_build
-check_cpu_LDADD          += $(top_srcdir)/libcpuinfo/libcpuinfo.a
-endif
+check_cpu_LDADD          = $(LDADD)
 check_ifmountfs_LDADD    = $(LDADD)
 if HAVE_GETLOADAVG
 check_load_LDADD         = $(LDADD)
