@@ -125,7 +125,7 @@ main (int argc, char **argv)
 	  required[2] = true;
 	  break;
 	case 'r':
-	  numcpus = get_processor_number ();
+	  numcpus = get_processor_number_online ();
 	  break;
 
 	case_GETOPT_HELP_CHAR

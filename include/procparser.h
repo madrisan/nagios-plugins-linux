@@ -34,6 +34,12 @@ extern "C"
   void procparser (char *filename, const proc_table_struct * proc_table,
 		   int proc_table_count, char separator);
 
+  /* Lookup a pattern and get the value from line 
+   * Format is:
+   *	 "<pattern>   : <key>"
+   */
+  int linelookup (char *line, char *pattern, char **value);
+
 #ifdef __cplusplus
 }
 #endif

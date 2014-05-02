@@ -39,17 +39,34 @@ extern "C"
     jiff guestn;
   };
 
-/* Get the number of (active) cpu.*/
+  /* CPU modes */
+  enum
+  {
+    MODE_32BIT = (1 << 1),
+    MODE_64BIT = (1 << 2)
+  };
 
-  static inline int get_processor_number ()
+  struct cpu_desc
+  {
+    char *arch;
+    char *vendor;
+    char *family;
+    char *model;
+    char *modelname;
+    char *virtflag;	/* virtualization flag (vmx, svm) */
+    char *mhz;
+    char *flags;	/* x86 */
+    int mode;
+    int ncpus;		/* number of present CPUs */
+  };
+
+/* Get the number of total and active cpus */
+
+  static inline int get_processor_number_total ()
   {
     return
-#if defined (HAVE_GET_NPROCS)
-      get_nprocs ();
-#elif defined (HAVE_GET_NPROCS_CONF)
+#if defined (HAVE_GET_NPROCS_CONF)
       get_nprocs_conf ();
-#elif defined (HAVE_SYSCONF__SC_NPROCESSORS_ONLN)
-      sysconf (_SC_NPROCESSORS_ONLN);
 #elif defined (HAVE_SYSCONF__SC_NPROCESSORS_CONF)
       sysconf (_SC_NPROCESSORS_CONF);
 #else
@@ -57,7 +74,24 @@ extern "C"
 #endif
   }
 
-  /* Fill the proc_stats structure pointed with the values found in the 
+  static inline int get_processor_number_online ()
+  {
+    return
+#if defined (HAVE_GET_NPROCS)
+      get_nprocs ();
+#elif defined (HAVE_SYSCONF__SC_NPROCESSORS_ONLN)
+      sysconf (_SC_NPROCESSORS_ONLN);
+#else
+      -1;
+#endif
+  }
+
+  /* Fill the cpu_desc structure pointed with the values found in the 
+   * proc filesystem */
+
+  extern void cpu_desc_read (struct cpu_desc * __restrict cpudesc);
+
+  /* Fill the cpu_stats structure pointed with the values found in the 
    * proc filesystem */
 
   extern void cpu_stats_read (struct cpu_stats * __restrict cpustats);

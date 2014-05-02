@@ -35,6 +35,9 @@ dnl Checks for programs
 #AC_USE_SYSTEM_EXTENSIONS(_GNU_SOURCE)
 
 AC_PROG_CC_STDC
+AC_C_BIGENDIAN(
+   [AC_DEFINE(WORDS_BIGENDIAN,1, [Define if byte ordering is bigendian])])
+
 if test "$cross_compiling" = no; then
   if test "x$ac_cv_prog_cc_c99" = "xno" || test "x$ac_cv_prog_cc_c99" = "x"; then
   # We might be on RHEL5 with a git checkout and so broken

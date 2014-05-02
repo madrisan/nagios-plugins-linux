@@ -19,6 +19,7 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -28,6 +29,7 @@
 
 #include "messages.h"
 #include "procparser.h"
+#include "xalloc.h"
 
 static int
 compare_proc_table_structs (const void *a, const void *b)
@@ -85,4 +87,41 @@ procparser (char *filename, const proc_table_struct *proc_table,
     }
 
   free (line);
+}
+
+int
+linelookup (char *line, char *pattern, char **value)
+{
+  char *p, *v;
+  int len = strlen (pattern);
+
+  if (!*line)
+    return 0;
+
+  /* pattern */
+  if (strncmp (line, pattern, len))
+    return 0;
+
+  /* white spaces */
+  for (p = line + len; isspace (*p); p++);
+
+  /* separator */
+  if (*p != ':')
+    return 0;
+
+  /* white spaces */
+  for (++p; isspace (*p); p++);
+
+  /* value */
+  if (!*p)
+    return 0;
+  v = p;
+
+  /* end of value */
+  len = strlen (line) - 1;
+  for (p = line + len; isspace (*(p - 1)); p--);
+  *p = '\0';
+
+  *value = xstrdup (v);
+  return 1;
 }
