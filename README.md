@@ -377,6 +377,9 @@ you're done!
 This package is written in plain C, making as few assumptions as possible, and
 sticking closely to ANSI C/POSIX. 
 A C99-compliant compiler is required anyway.
+This package is known to compile with
+* gcc 4.4 (RHEL6),
+* gcc 4.8.2 and clang 3.1 (openmamba GNU/Linux 2.90).
 
 
 ## Bugs
