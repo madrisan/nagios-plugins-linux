@@ -1,3 +1,20 @@
+/* cpustats.h -- a library for checking the CPU utilization
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 #ifndef _CPUSTATS_H
 #define _CPUSTATS_H
 
@@ -39,65 +56,6 @@ extern "C"
     jiff guestn;
   };
 
-  struct cpu_desc;
-
-/* Get the number of total and active cpus */
-
-  static inline int get_processor_number_total ()
-  {
-    return
-#if defined (HAVE_GET_NPROCS_CONF)
-      get_nprocs_conf ();
-#elif defined (HAVE_SYSCONF__SC_NPROCESSORS_CONF)
-      sysconf (_SC_NPROCESSORS_CONF);
-#else
-      -1;
-#endif
-  }
-
-  static inline int get_processor_number_online ()
-  {
-    return
-#if defined (HAVE_GET_NPROCS)
-      get_nprocs ();
-#elif defined (HAVE_SYSCONF__SC_NPROCESSORS_ONLN)
-      sysconf (_SC_NPROCESSORS_ONLN);
-#else
-      -1;
-#endif
-  }
-
-  /* Allocates space for a new cpu_desc object.
-   * Returns 0 if all went ok. Errors are returned as negative values.  */
-  extern int cpu_desc_new (struct cpu_desc **cpudesc);
-
-  /* Fill the cpu_desc structure pointed with the values found in the 
-   * proc filesystem */
-  extern void cpu_desc_read (struct cpu_desc * __restrict cpudesc);
-
-  /* Drop a reference of the cpu_desc library context. If the refcount of
-   * reaches zero, the resources of the context will be released.  */
-  extern struct cpu_desc *cpu_desc_unref (struct cpu_desc *cpudesc);
-
-  /* Accessing the values from cpu_desc */
-  extern char *cpu_desc_get_architecture (struct cpu_desc *cpudesc);
-  extern char *cpu_desc_get_vendor (struct cpu_desc *cpudesc);
-  extern char *cpu_desc_get_family (struct cpu_desc *cpudesc);
-  extern char *cpu_desc_get_model (struct cpu_desc *cpudesc);
-  extern char *cpu_desc_get_model_name (struct cpu_desc *cpudesc);
-  extern char *cpu_desc_get_virtualization_flag (struct cpu_desc *cpudesc);
-  extern char *cpu_desc_get_mhz (struct cpu_desc *cpudesc);
-  extern char *cpu_desc_get_flags (struct cpu_desc *cpudesc);
-
-  enum		/* CPU modes */
-  {
-    MODE_32BIT = (1 << 1),
-    MODE_64BIT = (1 << 2)
-  };
-  extern int cpu_desc_get_mode (struct cpu_desc *cpudesc);
-
-  extern int cpu_desc_get_number_of_cpus (struct cpu_desc *cpudesc);
-
   /* Fill the cpu_stats structure pointed with the values found in the 
    * proc filesystem */
   extern void cpu_stats_read (struct cpu_stats * __restrict cpustats);
@@ -106,4 +64,4 @@ extern "C"
 }
 #endif
 
-#endif /* _CPUSTATS_H */
+#endif		/* _CPUSTATS_H */

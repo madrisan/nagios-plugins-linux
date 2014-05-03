@@ -24,7 +24,7 @@
 #include <stdlib.h>
 
 #include "common.h"
-#include "cpustats.h"
+#include "cpudesc.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"

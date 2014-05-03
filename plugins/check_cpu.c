@@ -36,6 +36,7 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "cpudesc.h"
 #include "cpustats.h"
 #include "messages.h"
 #include "progname.h"
