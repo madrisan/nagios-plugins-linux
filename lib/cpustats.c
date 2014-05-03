@@ -29,8 +29,6 @@
 #include "common.h"
 #include "cpustats.h"
 #include "messages.h"
-#include "procparser.h"
-#include "xalloc.h"
 
 #define BUFFSIZE 0x1000
 static char buff[BUFFSIZE];
