@@ -133,17 +133,18 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 {
   printf ("-= CPU Characteristics =-\n");
 
-  print_s("Architecture:", cpudesc->arch);
+  print_s("Architecture:", cpu_desc_get_architecture (cpudesc));
 
-  if (cpudesc->mode)
+  int cpu_mode = cpu_desc_get_mode (cpudesc);
+  if (cpu_mode)
     {
       char mbuf[32], *p = mbuf;
-      if (cpudesc->mode & MODE_32BIT)
+      if (cpu_mode & MODE_32BIT)
         {
           strcpy (p, "32-bit, ");
           p += 8;
         }
-      if (cpudesc->mode & MODE_64BIT)
+      if (cpu_mode & MODE_64BIT)
         {
           strcpy (p, "64-bit, ");
           p += 8;
@@ -158,26 +159,22 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 #else
   print_s("Byte Order:", "Big Endian");
 #endif
-  print_n("CPU(s):", cpudesc->ncpus);
-  print_s("Vendor ID:", cpudesc->vendor);
-  print_s("CPU Family:", cpudesc->family);
-  print_s("Model:", cpudesc->model);
-  print_s("Model name:", cpudesc->modelname);
-  print_s("CPU MHz:", cpudesc->mhz);
+  print_n("CPU(s):", cpu_desc_get_number_of_cpus (cpudesc));
+  print_s("Vendor ID:", cpu_desc_get_vendor (cpudesc));
+  print_s("CPU Family:", cpu_desc_get_family (cpudesc));
+  print_s("Model:", cpu_desc_get_model (cpudesc));
+  print_s("Model name:", cpu_desc_get_model_name (cpudesc));
+  print_s("CPU MHz:", cpu_desc_get_mhz (cpudesc));
 
-  if (cpudesc->virtflag)
-    {
-      if (!strcmp (cpudesc->virtflag, "svm"))
-	print_s("Virtualization:", "AMD-V");
-      else if (!strcmp (cpudesc->virtflag, "vmx"))
-	print_s("Virtualization:", "VT-x");
-    }
+  char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc); 
+  if (cpu_virtflag)
+    print_s("Virtualization:", cpu_virtflag);
 }
 
 int
 main (int argc, char **argv)
 {
-  int c;
+  int c, err;
   bool verbose = false;
   unsigned long i, len, delay, count;
   char *critical = NULL, *warning = NULL;
@@ -192,7 +189,7 @@ main (int argc, char **argv)
                tog = 0;		/* toggle switch for cleaner code */
   int debt = 0;			/* handle idle ticks running backwards */
 
-  struct cpu_desc _cpudesc, *cpudesc = &_cpudesc; 
+  struct cpu_desc *cpudesc = NULL;
 
   set_program_name (argv[0]);
 
@@ -218,7 +215,9 @@ main (int argc, char **argv)
       xstrdup ("This plugin checks the CPU (user mode) utilization\n");
     }
 
-  memset (cpudesc, 0, sizeof (*cpudesc));
+  err = cpu_desc_new (&cpudesc);
+  if (err < 0)
+    plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
   while ((c = getopt_long (
 		argc, argv, "c:w:vi"
@@ -336,15 +335,16 @@ main (int argc, char **argv)
     ("%s (CPU: %s) %s - cpu %s %u%% | "
      "cpu_user=%u%% cpu_system=%u%% cpu_idle=%u%% cpu_iowait=%u%% "
      "cpu_steal=%u%% cpu_freq=%ldMHz\n"
-     , program_name_short, cpudesc->modelname, state_text (status)
-     , cpu_progname, cpu_perc
+     , program_name_short, cpu_desc_get_model_name (cpudesc)
+     , state_text (status), cpu_progname, cpu_perc
      , (unsigned) ((100 * duser   + half_ratio) / ratio)
      , (unsigned) ((100 * dsystem + half_ratio) / ratio)
      , (unsigned) ((100 * didle   + half_ratio) / ratio)
      , (unsigned) ((100 * diowait + half_ratio) / ratio)
      , (unsigned) ((100 * dsteal  + half_ratio) / ratio)
-     , strtol (cpudesc->mhz, NULL, 10)
+     , strtol (cpu_desc_get_mhz (cpudesc), NULL, 10)
   );
 
+  cpu_desc_unref (cpudesc);
   return status;
 }

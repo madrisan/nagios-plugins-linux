@@ -39,6 +39,39 @@ static char buff[BUFFSIZE];
 #define PATH_PROC_STAT		"/proc/stat"
 #define PATH_PROC_CPUINFO	"/proc/cpuinfo"
 
+struct cpu_desc
+{
+  int refcount;
+
+  char *arch;
+  char *vendor;
+  char *family;
+  char *model;
+  char *modelname;
+  char *virtflag;	/* virtualization flag (vmx, svm) */
+  char *mhz;
+  char *flags;		/* x86 */
+  int mode;
+  int ncpus;		/* number of present CPUs */
+};
+
+/* Allocates space for a new cpu_desc object.
+ * Returns 0 if all went ok. Errors are returned as negative values.  */
+int
+cpu_desc_new (struct cpu_desc **cpudesc)
+{
+  struct cpu_desc *d;
+
+  d = calloc (1, sizeof (struct cpu_desc));
+  if (!d)
+    return -ENOMEM;
+
+  d->refcount = 1;
+
+  *cpudesc = d;
+  return 0;
+}
+
 /* Fill the cpu_desc structure pointed with the values found in the 
  * proc filesystem */
 
@@ -50,6 +83,9 @@ cpu_desc_read (struct cpu_desc *cpudesc)
   size_t len = 0;
   ssize_t chread;
   struct utsname utsbuf;
+
+  if (cpudesc == NULL)
+    return;
 
   if ((fp = fopen (PATH_PROC_CPUINFO,  "r")) == NULL)
     plugin_error (STATE_UNKNOWN, errno, "error opening %s", PATH_PROC_CPUINFO);
@@ -107,6 +143,91 @@ cpu_desc_read (struct cpu_desc *cpudesc)
     }
 
   free (line);
+}
+
+/* Drop a reference of the cpu_desc library context. If the refcount of
+ * reaches zero, the resources of the context will be released.  */
+struct cpu_desc *
+cpu_desc_unref (struct cpu_desc *cpudesc)
+{
+  if (cpudesc == NULL)
+    return NULL;
+
+  cpudesc->refcount--;
+  if (cpudesc->refcount > 0)
+    return cpudesc;
+
+  free (cpudesc);
+  return NULL;
+}
+
+char *
+cpu_desc_get_architecture (struct cpu_desc *cpudesc)
+{
+  return cpudesc->arch;
+}
+
+char *
+cpu_desc_get_vendor (struct cpu_desc *cpudesc)
+{
+  return cpudesc->vendor;
+}
+
+char *
+cpu_desc_get_family (struct cpu_desc *cpudesc)
+{
+  return cpudesc->family;
+}
+
+char *
+cpu_desc_get_model (struct cpu_desc *cpudesc)
+{
+  return cpudesc->model;
+}
+
+char *
+cpu_desc_get_model_name (struct cpu_desc *cpudesc)
+{
+  return cpudesc->modelname;
+}
+
+char *
+cpu_desc_get_virtualization_flag (struct cpu_desc *cpudesc)
+{
+  if (cpudesc->virtflag == NULL)
+    return NULL;
+
+  if (!strcmp (cpudesc->virtflag, "svm"))
+    return "AMD-V";
+  else if (!strcmp (cpudesc->virtflag, "vmx"))
+    return "VT-x";
+  /* should never been reached */
+  else
+    return cpudesc->virtflag;
+}
+
+char *
+cpu_desc_get_mhz (struct cpu_desc *cpudesc)
+{
+  return cpudesc->mhz;
+}
+
+char *
+cpu_desc_get_flags (struct cpu_desc *cpudesc)
+{
+  return cpudesc->flags;
+}
+
+int
+cpu_desc_get_mode (struct cpu_desc *cpudesc)
+{
+  return cpudesc->mode;
+}
+
+int
+cpu_desc_get_number_of_cpus (struct cpu_desc *cpudesc)
+{
+  return cpudesc->ncpus;
 }
 
 /* Fill the proc_cpu structure pointed with the values found in the 
