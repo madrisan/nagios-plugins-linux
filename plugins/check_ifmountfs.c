@@ -100,7 +100,6 @@ main (int argc, char **argv)
 	{
 	default:
 	  usage (stderr);
-	  break;
 
 	case_GETOPT_HELP_CHAR
 	case_GETOPT_VERSION_CHAR

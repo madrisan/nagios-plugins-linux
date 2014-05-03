@@ -145,7 +145,6 @@ main (int argc, char **argv)
 	{
 	default:
 	  usage (stderr);
-	  break;
 	case 'c':
 	  critical = optarg;
 	  break;

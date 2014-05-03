@@ -232,7 +232,6 @@ main (int argc, char **argv)
 	  cpu_desc_read (cpudesc);
 	  cpu_desc_summary (cpudesc);
 	  return STATE_UNKNOWN;
-	  break;
 	case 'c':
 	  critical = optarg;
 	  break;

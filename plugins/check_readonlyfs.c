@@ -282,7 +282,6 @@ main (int argc, char **argv)
 	{
 	default:
 	  usage (stderr);
-	  break;
 	case 'a':
 	  show_all_fs = true;
 	  break;

@@ -218,7 +218,6 @@ main (int argc, char **argv)
 	{
 	default:
 	  usage (stderr);
-	  break;
 	case 'v':
 	  verbose = true;
 	  break;

@@ -108,7 +108,6 @@ main (int argc, char **argv)
 	{
 	default:
 	  usage (stderr);
-	  break;
 	case '1':
 	  i = sscanf (optarg, "%lf,%lf", &wload[0], &cload[0]);
 	  validate_input (i, wload[0], cload[0]);
