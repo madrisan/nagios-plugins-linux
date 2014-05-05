@@ -191,6 +191,8 @@ main (int argc, char **argv)
   int debt = 0;			/* handle idle ticks running backwards */
 
   struct cpu_desc *cpudesc = NULL;
+  long freq_min, freq_max;
+  char *cpu_freq_perfdata_ext = "";
 
   set_program_name (argv[0]);
 
@@ -331,10 +333,17 @@ main (int argc, char **argv)
 
   cpu_desc_read (cpudesc);
 
+  freq_min = cpu_desc_get_mhz_min (cpudesc);
+  freq_max = cpu_desc_get_mhz_max (cpudesc);
+  if (freq_min > 0 && freq_max > 0)
+    /* expected format for the Nagios performance data:
+     *   'label'=value[UOM];[warn];[crit];[min];[max]	*/
+    cpu_freq_perfdata_ext = xasprintf (";;;%ld;%ld", freq_min, freq_max);
+
   printf
     ("%s (CPU: %s) %s - cpu %s %u%% | "
      "cpu_user=%u%% cpu_system=%u%% cpu_idle=%u%% cpu_iowait=%u%% "
-     "cpu_steal=%u%% cpu_freq=%ldMHz\n"
+     "cpu_steal=%u%% cpu_freq=%ldMHz%s\n"
      , program_name_short, cpu_desc_get_model_name (cpudesc)
      , state_text (status), cpu_progname, cpu_perc
      , (unsigned) ((100 * duser   + half_ratio) / ratio)
@@ -342,7 +351,7 @@ main (int argc, char **argv)
      , (unsigned) ((100 * didle   + half_ratio) / ratio)
      , (unsigned) ((100 * diowait + half_ratio) / ratio)
      , (unsigned) ((100 * dsteal  + half_ratio) / ratio)
-     , strtol (cpu_desc_get_mhz (cpudesc), NULL, 10)
+     , strtol (cpu_desc_get_mhz (cpudesc), NULL, 10), cpu_freq_perfdata_ext
   );
 
   cpu_desc_unref (cpudesc);
