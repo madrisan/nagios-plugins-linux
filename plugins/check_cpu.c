@@ -167,6 +167,16 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
   print_s("Model name:", cpu_desc_get_model_name (cpudesc));
   print_s("CPU MHz:", cpu_desc_get_mhz (cpudesc));
 
+  long freq_min = cpu_desc_get_mhz_min (cpudesc);
+  long freq_max = cpu_desc_get_mhz_max (cpudesc);
+
+  if ((freq_min > 0) && (freq_max > 0))
+    {
+      char *cpu_hw_limits =
+	xasprintf ("%ld MHz - %ld MHz", freq_min, freq_max);
+      print_s("Hardware limits:", cpu_hw_limits);
+    }
+  
   char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc); 
   if (cpu_virtflag)
     print_s("Virtualization:", cpu_virtflag);
