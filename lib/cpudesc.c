@@ -38,7 +38,6 @@
 #define PATH_SYS_CPU		PATH_SYS_SYSTEM "/cpu"
 
 #define SYSFS_PATH_MAX 255
-#define MAX_LINE_LEN 255
 
 /* Get the number of total and active cpus */
 
@@ -83,41 +82,45 @@ static const char *cpudesc_cpufreq_sysfile[MAX_VALUE_FILES] = {
 static long
 cpu_desc_get_cpufreq (unsigned int cpunum, enum cpudesc_cpufreq which)
 {
-  char file[SYSFS_PATH_MAX];
-  char buf[MAX_LINE_LEN], *endptr;
-  size_t nread;
-  int fd;
+  char filename[SYSFS_PATH_MAX];
+  char *line, *endptr;
+  FILE *fp;
+  size_t len = 0;
+  ssize_t chread;
   long value;
 
   if (which >= MAX_VALUE_FILES )
-     return 0;
-
-  snprintf (file, SYSFS_PATH_MAX, PATH_SYS_CPU "/cpu%u/cpufreq/%s",
-            cpunum, cpudesc_cpufreq_sysfile[which]);
-
-  if ((fd = open (file, O_RDONLY)) == -1)
     return 0;
 
-  nread = read (fd, buf, (sizeof (buf) - 1));
-  if (nread < 1)
+  snprintf (filename, SYSFS_PATH_MAX, PATH_SYS_CPU "/cpu%u/cpufreq/%s",
+            cpunum, cpudesc_cpufreq_sysfile[which]);
+
+  if ((fp = fopen (filename,  "r")) == NULL)
+    return 0;
+
+  if ((chread = getline (&line, &len, fp)) < 1)
     {
-      close (fd);
+      fclose (fp);
       return 0;
     }
 
-  buf[nread] = '\0';
-  close(fd);
+  fclose (fp);
 
   errno = 0;
-  value = strtol (buf, &endptr, 10);
+  value = strtol (line, &endptr, 10);
   if ((errno == ERANGE && (value == LONG_MAX || value == LONG_MIN))
              || (errno != 0 && value == 0))
-    return 0;
+    goto err;
 
-  if (endptr == buf) 
-    return 0;  /* No digits were found */
+  if (endptr == line)
+    goto err;	/* No digits were found */
 
+  free (line);
   return value;
+
+err:
+  free (line);
+  return 0;
 }
 
 enum	/* CPU modes */
