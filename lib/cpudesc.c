@@ -18,15 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <sys/sysinfo.h>
-#include <sys/stat.h>
 #include <sys/utsname.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "common.h"
 #include "messages.h"
