@@ -23,6 +23,7 @@ noinst_LIBRARIES = libutils.a
 
 libutils_a_SOURCES = \
 	cpudesc.c    \
+	cpufreq.c    \
 	cpustats.c   \
 	meminfo.c    \
 	messages.c   \

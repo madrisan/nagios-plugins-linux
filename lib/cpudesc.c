@@ -34,15 +34,11 @@
 #include "xalloc.h"
 
 #define PATH_PROC_CPUINFO	"/proc/cpuinfo"
-#define PATH_SYS_SYSTEM		"/sys/devices/system"
-#define PATH_SYS_CPU		PATH_SYS_SYSTEM "/cpu"
-
-#define SYSFS_PATH_MAX 255
 
 /* Get the number of total and active cpus */
 
 int
-get_processor_number_total ()
+get_processor_number_total (void)
 {
   return
 #if defined (HAVE_GET_NPROCS_CONF)
@@ -55,7 +51,7 @@ get_processor_number_total ()
 }
 
 int
-get_processor_number_online ()
+get_processor_number_online (void)
 {
   return
 #if defined (HAVE_GET_NPROCS)
@@ -65,62 +61,6 @@ get_processor_number_online ()
 #else
     -1;
 #endif
-}
-
-enum cpudesc_cpufreq
-{
-  CPUINFO_MIN_FREQ,
-  CPUINFO_MAX_FREQ,
-  MAX_VALUE_FILES
-};
-
-static const char *cpudesc_cpufreq_sysfile[MAX_VALUE_FILES] = {
-  [CPUINFO_MIN_FREQ] = "cpuinfo_min_freq",
-  [CPUINFO_MAX_FREQ] = "cpuinfo_max_freq",
-};
-
-static long
-cpu_desc_get_cpufreq (unsigned int cpunum, enum cpudesc_cpufreq which)
-{
-  char filename[SYSFS_PATH_MAX];
-  char *line, *endptr;
-  FILE *fp;
-  size_t len = 0;
-  ssize_t chread;
-  long value;
-
-  if (which >= MAX_VALUE_FILES )
-    return 0;
-
-  snprintf (filename, SYSFS_PATH_MAX, PATH_SYS_CPU "/cpu%u/cpufreq/%s",
-            cpunum, cpudesc_cpufreq_sysfile[which]);
-
-  if ((fp = fopen (filename,  "r")) == NULL)
-    return 0;
-
-  if ((chread = getline (&line, &len, fp)) < 1)
-    {
-      fclose (fp);
-      return 0;
-    }
-
-  fclose (fp);
-
-  errno = 0;
-  value = strtol (line, &endptr, 10);
-  if ((errno == ERANGE && (value == LONG_MAX || value == LONG_MIN))
-             || (errno != 0 && value == 0))
-    goto err;
-
-  if (endptr == line)
-    goto err;	/* No digits were found */
-
-  free (line);
-  return value;
-
-err:
-  free (line);
-  return 0;
 }
 
 enum	/* CPU modes */
@@ -318,36 +258,4 @@ int
 cpu_desc_get_number_of_cpus (struct cpu_desc *cpudesc)
 {
   return cpudesc->ncpus;
-}
-
-long
-cpu_desc_get_mhz_min (struct cpu_desc *cpudesc)
-{
-   int i;
-   long cpufreq_min = 0;
-
-   for (i = 0; i < cpudesc->ncpus; i++)
-     {
-       long curr = cpu_desc_get_cpufreq (i, CPUINFO_MIN_FREQ);
-       if (curr > 0 && ((cpufreq_min > curr) || cpufreq_min == 0))
-	cpufreq_min = curr;
-     }
-
-   return (cpufreq_min / 1000);
-}
-
-long
-cpu_desc_get_mhz_max (struct cpu_desc *cpudesc)
-{
-  int i;
-  long cpufreq_max = 0;
-
-  for (i = 0; i < cpudesc->ncpus; i++)
-     {
-       long curr = cpu_desc_get_cpufreq (i, CPUINFO_MAX_FREQ);
-       if (curr > cpufreq_max)
-	cpufreq_max = curr;
-     }
-
-   return (cpufreq_max / 1000);
 }

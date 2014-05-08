@@ -51,9 +51,6 @@ extern "C"
   extern char *cpu_desc_get_mhz (struct cpu_desc *cpudesc);
   extern char *cpu_desc_get_flags (struct cpu_desc *cpudesc);
 
-  extern long cpu_desc_get_mhz_min (struct cpu_desc *cpudesc);
-  extern long cpu_desc_get_mhz_max (struct cpu_desc *cpudesc);
-
 enum		/* CPU modes */
   {
     MODE_32BIT = (1 << 1),
