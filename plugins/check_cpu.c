@@ -168,8 +168,8 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
   print_s("Model name:", cpu_desc_get_model_name (cpudesc));
   print_s("CPU MHz:", cpu_desc_get_mhz (cpudesc));
 
-  long freq_min = cpu_desc_get_mhz_min ();
-  long freq_max = cpu_desc_get_mhz_max ();
+  long freq_min = cpufreq_get_freq_min ();
+  long freq_max = cpufreq_get_freq_max ();
 
   if ((freq_min > 0) && (freq_max > 0))
     {
@@ -344,8 +344,8 @@ main (int argc, char **argv)
 
   cpu_desc_read (cpudesc);
 
-  freq_min = cpu_desc_get_mhz_min ();
-  freq_max = cpu_desc_get_mhz_max ();
+  freq_min = cpufreq_get_freq_min ();
+  freq_max = cpufreq_get_freq_max ();
   if (freq_min > 0 && freq_max > 0)
     /* expected format for the Nagios performance data:
      *   'label'=value[UOM];[warn];[crit];[min];[max]	*/
