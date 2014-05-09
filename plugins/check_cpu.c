@@ -168,14 +168,14 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
   print_s("Model name:", cpu_desc_get_model_name (cpudesc));
   print_s("CPU MHz:", cpu_desc_get_mhz (cpudesc));
 
-  long freq_min = cpufreq_get_freq_min ();
-  long freq_max = cpufreq_get_freq_max ();
-
-  if ((freq_min > 0) && (freq_max > 0))
+  unsigned long freq_min, freq_max;
+  if (0 == cpufreq_get_hardware_limits (0, &freq_min, &freq_max))
     {
-      char *cpu_hw_limits =
-	xasprintf ("%ld MHz - %ld MHz", freq_min, freq_max);
-      print_s("Hardware limits:", cpu_hw_limits);
+      printf ("%-18s", "Hardware limits:");
+      cpufreq_print (freq_min);
+      printf (" - ");
+      cpufreq_print (freq_max);
+      printf ("\n");
     }
   
   char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc); 
@@ -202,7 +202,6 @@ main (int argc, char **argv)
   int debt = 0;			/* handle idle ticks running backwards */
 
   struct cpu_desc *cpudesc = NULL;
-  long freq_min, freq_max;
   char *cpu_freq_perfdata_ext = "";
 
   set_program_name (argv[0]);
@@ -344,12 +343,14 @@ main (int argc, char **argv)
 
   cpu_desc_read (cpudesc);
 
-  freq_min = cpufreq_get_freq_min ();
-  freq_max = cpufreq_get_freq_max ();
-  if (freq_min > 0 && freq_max > 0)
-    /* expected format for the Nagios performance data:
-     *   'label'=value[UOM];[warn];[crit];[min];[max]	*/
-    cpu_freq_perfdata_ext = xasprintf (";;;%ld;%ld", freq_min, freq_max);
+  unsigned long freq_min, freq_max;
+  if (0 == cpufreq_get_hardware_limits (0, &freq_min, &freq_max))
+    {
+      /* expected format for the Nagios performance data:
+       *   'label'=value[UOM];[warn];[crit];[min];[max]	*/
+      cpu_freq_perfdata_ext =
+	xasprintf (";;;%lu;%lu", freq_min / 1000, freq_max / 1000);
+    }
 
   printf
     ("%s (CPU: %s) %s - cpu %s %u%% | "

@@ -23,11 +23,13 @@ extern "C"
 {
 #endif
 
-  extern long cpufreq_get_freq_min (void);
-  extern long cpufreq_get_freq_max (void);
+  extern int cpufreq_get_hardware_limits (unsigned int cpu,
+				   	  unsigned long *min,
+					  unsigned long *max);
+  extern void cpufreq_print (unsigned long freq);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif		/* _CPUFREQ_H */
+#endif				/* _CPUFREQ_H */

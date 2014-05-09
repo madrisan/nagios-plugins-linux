@@ -32,18 +32,26 @@
 
 enum cpufreq_sysfile_id
 {
+  CPUINFO_CUR_FREQ,
   CPUINFO_MIN_FREQ,
   CPUINFO_MAX_FREQ,
+  SCALING_CUR_FREQ,
+  SCALING_MIN_FREQ,
+  SCALING_MAX_FREQ,
   MAX_VALUE_FILES
 };
 
 static const char *cpufreq_sysfile[MAX_VALUE_FILES] = {
+  [CPUINFO_CUR_FREQ] = "cpuinfo_cur_freq",
   [CPUINFO_MIN_FREQ] = "cpuinfo_min_freq",
   [CPUINFO_MAX_FREQ] = "cpuinfo_max_freq",
+  [SCALING_CUR_FREQ] = "scaling_cur_freq",
+  [SCALING_MIN_FREQ] = "scaling_min_freq",
+  [SCALING_MAX_FREQ] = "scaling_max_freq",
 };
 
-static long
-cpufreq_get_freq (unsigned int cpunum, enum cpufreq_sysfile_id which)
+static unsigned long
+cpufreq_get_sysyfs_value (unsigned int cpunum, enum cpufreq_sysfile_id which)
 {
   char filename[SYSFS_PATH_MAX];
   char *line, *endptr;
@@ -52,13 +60,13 @@ cpufreq_get_freq (unsigned int cpunum, enum cpufreq_sysfile_id which)
   ssize_t chread;
   long value;
 
-  if (which >= MAX_VALUE_FILES )
+  if (which >= MAX_VALUE_FILES)
     return 0;
 
   snprintf (filename, SYSFS_PATH_MAX, PATH_SYS_CPU "/cpu%u/cpufreq/%s",
             cpunum, cpufreq_sysfile[which]);
 
-  if ((fp = fopen (filename,  "r")) == NULL)
+  if ((fp = fopen (filename, "r")) == NULL)
     return 0;
 
   if ((chread = getline (&line, &len, fp)) < 1)
@@ -70,50 +78,63 @@ cpufreq_get_freq (unsigned int cpunum, enum cpufreq_sysfile_id which)
   fclose (fp);
 
   errno = 0;
-  value = strtol (line, &endptr, 10);
-  if ((errno == ERANGE && (value == LONG_MAX || value == LONG_MIN))
-             || (errno != 0 && value == 0))
-    goto err;
-
-  if (endptr == line)
-    goto err;	/* No digits were found */
+  value = strtoul (line, &endptr, 10);
+  if ((endptr == line) || (errno == ERANGE))
+    {
+      free (line);
+      return 0;
+    }
 
   free (line);
   return value;
+}
 
-err:
-  free (line);
+int
+cpufreq_get_hardware_limits (unsigned int cpu,
+			     unsigned long *min, unsigned long *max)
+{
+  if ((!min) || (!max))
+    return -EINVAL;
+
+  *min = cpufreq_get_sysyfs_value (cpu, CPUINFO_MIN_FREQ);
+  if (!*min)
+    return -ENODEV;
+
+  *max = cpufreq_get_sysyfs_value (cpu, CPUINFO_MAX_FREQ);
+  if (!*max)
+    return -ENODEV;
+
   return 0;
 }
 
-long
-cpufreq_get_freq_min (void)
+void
+cpufreq_print (unsigned long freq)
 {
-   int i;
-   long cpufreq_min = 0;
+  unsigned long tmp;
 
-   for (i = 0; i < get_processor_number_total (); i++)
-     {
-       long curr = cpufreq_get_freq (i, CPUINFO_MIN_FREQ);
-       if (curr > 0 && ((cpufreq_min > curr) || cpufreq_min == 0))
-	cpufreq_min = curr;
-     }
-
-   return (cpufreq_min / 1000);
-}
-
-long
-cpufreq_get_freq_max (void)
-{
-  int i;
-  long cpufreq_max = 0;
-
-  for (i = 0; i < get_processor_number_total (); i++)
-     {
-       long curr = cpufreq_get_freq (i, CPUINFO_MAX_FREQ);
-       if (curr > cpufreq_max)
-	cpufreq_max = curr;
-     }
-
-   return (cpufreq_max / 1000);
+  if (freq > 1000000)
+    { 
+      tmp = freq % 10000;
+      if (tmp >= 5000)
+	freq += 10000;
+      printf ("%u.%02u GHz", ((unsigned int) freq / 1000000),
+	      ((unsigned int) (freq % 1000000) / 10000));
+    }
+  else if (freq > 100000)
+    {
+      tmp = freq % 1000;
+      if (tmp >= 500)
+	freq += 1000;
+      printf ("%u MHz", ((unsigned int) freq / 1000));
+    }
+  else if (freq > 1000)
+    {
+      tmp = freq % 100;
+      if (tmp >= 50)
+	freq += 100;
+      printf ("%u.%01u MHz", ((unsigned int) freq / 1000),
+	      ((unsigned int) (freq % 1000) / 100));
+    }
+  else
+    printf ("%lu kHz", freq);
 }
