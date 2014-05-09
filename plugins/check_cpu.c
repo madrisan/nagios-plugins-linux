@@ -169,19 +169,24 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
   print_s("Model:", cpu_desc_get_model (cpudesc));
   print_s("Model name:", cpu_desc_get_model_name (cpudesc));
   /*print_s("CPU freq (cpu0):", cpu_desc_get_mhz (cpudesc));*/
-  print_s("CPU freq (cpu0):",
-	  cpufreq_to_string (cpufreq_get_freq_kernel (0)));
+  print_s("Frequency (cpu0):",
+	  cpufreq_freq_to_string (cpufreq_get_freq_kernel (0)));
 
   unsigned long freq_min, freq_max;
   if (0 == cpufreq_get_hardware_limits (0, &freq_min, &freq_max))
     {
-      char *min_s = cpufreq_to_string (freq_min),
-	   *max_s = cpufreq_to_string (freq_max);
+      char *min_s = cpufreq_freq_to_string (freq_min),
+	   *max_s = cpufreq_freq_to_string (freq_max);
       print_range_s("Hardware limits (cpu0):", min_s, max_s);
       free (min_s);
       free (max_s);
     }
-  
+
+  unsigned long latency = cpufreq_get_transition_latency (0);
+  if (latency)
+    print_s("Maximum transition latency (cpu0): ",
+	    cpufreq_duration_to_string (latency));
+ 
   char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc); 
   if (cpu_virtflag)
     print_s("Virtualization:", cpu_virtflag);

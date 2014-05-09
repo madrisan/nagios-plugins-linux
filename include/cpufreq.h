@@ -27,8 +27,10 @@ extern "C"
 				   	  unsigned long *min,
 					  unsigned long *max);
   extern unsigned long cpufreq_get_freq_kernel (unsigned int cpu);
+  extern unsigned long cpufreq_get_transition_latency (unsigned int cpu);
 
-  extern char* cpufreq_to_string (unsigned long freq);
+  extern char* cpufreq_freq_to_string (unsigned long freq);
+  extern char* cpufreq_duration_to_string (unsigned long duration);
 
 #ifdef __cplusplus
 }

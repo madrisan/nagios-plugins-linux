@@ -36,6 +36,7 @@ enum cpufreq_sysfile_id
   CPUINFO_CUR_FREQ,
   CPUINFO_MIN_FREQ,
   CPUINFO_MAX_FREQ,
+  CPUINFO_LATENCY,
   SCALING_CUR_FREQ,
   SCALING_MIN_FREQ,
   SCALING_MAX_FREQ,
@@ -46,6 +47,7 @@ static const char *cpufreq_sysfile[MAX_VALUE_FILES] = {
   [CPUINFO_CUR_FREQ] = "cpuinfo_cur_freq",
   [CPUINFO_MIN_FREQ] = "cpuinfo_min_freq",
   [CPUINFO_MAX_FREQ] = "cpuinfo_max_freq",
+  [CPUINFO_LATENCY]  = "cpuinfo_transition_latency",
   [SCALING_CUR_FREQ] = "scaling_cur_freq",
   [SCALING_MIN_FREQ] = "scaling_min_freq",
   [SCALING_MAX_FREQ] = "scaling_max_freq",
@@ -90,6 +92,12 @@ cpufreq_get_sysyfs_value (unsigned int cpunum, enum cpufreq_sysfile_id which)
   return value;
 }
 
+unsigned long
+cpufreq_get_freq_kernel (unsigned int cpu)
+{
+  return  cpufreq_get_sysyfs_value (cpu, SCALING_CUR_FREQ);
+}
+
 int
 cpufreq_get_hardware_limits (unsigned int cpu,
 			     unsigned long *min, unsigned long *max)
@@ -109,13 +117,13 @@ cpufreq_get_hardware_limits (unsigned int cpu,
 }
 
 unsigned long
-cpufreq_get_freq_kernel (unsigned int cpu)
+cpufreq_get_transition_latency (unsigned int cpu)
 {
-  return  cpufreq_get_sysyfs_value (cpu, SCALING_CUR_FREQ);
+  return cpufreq_get_sysyfs_value (cpu, CPUINFO_LATENCY);
 }
 
 char *
-cpufreq_to_string (unsigned long freq)
+cpufreq_freq_to_string (unsigned long freq)
 {
   unsigned long tmp;
 
@@ -144,4 +152,36 @@ cpufreq_to_string (unsigned long freq)
     }
   else
     return xasprintf ("%lu kHz", freq);
+}
+
+char *
+cpufreq_duration_to_string (unsigned long duration)
+{
+  unsigned long tmp;
+
+  if (duration > 1000000)
+    {
+      tmp = duration % 10000;
+      if (tmp >= 5000)
+	duration += 10000;
+      return xasprintf ("%u.%02u ms", ((unsigned int) duration / 1000000),
+			((unsigned int) (duration % 1000000) / 10000));
+    }
+  else if (duration > 100000)
+    {
+      tmp = duration % 1000;
+      if (tmp >= 500)
+	duration += 1000;
+      return xasprintf ("%u us", ((unsigned int) duration / 1000));
+    }
+  else if (duration > 1000)
+    {
+      tmp = duration % 100;
+      if (tmp >= 50)
+        duration += 100;
+      return xasprintf ("%u.%01u us", ((unsigned int) duration / 1000),
+			((unsigned int) (duration % 1000) / 100));
+    }
+  else
+    return xasprintf ("%lu ns", duration);
 }
