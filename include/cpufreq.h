@@ -26,7 +26,9 @@ extern "C"
   extern int cpufreq_get_hardware_limits (unsigned int cpu,
 				   	  unsigned long *min,
 					  unsigned long *max);
-  extern void cpufreq_print (unsigned long freq);
+  extern unsigned long cpufreq_get_freq_kernel (unsigned int cpu);
+
+  extern char* cpufreq_to_string (unsigned long freq);
 
 #ifdef __cplusplus
 }

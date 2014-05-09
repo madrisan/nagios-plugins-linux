@@ -128,8 +128,10 @@ strtol_or_err (const char *str, const char *errmesg)
 }
 
 /* output formats "<key>:  <value>" */
-#define print_s(_key, _val)	printf ("%-18s%s\n", _key, _val)
-#define print_n(_key, _val)	printf ("%-18s%d\n", _key, _val)
+#define print_n(_key, _val)  printf ("%-25s%d\n", _key, _val)
+#define print_s(_key, _val)  printf ("%-25s%s\n", _key, _val)
+#define print_range_s(_key, _val1, _val2) \
+        printf ("%-25s%s - %s\n", _key, _val1, _val2)
 
 static void cpu_desc_summary (struct cpu_desc *cpudesc)
 {
@@ -166,16 +168,18 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
   print_s("CPU Family:", cpu_desc_get_family (cpudesc));
   print_s("Model:", cpu_desc_get_model (cpudesc));
   print_s("Model name:", cpu_desc_get_model_name (cpudesc));
-  print_s("CPU MHz:", cpu_desc_get_mhz (cpudesc));
+  /*print_s("CPU freq (cpu0):", cpu_desc_get_mhz (cpudesc));*/
+  print_s("CPU freq (cpu0):",
+	  cpufreq_to_string (cpufreq_get_freq_kernel (0)));
 
   unsigned long freq_min, freq_max;
   if (0 == cpufreq_get_hardware_limits (0, &freq_min, &freq_max))
     {
-      printf ("%-18s", "Hardware limits:");
-      cpufreq_print (freq_min);
-      printf (" - ");
-      cpufreq_print (freq_max);
-      printf ("\n");
+      char *min_s = cpufreq_to_string (freq_min),
+	   *max_s = cpufreq_to_string (freq_max);
+      print_range_s("Hardware limits (cpu0):", min_s, max_s);
+      free (min_s);
+      free (max_s);
     }
   
   char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc); 

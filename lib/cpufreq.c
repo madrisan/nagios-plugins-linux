@@ -24,6 +24,7 @@
 
 #include "common.h"
 #include "cpudesc.h"
+#include "xasprintf.h"
 
 #define PATH_SYS_SYSTEM		"/sys/devices/system"
 #define PATH_SYS_CPU		PATH_SYS_SYSTEM "/cpu"
@@ -107,8 +108,14 @@ cpufreq_get_hardware_limits (unsigned int cpu,
   return 0;
 }
 
-void
-cpufreq_print (unsigned long freq)
+unsigned long
+cpufreq_get_freq_kernel (unsigned int cpu)
+{
+  return  cpufreq_get_sysyfs_value (cpu, SCALING_CUR_FREQ);
+}
+
+char *
+cpufreq_to_string (unsigned long freq)
 {
   unsigned long tmp;
 
@@ -117,24 +124,24 @@ cpufreq_print (unsigned long freq)
       tmp = freq % 10000;
       if (tmp >= 5000)
 	freq += 10000;
-      printf ("%u.%02u GHz", ((unsigned int) freq / 1000000),
-	      ((unsigned int) (freq % 1000000) / 10000));
+      return xasprintf ("%u.%02u GHz", ((unsigned int) freq / 1000000),
+		        ((unsigned int) (freq % 1000000) / 10000));
     }
   else if (freq > 100000)
     {
       tmp = freq % 1000;
       if (tmp >= 500)
 	freq += 1000;
-      printf ("%u MHz", ((unsigned int) freq / 1000));
+      return xasprintf ("%u MHz", ((unsigned int) freq / 1000));
     }
   else if (freq > 1000)
     {
       tmp = freq % 100;
       if (tmp >= 50)
 	freq += 100;
-      printf ("%u.%01u MHz", ((unsigned int) freq / 1000),
-	      ((unsigned int) (freq % 1000) / 100));
+      return xasprintf ("%u.%01u MHz", ((unsigned int) freq / 1000),
+		        ((unsigned int) (freq % 1000) / 100));
     }
   else
-    printf ("%lu kHz", freq);
+    return xasprintf ("%lu kHz", freq);
 }
