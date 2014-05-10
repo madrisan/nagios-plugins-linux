@@ -128,10 +128,10 @@ strtol_or_err (const char *str, const char *errmesg)
 }
 
 /* output formats "<key>:  <value>" */
-#define print_n(_key, _val)  printf ("%-35s%d\n", _key, _val)
-#define print_s(_key, _val)  printf ("%-35s%s\n", _key, _val)
+#define print_n(_key, _val)  printf ("%-30s%d\n", _key, _val)
+#define print_s(_key, _val)  printf ("%-30s%s\n", _key, _val)
 #define print_range_s(_key, _val1, _val2) \
-        printf ("%-35s%s - %s\n", _key, _val1, _val2)
+        printf ("%-30s%s - %s\n", _key, _val1, _val2)
 
 static void cpu_desc_summary (struct cpu_desc *cpudesc)
 {
@@ -163,38 +163,59 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 #else
   print_s("Byte Order:", "Big Endian");
 #endif
-  print_n("CPU(s):", cpu_desc_get_number_of_cpus (cpudesc));
+
+  unsigned int cpu,
+	       ncpu = cpu_desc_get_number_of_cpus (cpudesc);
+
+  print_n("CPU(s):", ncpu);
   print_s("Vendor ID:", cpu_desc_get_vendor (cpudesc));
   print_s("CPU Family:", cpu_desc_get_family (cpudesc));
   print_s("Model:", cpu_desc_get_model (cpudesc));
   print_s("Model name:", cpu_desc_get_model_name (cpudesc));
 
-  unsigned long latency = cpufreq_get_transition_latency (0);
-  if (latency)
-    print_s("Maximum transition latency (cpu0): ",
-	    cpufreq_duration_to_string (latency));
- 
-  /*print_s("CPU freq (cpu0):", cpu_desc_get_mhz (cpudesc));*/
-  print_s("Current CPU frequency (cpu0):",
-	  cpufreq_freq_to_string (cpufreq_get_freq_kernel (0)));
-
-  unsigned long freq_min, freq_max;
-  if (0 == cpufreq_get_hardware_limits (0, &freq_min, &freq_max))
+  for (cpu = 0; cpu < ncpu; cpu++)
     {
-      char *min_s = cpufreq_freq_to_string (freq_min),
-	   *max_s = cpufreq_freq_to_string (freq_max);
-      print_range_s("Hardware Limits (cpu0):", min_s, max_s);
-      free (min_s);
-      free (max_s);
+      printf ("-CPU%d-\n", cpu);
+
+      unsigned long latency = cpufreq_get_transition_latency (cpu);
+      if (latency)
+	print_s("Maximum transition latency:",
+		cpufreq_duration_to_string (latency));
+ 
+      print_s("Current CPU frequency:",
+	      cpufreq_freq_to_string (cpufreq_get_freq_kernel (cpu)));
+
+      unsigned long freq_min, freq_max;
+      if (0 == cpufreq_get_hardware_limits (cpu, &freq_min, &freq_max))
+	{
+	  char *min_s = cpufreq_freq_to_string (freq_min),
+	       *max_s = cpufreq_freq_to_string (freq_max);
+	  print_range_s("Hardware Limits:", min_s, max_s);
+	  free (min_s);
+	  free (max_s);
+	}
+
+      char *freq_governors = cpufreq_get_available_governors (cpu);
+      if (freq_governors)
+	{
+	  print_s ("CPU freq Avaialble Governors:", freq_governors);
+	  free (freq_governors);
+	}
+
+      char *freq_governor = cpufreq_get_governor (cpu);
+      if (freq_governor)
+	{
+	  print_s ("CPU freq Current Governor:", freq_governor);
+	  free (freq_governor);
+	}
+
+      char *freq_driver = cpufreq_get_driver (cpu);
+      if (freq_driver)
+	{
+	  print_s ("CPU freq Driver:", freq_driver);
+	  free (freq_driver);
+	}
     }
-
-  char *freq_governor = cpufreq_get_governor (0);
-  if (freq_governor)
-    print_s ("CPU freq Governor:", freq_governor);
-
-  char *freq_driver = cpufreq_get_driver (0);
-  if (freq_driver)
-    print_s ("CPU freq Driver:", freq_driver);
 
   char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc); 
   if (cpu_virtflag)

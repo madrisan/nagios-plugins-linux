@@ -30,6 +30,7 @@ extern "C"
   extern unsigned long cpufreq_get_transition_latency (unsigned int cpu);
   extern char *cpufreq_get_driver (unsigned int cpu);
   extern char *cpufreq_get_governor (unsigned int cpu);
+  extern char *cpufreq_get_available_governors (unsigned int cpu);
 
   extern char* cpufreq_freq_to_string (unsigned long freq);
   extern char* cpufreq_duration_to_string (unsigned long duration);

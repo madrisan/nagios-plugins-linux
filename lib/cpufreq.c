@@ -58,12 +58,14 @@ enum cpufreq_sysfile_string_id
 {
   SCALING_DRIVER,
   SCALING_GOVERNOR,
+  SCALING_AVAILABLE_GOVERNORS,
   MAX_STRING_FILES
 };
 
 static const char *cpufreq_sysfile_string[MAX_STRING_FILES] = {
   [SCALING_DRIVER]   = "scaling_driver",
-  [SCALING_GOVERNOR] = "scaling_governor"
+  [SCALING_GOVERNOR] = "scaling_governor",
+  [SCALING_AVAILABLE_GOVERNORS] = "scaling_available_governors"
 };
 
 static char *
@@ -180,6 +182,12 @@ char *
 cpufreq_get_governor (unsigned int cpu)
 {
   return cpufreq_get_sysyfs_string (cpu, SCALING_GOVERNOR);
+}
+
+char *
+cpufreq_get_available_governors (unsigned int cpu)
+{
+  return cpufreq_get_sysyfs_string (cpu, SCALING_AVAILABLE_GOVERNORS);
 }
 
 char *
