@@ -128,10 +128,10 @@ strtol_or_err (const char *str, const char *errmesg)
 }
 
 /* output formats "<key>:  <value>" */
-#define print_n(_key, _val)  printf ("%-25s%d\n", _key, _val)
-#define print_s(_key, _val)  printf ("%-25s%s\n", _key, _val)
+#define print_n(_key, _val)  printf ("%-35s%d\n", _key, _val)
+#define print_s(_key, _val)  printf ("%-35s%s\n", _key, _val)
 #define print_range_s(_key, _val1, _val2) \
-        printf ("%-25s%s - %s\n", _key, _val1, _val2)
+        printf ("%-35s%s - %s\n", _key, _val1, _val2)
 
 static void cpu_desc_summary (struct cpu_desc *cpudesc)
 {
@@ -168,8 +168,14 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
   print_s("CPU Family:", cpu_desc_get_family (cpudesc));
   print_s("Model:", cpu_desc_get_model (cpudesc));
   print_s("Model name:", cpu_desc_get_model_name (cpudesc));
+
+  unsigned long latency = cpufreq_get_transition_latency (0);
+  if (latency)
+    print_s("Maximum transition latency (cpu0): ",
+	    cpufreq_duration_to_string (latency));
+ 
   /*print_s("CPU freq (cpu0):", cpu_desc_get_mhz (cpudesc));*/
-  print_s("Frequency (cpu0):",
+  print_s("Current CPU frequency (cpu0):",
 	  cpufreq_freq_to_string (cpufreq_get_freq_kernel (0)));
 
   unsigned long freq_min, freq_max;
@@ -177,16 +183,19 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
     {
       char *min_s = cpufreq_freq_to_string (freq_min),
 	   *max_s = cpufreq_freq_to_string (freq_max);
-      print_range_s("Hardware limits (cpu0):", min_s, max_s);
+      print_range_s("Hardware Limits (cpu0):", min_s, max_s);
       free (min_s);
       free (max_s);
     }
 
-  unsigned long latency = cpufreq_get_transition_latency (0);
-  if (latency)
-    print_s("Maximum transition latency (cpu0): ",
-	    cpufreq_duration_to_string (latency));
- 
+  char *freq_governor = cpufreq_get_governor (0);
+  if (freq_governor)
+    print_s ("CPU freq Governor:", freq_governor);
+
+  char *freq_driver = cpufreq_get_driver (0);
+  if (freq_driver)
+    print_s ("CPU freq Driver:", freq_driver);
+
   char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc); 
   if (cpu_virtflag)
     print_s("Virtualization:", cpu_virtflag);

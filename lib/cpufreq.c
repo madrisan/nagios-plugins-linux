@@ -21,6 +21,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
 #include "cpudesc.h"
@@ -31,7 +32,7 @@
 
 #define SYSFS_PATH_MAX 255
 
-enum cpufreq_sysfile_id
+enum cpufreq_sysfile_numeric_id
 {
   CPUINFO_CUR_FREQ,
   CPUINFO_MIN_FREQ,
@@ -43,42 +44,65 @@ enum cpufreq_sysfile_id
   MAX_VALUE_FILES
 };
 
-static const char *cpufreq_sysfile[MAX_VALUE_FILES] = {
+static const char *cpufreq_sysfile_numeric[MAX_VALUE_FILES] = {
   [CPUINFO_CUR_FREQ] = "cpuinfo_cur_freq",
   [CPUINFO_MIN_FREQ] = "cpuinfo_min_freq",
   [CPUINFO_MAX_FREQ] = "cpuinfo_max_freq",
   [CPUINFO_LATENCY]  = "cpuinfo_transition_latency",
   [SCALING_CUR_FREQ] = "scaling_cur_freq",
   [SCALING_MIN_FREQ] = "scaling_min_freq",
-  [SCALING_MAX_FREQ] = "scaling_max_freq",
+  [SCALING_MAX_FREQ] = "scaling_max_freq"
 };
 
+enum cpufreq_sysfile_string_id
+{
+  SCALING_DRIVER,
+  SCALING_GOVERNOR,
+  MAX_STRING_FILES
+};
+
+static const char *cpufreq_sysfile_string[MAX_STRING_FILES] = {
+  [SCALING_DRIVER]   = "scaling_driver",
+  [SCALING_GOVERNOR] = "scaling_governor"
+};
+
+static char *
+cpufreq_get_sysyfs_getline (const char *filename)
+{
+  FILE *fp;
+  char *line;
+  size_t len = 0;
+  ssize_t chread;
+
+  if ((fp = fopen (filename, "r")) == NULL)
+    return NULL;
+  
+  if ((chread = getline (&line, &len, fp)) < 1)
+    {
+      fclose (fp);
+      return NULL;
+    }
+
+  fclose (fp);
+  return line;
+}
+
 static unsigned long
-cpufreq_get_sysyfs_value (unsigned int cpunum, enum cpufreq_sysfile_id which)
+cpufreq_get_sysyfs_value (unsigned int cpunum,
+			  enum cpufreq_sysfile_numeric_id which)
 {
   char filename[SYSFS_PATH_MAX];
   char *line, *endptr;
-  FILE *fp;
-  size_t len = 0;
-  ssize_t chread;
   long value;
 
   if (which >= MAX_VALUE_FILES)
     return 0;
 
   snprintf (filename, SYSFS_PATH_MAX, PATH_SYS_CPU "/cpu%u/cpufreq/%s",
-            cpunum, cpufreq_sysfile[which]);
+	    cpunum, cpufreq_sysfile_numeric[which]);
 
-  if ((fp = fopen (filename, "r")) == NULL)
+  if (NULL == (line = cpufreq_get_sysyfs_getline (filename)))
     return 0;
-
-  if ((chread = getline (&line, &len, fp)) < 1)
-    {
-      fclose (fp);
-      return 0;
-    }
-
-  fclose (fp);
 
   errno = 0;
   value = strtoul (line, &endptr, 10);
@@ -90,6 +114,30 @@ cpufreq_get_sysyfs_value (unsigned int cpunum, enum cpufreq_sysfile_id which)
 
   free (line);
   return value;
+}
+
+static char *
+cpufreq_get_sysyfs_string (unsigned int cpunum,
+			   enum cpufreq_sysfile_string_id which)
+{
+  char filename[SYSFS_PATH_MAX];
+  char* line;
+  size_t len = 0;
+
+  if (which >= MAX_STRING_FILES)
+    return NULL;
+
+  snprintf (filename, SYSFS_PATH_MAX, PATH_SYS_CPU "/cpu%u/cpufreq/%s",
+	    cpunum, cpufreq_sysfile_string[which]);
+  
+  if (NULL == (line = cpufreq_get_sysyfs_getline (filename)))
+    return NULL;
+
+  len = strlen (line);
+  if (line[len-1] == '\n')
+    line[len-1] = '\0';
+  
+  return line;
 }
 
 unsigned long
@@ -120,6 +168,18 @@ unsigned long
 cpufreq_get_transition_latency (unsigned int cpu)
 {
   return cpufreq_get_sysyfs_value (cpu, CPUINFO_LATENCY);
+}
+
+char *
+cpufreq_get_driver (unsigned int cpu)
+{
+  return cpufreq_get_sysyfs_string (cpu, SCALING_DRIVER);
+}
+
+char *
+cpufreq_get_governor (unsigned int cpu)
+{
+  return cpufreq_get_sysyfs_string (cpu, SCALING_GOVERNOR);
 }
 
 char *
