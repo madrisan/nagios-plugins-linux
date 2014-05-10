@@ -198,7 +198,7 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
       char *freq_governors = cpufreq_get_available_governors (cpu);
       if (freq_governors)
 	{
-	  print_s ("CPU freq Avaialble Governors:", freq_governors);
+	  print_s ("CPU freq Available Governors:", freq_governors);
 	  free (freq_governors);
 	}
 
