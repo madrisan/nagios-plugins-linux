@@ -21,19 +21,20 @@ AM_CPPFLAGS = \
 
 noinst_LIBRARIES = libutils.a
 
-libutils_a_SOURCES = \
-	cpudesc.c    \
-	cpufreq.c    \
-	cpustats.c   \
-	meminfo.c    \
-	messages.c   \
-	mountlist.c  \
-	netinfo.c    \
-	processes.c  \
-	procparser.c \
-	progname.c   \
-	thresholds.c \
-	tcpinfo.c    \
-	vminfo.c     \
-	xasprintf.c  \
+libutils_a_SOURCES =  \
+	cpudesc.c     \
+	cpufreq.c     \
+	cpustats.c    \
+	meminfo.c     \
+	messages.c    \
+	mountlist.c   \
+	netinfo.c     \
+	processes.c   \
+	procparser.c  \
+	progname.c    \
+	sysfsparser.c \
+	thresholds.c  \
+	tcpinfo.c     \
+	vminfo.c      \
+	xasprintf.c   \
 	xmalloc.c
