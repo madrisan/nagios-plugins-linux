@@ -29,6 +29,7 @@ extern "C"
   extern unsigned long sysfsparser_cpufreq_get_freq_kernel (unsigned int cpu);
   extern unsigned long sysfsparser_cpufreq_get_transition_latency (unsigned int cpu);
 
+  extern char *sysfsparser_cpufreq_get_available_freqs (unsigned int cpu);
   extern char *sysfsparser_cpufreq_get_driver (unsigned int cpu);
   extern char *sysfsparser_cpufreq_get_governor (unsigned int cpu);
   extern char *sysfsparser_cpufreq_get_available_governors (unsigned int cpu);

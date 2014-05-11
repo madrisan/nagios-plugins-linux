@@ -130,6 +130,7 @@ strtol_or_err (const char *str, const char *errmesg)
 /* output formats "<key>:  <value>" */
 #define print_n(_key, _val)  printf ("%-30s%d\n", _key, _val)
 #define print_s(_key, _val)  printf ("%-30s%s\n", _key, _val)
+#define print_key_s(_key)    printf ("%-30s", _key)
 #define print_range_s(_key, _val1, _val2) \
         printf ("%-30s%s - %s\n", _key, _val1, _val2)
 
@@ -179,11 +180,26 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 
       unsigned long latency = cpufreq_get_transition_latency (cpu);
       if (latency)
-	print_s("Maximum transition latency:",
+	print_s("Maximum Transition Latency:",
 		cpufreq_duration_to_string (latency));
- 
-      print_s("Current CPU frequency:",
+
+      print_s("Current CPU Frequency:",
 	      cpufreq_freq_to_string (cpufreq_get_freq_kernel (cpu)));
+
+      struct cpufreq_available_frequencies *curr;
+      curr = cpufreq_get_available_freqs (cpu);
+      if (curr)
+	{
+	  print_key_s("Available CPU Frequencies:");
+	  while (curr)
+	    {
+	      printf ("%s ",
+		      cpufreq_freq_to_string
+		      (cpufreq_get_available_freqs_value (curr)));
+	      curr = cpufreq_get_available_freqs_next (curr);
+	    }
+	  printf ("\n");
+	}
 
       unsigned long freq_min, freq_max;
       if (0 == cpufreq_get_hardware_limits (cpu, &freq_min, &freq_max))
@@ -195,18 +211,18 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 	  free (max_s);
 	}
 
-      char *freq_governors = cpufreq_get_available_governors (cpu);
-      if (freq_governors)
-	{
-	  print_s ("CPU freq Available Governors:", freq_governors);
-	  free (freq_governors);
-	}
-
       char *freq_governor = cpufreq_get_governor (cpu);
       if (freq_governor)
 	{
 	  print_s ("CPU freq Current Governor:", freq_governor);
 	  free (freq_governor);
+	}
+
+      char *freq_governors = cpufreq_get_available_governors (cpu);
+      if (freq_governors)
+	{
+	  print_s ("CPU freq Available Governors:", freq_governors);
+	  free (freq_governors);
 	}
 
       char *freq_driver = cpufreq_get_driver (cpu);

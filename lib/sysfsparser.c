@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "sysfsparser.h"
 #include "xasprintf.h"
 
 #define PATH_SYS_SYSTEM		"/sys/devices/system"
@@ -58,6 +59,7 @@ enum sysfsparser_cpufreq_sysfile_string_id
   SCALING_DRIVER,
   SCALING_GOVERNOR,
   SCALING_AVAILABLE_GOVERNORS,
+  SCALING_AVAILABLE_FREQS,
   MAX_STRING_FILES
 };
 
@@ -65,7 +67,8 @@ static const char *
   sysfsparser_devices_system_cpu_file_string[MAX_STRING_FILES] = {
   [SCALING_DRIVER]   = "scaling_driver",
   [SCALING_GOVERNOR] = "scaling_governor",
-  [SCALING_AVAILABLE_GOVERNORS] = "scaling_available_governors"
+  [SCALING_AVAILABLE_GOVERNORS] = "scaling_available_governors",
+  [SCALING_AVAILABLE_FREQS] = "scaling_available_frequencies"
 };
 
 static char *
@@ -163,27 +166,38 @@ sysfsparser_cpufreq_get_hardware_limits (unsigned int cpu,
   return 0;
 }
 
-unsigned long sysfsparser_cpufreq_get_freq_kernel (unsigned int cpu)
+unsigned long
+sysfsparser_cpufreq_get_freq_kernel (unsigned int cpu)
 {
   return sysfsparser_get_value (cpu, SCALING_CUR_FREQ);
 }
 
-unsigned long sysfsparser_cpufreq_get_transition_latency (unsigned int cpu)
+char *
+sysfsparser_cpufreq_get_available_freqs (unsigned int cpu)
+{
+  return sysfsparser_get_string (cpu, SCALING_AVAILABLE_FREQS);
+}
+
+unsigned long
+sysfsparser_cpufreq_get_transition_latency (unsigned int cpu)
 {
   return sysfsparser_get_value (cpu, CPUINFO_LATENCY);
 }
 
-char *sysfsparser_cpufreq_get_driver (unsigned int cpu)
+char *
+sysfsparser_cpufreq_get_driver (unsigned int cpu)
 {
   return sysfsparser_get_string (cpu, SCALING_DRIVER);
 }
 
-char *sysfsparser_cpufreq_get_governor (unsigned int cpu)
+char *
+sysfsparser_cpufreq_get_governor (unsigned int cpu)
 {
   return sysfsparser_get_string (cpu, SCALING_GOVERNOR);
 }
 
-char *sysfsparser_cpufreq_get_available_governors (unsigned int cpu)
+char *
+sysfsparser_cpufreq_get_available_governors (unsigned int cpu)
 {
   return sysfsparser_get_string (cpu, SCALING_AVAILABLE_GOVERNORS);
 }
