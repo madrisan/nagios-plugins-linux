@@ -57,6 +57,7 @@ static const char *program_shorthelp = NULL;
 
 static struct option const longopts[] = {
   {(char *) "cpuinfo", no_argument, NULL, 'i'},
+  {(char *) "cpufreq", no_argument, NULL, 'f'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "verbose", no_argument, NULL, 'v'},
@@ -80,6 +81,7 @@ usage (FILE * out)
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs ("  -v, --verbose   show details for command-line debugging "
          "(Nagios may truncate output)\n", out);
+  fputs ("  -f, --cpufreq   show the CPU frequency characteristics\n", out);
   fputs ("  -i, --cpuinfo   show the CPU characteristics (for debugging)\n",
 	 out);
   fputs (USAGE_HELP, out);
@@ -90,7 +92,7 @@ usage (FILE * out)
            "(default: %d)\n", COUNT_DEFAULT);
   fputs ("\t1 means the percentages of total CPU time from boottime.\n", out);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s -w 10%% -c 20%% 1 2\n", program_name);
+  fprintf (out, "  %s -f -w 10%% -c 20%% 1 2\n", program_name);
   fprintf (out, "  %s --cpuinfo\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
@@ -242,7 +244,7 @@ int
 main (int argc, char **argv)
 {
   int c, err;
-  bool verbose = false;
+  bool verbose = false, show_freq = false;
   unsigned long i, len, delay, count;
   char *critical = NULL, *warning = NULL;
   char *p = NULL, *cpu_progname;
@@ -288,7 +290,7 @@ main (int argc, char **argv)
     plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
   while ((c = getopt_long (
-		argc, argv, "c:w:vi"
+		argc, argv, "c:w:vif"
 		GETOPT_HELP_VERSION_STRING, longopts, NULL)) != -1)
     {
       switch (c)
@@ -299,6 +301,9 @@ main (int argc, char **argv)
 	  cpu_desc_read (cpudesc);
 	  cpu_desc_summary (cpudesc);
 	  return STATE_UNKNOWN;
+	case 'f':
+	  show_freq = true;
+	  break;
 	case 'c':
 	  critical = optarg;
 	  break;
@@ -398,19 +403,10 @@ main (int argc, char **argv)
 
   cpu_desc_read (cpudesc);
 
-  unsigned long freq_min, freq_max;
-  if (0 == cpufreq_get_hardware_limits (0, &freq_min, &freq_max))
-    {
-      /* expected format for the Nagios performance data:
-       *   'label'=value[UOM];[warn];[crit];[min];[max]	*/
-      cpu_freq_perfdata_ext =
-	xasprintf (";;;%lu;%lu", freq_min / 1000, freq_max / 1000);
-    }
-
   printf
     ("%s (CPU: %s) %s - cpu %s %u%% | "
      "cpu_user=%u%% cpu_system=%u%% cpu_idle=%u%% cpu_iowait=%u%% "
-     "cpu_steal=%u%% cpu_freq=%ldMHz%s\n"
+     "cpu_steal=%u%%"
      , program_name_short, cpu_desc_get_model_name (cpudesc)
      , state_text (status), cpu_progname, cpu_perc
      , (unsigned) ((100 * duser   + half_ratio) / ratio)
@@ -418,8 +414,26 @@ main (int argc, char **argv)
      , (unsigned) ((100 * didle   + half_ratio) / ratio)
      , (unsigned) ((100 * diowait + half_ratio) / ratio)
      , (unsigned) ((100 * dsteal  + half_ratio) / ratio)
-     , strtol (cpu_desc_get_mhz (cpudesc), NULL, 10), cpu_freq_perfdata_ext
   );
+
+  if (show_freq)
+    {
+      int cpuid;
+      unsigned long freq_min, freq_max, freq_kernel;
+      for (cpuid = 0; cpuid < cpu_desc_get_number_of_cpus (cpudesc); cpuid++)
+	{
+	  if (0 == cpufreq_get_hardware_limits (cpuid, &freq_min, &freq_max))
+	    {
+	      freq_kernel = cpufreq_get_freq_kernel (cpuid);
+	      /* expected format for the Nagios performance data:
+	       *   'label'=value[UOM];[warn];[crit];[min];[max]	*/
+	      if (freq_kernel)
+		printf (" cpu%d_freq=%luHz;;;%lu;%lu",
+			cpuid, freq_kernel, freq_min, freq_max);
+	    }
+	}
+    }
+  putchar ('\n');
 
   cpu_desc_unref (cpudesc);
   return status;
