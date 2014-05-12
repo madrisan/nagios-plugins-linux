@@ -259,7 +259,6 @@ main (int argc, char **argv)
   int debt = 0;			/* handle idle ticks running backwards */
 
   struct cpu_desc *cpudesc = NULL;
-  char *cpu_freq_perfdata_ext = "";
 
   set_program_name (argv[0]);
 
