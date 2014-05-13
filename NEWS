@@ -1,3 +1,10 @@
+    Major changes between "nagios-plugins-linux" versions 8 and 9
+
+* check_cpu: add the CPU frequencies to the plugin perfdata.
+* check_cpu: new summary mode (command line switch: '--cpuinfo').
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 7 and 8
 
 * New plugin 'check_network'.
