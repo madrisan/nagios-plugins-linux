@@ -5,19 +5,20 @@ AM_CPPFLAGS = \
 
 check_cpu_programs = check_iowait
 
-libexec_PROGRAMS =       \
-	check_clock      \
-	check_cpu        \
-	check_ifmountfs  \
-	check_memory     \
-	check_multipath  \
-	check_nbprocs    \
-	check_network    \
-	check_paging     \
-	check_readonlyfs \
-	check_swap       \
-	check_tcpcount   \
-	check_uptime     \
+libexec_PROGRAMS =        \
+	check_clock       \
+	check_cpu         \
+	check_ifmountfs   \
+	check_memory      \
+	check_multipath   \
+	check_nbprocs     \
+	check_network     \
+	check_paging      \
+	check_readonlyfs  \
+	check_swap        \
+	check_temperature \
+	check_tcpcount    \
+	check_uptime      \
 	check_users
 if HAVE_GETLOADAVG
 libexec_PROGRAMS += check_load
@@ -37,6 +38,7 @@ check_paging_SOURCES     = check_paging.c
 check_readonlyfs_SOURCES = check_readonlyfs.c
 check_swap_SOURCES       = check_swap.c
 check_tcpcount_SOURCES   = check_tcpcount.c
+check_temperature_SOURCES = check_temperature.c
 check_uptime_SOURCES     = check_uptime.c
 check_users_SOURCES      = check_users.c
 
@@ -56,6 +58,7 @@ check_paging_LDADD       = $(LDADD)
 check_readonlyfs_LDADD   = $(LDADD)
 check_swap_LDADD         = $(LDADD)
 check_tcpcount_LDADD     = $(LDADD)
+check_temperature_LDADD  = $(LDADD)
 check_uptime_LDADD       = $(LDADD)
 check_users_LDADD        = $(LDADD)
 

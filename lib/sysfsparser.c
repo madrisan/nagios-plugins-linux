@@ -71,7 +71,7 @@ static const char *
   [SCALING_AVAILABLE_FREQS] = "scaling_available_frequencies"
 };
 
-static char *
+char *
 sysfsparser_getline (const char *filename)
 {
   FILE *fp;
@@ -92,9 +92,30 @@ sysfsparser_getline (const char *filename)
   return line;
 }
 
+unsigned long
+sysfsparser_getvalue (const char *filename)
+{
+  char *line, *endptr;
+  unsigned long value;
+
+  if (NULL == (line = sysfsparser_getline (filename)))
+    return 0;
+
+  errno = 0;
+  value = strtoul (line, &endptr, 10);
+  if ((endptr == line) || (errno == ERANGE))
+    {
+      free (line);
+      return 0;
+    }
+
+  free (line);
+  return value;
+}
+
 static unsigned long
-sysfsparser_get_value (unsigned int cpunum,
-		       enum sysfsparser_cpufreq_sysfile_numeric_id which)
+sysfsparser_cpufreq_get_value (unsigned int cpunum,
+			       enum sysfsparser_cpufreq_sysfile_numeric_id which)
 {
   char filename[SYSFS_PATH_MAX];
   char *line, *endptr;
@@ -122,8 +143,8 @@ sysfsparser_get_value (unsigned int cpunum,
 }
 
 static char *
-sysfsparser_get_string (unsigned int cpunum,
-		        enum sysfsparser_cpufreq_sysfile_string_id which)
+sysfsparser_cpufreq_get_string (unsigned int cpunum,
+				enum sysfsparser_cpufreq_sysfile_string_id which)
 {
   char filename[SYSFS_PATH_MAX];
   char* line;
@@ -155,11 +176,11 @@ sysfsparser_cpufreq_get_hardware_limits (unsigned int cpu,
   if ((!min) || (!max))
     return -EINVAL;
 
-  *min = sysfsparser_get_value (cpu, CPUINFO_MIN_FREQ);
+  *min = sysfsparser_cpufreq_get_value (cpu, CPUINFO_MIN_FREQ);
   if (!*min)
     return -ENODEV;
 
-  *max = sysfsparser_get_value (cpu, CPUINFO_MAX_FREQ);
+  *max = sysfsparser_cpufreq_get_value (cpu, CPUINFO_MAX_FREQ);
   if (!*max)
     return -ENODEV;
 
@@ -169,35 +190,35 @@ sysfsparser_cpufreq_get_hardware_limits (unsigned int cpu,
 unsigned long
 sysfsparser_cpufreq_get_freq_kernel (unsigned int cpu)
 {
-  return sysfsparser_get_value (cpu, SCALING_CUR_FREQ);
+  return sysfsparser_cpufreq_get_value (cpu, SCALING_CUR_FREQ);
 }
 
 char *
 sysfsparser_cpufreq_get_available_freqs (unsigned int cpu)
 {
-  return sysfsparser_get_string (cpu, SCALING_AVAILABLE_FREQS);
+  return sysfsparser_cpufreq_get_string (cpu, SCALING_AVAILABLE_FREQS);
 }
 
 unsigned long
 sysfsparser_cpufreq_get_transition_latency (unsigned int cpu)
 {
-  return sysfsparser_get_value (cpu, CPUINFO_LATENCY);
+  return sysfsparser_cpufreq_get_value (cpu, CPUINFO_LATENCY);
 }
 
 char *
 sysfsparser_cpufreq_get_driver (unsigned int cpu)
 {
-  return sysfsparser_get_string (cpu, SCALING_DRIVER);
+  return sysfsparser_cpufreq_get_string (cpu, SCALING_DRIVER);
 }
 
 char *
 sysfsparser_cpufreq_get_governor (unsigned int cpu)
 {
-  return sysfsparser_get_string (cpu, SCALING_GOVERNOR);
+  return sysfsparser_cpufreq_get_string (cpu, SCALING_GOVERNOR);
 }
 
 char *
 sysfsparser_cpufreq_get_available_governors (unsigned int cpu)
 {
-  return sysfsparser_get_string (cpu, SCALING_AVAILABLE_GOVERNORS);
+  return sysfsparser_cpufreq_get_string (cpu, SCALING_AVAILABLE_GOVERNORS);
 }
