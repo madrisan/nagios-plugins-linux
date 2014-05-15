@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-m4_define(PROG_VERSION, 8)
+m4_define(PROG_VERSION, 9)
 m4_define(PROG_NAME, [nagios-plugins-linux])
 m4_define(PROG_BUGREPORT, [davide.madrisan@gmail.com])
 
