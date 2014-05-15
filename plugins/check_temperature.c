@@ -56,7 +56,7 @@ static const char *program_copyright =
 static struct option const longopts[] = {
   {(char *) "fahrenheit", required_argument, NULL, 'f'},
   {(char *) "kelvin", required_argument, NULL, 'k'},
-  {(char *) "list", required_argument, NULL, 'l'},
+  {(char *) "list", no_argument, NULL, 'l'},
   {(char *) "thermal_zone", required_argument, NULL, 't'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
