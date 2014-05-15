@@ -20,6 +20,7 @@ Here is the list of the available plugins:
 * check_readonlyfs
 * check_swap
 * check_tcpcount
+* check_temperature
 * check_uptime
 * check_users
 
@@ -40,6 +41,8 @@ time and Nagios time.
 * -r, --refclock TIME: the clock reference (in seconds since the Epoch)
 * -w, --warning COUNTER: warning threshold
 * -c, --critical COUNTER: critical threshold
+* -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
@@ -54,16 +57,21 @@ This Nagios plugin checks the CPU (user mode) utilization.
 
 *Usage*
 
-	check_cpu [-v] [-w PERC] [-c PERC] [delay [count]]
+	check_cpu [-f] [-v] [-w PERC] [-c PERC] [delay [count]]
+	check_cpu --cpuinfo
 	check_cpu --help
 
 *Where*
 
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
+* -f, --cpufreq: show the CPU frequency characteristics
+* -i, --cpuinfo: show the CPU characteristics (for debugging)
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
 * delay is the delay between updates in seconds (default: 1sec)
 * count is the number of updates (default: 2)
+* -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
@@ -105,6 +113,8 @@ This Nagios plugin checks for I/O wait bottlenecks.
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
 * delay is the delay between updates in seconds (default: 1sec)
 * count is the number of updates (default: 2)
+* -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
@@ -131,6 +141,8 @@ This Nagios plugin tests the current system load average.
 * 1, --load1=WLOAD1,CLOAD1: warning and critial thresholds for load1
 * 5, --load5=WLOAD5,CLOAD5. warning and critical thresholds for load5
 * L, --load15=WLOAD15,CLOAD15: warning and critical thresholds for load15
+* -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
@@ -156,6 +168,8 @@ These two nagios plugins respectivery check for memory and swap usage.
 * -b,-k,-m,-g: show output in bytes, KB (the default), MB, or GB
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
+* -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
@@ -199,6 +213,7 @@ This Nagios plugin checks the multipath topology status.
 
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
 * -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
@@ -219,6 +234,7 @@ This Nagios plugin displays the number of running processes per user.
 * -t, --threads: display the number of threads
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
 * -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
@@ -238,6 +254,7 @@ This Nagios plugin checks displays some network interfaces.statistics.
 *Where*
 
 * -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 
 **The check_paging plugin**
@@ -254,6 +271,7 @@ This Nagios plugin checks for memory and swap paging.
 * -p, --paging: display the page reads and writes
 * -s, --swapping: display the swap reads amd writes
 * -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
@@ -276,6 +294,7 @@ This Nagios plugin checks for readonly filesystems.
 * -T, --type=TYPE: limit listing to file systems of type TYPE
 * -X, --exclude-type=TYPE: limit listing to file systems not of type TYPE
 * -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
@@ -298,12 +317,42 @@ This plugin displays TCP network and socket informations.
 * -t, --tcp: display the statistics for the TCP protocol (the default)
 * -6, --tcp6: display the statistics for the TCPv6 protocol
 * -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
 	check_tcpcount -w 1000 -c 1500
 	check_tcpcount --tcp6 -w 1000 -c 1500
 	check_tcpcount --tcp --tcp6 -w 1500 -c 2000
+
+
+**The check_temperature  plugin**
+
+This Nagios plugin monitors the hardware's temperature.
+
+*Usage*
+
+	check_temperature [-f|-k] [-t <thermal_zone>] [-w COUNTER] [-c COUNTER]
+	check_temperature -l
+	check_temperature -.help
+
+*Where*
+
+* -f, --fahrenheit: use fahrenheit as the temperature unit
+* -k, --kelvin: use kelvin as the temperature unit
+* -l, --list: list the thermal zones available and exit
+* -t, --thermal_zone: only consider a specific thermal zone
+* -w, --warning COUNTER: warning threshold
+* -c, --critical COUNTER: critical threshold
+* -v, --verbose: show details for command-line debugging (Nagios may truncate output)
+* -h, --help: display this help and exit
+* -V, --version: output version information and exit
+
+*Examples*
+
+	check_temperature -w 80 -c 90
+	check_temperature --list
+	check_temperature -t thermal_zone0 -w 80 -c 90
 
 
 **The check_uptime plugin**
@@ -316,6 +365,13 @@ This Nagios plugin checks how long the system has been running.
 	check_uptime --help
 
 *Where*
+
+* -w, --warning COUNTER: warning threshold
+* -c, --critical COUNTER: critical threshold
+* -h, --help: display this help and exit
+* -V, --version: output version information and exit
+
+and
 
 * start <= end
 * start and ":" is not required if start=0
@@ -342,6 +398,8 @@ Where
 
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
+* -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 

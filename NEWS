@@ -1,5 +1,6 @@
     Major changes between "nagios-plugins-linux" versions 8 and 9
 
+* New plugin 'check_temperature'.
 * check_cpu: add the CPU frequencies to the plugin perfdata.
 * check_cpu: new summary mode (command line switch: '--cpuinfo').
 
