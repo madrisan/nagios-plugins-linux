@@ -50,6 +50,8 @@ enum
   TEMP_FAHRENHEIT
 };
 
+static bool verbose = false;
+
 static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
@@ -130,11 +132,43 @@ get_real_temp (unsigned long temperature, char **scale, int temp_units)
   return (real_temp);
 }
 
+int 
+get_critical_trip_point (char *thermal_zone)
+{
+  char filename[SYSFS_PATH_MAX], *type;
+  int i, crit_temp = 0;
+
+  for (i = 0; i < 5; i++)
+    {
+      snprintf (filename, SYSFS_PATH_MAX,
+		PATH_SYS_ACPI_THERMAL "/%s/trip_point_%d_type",
+		thermal_zone, i);
+      if ((type = sysfsparser_getline (filename)) != NULL)
+	{
+	  if (!strncmp (type, "critical", strlen ("critical")))
+	    {
+	      snprintf (filename, SYSFS_PATH_MAX,
+			PATH_SYS_ACPI_THERMAL "/%s/trip_point_%d_temp",
+			thermal_zone, i);
+	      crit_temp = sysfsparser_getvalue (filename) / 1000;
+
+	      if (verbose && (crit_temp > 0))
+		printf ("found a critical trip point: %dC\n", crit_temp);
+
+	      free (type);
+	      break;
+	    }
+	}
+    }
+
+  return crit_temp;
+}
+
 int
 main (int argc, char **argv)
 {
   int c;
-  bool verbose = false, list = false;
+  bool list = false;
   char *critical = NULL, *warning = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
@@ -211,6 +245,8 @@ main (int argc, char **argv)
 
       if (!strncmp (de->d_name, "thermal_zone", strlen ("thermal_zone")))
 	{
+	  /* temperatures are stored in the files 
+	   *  /sys/class/thermal/thermal_zone[0-9}/temp	  */
 	  snprintf (filename, SYSFS_PATH_MAX,
 		    PATH_SYS_ACPI_THERMAL "/%s/temp", de->d_name);
 
@@ -247,14 +283,20 @@ main (int argc, char **argv)
    *      98000
    *      cat /sys/class/thermal/thermal_zone0/trip_point_0_type
    *      critical	*/
+
+  int crit_temp = get_critical_trip_point (thermal_zone);
+
   status = get_status (real_temp, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - %.1f %s (%s) | temp=%u%c\n", program_name_short,
+  printf ("%s %s - %.1f %s (%s) | temp=%u%c", program_name_short,
 	  state_text (status), real_temp, scale, thermal_zone,
 	  (unsigned int) real_temp,
 	  (temperature_unit == TEMP_KELVIN) ? 'K' :
 	  (temperature_unit == TEMP_FAHRENHEIT) ? 'F' : 'C');
+  if (crit_temp > 0)
+    printf (";0;%d", crit_temp);
+  putchar ('\n');
 
   free (thermal_zone);
   return status;
