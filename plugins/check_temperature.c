@@ -41,8 +41,6 @@
 #define PATH_SYS_ACPI	"/sys/class"
 #define PATH_SYS_ACPI_THERMAL	PATH_SYS_ACPI "/thermal"
 
-#define SYSFS_PATH_MAX  255
-
 enum
 {
   TEMP_KELVIN,
@@ -135,33 +133,32 @@ get_real_temp (unsigned long temperature, char **scale, int temp_units)
 int 
 get_critical_trip_point (char *thermal_zone)
 {
-  char filename[SYSFS_PATH_MAX], *type;
+  char *type;
   int i, crit_temp = 0;
 
   for (i = 0; i < 5; i++)
     {
-      snprintf (filename, SYSFS_PATH_MAX,
-		PATH_SYS_ACPI_THERMAL "/%s/trip_point_%d_type",
-		thermal_zone, i);
-      if ((type = sysfsparser_getline (filename)) != NULL)
-	{
-	  if (!strncmp (type, "critical", strlen ("critical")))
-	    {
-	      snprintf (filename, SYSFS_PATH_MAX,
-			PATH_SYS_ACPI_THERMAL "/%s/trip_point_%d_temp",
-			thermal_zone, i);
-	      crit_temp = sysfsparser_getvalue (filename) / 1000;
+      type =
+	sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/trip_point_%d_type",
+			     thermal_zone, i);
+      if (NULL == type)
+	continue;
+      if (strncmp (type, "critical", strlen ("critical")))
+	continue;
 
-	      if (verbose && (crit_temp > 0))
-		printf ("found a critical trip point: %dC\n", crit_temp);
+       crit_temp =
+	sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL "/%s/trip_point_%d_temp",
+			      thermal_zone, i);
 
-	      free (type);
-	      break;
-	    }
-	}
+       if (verbose && (crit_temp > 0))
+	 printf ("found a critical trip point: %d (%dC)\n",
+		 crit_temp, crit_temp / 1000);
+
+       free (type);
+       break;
     }
 
-  return crit_temp;
+  return crit_temp / 1000;
 }
 
 int
@@ -226,7 +223,6 @@ main (int argc, char **argv)
   if ((d = opendir (".")) == NULL)
     goto error;
 
-  char filename[SYSFS_PATH_MAX];
   unsigned long max_temp = 0, temp = 0;
   char *scale, *thermal_zone = NULL;
   double real_temp;
@@ -247,11 +243,12 @@ main (int argc, char **argv)
 	{
 	  /* temperatures are stored in the files 
 	   *  /sys/class/thermal/thermal_zone[0-9}/temp	  */
-	  snprintf (filename, SYSFS_PATH_MAX,
-		    PATH_SYS_ACPI_THERMAL "/%s/temp", de->d_name);
+	  temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL "/%s/temp",
+				       de->d_name);
 
-	  /* FIXME: as a 1st step we get the highest temp reported by sysfs */
-	  if ((temp = sysfsparser_getvalue (filename)) > 0)
+	  /* FIXME: as a 1st step we get the highest temp
+	   *        reported by sysfs */
+	  if (temp > 0)
 	    {
 	      found_data = true;
 	      if (max_temp < temp)
@@ -264,8 +261,9 @@ main (int argc, char **argv)
 		printf ("%s\n", de->d_name);
 	    }
 	  if (verbose)
-	    printf ("found a thermal information (%s): %lu (%s)\n", filename,
-		    max_temp, thermal_zone ? thermal_zone : "n/a");
+	    printf ("found a thermal information: %lu (%luC) - %s\n",
+		    max_temp, max_temp / 1000,
+		    thermal_zone ? thermal_zone : "thermal zone n/a");
 	}
     }
   closedir (d);

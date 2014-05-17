@@ -17,19 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE	/* activate extra prototypes for glibc */
+#endif
+
 #include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "common.h"
+#include "messages.h"
 #include "sysfsparser.h"
 #include "xasprintf.h"
 
 #define PATH_SYS_SYSTEM		"/sys/devices/system"
 #define PATH_SYS_CPU		PATH_SYS_SYSTEM "/cpu"
-
-#define SYSFS_PATH_MAX 255
 
 enum sysfsparser_cpufreq_sysfile_numeric_id
 {
@@ -72,42 +76,47 @@ static const char *
 };
 
 char *
-sysfsparser_getline (const char *filename)
+sysfsparser_getline (const char *format, ...)
 {
   FILE *fp;
-  char *line;
+  char *line, *filename;
   size_t len = 0;
   ssize_t chread;
+  va_list args;
+
+  va_start (args, format);
+  if (vasprintf (&filename, format, args) < 0)
+    plugin_error (STATE_UNKNOWN, errno, "vasprintf has failed");
+  va_end (args);
 
   if ((fp = fopen (filename, "r")) == NULL)
     return NULL;
   
-  if ((chread = getline (&line, &len, fp)) < 1)
-    {
-      fclose (fp);
-      return NULL;
-    }
+  chread = getline (&line, &len, fp);
 
   fclose (fp);
-  return line;
+  return (chread < 1) ? NULL : line;
 }
 
 unsigned long
-sysfsparser_getvalue (const char *filename)
+sysfsparser_getvalue (const char *format, ...)
 {
-  char *line, *endptr;
+  char *line, *endptr, *filename;
   unsigned long value;
+  va_list args;
 
-  if (NULL == (line = sysfsparser_getline (filename)))
+  va_start (args, format);
+  if (vasprintf (&filename, format, args) < 0)
+    plugin_error (STATE_UNKNOWN, errno, "vasprintf has failed");
+  va_end (args);
+
+  if (NULL == (line = sysfsparser_getline ("%s", filename)))
     return 0;
 
   errno = 0;
   value = strtoul (line, &endptr, 10);
   if ((endptr == line) || (errno == ERANGE))
-    {
-      free (line);
-      return 0;
-    }
+    value = 0;
 
   free (line);
   return value;
@@ -117,26 +126,22 @@ static unsigned long
 sysfsparser_cpufreq_get_value (unsigned int cpunum,
 			       enum sysfsparser_cpufreq_sysfile_numeric_id which)
 {
-  char filename[SYSFS_PATH_MAX];
   char *line, *endptr;
   long value;
 
   if (which >= MAX_VALUE_FILES)
     return 0;
 
-  snprintf (filename, SYSFS_PATH_MAX, PATH_SYS_CPU "/cpu%u/cpufreq/%s",
-	    cpunum, sysfsparser_devices_system_cpu_file_numeric[which]);
-
-  if (NULL == (line = sysfsparser_getline (filename)))
+  line =
+    sysfsparser_getline (PATH_SYS_CPU "/cpu%u/cpufreq/%s", cpunum,
+			 sysfsparser_devices_system_cpu_file_numeric[which]);
+  if (NULL == line)
     return 0;
 
   errno = 0;
   value = strtoul (line, &endptr, 10);
   if ((endptr == line) || (errno == ERANGE))
-    {
-      free (line);
-      return 0;
-    }
+    value = 0;
 
   free (line);
   return value;
@@ -146,18 +151,17 @@ static char *
 sysfsparser_cpufreq_get_string (unsigned int cpunum,
 				enum sysfsparser_cpufreq_sysfile_string_id which)
 {
-  char filename[SYSFS_PATH_MAX];
-  char* line;
+  char *line;
   size_t len = 0;
 
   if (which >= MAX_STRING_FILES)
     return NULL;
 
-  snprintf (filename, SYSFS_PATH_MAX, PATH_SYS_CPU "/cpu%u/cpufreq/%s",
-	    cpunum, sysfsparser_devices_system_cpu_file_string[which]);
-  
-  if (NULL == (line = sysfsparser_getline (filename)))
-    return NULL;
+  line = 
+    sysfsparser_getline (PATH_SYS_CPU "/cpu%u/cpufreq/%s", cpunum,
+			 sysfsparser_devices_system_cpu_file_string[which]);
+  if (NULL == line)
+    return 0;
 
   len = strlen (line);
   if (line[len-1] == '\n')

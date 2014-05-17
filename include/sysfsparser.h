@@ -23,8 +23,10 @@ extern "C"
 {
 #endif
   /* generic functions */
-  extern char *sysfsparser_getline (const char *filename);
-  extern unsigned long sysfsparser_getvalue (const char *filename);
+  extern char *sysfsparser_getline (const char *filename, ...)
+       _attribute_format_printf_(1, 2);
+  extern unsigned long sysfsparser_getvalue (const char *filename, ...)
+       _attribute_format_printf_(1, 2);
 
   /* functions specific to cpufreq */
   extern int sysfsparser_cpufreq_get_hardware_limits (unsigned int cpu,
