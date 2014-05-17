@@ -72,12 +72,12 @@ usage (FILE * out)
   fputs ("This plugin monitors the hardware's temperature.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-f|-k] [-t <thermal_zone>] [-w COUNTER] [-c COUNTER]\n",
-	   program_name);
+  fprintf (out, "  %s [-f|-k] [-t <thermal_zone_num>] "
+	   "[-w COUNTER] [-c COUNTER]\n", program_name);
   fprintf (out, "  %s -l\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -f, --fahrenheit  use fahrenheit as the temperature unit\n", out);
-  fputs ("  -k, --kelvin    use kelvin as the temperature unit\n", out);
+  fputs ("  -k, --kelvin      use kelvin as the temperature unit\n", out);
   fputs ("  -t, --thermal_zone    only consider a specific thermal zone\n", out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
@@ -87,7 +87,7 @@ usage (FILE * out)
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -w 80 -c 90\n", program_name);
-  fprintf (out, "  %s -t thermal_zone0 -w 80 -c 90\n", program_name);
+  fprintf (out, "  %s -t 0 -w 80 -c 90\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -128,24 +128,24 @@ get_real_temp (unsigned long temperature, char **scale, int temp_units)
 }
 
 int 
-get_critical_trip_point (char *thermal_zone)
+get_critical_trip_point (int thermal_zone)
 {
   char *type;
   int i, crit_temp = 0;
 
   for (i = 0; i < 5; i++)
     {
-      type =
-	sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/trip_point_%d_type",
-			     thermal_zone, i);
+      type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL
+				  "/thermal_zone%d/trip_point_%d_type",
+				  thermal_zone, i);
       if (NULL == type)
 	continue;
       if (strncmp (type, "critical", strlen ("critical")))
 	continue;
 
-       crit_temp =
-	sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL "/%s/trip_point_%d_temp",
-			      thermal_zone, i);
+       crit_temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL
+					 "/thermal_zone%d/trip_point_%d_temp",
+					 thermal_zone, i);
 
        if (verbose && (crit_temp > 0))
 	 printf ("found a critical trip point: %d (%dC)\n",
@@ -169,7 +169,7 @@ main (int argc, char **argv)
   DIR *d;
   struct dirent *de;
   bool found_data = false;
-  char *selected_thermal_zone = NULL;
+  int selected_thermal_zone = -1;
   int temperature_unit = TEMP_CELSIUS;
 
   set_program_name (argv[0]);
@@ -189,7 +189,7 @@ main (int argc, char **argv)
 	  temperature_unit = TEMP_KELVIN;
 	  break;
 	case 't':
-	  selected_thermal_zone = optarg;
+	  selected_thermal_zone = atoi (optarg);
 	  break;
 	case 'c':
 	  critical = optarg;
@@ -217,7 +217,8 @@ main (int argc, char **argv)
     goto error;
 
   unsigned long max_temp = 0, temp = 0;
-  char *scale, *thermal_zone = NULL;
+  int thermal_zone = -1;
+  char *scale;
   double real_temp;
 
   while ((de = readdir (d)))
@@ -226,7 +227,9 @@ main (int argc, char **argv)
       if (!strcmp (de->d_name, ".") || !strcmp (de->d_name, ".."))
 	continue;
 
-      if (selected_thermal_zone && (strcmp (selected_thermal_zone, de->d_name)))
+      if ((selected_thermal_zone >= 0) &&
+	  (selected_thermal_zone !=
+	     atoi (de->d_name + strlen ("thermal_zone"))))
 	continue;
 
       if (!strncmp (de->d_name, "thermal_zone", strlen ("thermal_zone")))
@@ -244,14 +247,12 @@ main (int argc, char **argv)
 	      if (max_temp < temp)
 		{
 		  max_temp = temp;
-		  free (thermal_zone);
-		  thermal_zone = xstrdup (de->d_name);
+		  thermal_zone = atoi (de->d_name + strlen ("thermal_zone"));
 		}
 	    }
 	  if (verbose)
-	    printf ("found a thermal information: %lu (%luC) - %s\n",
-		    max_temp, max_temp / 1000,
-		    thermal_zone ? thermal_zone : "thermal zone n/a");
+	    printf ("found a thermal information: %luC, thermal zone %d\n",
+		    max_temp / 1000, thermal_zone);
 	}
     }
   closedir (d);
@@ -272,7 +273,7 @@ main (int argc, char **argv)
   status = get_status (real_temp, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - %.1f %s (%s) | temp=%u%c", program_name_short,
+  printf ("%s %s - %.1f %s (thermal zone %d) | temp=%u%c", program_name_short,
 	  state_text (status), real_temp, scale, thermal_zone,
 	  (unsigned int) real_temp,
 	  (temperature_unit == TEMP_KELVIN) ? 'K' :
@@ -281,13 +282,12 @@ main (int argc, char **argv)
     printf (";0;%d", crit_temp);
   putchar ('\n');
 
-  free (thermal_zone);
   return status;
 
 error:
   if (selected_thermal_zone)
     plugin_error (STATE_UNKNOWN, 0,
-		  "no thermal information for \"%s\"", selected_thermal_zone);
+		  "no thermal information for zone %d", selected_thermal_zone);
   else
     plugin_error (STATE_UNKNOWN, errno,
 		  "no kernel support for ACPI thermal infomations");
