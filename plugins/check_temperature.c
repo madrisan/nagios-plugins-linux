@@ -74,7 +74,6 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [-f|-k] [-t <thermal_zone_num>] "
 	   "[-w COUNTER] [-c COUNTER]\n", program_name);
-  fprintf (out, "  %s -l\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -f, --fahrenheit  use fahrenheit as the temperature unit\n", out);
   fputs ("  -k, --kelvin      use kelvin as the temperature unit\n", out);
