@@ -41,9 +41,6 @@
 #include "thresholds.h"
 #include "xalloc.h"
 
-#define PATH_SYS_ACPI	"/sys/class"
-#define PATH_SYS_ACPI_THERMAL	PATH_SYS_ACPI "/thermal"
-
 enum
 {
   TEMP_KELVIN,

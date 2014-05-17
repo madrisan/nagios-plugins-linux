@@ -18,6 +18,20 @@
 #ifndef _SYSFSPARSER_H
 #define _SYSFSPARSER_H
 
+/* Thermal zone device sys I/F, created once it's registered:
+ * /sys/class/thermal/thermal_zone[0-*]:
+ *    |---type:                   Type of the thermal zone
+ *    |---temp:                   Current temperature
+ *    |---mode:                   Working mode of the thermal zone
+ *    |---policy:                 Thermal governor used for this zone
+ *    |---trip_point_[0-*]_temp:  Trip point temperature
+ *    |---trip_point_[0-*]_type:  Trip point type
+ *    |---trip_point_[0-*]_hyst:  Hysteresis value for this trip point
+ *    |---emul_temp:              Emulated temperature set node
+ */
+#define PATH_SYS_ACPI   "/sys/class"
+#define PATH_SYS_ACPI_THERMAL   PATH_SYS_ACPI "/thermal"
+
 #ifdef __cplusplus
 extern "C"
 {
