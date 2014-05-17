@@ -224,7 +224,7 @@ main (int argc, char **argv)
 
   unsigned long max_temp = 0, temp = 0;
   int thermal_zone = -1;
-  char *scale;
+  char *scale, *type = NULL;
   double real_temp;
 
   while ((de = readdir (d)))
@@ -244,6 +244,8 @@ main (int argc, char **argv)
 	   *  /sys/class/thermal/thermal_zone[0-9}/temp	  */
 	  temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL "/%s/temp",
 				       de->d_name);
+	  type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
+				      de->d_name);
 
 	  /* FIXME: as a 1st step we get the highest temp
 	   *        reported by sysfs */
@@ -279,9 +281,9 @@ main (int argc, char **argv)
   status = get_status (real_temp, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - %.1f %s (thermal zone %d) | temp=%u%c", program_name_short,
-	  state_text (status), real_temp, scale, thermal_zone,
-	  (unsigned int) real_temp,
+  printf ("%s %s - %.1f %s (thermal zone %d, type: %s) | temp=%u%c",
+	  program_name_short, state_text (status), real_temp, scale,
+	  thermal_zone, type ? type : "n/a", (unsigned int) real_temp,
 	  (temperature_unit == TEMP_KELVIN) ? 'K' :
 	  (temperature_unit == TEMP_FAHRENHEIT) ? 'F' : 'C');
   if (crit_temp > 0)
