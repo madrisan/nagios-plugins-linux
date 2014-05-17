@@ -143,16 +143,16 @@ get_critical_trip_point (int thermal_zone)
       if (strncmp (type, "critical", strlen ("critical")))
 	continue;
 
-       crit_temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL
-					 "/thermal_zone%d/trip_point_%d_temp",
-					 thermal_zone, i);
+      crit_temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL
+					"/thermal_zone%d/trip_point_%d_temp",
+					thermal_zone, i);
 
-       if (verbose && (crit_temp > 0))
-	 printf ("found a critical trip point: %d (%dC)\n",
-		 crit_temp, crit_temp / 1000);
+      if (verbose && (crit_temp > 0))
+	printf ("found a critical trip point: %d (%dC)\n",
+		crit_temp, crit_temp / 1000);
 
-       free (type);
-       break;
+      free (type);
+      break;
     }
 
   return crit_temp / 1000;
@@ -162,7 +162,7 @@ int
 main (int argc, char **argv)
 {
   int c;
-  char *critical = NULL, *warning = NULL;
+  char *critical = NULL, *warning = NULL, *end;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
@@ -189,7 +189,11 @@ main (int argc, char **argv)
 	  temperature_unit = TEMP_KELVIN;
 	  break;
 	case 't':
-	  selected_thermal_zone = atoi (optarg);
+	  errno = 0;
+	  selected_thermal_zone = strtol (optarg, &end, 10);
+	  if (errno != 0 || optarg == end || (end != NULL && *end != '\0'))
+	    plugin_error (STATE_UNKNOWN, 0,
+			  "the option '-t' requires an integer");
 	  break;
 	case 'c':
 	  critical = optarg;
@@ -201,7 +205,10 @@ main (int argc, char **argv)
 	  verbose = true;
 	  break;
 
-	case_GETOPT_HELP_CHAR case_GETOPT_VERSION_CHAR}
+	case_GETOPT_HELP_CHAR
+	case_GETOPT_VERSION_CHAR
+
+        }
     }
 
   status = set_thresholds (&my_threshold, warning, critical);
