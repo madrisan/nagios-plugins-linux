@@ -93,9 +93,16 @@ sysfsparser_getline (const char *format, ...)
     return NULL;
   
   chread = getline (&line, &len, fp);
-
   fclose (fp);
-  return (chread < 1) ? NULL : line;
+
+  if (chread < 1)
+    return NULL;
+
+  len = strlen (line);
+  if (line[len-1] == '\n')
+    line[len-1] = '\0';
+
+  return line;
 }
 
 unsigned long
