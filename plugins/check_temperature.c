@@ -17,8 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Based on the code of the acpiclient tool
- * <http://sourceforge.net/p/acpiclient/code/ci/master/tree/acpi.c>
+ * Based on the code of the acpiclient tool:
+ *  <http://sourceforge.net/p/acpiclient/code/ci/master/tree/acpi.c>
+ *
+ * See also the official kernel documentation:
+ *  <https://www.kernel.org/doc/Documentation/thermal/sysfs-api.txt>
  */
 
 #include <sys/types.h>
