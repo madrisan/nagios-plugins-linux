@@ -56,7 +56,6 @@ static const char *program_copyright =
 static struct option const longopts[] = {
   {(char *) "fahrenheit", required_argument, NULL, 'f'},
   {(char *) "kelvin", required_argument, NULL, 'k'},
-  {(char *) "list", no_argument, NULL, 'l'},
   {(char *) "thermal_zone", required_argument, NULL, 't'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
@@ -79,7 +78,6 @@ usage (FILE * out)
   fputs (USAGE_OPTIONS, out);
   fputs ("  -f, --fahrenheit  use fahrenheit as the temperature unit\n", out);
   fputs ("  -k, --kelvin    use kelvin as the temperature unit\n", out);
-  fputs ("  -l, --list      list the thermal zones available and exit\n", out);
   fputs ("  -t, --thermal_zone    only consider a specific thermal zone\n", out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
@@ -89,7 +87,6 @@ usage (FILE * out)
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -w 80 -c 90\n", program_name);
-  fprintf (out, "  %s --list\n", program_name);
   fprintf (out, "  %s -t thermal_zone0 -w 80 -c 90\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
@@ -165,7 +162,6 @@ int
 main (int argc, char **argv)
 {
   int c;
-  bool list = false;
   char *critical = NULL, *warning = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
@@ -191,9 +187,6 @@ main (int argc, char **argv)
 	  break;
 	case 'k':
 	  temperature_unit = TEMP_KELVIN;
-	  break;
-	case 'l':
-	  list = true;
 	  break;
 	case 't':
 	  selected_thermal_zone = optarg;
@@ -227,9 +220,6 @@ main (int argc, char **argv)
   char *scale, *thermal_zone = NULL;
   double real_temp;
 
-  if (list)
-    printf ("-= Thermal zones =-\n");
-
   while ((de = readdir (d)))
     {
       /* ignore directory entries */
@@ -257,8 +247,6 @@ main (int argc, char **argv)
 		  free (thermal_zone);
 		  thermal_zone = xstrdup (de->d_name);
 		}
-	      if (list)
-		printf ("%s\n", de->d_name);
 	    }
 	  if (verbose)
 	    printf ("found a thermal information: %lu (%luC) - %s\n",
@@ -267,9 +255,6 @@ main (int argc, char **argv)
 	}
     }
   closedir (d);
-
-  if (list == true)
-    return STATE_UNKNOWN;
 
   if (found_data == false)
     goto error;
