@@ -132,7 +132,10 @@ get_critical_trip_point (int thermal_zone)
   char *type;
   int i, crit_temp = 0;
 
-  for (i = 0; i < 5; i++)
+  /* Note: as far as I can see, the only possible trip points are:
+   *  'critical', 'passive', 'active0', and 'active1'
+   * Four (optional) entries max.   */
+  for (i = 0; i < 4; i++)
     {
       type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL
 				  "/thermal_zone%d/trip_point_%d_type",
