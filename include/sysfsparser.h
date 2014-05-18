@@ -42,7 +42,7 @@ extern "C"
   extern unsigned long sysfsparser_getvalue (const char *filename, ...)
        _attribute_format_printf_(1, 2);
 
-  /* functions specific to cpufreq */
+  /* cpufreq */
   extern int sysfsparser_cpufreq_get_hardware_limits (unsigned int cpu,
 						      unsigned long *min,
 						      unsigned long *max);
@@ -53,6 +53,9 @@ extern "C"
   extern char *sysfsparser_cpufreq_get_driver (unsigned int cpu);
   extern char *sysfsparser_cpufreq_get_governor (unsigned int cpu);
   extern char *sysfsparser_cpufreq_get_available_governors (unsigned int cpu);
+
+  /* thermal sensors */
+  extern int sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone);
 
 #ifdef __cplusplus
 }

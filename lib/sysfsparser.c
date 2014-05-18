@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "logging.h"
 #include "messages.h"
 #include "sysfsparser.h"
 #include "xasprintf.h"
@@ -233,3 +234,60 @@ sysfsparser_cpufreq_get_available_governors (unsigned int cpu)
 {
   return sysfsparser_cpufreq_get_string (cpu, SCALING_AVAILABLE_GOVERNORS);
 }
+
+/* Thermal Sensors function  */
+
+/* Thermal zone device sys I/F, created once it's registered:
+ * /sys/class/thermal/thermal_zone[0-*]:
+ *    |---type:                   Type of the thermal zone
+ *    |---temp:                   Current temperature
+ *    |---mode:                   Working mode of the thermal zone
+ *    |---policy:                 Thermal governor used for this zone
+ *    |---trip_point_[0-*]_temp:  Trip point temperature
+ *    |---trip_point_[0-*]_type:  Trip point type
+ *    |---trip_point_[0-*]_hyst:  Hysteresis value for this trip point
+ *    |---emul_temp:              Emulated temperature set node
+ */
+
+#define PATH_SYS_ACPI   "/sys/class"
+#define PATH_SYS_ACPI_THERMAL   PATH_SYS_ACPI "/thermal"
+
+int
+sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone)
+{
+  char *type;
+  int i, crit_temp = -1;
+
+  /* as far as I can see, the only possible trip points are:
+   *  'critical', 'passive', 'active0', and 'active1'
+   * Four (optional) entries max.   */
+  for (i = 0; i < 4; i++)
+    {
+      type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL
+				  "/thermal_zone%u/trip_point_%d_type",
+				  thermal_zone, i);
+      if (NULL == type)
+	continue;
+
+      /* cat /sys/class/thermal/thermal_zone0/trip_point_0_temp
+       *  98000
+       * cat /sys/class/thermal/thermal_zone0/trip_point_0_type
+       *  critical   */
+      if (strncmp (type, "critical", strlen ("critical")))
+	continue;
+
+      crit_temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL
+					"/thermal_zone%u/trip_point_%d_temp",
+					thermal_zone, i);
+
+      if (crit_temp > 0)
+	dbg ("a critical trip point has been found: %.2f degrees C\n",
+	     (float) (crit_temp / 1000.0));
+
+      free (type);
+      break;
+    }
+
+  return crit_temp;
+}
+

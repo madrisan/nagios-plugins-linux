@@ -126,40 +126,6 @@ get_real_temp (unsigned long temperature, char **scale, int temp_units)
   return (real_temp);
 }
 
-int 
-get_critical_trip_point (int thermal_zone)
-{
-  char *type;
-  int i, crit_temp = 0;
-
-  /* Note: as far as I can see, the only possible trip points are:
-   *  'critical', 'passive', 'active0', and 'active1'
-   * Four (optional) entries max.   */
-  for (i = 0; i < 4; i++)
-    {
-      type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL
-				  "/thermal_zone%d/trip_point_%d_type",
-				  thermal_zone, i);
-      if (NULL == type)
-	continue;
-      if (strncmp (type, "critical", strlen ("critical")))
-	continue;
-
-      crit_temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL
-					"/thermal_zone%d/trip_point_%d_temp",
-					thermal_zone, i);
-
-      if (verbose && (crit_temp > 0))
-	printf ("found a critical trip point: %d (%dC)\n",
-		crit_temp, crit_temp / 1000);
-
-      free (type);
-      break;
-    }
-
-  return crit_temp / 1000;
-}
-
 int
 main (int argc, char **argv)
 {
@@ -273,13 +239,8 @@ main (int argc, char **argv)
 
   real_temp = get_real_temp (max_temp, &scale, temperature_unit);
 
-  /* note that the critical temperature is provided by sysfs
-   * ex:  cat /sys/class/thermal/thermal_zone0/trip_point_0_temp
-   *      98000
-   *      cat /sys/class/thermal/thermal_zone0/trip_point_0_type
-   *      critical	*/
-
-  int crit_temp = get_critical_trip_point (thermal_zone);
+  int crit_temp =
+    sysfsparser_thermal_get_critical_temperature (thermal_zone) / 1000;
 
   status = get_status (real_temp, my_threshold);
   free (my_threshold);
