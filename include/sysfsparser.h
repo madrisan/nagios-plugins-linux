@@ -18,31 +18,22 @@
 #ifndef _SYSFSPARSER_H
 #define _SYSFSPARSER_H
 
-/* Thermal zone device sys I/F, created once it's registered:
- * /sys/class/thermal/thermal_zone[0-*]:
- *    |---type:                   Type of the thermal zone
- *    |---temp:                   Current temperature
- *    |---mode:                   Working mode of the thermal zone
- *    |---policy:                 Thermal governor used for this zone
- *    |---trip_point_[0-*]_temp:  Trip point temperature
- *    |---trip_point_[0-*]_type:  Trip point type
- *    |---trip_point_[0-*]_hyst:  Hysteresis value for this trip point
- *    |---emul_temp:              Emulated temperature set node
- */
-#define PATH_SYS_ACPI   "/sys/class"
-#define PATH_SYS_ACPI_THERMAL   PATH_SYS_ACPI "/thermal"
+#include <limits.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
   /* generic functions */
+
   extern char *sysfsparser_getline (const char *filename, ...)
        _attribute_format_printf_(1, 2);
   extern unsigned long sysfsparser_getvalue (const char *filename, ...)
        _attribute_format_printf_(1, 2);
 
   /* cpufreq */
+
   extern int sysfsparser_cpufreq_get_hardware_limits (unsigned int cpu,
 						      unsigned long *min,
 						      unsigned long *max);
@@ -55,6 +46,12 @@ extern "C"
   extern char *sysfsparser_cpufreq_get_available_governors (unsigned int cpu);
 
   /* thermal sensors */
+
+# define ALL_THERMAL_ZONES   UINT_MAX
+
+  bool sysfsparser_thermal_kernel_support (void);
+  extern int sysfsparser_thermal_get_temperature (unsigned int selected_zone,
+						  unsigned int *zone, char **type);
   extern int sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone);
 
 #ifdef __cplusplus

@@ -24,8 +24,6 @@
  *  <https://www.kernel.org/doc/Documentation/thermal/sysfs-api.txt>
  */
 
-#include <sys/types.h>
-#include <dirent.h>
 #include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -129,16 +127,12 @@ get_real_temp (unsigned long temperature, char **scale, int temp_units)
 int
 main (int argc, char **argv)
 {
-  int c;
-  char *critical = NULL, *warning = NULL, *end;
+  int c, temperature_unit = TEMP_CELSIUS;
+  unsigned int thermal_zone, selected_thermal_zone = ALL_THERMAL_ZONES;
+  char *critical = NULL, *warning = NULL,
+       *end, *type, *scale;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
-
-  DIR *d;
-  struct dirent *de;
-  bool found_data = false;
-  int selected_thermal_zone = -1;
-  int temperature_unit = TEMP_CELSIUS;
 
   set_program_name (argv[0]);
 
@@ -158,7 +152,7 @@ main (int argc, char **argv)
 	  break;
 	case 't':
 	  errno = 0;
-	  selected_thermal_zone = strtol (optarg, &end, 10);
+	  selected_thermal_zone = strtoul (optarg, &end, 10);
 	  if (errno != 0 || optarg == end || (end != NULL && *end != '\0'))
 	    plugin_error (STATE_UNKNOWN, 0,
 			  "the option '-t' requires an integer");
@@ -183,87 +177,27 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  if (chdir (PATH_SYS_ACPI_THERMAL) < 0)
-    plugin_error (STATE_UNKNOWN, 0,
-		  "no ACPI thermel support in kernel, or incorrect path (\"%s\")",
-		  PATH_SYS_ACPI_THERMAL);
-
-  if ((d = opendir (".")) == NULL)
-    goto error;
-
-  unsigned long max_temp = 0, temp = 0;
-  int thermal_zone = -1;
-  char *scale, *type = NULL;
-  double real_temp;
-
-  while ((de = readdir (d)))
-    {
-      /* ignore directory entries */
-      if (!strcmp (de->d_name, ".") || !strcmp (de->d_name, ".."))
-	continue;
-
-      if ((selected_thermal_zone >= 0) &&
-	  (selected_thermal_zone !=
-	     atoi (de->d_name + strlen ("thermal_zone"))))
-	continue;
-
-      if (!strncmp (de->d_name, "thermal_zone", strlen ("thermal_zone")))
-	{
-	  /* temperatures are stored in the files 
-	   *  /sys/class/thermal/thermal_zone[0-9}/temp	  */
-	  temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL "/%s/temp",
-				       de->d_name);
-	  type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
-				      de->d_name);
-
-	  /* FIXME: as a 1st step we get the highest temp
-	   *        reported by sysfs */
-	  if (temp > 0)
-	    {
-	      found_data = true;
-	      if (max_temp < temp)
-		{
-		  max_temp = temp;
-		  thermal_zone = atoi (de->d_name + strlen ("thermal_zone"));
-		}
-	    }
-	  if (verbose)
-	    printf ("found a thermal information: %luC, thermal zone %d\n",
-		    max_temp / 1000, thermal_zone);
-	}
-    }
-  closedir (d);
-
-  if (found_data == false)
-    goto error;
-
-  real_temp = get_real_temp (max_temp, &scale, temperature_unit);
+  int max_temp =
+    sysfsparser_thermal_get_temperature (selected_thermal_zone,
+					 &thermal_zone, &type);
+  double real_temp = get_real_temp (max_temp, &scale, temperature_unit);
 
   status = get_status (real_temp, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - %.1f %s (thermal zone %d, type: %s) | temp=%u%c",
+  printf ("%s %s - %.1f %s (thermal zone: %d, type: \"%s\") | temp=%u%c",
 	  program_name_short, state_text (status), real_temp, scale,
 	  thermal_zone, type ? type : "n/a", (unsigned int) real_temp,
 	  (temperature_unit == TEMP_KELVIN) ? 'K' :
 	  (temperature_unit == TEMP_FAHRENHEIT) ? 'F' : 'C');
 
-  /* check for the critical temperature reported in thermal_zone */
+  /* check for the related critical temperature, if any */
   int crit_temp =
     sysfsparser_thermal_get_critical_temperature (thermal_zone) / 1000;
-
   if (crit_temp > 0)
     printf (";0;%d", crit_temp);
 
   putchar ('\n');
 
   return status;
-
-error:
-  if (selected_thermal_zone)
-    plugin_error (STATE_UNKNOWN, 0,
-		  "no thermal information for zone %d", selected_thermal_zone);
-  else
-    plugin_error (STATE_UNKNOWN, errno,
-		  "no kernel support for ACPI thermal infomations");
 }

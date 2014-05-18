@@ -21,11 +21,14 @@
 # define _GNU_SOURCE	/* activate extra prototypes for glibc */
 #endif
 
+#include <sys/types.h>
+#include <dirent.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "common.h"
 #include "logging.h"
@@ -237,6 +240,9 @@ sysfsparser_cpufreq_get_available_governors (unsigned int cpu)
 
 /* Thermal Sensors function  */
 
+#define PATH_SYS_ACPI   "/sys/class"
+#define PATH_SYS_ACPI_THERMAL   PATH_SYS_ACPI "/thermal"
+
 /* Thermal zone device sys I/F, created once it's registered:
  * /sys/class/thermal/thermal_zone[0-*]:
  *    |---type:                   Type of the thermal zone
@@ -249,8 +255,14 @@ sysfsparser_cpufreq_get_available_governors (unsigned int cpu)
  *    |---emul_temp:              Emulated temperature set node
  */
 
-#define PATH_SYS_ACPI   "/sys/class"
-#define PATH_SYS_ACPI_THERMAL   PATH_SYS_ACPI "/thermal"
+bool
+sysfsparser_thermal_kernel_support ()
+{
+  if (chdir (PATH_SYS_ACPI_THERMAL) < 0)
+    return false;
+
+  return true;
+}
 
 int
 sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone)
@@ -291,3 +303,71 @@ sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone)
   return crit_temp;
 }
 
+int
+sysfsparser_thermal_get_temperature (unsigned int selected_zone,
+				     unsigned int *zone, char **type)
+{
+  DIR *d;
+  struct dirent *de;
+  bool found_data = false;
+  unsigned long max_temp = 0, temp = 0;
+
+  if (chdir (PATH_SYS_ACPI_THERMAL) < 0)
+    plugin_error (STATE_UNKNOWN, 0, "no ACPI thermal support in kernel "
+		  "or incorrect path (\"%s\")", PATH_SYS_ACPI_THERMAL);
+
+  if ((d = opendir (".")) == NULL)
+    plugin_error (STATE_UNKNOWN, errno,
+		  "cannot open() " PATH_SYS_ACPI_THERMAL);
+
+  while ((de = readdir (d)))
+    {
+      /* ignore directory entries */
+      if (!strcmp (de->d_name, ".") || !strcmp (de->d_name, ".."))
+	continue;
+      /* ignore all files but 'thermal_zone[0-*]' ones */
+      if (strncmp (de->d_name, "thermal_zone", 12))
+	continue;
+
+      if ((selected_zone != ALL_THERMAL_ZONES) &&
+	  (selected_zone != strtoul (de->d_name + 12, NULL, 10)))
+	continue;
+
+      if (!strncmp (de->d_name, "thermal_zone", 12))
+	{
+	  /* temperatures are stored in the files
+	   *  /sys/class/thermal/thermal_zone[0-9}/temp	  */
+	  temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL "/%s/temp",
+				       de->d_name);
+	  *type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
+				       de->d_name);
+
+	  /* FIXME: as a 1st step we get the highest temp
+	   *        reported by sysfs */
+	  if (temp > 0)
+	    {
+	      found_data = true;
+	      if (max_temp < temp)
+		{
+		  max_temp = temp;
+		  *zone = strtoul (de->d_name + 12, NULL, 10);
+		}
+	    }
+	  dbg ("thermal information found: %.2f degrees C, zone: %d\n",
+	       (float) (max_temp / 1000.0), *zone);
+	}
+    }
+  closedir (d);
+
+  if (false == found_data)
+    {
+      if (selected_zone == ALL_THERMAL_ZONES)
+	plugin_error (STATE_UNKNOWN, 0,
+		      "no thermal information has been found");
+      else
+	plugin_error (STATE_UNKNOWN, 0,
+		      "no thermal information for zone '%u'", selected_zone);
+    }
+
+  return max_temp;
+}
