@@ -239,9 +239,6 @@ main (int argc, char **argv)
 
   real_temp = get_real_temp (max_temp, &scale, temperature_unit);
 
-  int crit_temp =
-    sysfsparser_thermal_get_critical_temperature (thermal_zone) / 1000;
-
   status = get_status (real_temp, my_threshold);
   free (my_threshold);
 
@@ -250,8 +247,14 @@ main (int argc, char **argv)
 	  thermal_zone, type ? type : "n/a", (unsigned int) real_temp,
 	  (temperature_unit == TEMP_KELVIN) ? 'K' :
 	  (temperature_unit == TEMP_FAHRENHEIT) ? 'F' : 'C');
+
+  /* check for the critical temperature reported in thermal_zone */
+  int crit_temp =
+    sysfsparser_thermal_get_critical_temperature (thermal_zone) / 1000;
+
   if (crit_temp > 0)
     printf (";0;%d", crit_temp);
+
   putchar ('\n');
 
   return status;
