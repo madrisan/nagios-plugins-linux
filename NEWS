@@ -1,3 +1,12 @@
+    Major changes between "nagios-plugins-linux" versions 9 and 10
+
+* check_temperature - modify the syntaxx of the switch command
+* check_temperature - add the sensor type to the output message.
+* check_temperature - the code has been reworked and most of the code
+  moved to the sysfsparser library.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 8 and 9
 
 * New plugin 'check_temperature'.

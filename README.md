@@ -24,6 +24,13 @@ Here is the list of the available plugins:
 * check_uptime
 * check_users
 
+
+## Full documentation
+
+A full documentation of the `nagios-plugins-linux` is available at
+https://sites.google.com/site/davidemadrisan/nagios-monitoring/linux-os
+
+
 ## The plugins in detail 
 
 **The check_clock plugin**
@@ -435,6 +442,7 @@ you're done!
 This package is written in plain C, making as few assumptions as possible, and
 sticking closely to ANSI C/POSIX. 
 A C99-compliant compiler is required anyway.
+
 This package is known to compile with
 * gcc 4.4 (RHEL6),
 * gcc 4.8.2 and clang 3.1 (openmamba GNU/Linux 2.90).
