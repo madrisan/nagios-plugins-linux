@@ -25,8 +25,11 @@
 extern "C"
 {
 #endif
+
   /* generic functions */
 
+  extern bool sysfsparser_path_exist (const char *path, ...)
+       _attribute_format_printf_(1, 2);
   extern char *sysfsparser_getline (const char *filename, ...)
        _attribute_format_printf_(1, 2);
   extern unsigned long sysfsparser_getvalue (const char *filename, ...)

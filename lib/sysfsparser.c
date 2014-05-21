@@ -79,6 +79,20 @@ static const char *
   [SCALING_AVAILABLE_FREQS] = "scaling_available_frequencies"
 };
 
+bool
+sysfsparser_path_exist (const char *path, ...)
+{
+  char *filename;
+  va_list args;
+
+  va_start (args, path);
+  if (vasprintf (&filename, path, args) < 0)
+    plugin_error (STATE_UNKNOWN, errno, "vasprintf has failed");
+  va_end (args);
+
+  return access (filename, F_OK) == 0;
+}
+
 char *
 sysfsparser_getline (const char *format, ...)
 {
