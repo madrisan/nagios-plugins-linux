@@ -27,9 +27,13 @@
 #include "common.h"
 #include "messages.h"
 #include "procparser.h"
+#include "sysfsparser.h"
 #include "xalloc.h"
 
 #define PATH_PROC_CPUINFO	"/proc/cpuinfo"
+
+#define PATH_SYS_SYSTEM		"/sys/devices/system"
+#define PATH_SYS_CPU		PATH_SYS_SYSTEM "/cpu"
 
 /* Get the number of total and active cpus */
 
@@ -58,6 +62,14 @@ get_processor_number_online (void)
     -1;
 #endif
 }
+
+/* Get the mamimum number of processors supported by the kernet */
+static unsigned int
+get_processor_kernel_max ()
+{
+  return sysfsparser_getvalue (PATH_SYS_CPU "/kernel_max") + 1;
+}
+
 
 enum	/* CPU modes */
 {
