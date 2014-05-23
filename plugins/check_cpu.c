@@ -216,26 +216,26 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
       char *freq_governor = cpufreq_get_governor (cpu);
       if (freq_governor)
 	{
-	  print_s ("CPU freq Current Governor:", freq_governor);
+	  print_s ("CPU Freq Current Governor:", freq_governor);
 	  free (freq_governor);
 	}
 
       char *freq_governors = cpufreq_get_available_governors (cpu);
       if (freq_governors)
 	{
-	  print_s ("CPU freq Available Governors:", freq_governors);
+	  print_s ("CPU Freq Available Governors:", freq_governors);
 	  free (freq_governors);
 	}
 
       char *freq_driver = cpufreq_get_driver (cpu);
       if (freq_driver)
 	{
-	  print_s ("CPU freq Driver:", freq_driver);
+	  print_s ("CPU Freq Driver:", freq_driver);
 	  free (freq_driver);
 	}
 
       bool hot_pluggable = get_processor_is_hot_pluggable (cpu);
-      print_s ("CPU Hot Pluggable:", hot_pluggable ? "yes" : "no");
+      print_s ("CPU is Hot Pluggable:", hot_pluggable ? "yes" : "no");
     }
 
   char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc); 
