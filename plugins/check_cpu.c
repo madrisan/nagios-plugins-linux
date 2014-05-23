@@ -233,6 +233,9 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 	  print_s ("CPU freq Driver:", freq_driver);
 	  free (freq_driver);
 	}
+
+      bool hot_pluggable = get_processor_is_hot_pluggable (cpu);
+      print_s ("CPU Hot Pluggable:", hot_pluggable ? "yes" : "no");
     }
 
   char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc); 

@@ -63,13 +63,18 @@ get_processor_number_online (void)
 #endif
 }
 
-/* Get the mamimum number of processors supported by the kernet */
+/* Get the maximum cpu index allowed by the kernel configuration. */
 static unsigned int
 get_processor_kernel_max ()
 {
   return sysfsparser_getvalue (PATH_SYS_CPU "/kernel_max") + 1;
 }
 
+bool
+get_processor_is_hot_pluggable (unsigned int cpu)
+{
+  return sysfsparser_path_exist (PATH_SYS_CPU "/cpu%u/online", cpu);
+}
 
 enum	/* CPU modes */
 {

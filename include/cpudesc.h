@@ -23,9 +23,12 @@ extern "C"
 {
 #endif
 
-/* Get the number of total and active cpus */
+  /* Get the number of total and active cpus */
   extern int get_processor_number_total ();
   extern int get_processor_number_online ();
+
+  /* Processor characteristics */
+  extern bool get_processor_is_hot_pluggable (unsigned int cpu);
 
   struct cpu_desc;
 
