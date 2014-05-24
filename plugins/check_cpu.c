@@ -180,13 +180,20 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
     {
       printf ("-CPU%d-\n", cpu);
 
+      bool cpu_hot_pluggable = get_processor_is_hot_pluggable (cpu);
+      int cpu_online = get_processor_is_online (cpu);
+
+      print_s ("CPU is Hot Pluggable:", cpu_hot_pluggable ?
+		 (cpu_online ? "yes (online)" : "yes (offline)") : "no");
+
       unsigned long latency = cpufreq_get_transition_latency (cpu);
       if (latency)
 	print_s("Maximum Transition Latency:",
 		cpufreq_duration_to_string (latency));
 
-      print_s("Current CPU Frequency:",
-	      cpufreq_freq_to_string (cpufreq_get_freq_kernel (cpu)));
+      unsigned long freq_kernel = cpufreq_get_freq_kernel (cpu);
+      if (freq_kernel > 0)
+	print_s("Current CPU Frequency:", cpufreq_freq_to_string (freq_kernel));
 
       struct cpufreq_available_frequencies *curr;
       curr = cpufreq_get_available_freqs (cpu);
@@ -233,9 +240,6 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 	  print_s ("CPU Freq Driver:", freq_driver);
 	  free (freq_driver);
 	}
-
-      bool hot_pluggable = get_processor_is_hot_pluggable (cpu);
-      print_s ("CPU is Hot Pluggable:", hot_pluggable ? "yes" : "no");
     }
 
   char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc); 

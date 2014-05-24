@@ -29,6 +29,7 @@ extern "C"
 
   /* Processor characteristics */
   extern bool get_processor_is_hot_pluggable (unsigned int cpu);
+  extern int get_processor_is_online (unsigned int cpu);
 
   struct cpu_desc;
 

@@ -76,6 +76,18 @@ get_processor_is_hot_pluggable (unsigned int cpu)
   return sysfsparser_path_exist (PATH_SYS_CPU "/cpu%u/online", cpu);
 }
 
+int
+get_processor_is_online (unsigned int cpu)
+{
+  bool path_exist =
+    sysfsparser_path_exist (PATH_SYS_CPU "/cpu%u/online", cpu);
+
+  if (false == path_exist)
+    return -1;
+
+  return sysfsparser_getvalue (PATH_SYS_CPU "/cpu%u/online", cpu);
+}
+
 enum	/* CPU modes */
 {
   MODE_32BIT = (1 << 1),
