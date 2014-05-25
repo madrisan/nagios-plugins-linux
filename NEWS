@@ -1,3 +1,10 @@
+    Major changes between "nagios-plugins-linux" versions 10 and 11
+
+* check_cpu - better output of '--cpuinfo' when a hot pluggable cpu
+  is offline.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 9 and 10
 
 * check_temperature - modify the syntaxx of the switch command
