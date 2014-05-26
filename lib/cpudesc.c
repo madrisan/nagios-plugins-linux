@@ -37,9 +37,18 @@
 
 /* Get the number of total and active cpus */
 
+/* Note! On Linux systems with glibc,
+ *   sysconf (_SC_NPROCESSORS_CONF)
+ *   sysconf (_SC_NPROCESSORS_ONLN)
+ * come from the /sys and /proc file systems (see
+ * glibc/sysdeps/unix/sysv/linux/getsysstats.c).
+ * In some situations these file systems are not mounted, and the sysconf
+ * call returns 1, which does not reflect the reality.   */
+
 int
 get_processor_number_total (void)
 {
+  /* The number of CPUs configured in the system.   */
   return
 #if defined (HAVE_GET_NPROCS_CONF)
     get_nprocs_conf ();
@@ -53,6 +62,7 @@ get_processor_number_total (void)
 int
 get_processor_number_online (void)
 {
+  /* The number of CPUs available to the scheduler.   */
   return
 #if defined (HAVE_GET_NPROCS)
     get_nprocs ();
