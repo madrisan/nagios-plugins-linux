@@ -171,6 +171,11 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 	       ncpu = cpu_desc_get_number_of_cpus (cpudesc);
 
   print_n("CPU(s):", ncpu);
+
+  int nthreads = get_processor_nthreads ();
+  if (nthreads > 0)
+    print_n("Thread(s) per core:", nthreads);
+
   print_s("Vendor ID:", cpu_desc_get_vendor (cpudesc));
   print_s("CPU Family:", cpu_desc_get_family (cpudesc));
   print_s("Model:", cpu_desc_get_model (cpudesc));
