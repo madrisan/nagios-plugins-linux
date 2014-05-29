@@ -167,10 +167,9 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
   print_s("Byte Order:", "Big Endian");
 #endif
 
-  unsigned int cpu,
-	       ncpu = cpu_desc_get_number_of_cpus (cpudesc);
+  int cpu, ncpus = cpu_desc_get_ncpus (cpudesc);
 
-  print_n("CPU(s):", ncpu);
+  print_n("CPU(s):", ncpus);
 
   int nthreads = cpu_desc_get_nthreads (cpudesc);
   if (nthreads > 0)
@@ -181,7 +180,7 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
   print_s("Model:", cpu_desc_get_model (cpudesc));
   print_s("Model name:", cpu_desc_get_model_name (cpudesc));
 
-  for (cpu = 0; cpu < ncpu; cpu++)
+  for (cpu = 0; cpu < ncpus; cpu++)
     {
       printf ("-CPU%d-\n", cpu);
 
@@ -431,7 +430,7 @@ main (int argc, char **argv)
     {
       int cpuid;
       unsigned long freq_min, freq_max, freq_kernel;
-      for (cpuid = 0; cpuid < cpu_desc_get_number_of_cpus (cpudesc); cpuid++)
+      for (cpuid = 0; cpuid < cpu_desc_get_ncpus (cpudesc); cpuid++)
 	{
 	  if (0 == cpufreq_get_hardware_limits (cpuid, &freq_min, &freq_max))
 	    {

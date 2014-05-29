@@ -17,6 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* A note on terminology
+ * ---------------------
+ * CPU    The logical CPU number of a CPU as used by the Linux kernel.
+ * CORE   The logical core number.  A core can contain several CPUs.
+ * SOCKET The logical socket number.  A socket can contain several cores.
+ * BOOK   The logical book number.  A book can contain several sockets.
+ * NODE   The logical NUMA node number.  A node may contain several books.  */
+
 #define _GNU_SOURCE
 #include <sched.h>
 
@@ -71,7 +79,7 @@ get_processor_number_online (void)
 }
 
 /* Get the maximum cpu index allowed by the kernel configuration. */
-static unsigned int
+int
 get_processor_kernel_max ()
 {
   return sysfsparser_getvalue (PATH_SYS_CPU "/kernel_max") + 1;
@@ -146,6 +154,7 @@ cpulist_parse (const char *str, cpu_set_t *set, size_t setsize)
   return 0;
 }
 
+/* Get the number of threads within one core */
 unsigned int
 get_processor_nthreads ()
 {

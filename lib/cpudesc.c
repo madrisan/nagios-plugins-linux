@@ -74,7 +74,8 @@ struct cpu_desc
   char *flags;		/* x86 */
   int mode;
   int ncpus;		/* number of present CPUs */
-  int nthreads;		/* number of thread(s)    */
+  int ncpuspos;		/* maximal possible CPUs */
+  int nthreads;		/* number of thread(s)  */
 };
 
 /* Allocates space for a new cpu_desc object.
@@ -117,6 +118,7 @@ cpu_desc_read (struct cpu_desc *cpudesc)
   cpudesc->arch = xstrdup (utsbuf.machine);
 
   cpudesc->ncpus = get_processor_number_total ();
+  cpudesc->ncpuspos = get_processor_kernel_max ();
   cpudesc->nthreads = get_processor_nthreads ();
 
   cpudesc->mode = 0;
@@ -248,9 +250,15 @@ cpu_desc_get_mode (struct cpu_desc *cpudesc)
 }
 
 int
-cpu_desc_get_number_of_cpus (struct cpu_desc *cpudesc)
+cpu_desc_get_ncpus (struct cpu_desc *cpudesc)
 {
   return cpudesc->ncpus;
+}
+
+int
+cpu_desc_get_ncpuspos (struct cpu_desc *cpudesc)
+{
+  return cpudesc->ncpuspos;
 }
 
 int

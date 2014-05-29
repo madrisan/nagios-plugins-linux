@@ -65,7 +65,8 @@ enum		/* CPU modes */
   };
   extern int cpu_desc_get_mode (struct cpu_desc *cpudesc);
 
-  extern int cpu_desc_get_number_of_cpus (struct cpu_desc *cpudesc);
+  extern int cpu_desc_get_ncpus (struct cpu_desc *cpudesc);
+  extern int cpu_desc_get_ncpuspos (struct cpu_desc *cpudesc);
   extern int cpu_desc_get_nthreads (struct cpu_desc *cpudesc);
 
 #ifdef __cplusplus

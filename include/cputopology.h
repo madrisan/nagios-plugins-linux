@@ -23,11 +23,14 @@ extern "C"
 {
 #endif
 
-  /* Get the number of total and active cpus */
+  /* Get the number of total and active cpus. */
   extern int get_processor_number_total ();
   extern int get_processor_number_online ();
 
-  /* Get the number of threads */
+  /* Get the maximum cpu index allowed by the kernel configuration. */
+  extern int get_processor_kernel_max ();
+
+  /* Get the number of threads. */
   extern int get_processor_nthreads ();
 
 #ifdef __cplusplus
