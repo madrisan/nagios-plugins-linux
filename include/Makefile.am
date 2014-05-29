@@ -22,6 +22,7 @@ noinst_HEADERS = \
   cpudesc.h     \
   cpufreq.h     \
   cpustats.h    \
+  cputopology.h \
   logging.h     \
   meminfo.h     \
   mountlist.h   \
