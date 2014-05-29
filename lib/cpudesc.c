@@ -155,7 +155,7 @@ cpulist_parse (const char *str, cpu_set_t *set, size_t setsize)
 
 unsigned int
 get_processor_nthreads ()
-{;
+{
   char *list;
   cpu_set_t *set;
   size_t nthreads = 0, setsize = 0,
@@ -220,6 +220,7 @@ struct cpu_desc
   char *flags;		/* x86 */
   int mode;
   int ncpus;		/* number of present CPUs */
+  int nthreads;		/* number of thread(s)    */
 };
 
 /* Allocates space for a new cpu_desc object.
@@ -240,7 +241,7 @@ cpu_desc_new (struct cpu_desc **cpudesc)
 }
 
 /* Fill the cpu_desc structure pointed with the values found in the 
- * proc filesystem */
+ * proc and sysfs filesystems  */
 
 void
 cpu_desc_read (struct cpu_desc *cpudesc)
@@ -262,6 +263,7 @@ cpu_desc_read (struct cpu_desc *cpudesc)
   cpudesc->arch = xstrdup (utsbuf.machine);
 
   cpudesc->ncpus = get_processor_number_total ();
+  cpudesc->nthreads = get_processor_nthreads ();
 
   cpudesc->mode = 0;
 #if defined(__alpha__) || defined(__ia64__)
@@ -396,3 +398,10 @@ cpu_desc_get_number_of_cpus (struct cpu_desc *cpudesc)
 {
   return cpudesc->ncpus;
 }
+
+int
+cpu_desc_get_nthreads (struct cpu_desc *cpudesc)
+{
+  return cpudesc->nthreads;
+}
+
