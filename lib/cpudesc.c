@@ -118,7 +118,7 @@ cpu_desc_read (struct cpu_desc *cpudesc)
   cpudesc->arch = xstrdup (utsbuf.machine);
 
   cpudesc->ncpus = get_processor_number_total ();
-  cpudesc->ncpuspos = get_processor_kernel_max ();
+  cpudesc->ncpuspos = get_processor_number_kernel_max ();
   cpudesc->nthreads = get_processor_nthreads ();
 
   cpudesc->mode = 0;

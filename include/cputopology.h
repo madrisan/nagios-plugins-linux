@@ -28,7 +28,7 @@ extern "C"
   extern int get_processor_number_online ();
 
   /* Get the maximum cpu index allowed by the kernel configuration. */
-  extern int get_processor_kernel_max ();
+  extern int get_processor_number_kernel_max ();
 
   /* Get the number of threads. */
   extern int get_processor_nthreads ();

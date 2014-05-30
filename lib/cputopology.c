@@ -80,7 +80,7 @@ get_processor_number_online (void)
 
 /* Get the maximum cpu index allowed by the kernel configuration. */
 int
-get_processor_kernel_max ()
+get_processor_number_kernel_max ()
 {
   return sysfsparser_getvalue (PATH_SYS_CPU "/kernel_max") + 1;
 }
@@ -161,7 +161,7 @@ get_processor_nthreads ()
   char *list;
   cpu_set_t *set;
   size_t nthreads = 0, setsize = 0,
-	 maxcpus = get_processor_kernel_max ();
+	 maxcpus = get_processor_number_kernel_max ();
   int rc;
 
   list = sysfsparser_getline (PATH_SYS_CPU "/online");
