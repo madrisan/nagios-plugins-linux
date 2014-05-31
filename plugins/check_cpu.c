@@ -39,6 +39,7 @@
 #include "cpudesc.h"
 #include "cpufreq.h"
 #include "cpustats.h"
+#include "cputopology.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"

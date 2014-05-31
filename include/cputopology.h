@@ -31,7 +31,7 @@ extern "C"
   extern int get_processor_number_kernel_max ();
 
   /* Get the number of threads. */
-  extern int get_processor_nthreads ();
+  extern int get_cputopology_nthreads ();
 
 #ifdef __cplusplus
 }

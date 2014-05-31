@@ -79,107 +79,103 @@ get_processor_number_online (void)
 }
 
 /* Get the maximum cpu index allowed by the kernel configuration. */
+
 int
 get_processor_number_kernel_max ()
 {
   return sysfsparser_getvalue (PATH_SYS_CPU "/kernel_max") + 1;
 }
 
-static const char *
-nexttoken (const char *q, int sep)
+static inline int
+char_to_val (int c)
 {
-  if (q)
-    q = strchr (q, sep);
-  if (q)
-    q++;
-  return q;
+  int cl;
+
+  cl = tolower (c);
+  if (c >= '0' && c <= '9')
+    return c - '0';
+  else if (cl >= 'a' && cl <= 'f')
+    return cl + (10 - 'a');
+  else
+    return -1;
 }
 
-/* Parses string with list of CPU ranges.
- * Returns 1 on error.  */
+/* Parses string with CPUs mask.  */
 
 static int
-cpulist_parse (const char *str, cpu_set_t *set, size_t setsize)
+cpumask_parse (const char *str, cpu_set_t *set, size_t setsize)
 {
-  const char *p, *q;
-  int r = 0;
+  int len = strlen (str);
+  const char *ptr = str + len - 1;
+  int cpu = 0;
+
+  /* skip 0x, it's all hex anyway */
+  if (len > 1 && !memcmp (str, "0x", 2L))
+    str += 2;
 
   CPU_ZERO_S (setsize, set);
 
-  q = str;
-  while (p = q, q = nexttoken (q, ','), p)
+  while (ptr >= str)
     {
-      unsigned int a; /* beginning of range */
-      unsigned int b; /* end of range */
-      unsigned int s; /* stride */
-      const char *c1, *c2;
-      char c;
+      char val;
 
-      if ((r = sscanf (p, "%u%c", &a, &c)) < 1)
-	return 1;
+      /* cpu masks in /sys uses comma as a separator */
+      if (*ptr == ',')
+	ptr--;
 
-      b = a;
-      s = 1;
-
-      c1 = nexttoken (p, '-');
-      c2 = nexttoken (p, ',');
-      if (c1 != NULL && (c2 == NULL || c1 < c2))
-	{
-	  if ((r = sscanf (c1, "%u%c", &b, &c)) < 1)
-	    return 1;
-
-	  c1 = nexttoken (c1, ':');
-	  if (c1 != NULL && (c2 == NULL || c1 < c2))
-	    {
-	      if ((r = sscanf (c1, "%u%c", &s, &c)) < 1)
-		return 1;
-	      if (s == 0)
-		return 1;
-	    }
-	}
-
-      if (!(a <= b))
-	return 1;
-
-      while (a <= b)
-	{
-	  CPU_SET_S (a, setsize, set);
-	  a += s;
-	}
+      val = char_to_val (*ptr);
+      if (val == (char) -1)
+	return -1;
+      if (val & 1)
+	CPU_SET_S (cpu, setsize, set);
+      if (val & 2)
+	CPU_SET_S (cpu + 1, setsize, set);
+      if (val & 4)
+	CPU_SET_S (cpu + 2, setsize, set);
+      if (val & 8)
+	CPU_SET_S (cpu + 3, setsize, set);
+      len--;
+      ptr--;
+      cpu += 4;
     }
-
-  if (r == 2)
-    return 1;
 
   return 0;
 }
 
 /* Get the number of threads within one core */
+
 unsigned int
-get_processor_nthreads ()
+get_cputopology_nthreads ()
 {
-  char *list;
+  char *thread_siblings;
   cpu_set_t *set;
-  size_t nthreads = 0, setsize = 0,
+  size_t cpu, setsize = 0,
 	 maxcpus = get_processor_number_kernel_max ();
   int rc;
+  unsigned int nthreads = 0, curr;
 
-  list = sysfsparser_getline (PATH_SYS_CPU "/online");
-  if (NULL == list)
+  if (!(set = CPU_ALLOC (maxcpus)))
     return 0;
-
-  if (NULL == (set = CPU_ALLOC (maxcpus)))
-    return 0;
-
   setsize = CPU_ALLOC_SIZE (maxcpus);
 
-  if ((rc = cpulist_parse (list, set, setsize)))
-    return 0;
+  for (cpu = 0; cpu < maxcpus; cpu++)
+    {
+      /* thread_siblings. internal kernel map of cpu#'s hardware threads
+       * within the same core as cpu#   */
+      thread_siblings =
+	sysfsparser_getline (PATH_SYS_CPU
+			     "/cpu%u/topology/thread_siblings", cpu);
+      if (!thread_siblings)
+        continue;
+      if ((rc = cpumask_parse (thread_siblings, set, setsize)))
+	continue;
 
-  nthreads = CPU_COUNT_S (setsize, set);
+      curr = CPU_COUNT_S (setsize, set);
+      if (nthreads < curr)	/* not sure this makes sense.. */
+	nthreads = curr;	/* 'curr' should be the same on each cpu# */
+      free (thread_siblings);
+    }
 
   CPU_FREE (set);
-  free (list);
-
   return nthreads;
 }
