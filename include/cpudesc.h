@@ -27,9 +27,6 @@ extern "C"
   extern int get_processor_number_total ();
   extern int get_processor_number_online ();
 
-  /* Get the number of threads */
-  extern int get_processor_nthreads ();
-
   /* Processor characteristics */
   extern bool get_processor_is_hot_pluggable (unsigned int cpu);
   extern int get_processor_is_online (unsigned int cpu);

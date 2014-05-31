@@ -172,9 +172,12 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 
   print_n("CPU(s):", ncpus);
 
-  int nthreads = cpu_desc_get_nthreads (cpudesc);
-  if (nthreads > 0)
-    print_n("Thread(s) per core:", nthreads);
+  unsigned int nsockets, ncores, nthreads;
+  get_cputopology_read (&nsockets, &ncores, &nthreads);
+
+  print_n("Thread(s) per core:", nthreads);
+  print_n("Core(s) per socket:", ncores);
+  print_n("Socket(s):", nsockets);
 
   print_s("Vendor ID:", cpu_desc_get_vendor (cpudesc));
   print_s("CPU Family:", cpu_desc_get_family (cpudesc));

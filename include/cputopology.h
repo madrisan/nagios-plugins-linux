@@ -30,8 +30,11 @@ extern "C"
   /* Get the maximum cpu index allowed by the kernel configuration. */
   extern int get_processor_number_kernel_max ();
 
-  /* Get the number of threads. */
+  /* Get the number of sockets, cores, and threads. */
   extern int get_cputopology_nthreads ();
+  extern void get_cputopology_read (unsigned int *nsockets,
+				    unsigned int *ncores,
+				    unsigned int *nthreads);
 
 #ifdef __cplusplus
 }

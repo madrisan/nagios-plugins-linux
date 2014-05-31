@@ -100,7 +100,7 @@ char_to_val (int c)
     return -1;
 }
 
-/* Parses string with CPUs mask.  */
+/* Parses string with CPUs mask and return the number of CPUs present. */
 
 static int
 cpumask_parse (const char *str, cpu_set_t *set, size_t setsize)
@@ -108,6 +108,9 @@ cpumask_parse (const char *str, cpu_set_t *set, size_t setsize)
   int len = strlen (str);
   const char *ptr = str + len - 1;
   int cpu = 0;
+
+  if (!str)
+    return -1;
 
   /* skip 0x, it's all hex anyway */
   if (len > 1 && !memcmp (str, "0x", 2L))
@@ -139,43 +142,59 @@ cpumask_parse (const char *str, cpu_set_t *set, size_t setsize)
       cpu += 4;
     }
 
-  return 0;
+  return CPU_COUNT_S (setsize, set);
 }
 
 /* Get the number of threads within one core */
 
-unsigned int
-get_cputopology_nthreads ()
+void
+get_cputopology_read (unsigned int *nsockets, unsigned int *ncores,
+		      unsigned int *nthreads)
 {
-  char *thread_siblings;
   cpu_set_t *set;
-  size_t cpu, setsize = 0,
-	 maxcpus = get_processor_number_kernel_max ();
-  int rc;
-  unsigned int nthreads = 0, curr;
+  size_t cpu, maxcpus, setsize = 0;
+
+  *nsockets = *ncores = *nthreads = 1;
+  maxcpus = get_processor_number_kernel_max ();
 
   if (!(set = CPU_ALLOC (maxcpus)))
-    return 0;
+    return;
   setsize = CPU_ALLOC_SIZE (maxcpus);
 
   for (cpu = 0; cpu < maxcpus; cpu++)
     {
-      /* thread_siblings. internal kernel map of cpu#'s hardware threads
+      /* thread_siblings: internal kernel map of cpu#'s hardware threads
        * within the same core as cpu#   */
-      thread_siblings =
+      char *thread_siblings =
 	sysfsparser_getline (PATH_SYS_CPU
 			     "/cpu%u/topology/thread_siblings", cpu);
       if (!thread_siblings)
         continue;
-      if ((rc = cpumask_parse (thread_siblings, set, setsize)))
-	continue;
 
-      curr = CPU_COUNT_S (setsize, set);
-      if (nthreads < curr)	/* not sure this makes sense.. */
-	nthreads = curr;	/* 'curr' should be the same on each cpu# */
+      /* threads within one core */
+      *nthreads = cpumask_parse (thread_siblings, set, setsize);
+      if (*nthreads <= 0)
+	*nthreads = 1;
+
+      /* core_siblings: internal kernel map of cpu#'s hardware threads
+       * within the same physical_package_id.  */
+      char *core_siblings =
+	sysfsparser_getline (PATH_SYS_CPU
+			     "/cpu%d/topology/core_siblings", cpu);
+      /* cores within one socket */
+      *ncores = cpumask_parse (core_siblings, set, setsize) / *nthreads;
+      if (*ncores <= 0)
+	*ncores = 1;
+
+      int ncpus = get_processor_number_online ();
+
+      *nsockets = ncpus / *nthreads / *ncores;
+      if (!*nsockets)
+	*nsockets = 1;
+
+      free (core_siblings);
       free (thread_siblings);
     }
 
   CPU_FREE (set);
-  return nthreads;
 }

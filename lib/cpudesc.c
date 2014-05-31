@@ -75,7 +75,6 @@ struct cpu_desc
   int mode;
   int ncpus;		/* number of present CPUs */
   int ncpuspos;		/* maximal possible CPUs */
-  int nthreads;		/* number of thread(s)  */
 };
 
 /* Allocates space for a new cpu_desc object.
@@ -119,7 +118,6 @@ cpu_desc_read (struct cpu_desc *cpudesc)
 
   cpudesc->ncpus = get_processor_number_total ();
   cpudesc->ncpuspos = get_processor_number_kernel_max ();
-  cpudesc->nthreads = get_cputopology_nthreads ();
 
   cpudesc->mode = 0;
 #if defined(__alpha__) || defined(__ia64__)
@@ -260,10 +258,3 @@ cpu_desc_get_ncpuspos (struct cpu_desc *cpudesc)
 {
   return cpudesc->ncpuspos;
 }
-
-int
-cpu_desc_get_nthreads (struct cpu_desc *cpudesc)
-{
-  return cpudesc->nthreads;
-}
-
