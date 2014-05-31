@@ -194,6 +194,6 @@ main (int argc, char **argv)
   status = get_status (ctxt, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - number of context switches %Lu | cpu_ctxt=%Lu\n",
+  printf ("%s %s - number of context switches %Lu | cswch/s=%Lu\n",
 	  program_name_short, state_text (status), ctxt, ctxt);
 }
