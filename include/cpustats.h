@@ -40,7 +40,8 @@ extern "C"
  *            under the control of the Linux kernel. (since Linux 2.6.24)
  * cguestn   Time spent running a niced guest (virtual CPU for guest
  *            operating systems under the control of the Linux kernel).
- *            (since Linux 2.6.33)	*/
+ *            (since Linux 2.6.33)
+ * ctxt      The number of context switches that the system underwent 	  */
 
   struct cpu_stats
   {
@@ -54,6 +55,7 @@ extern "C"
     jiff steal;
     jiff guest;
     jiff guestn;
+    jiff ctxt;
   };
 
   /* Fill the cpu_stats structure pointed with the values found in the 

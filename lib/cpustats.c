@@ -34,7 +34,6 @@
 static char buff[BUFFSIZE];
 
 #define PATH_PROC_STAT		"/proc/stat"
-#define PATH_PROC_CPUINFO	"/proc/cpuinfo"
 
 /* Fill the proc_cpu structure pointed with the values found in the 
  * proc filesystem */
@@ -62,14 +61,24 @@ cpu_stats_read (struct cpu_stats *cpustats)
   cpustats->steal = 0;	/* not separated out until the 2.6.11 */
   cpustats->guest = 0;	/* since Linux 2.6.24 */
   cpustats->guestn = 0;	/* since Linux 2.6.33 */
+  cpustats->ctxt = 0;
 
-  b = strstr (buff, "cpu ");
-  if (b)
+  if ((b = strstr (buff, "cpu ")))
     sscanf (b, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
 	    &cpustats->user, &cpustats->nice, &cpustats->system,
 	    &cpustats->idle, &cpustats->iowait, &cpustats->irq,
 	    &cpustats->softirq, &cpustats->steal, &cpustats->guest,
 	    &cpustats->guestn);
   else
-    plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PATH_PROC_STAT);
+    goto readerr;
+
+  if ((b = strstr (buff, "ctxt ")))
+    sscanf (b, "ctxt %Lu", &cpustats->ctxt);
+  else
+    goto readerr;
+
+  return;
+
+readerr:
+  plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PATH_PROC_STAT);
 }
