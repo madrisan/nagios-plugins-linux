@@ -7,27 +7,27 @@ Nagios is an open source computer system monitoring, network monitoring and infr
 
 Here is the list of the available plugins:
 
-* check_clock
-* check_cpu
-* check_ifmountfs
-* check_iowait
-* check_load
-* check_memory
-* check_multipath
-* check_nbprocs
-* check_network
-* check_paging
-* check_readonlyfs
-* check_swap
-* check_tcpcount
-* check_temperature
-* check_uptime
-* check_users
+* check_clock - returns the number of seconds elapsed between local time and Nagios server time 
+* check_cpu - checks the CPU (user mode) utilization 
+* check_ifmountfs - checks whether the given filesystems are mounted 
+* check_iowait - monitors the I/O wait bottlenecks 
+* check_load - checks the current system load average 
+* check_memory - checks the memory usage 
+* check_multipath - checks the multipath topology status 
+* check_nbprocs - displays the number of running processes per user 
+* check_network - displays some network interfaces statistics 
+* check_paging - checks the memory and swap paging 
+* check_readonlyfs - checks for readonly filesystems 
+* check_swap - checks the swap usage 
+* check_tcpcount - checks the tcp network usage 
+* check_temperature - monitors the hardware's temperature 
+* check_uptime - checks how long the system has been running 
+* check_users - displays the number of users that are currently logged on 
 
 
 ## Full documentation
 
-A full documentation of the `nagios-plugins-linux` is available at
+The full documentation of the `nagios-plugins-linux` is available at
 https://sites.google.com/site/davidemadrisan/nagios-monitoring/linux-os
 
 
