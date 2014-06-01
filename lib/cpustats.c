@@ -30,7 +30,8 @@
 #include "cpustats.h"
 #include "messages.h"
 
-#define BUFFSIZE 0x1000
+/* note! This buffer may not be big enough if lots of CPUs are online */
+#define BUFFSIZE 0x1000		/* 4kB */
 static char buff[BUFFSIZE];
 
 #define PATH_PROC_STAT		"/proc/stat"
