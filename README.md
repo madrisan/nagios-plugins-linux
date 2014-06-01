@@ -7,22 +7,22 @@ Nagios is an open source computer system monitoring, network monitoring and infr
 
 Here is the list of the available plugins:
 
-* check_clock - returns the number of seconds elapsed between local time and Nagios server time 
-* check_cpu - checks the CPU (user mode) utilization 
-* check_ifmountfs - checks whether the given filesystems are mounted 
-* check_iowait - monitors the I/O wait bottlenecks 
-* check_load - checks the current system load average 
-* check_memory - checks the memory usage 
-* check_multipath - checks the multipath topology status 
-* check_nbprocs - displays the number of running processes per user 
-* check_network - displays some network interfaces statistics 
-* check_paging - checks the memory and swap paging 
-* check_readonlyfs - checks for readonly filesystems 
-* check_swap - checks the swap usage 
-* check_tcpcount - checks the tcp network usage 
-* check_temperature - monitors the hardware's temperature 
-* check_uptime - checks how long the system has been running 
-* check_users - displays the number of users that are currently logged on 
+* **check_clock** - returns the number of seconds elapsed between local time and Nagios server time 
+* **check_cpu** - checks the CPU (user mode) utilization 
+* **check_ifmountfs** - checks whether the given filesystems are mounted 
+* **check_iowait** - monitors the I/O wait bottlenecks 
+* **check_load** - checks the current system load average 
+* **check_memory** - checks the memory usage 
+* **check_multipath** - checks the multipath topology status 
+* **check_nbprocs** - displays the number of running processes per user 
+* **check_network** - displays some network interfaces statistics 
+* **check_paging** - checks the memory and swap paging 
+* **check_readonlyfs** - checks for readonly filesystems 
+* **check_swap** - checks the swap usage 
+* **check_tcpcount** - checks the tcp network usage 
+* **check_temperature** - monitors the hardware's temperature 
+* **check_uptime** - checks how long the system has been running 
+* **check_users** - displays the number of users that are currently logged on 
 
 
 ## Full documentation
