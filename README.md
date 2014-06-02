@@ -3,12 +3,13 @@
 ## About
 
 This package contains several `nagios plugins` for monitoring Linux boxes.
-Nagios is an open source computer system monitoring, network monitoring and infrastructure monitoring software application.
+Nagios is an open source computer system monitoring, network monitoring and infrastructure monitoring software application (see: http://www.nagios.org/).
 
 Here is the list of the available plugins:
 
 * **check_clock** - returns the number of seconds elapsed between local time and Nagios server time 
 * **check_cpu** - checks the CPU (user mode) utilization 
+* **check_cswch** - checks the total number of context switches across all CPUs
 * **check_ifmountfs** - checks whether the given filesystems are mounted 
 * **check_iowait** - monitors the I/O wait bottlenecks 
 * **check_load** - checks the current system load average 
@@ -88,6 +89,27 @@ This Nagios plugin checks the CPU (user mode) utilization.
 	# count = 1 means the percentages of total CPU time from boottime
 	check_cpu -w 85% -c 95% 1 1
 	cpu OK - cpu user 34% | cpu_user=34%, cpu_system=11%, cpu_idle=49%, cpu_iowait=7%, cpu_steal=0%
+
+
+**The check_cswch plugin**
+
+This Nagios plugin checks the total number of context switches across all CPUs.
+
+*Usage*
+
+	check_cswch [-v] [-w COUNTER] -c [COUNTER] [delay [count]]
+	check_cswch --help
+
+*Where*
+
+* -w, --warning COUNTER: warning threshold
+* -c, --critical COUNTER: critical threshold
+* -v, --verbose: show details for command-line debugging (Nagios may truncate output)
+
+
+*Examples*
+
+	check_cswch 1 2
 
 
 **The check_ifmountfs plugin**
@@ -415,7 +437,8 @@ Where
 
 ## Source code
 
-The source code can be also found at https://sites.google.com/site/davidemadrisan/opensource
+The source code can be also found at
+[this page](https://sites.google.com/site/davidemadrisan/opensource)
 
 
 ## Installation
@@ -451,4 +474,4 @@ This package is known to compile with
 ## Bugs
 
 If you find a bug please create an issue in the project bug tracker at
-https://github.com/madrisan/nagios-plugins-linux/issues
+[github](https://github.com/madrisan/nagios-plugins-linux/issues)

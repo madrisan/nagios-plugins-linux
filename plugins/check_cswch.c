@@ -58,7 +58,7 @@ usage (FILE * out)
 	 "across all CPUs.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-w COUNTER] -c [COUNTER] [delay [count]]\n",
+  fprintf (out, "  %s [-v] [-w COUNTER] -c [COUNTER] [delay [count]]\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
