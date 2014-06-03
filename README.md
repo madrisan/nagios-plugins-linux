@@ -28,8 +28,14 @@ Here is the list of the available plugins:
 
 ## Full documentation
 
-The full documentation of the `nagios-plugins-linux` is available at
-https://sites.google.com/site/davidemadrisan/nagios-monitoring/linux-os
+The full documentation of the `nagios-plugins-linux` is available online
+[here](https://sites.google.com/site/davidemadrisan/nagios-monitoring/linux-os).
+
+
+## Source code
+
+The source code of the latest stable version can be found in
+[this page](https://sites.google.com/site/davidemadrisan/nagios-monitoring/linux-os).
 
 
 ## The plugins in detail 
@@ -433,12 +439,6 @@ Where
 *Examples*
 
 	check_users -w 1
-
-
-## Source code
-
-The source code can be also found at
-[this page](https://sites.google.com/site/davidemadrisan/opensource)
 
 
 ## Installation
