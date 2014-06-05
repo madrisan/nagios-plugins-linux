@@ -2,8 +2,8 @@
  * License: GPLv3+
  * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A Nagios plugin that monitors the total number of context switches
- * per second across all CPUs.
+ * A Nagios plugin that monitors the interrupts serviced per second,
+ * including unnumbered architecture specific interrupts.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
+/* Note:  High number of interrupts per second indicates a problem with
+ * hardware. It could indicate a software bug in the case of software
+ * interrupts.	*/
 
 #include <errno.h>
 #include <getopt.h>
@@ -54,8 +58,7 @@ static _Noreturn void
 usage (FILE * out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
-  fputs ("This plugin monitors the total number of context switches "
-	 "across all CPUs.\n", out);
+  fputs ("This plugin monitors the total number of interrupts.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [-v] [-w COUNTER] -c [COUNTER] [delay [count]]\n",
@@ -72,7 +75,7 @@ usage (FILE * out)
   fprintf (out, "  count is the number of updates "
 	   "(default: %d)\n", COUNT_DEFAULT);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s 1 2\n", program_name);
+  fprintf (out, "  %s -w 10000 1 2\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -90,7 +93,7 @@ print_version (void)
 /*
  * same as strtol(3) but exit on failure instead of returning crap
  */
-long
+static long
 strtol_or_err (const char *str, const char *errmesg)
 {
   long num;
@@ -169,9 +172,9 @@ main (int argc, char **argv)
     usage (stderr);
 
   cpu_stats_read (&cpu[0]);
-  unsigned long long nctxt = cpu[0].nctxt;
+  unsigned long long nintr = cpu[0].nintr;
   if (verbose)
-    printf ("ctxt = %Lu\n", nctxt);
+    printf ("inr = %Lu\n", nintr);
 
   for (i = 1; i < count; i++)
     {
@@ -180,15 +183,15 @@ main (int argc, char **argv)
       tog = !tog;
       cpu_stats_read (&cpu[tog]);
 
-      nctxt = cpu[tog].nctxt - cpu[!tog].nctxt;
+      nintr = cpu[tog].nintr - cpu[!tog].nintr;
 
       if (verbose)
-	printf ("ctxt = %Lu -delta-> %Lu\n", cpu[tog].nctxt, nctxt);
+	printf ("intr = %Lu -delta-> %Lu\n", cpu[tog].nintr, nintr);
     }
 
-  status = get_status (nctxt, my_threshold);
+  status = get_status (nintr, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - number of context switches %Lu | cswch/s=%Lu\n",
-	  program_name_short, state_text (status), nctxt, nctxt);
+  printf ("%s %s - number of interrupts %Lu | intr/s=%Lu\n",
+	  program_name_short, state_text (status), nintr, nintr);
 }

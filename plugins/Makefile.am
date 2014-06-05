@@ -10,6 +10,7 @@ libexec_PROGRAMS =        \
 	check_cpu         \
 	check_cswch       \
 	check_ifmountfs   \
+	check_intr        \
 	check_memory      \
 	check_multipath   \
 	check_nbprocs     \
@@ -29,6 +30,7 @@ check_clock_SOURCES      = check_clock.c
 check_cpu_SOURCES        = check_cpu.c
 check_cswch_SOURCES      = check_cswch.c
 check_ifmountfs_SOURCES  = check_ifmountfs.c
+check_intr_SOURCES       = check_intr.c
 if HAVE_GETLOADAVG
 check_load_SOURCES       = check_load.c
 endif
@@ -50,6 +52,7 @@ check_clock_LDADD        = $(LDADD)
 check_cpu_LDADD          = $(LDADD)
 check_cswch_LDADD        = $(LDADD)
 check_ifmountfs_LDADD    = $(LDADD)
+check_intr_LDADD         = $(LDADD)
 if HAVE_GETLOADAVG
 check_load_LDADD         = $(LDADD)
 endif

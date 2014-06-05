@@ -62,7 +62,10 @@ cpu_stats_read (struct cpu_stats *cpustats)
   cpustats->steal = 0;	/* not separated out until the 2.6.11 */
   cpustats->guest = 0;	/* since Linux 2.6.24 */
   cpustats->guestn = 0;	/* since Linux 2.6.33 */
-  cpustats->ctxt = 0;
+
+  cpustats->nctxt = 0;
+  cpustats->nintr = 0;
+  cpustats->nsoftirq = 0;
 
   if ((b = strstr (buff, "cpu ")))
     sscanf (b, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
@@ -74,7 +77,17 @@ cpu_stats_read (struct cpu_stats *cpustats)
     goto readerr;
 
   if ((b = strstr (buff, "ctxt ")))
-    sscanf (b, "ctxt %Lu", &cpustats->ctxt);
+    sscanf (b, "ctxt %Lu", &cpustats->nctxt);
+  else
+    goto readerr;
+
+  if ((b = strstr (buff, "intr ")))
+    sscanf (b, "intr %Lu ", &cpustats->nintr);
+  else
+    goto readerr;
+
+  if ((b = strstr (buff, "softirq ")))
+    sscanf (b, "softintr %Lu ", &cpustats->nsoftirq);
   else
     goto readerr;
 
