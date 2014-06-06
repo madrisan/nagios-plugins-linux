@@ -90,7 +90,7 @@ print_version (void)
 /*
  * same as strtol(3) but exit on failure instead of returning crap
  */
-long
+static long
 strtol_or_err (const char *str, const char *errmesg)
 {
   long num;
