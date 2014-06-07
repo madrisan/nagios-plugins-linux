@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include "logging.h"
 #include "messages.h"
 #include "meminfo.h"
 #include "procparser.h"
@@ -29,6 +30,16 @@
 
 typedef struct proc_sysmem_data
 {
+  /* 3.14+
+   * MemAvailable provides an estimate of how much memory is available for
+   * starting new applications, without swapping.
+   * However, unlike the data provided by the Cache or Free fields,
+   * MemAvailable takes into account page cache and also that not all
+   * reclaimable memory slabs will be reclaimable due to items being in
+   * use.  See:
+   * https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773
+   */
+  unsigned long kb_main_available;
   /* old but still kicking -- the important stuff */
   unsigned long kb_main_buffers;
   unsigned long kb_main_cached;
@@ -131,6 +142,7 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
     { "LowFree", &data->kb_low_free },
     { "LowTotal", &data->kb_low_total },
     { "Mapped", &data->kb_mapped },        /* kB version of vmstat nr_mapped */
+    { "MemAvailable", &data->kb_main_available },  /* kernel 3.14 and later */
     { "MemFree", &data->kb_main_free },	    /* important */
     { "MemTotal", &data->kb_main_total },    /* important */
     { "NFS_Unstable", &data->kb_nfs_unstable },
@@ -150,8 +162,13 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
   };
   const int sysmem_table_count = sizeof (sysmem_table) / sizeof (proc_table_struct);
 
-  data->kb_inactive = ~0UL;
+  data->kb_main_available = MEMINFO_UNSET;
+  data->kb_inactive = MEMINFO_UNSET;
+
   procparser (PROC_MEMINFO, sysmem_table, sysmem_table_count, ':');
+
+  if (data->kb_main_available == MEMINFO_UNSET)
+    dbg ("MemAvailable is not provided by /proc/meminfo\n");
 
   if (!data->kb_low_total)
     {				/* low==main except with large-memory support */
@@ -159,7 +176,7 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
       data->kb_low_free = data->kb_main_free;
     }
 
-  if (data->kb_inactive == ~0UL)
+  if (data->kb_inactive == MEMINFO_UNSET)
     {
       data->kb_inactive =
 	data->kb_inact_dirty + data->kb_inact_clean +
@@ -210,6 +227,7 @@ proc_sysmem_get(dirty)
  * worst case if it runs out of swap space then begin killing processes.  */
 proc_sysmem_get(inactive)
 
+proc_sysmem_get(main_available)
 proc_sysmem_get(main_buffers)
 proc_sysmem_get(main_cached)
 proc_sysmem_get(main_free)

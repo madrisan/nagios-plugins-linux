@@ -102,6 +102,7 @@ main (int argc, char **argv)
   thresholds *my_threshold = NULL;
 
   struct proc_sysmem *sysmem = NULL;
+  unsigned long kb_mem_main_available;
   unsigned long kb_mem_main_buffers;
   unsigned long kb_mem_main_cached;
   unsigned long kb_mem_main_free;
@@ -172,6 +173,7 @@ main (int argc, char **argv)
   kb_mem_committed_as = proc_sysmem_get_committed_as (sysmem);
   kb_mem_dirty        = proc_sysmem_get_dirty (sysmem);
   kb_mem_inactive     = proc_sysmem_get_inactive (sysmem);
+  kb_mem_main_available = proc_sysmem_get_main_available (sysmem);
   kb_mem_main_buffers = proc_sysmem_get_main_buffers (sysmem);
   kb_mem_main_cached  = proc_sysmem_get_main_cached (sysmem);
   kb_mem_main_free    = proc_sysmem_get_main_free (sysmem);

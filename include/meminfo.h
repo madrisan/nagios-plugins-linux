@@ -28,6 +28,8 @@ extern "C"
     b_shift = 0, k_shift = 10, m_shift = 20, g_shift = 30
   };
 
+#define MEMINFO_UNSET ~0UL
+
 #define SU(X) ( ((unsigned long long)(X) << k_shift) >> shift ), units
 
   struct proc_sysmem;
@@ -52,6 +54,7 @@ extern "C"
   unsigned long proc_sysmem_get_dirty (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_inactive (struct proc_sysmem *sysmem);
 
+  unsigned long proc_sysmem_get_main_available (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_main_buffers (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_main_cached (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_main_free (struct proc_sysmem *sysmem);
