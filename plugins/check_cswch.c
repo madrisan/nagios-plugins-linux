@@ -180,10 +180,10 @@ main (int argc, char **argv)
       tog = !tog;
       cpu_stats_read (&cpu[tog]);
 
-      nctxt = cpu[tog].nctxt - cpu[!tog].nctxt;
+      nctxt = (cpu[tog].nctxt - cpu[!tog].nctxt) / sleep_time;
 
       if (verbose)
-	printf ("ctxt = %Lu -delta-> %Lu\n", cpu[tog].nctxt, nctxt);
+	printf ("ctxt = %Lu --> %Lu/s\n", cpu[tog].nctxt, nctxt);
     }
 
   status = get_status (nctxt, my_threshold);
