@@ -183,10 +183,10 @@ main (int argc, char **argv)
       tog = !tog;
       cpu_stats_read (&cpu[tog]);
 
-      nintr = cpu[tog].nintr - cpu[!tog].nintr;
+      nintr = (cpu[tog].nintr - cpu[!tog].nintr) / sleep_time;
 
       if (verbose)
-	printf ("intr = %Lu -delta-> %Lu\n", cpu[tog].nintr, nintr);
+	printf ("intr = %Lu --> %Lu/s\n", cpu[tog].nintr, nintr);
     }
 
   status = get_status (nintr, my_threshold);
