@@ -174,7 +174,7 @@ main (int argc, char **argv)
   cpu_stats_read (&cpu[0]);
   unsigned long long nintr = cpu[0].nintr;
   if (verbose)
-    printf ("inr = %Lu\n", nintr);
+    printf ("intr = %Lu\n", nintr);
 
   for (i = 1; i < count; i++)
     {
