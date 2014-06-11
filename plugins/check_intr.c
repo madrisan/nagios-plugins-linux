@@ -58,7 +58,7 @@ static _Noreturn void
 usage (FILE * out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
-  fputs ("This plugin monitors the total number of interrupts.\n", out);
+  fputs ("This plugin monitors the total number of system interrupts.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [-v] [-w COUNTER] -c [COUNTER] [delay [count]]\n",

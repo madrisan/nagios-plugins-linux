@@ -10,7 +10,8 @@ Here is the list of the available plugins:
 * **check_clock** - returns the number of seconds elapsed between local time and Nagios server time 
 * **check_cpu** - checks the CPU (user mode) utilization 
 * **check_cswch** - checks the total number of context switches across all CPUs
-* **check_ifmountfs** - checks whether the given filesystems are mounted 
+* **check_ifmountfs** - checks whether the given filesystems are mounted
+* **check_intr** - monitors the total number of system interrupts
 * **check_iowait** - monitors the I/O wait bottlenecks 
 * **check_load** - checks the current system load average 
 * **check_memory** - checks the memory usage 
@@ -112,7 +113,6 @@ This Nagios plugin checks the total number of context switches across all CPUs.
 * -c, --critical COUNTER: critical threshold
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
 
-
 *Examples*
 
 	check_cswch 1 2
@@ -130,6 +130,26 @@ This Nagios plugin checks whether the given filesystems are mounted.
 *Examples*
 
 	check_ifmountfs /mnt/nfs-data /mnt/cdrom
+
+
+**The check_intr plugin**
+
+This Nagios plugin monitors the total number of system interrupts.
+
+*Usage*
+
+	check_intr [-v] [-w COUNTER] -c [COUNTER] [delay [count]]
+	check_intr --help
+
+*Where*
+
+* -w, --warning COUNTER: warning threshold
+* -c, --critical COUNTER: critical threshold
+* -v, --verbose: show details for command-line debugging (Nagios may truncate output)
+
+*Examples*
+
+	check_intr 1 2
 
 
 **The check_iowait plugin**
