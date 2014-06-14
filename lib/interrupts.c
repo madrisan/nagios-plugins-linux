@@ -40,7 +40,7 @@ proc_interrupts_get_nintr_per_cpu (unsigned int *ncpus)
   size_t len = 0;
   ssize_t chread;
   bool header = true;
-  int cpu;
+  unsigned int cpu;
 
   if ((fp = fopen (PROC_INTR, "r")) == NULL)
     return NULL;
