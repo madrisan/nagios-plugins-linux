@@ -33,6 +33,7 @@
 
 #include "common.h"
 #include "cpustats.h"
+#include "interrupts.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
@@ -122,8 +123,9 @@ main (int argc, char **argv)
 
   struct cpu_stats cpu[2];
   unsigned int sleep_time = 1,
-	   tog = 0;		/* toggle switch for cleaner code */
-  unsigned long i, delay, count;
+	   tog = 0,		/* toggle switch for cleaner code */
+	   ncpus;
+  unsigned long i, delay, count, *vintr;
 
   set_program_name (argv[0]);
 
@@ -176,6 +178,8 @@ main (int argc, char **argv)
   if (verbose)
     printf ("intr = %Lu\n", nintr);
 
+  vintr = proc_interrupts_get_nintr_per_cpu (&ncpus);
+
   for (i = 1; i < count; i++)
     {
       sleep (sleep_time);
@@ -184,7 +188,6 @@ main (int argc, char **argv)
       cpu_stats_read (&cpu[tog]);
 
       nintr = (cpu[tog].nintr - cpu[!tog].nintr) / sleep_time;
-
       if (verbose)
 	printf ("intr = %Lu --> %Lu/s\n", cpu[tog].nintr, nintr);
     }
@@ -192,6 +195,12 @@ main (int argc, char **argv)
   status = get_status (nintr, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - number of interrupts %Lu | intr/s=%Lu\n",
+  printf ("%s %s - number of interrupts/sec %Lu | intr/s=%Lu",
 	  program_name_short, state_text (status), nintr, nintr);
+  /* FIXME: we have to display the values/s not from boot time */
+  for (i = 0; i < ncpus; i++)
+    printf (" intr_cpu%lu=%lu", i, vintr[i]);
+  printf ("\n");
+
+  free (vintr);
 }
