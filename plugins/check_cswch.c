@@ -189,6 +189,8 @@ main (int argc, char **argv)
   status = get_status (nctxt, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - number of context switches %Lu | cswch/s=%Lu\n",
-	  program_name_short, state_text (status), nctxt, nctxt);
+  char *time_unit = (count > 1) ? "/s" : "";
+  printf ("%s %s - number of context switches%s %Lu | cswch%s=%Lu\n",
+	  program_name_short, state_text (status),
+	  time_unit, nctxt, time_unit, nctxt);
 }

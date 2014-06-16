@@ -195,8 +195,11 @@ main (int argc, char **argv)
   status = get_status (nintr, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - number of interrupts/sec %Lu | intr/s=%Lu",
-	  program_name_short, state_text (status), nintr, nintr);
+  char *time_unit = (count > 1) ? "/s" : "";
+  printf ("%s %s - number of interrupts%s %Lu | intr%s=%Lu",
+	  program_name_short, state_text (status),
+	  time_unit, nintr, time_unit, nintr);
+
   /* FIXME: we have to display the values/s not from boot time */
   for (i = 0; i < ncpus; i++)
     printf (" intr_cpu%lu=%lu", i, vintr[i]);
