@@ -17,7 +17,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 /* Note:  High number of interrupts per second indicates a problem with
@@ -34,6 +33,7 @@
 #include "common.h"
 #include "cpustats.h"
 #include "interrupts.h"
+#include "logging.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
@@ -125,7 +125,8 @@ main (int argc, char **argv)
   unsigned int sleep_time = 1,
 	   tog = 0,		/* toggle switch for cleaner code */
 	   ncpus;
-  unsigned long i, delay, count, *vintr;
+  unsigned long i, delay, count,
+	   *vintr[2] = { NULL, NULL };
 
   set_program_name (argv[0]);
 
@@ -178,7 +179,7 @@ main (int argc, char **argv)
   if (verbose)
     printf ("intr = %Lu\n", nintr);
 
-  vintr = proc_interrupts_get_nintr_per_cpu (&ncpus);
+  vintr[0] = proc_interrupts_get_nintr_per_cpu (&ncpus);
 
   for (i = 1; i < count; i++)
     {
@@ -190,20 +191,30 @@ main (int argc, char **argv)
       nintr = (cpu[tog].nintr - cpu[!tog].nintr) / sleep_time;
       if (verbose)
 	printf ("intr = %Lu --> %Lu/s\n", cpu[tog].nintr, nintr);
+
+      if (i + 1 == count)
+	vintr[1] = proc_interrupts_get_nintr_per_cpu (&ncpus);
     }
 
   status = get_status (nintr, my_threshold);
   free (my_threshold);
+
+  unsigned long total_delay =
+		  (count > 1) ? count * sleep_time : sleep_time;
+  dbg ("total_delay = %lu\n", total_delay);
 
   char *time_unit = (count > 1) ? "/s" : "";
   printf ("%s %s - number of interrupts%s %Lu | intr%s=%Lu",
 	  program_name_short, state_text (status),
 	  time_unit, nintr, time_unit, nintr);
 
-  /* FIXME: we have to display the values/s not from boot time */
+  /* FIXME: the two vectors 'vintr' can have a different 'ncpus' */
   for (i = 0; i < ncpus; i++)
-    printf (" intr_cpu%lu=%lu", i, vintr[i]);
+    printf (" intr_cpu%lu%s=%lu", i, time_unit,
+	    (count >
+	     1) ? (vintr[1][i] - vintr[0][i]) / total_delay : vintr[0][i]);
   printf ("\n");
 
-  free (vintr);
+  free (vintr[1]);
+  free (vintr[0]);
 }

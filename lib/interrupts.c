@@ -30,8 +30,10 @@
 #define PROC_ROOT	"/proc"
 #define PROC_INTR	PROC_ROOT "/interrupts"
 
-/* Return an array containing the total number of interrupts per cpu */
-
+/* Return an array containing the number of interrupts per cpu per IO device.
+ * Since Linux 2.6.24, for the i386 and x86_64 architectures at least,
+ * /proc/interrupts also includes interrupts internal to the system (that is,
+ * not associated with a device as such).  */
 unsigned long *
 proc_interrupts_get_nintr_per_cpu (unsigned int *ncpus)
 {

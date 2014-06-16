@@ -81,6 +81,9 @@ cpu_stats_read (struct cpu_stats *cpustats)
   else
     goto readerr;
 
+  /* Get the number of interrupts serviced since boot time, for each of the
+   * possible system interrupts, including unnumbered architecture specific
+   * interrupts  */
   if ((b = strstr (buff, "intr ")))
     sscanf (b, "intr %Lu ", &cpustats->nintr);
   else
