@@ -24,7 +24,6 @@ extern "C"
 #endif
 
   /* Return an array containing the number of interrupts per cpu per IO device
-   * records the number of interrupts per CPU per IO device.
    * Since Linux 2.6.24, for the i386 and x86_64 architectures, at least, this
    * also includes interrupts internal to the system (that is, not associated
    * with a device as such).  */
