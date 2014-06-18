@@ -1,15 +1,26 @@
+    Major changes between "nagios-plugins-linux" versions 11 and 12
+
+* New plugin 'check_intr'.
+* meminfo library: get 'MemAvailable' value from /proc/meminfo
+  (kernel 3.14+) for a future usage.
+* check_cswch: fix the unit displayed in the output message when
+  'count' is 1.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 10 and 11
 
-* check_cpu - better output of '--cpuinfo' when a hot pluggable cpu
+* New plugin 'check_cswch'.
+* check_cpu: better output of '--cpuinfo' when a hot pluggable cpu
   is offline.
 
 ======================================================================
 
     Major changes between "nagios-plugins-linux" versions 9 and 10
 
-* check_temperature - modify the syntaxx of the switch command
-* check_temperature - add the sensor type to the output message.
-* check_temperature - the code has been reworked and most of the code
+* check_temperature: modify the syntax of the switch command
+* check_temperature: add the sensor type to the output message.
+* check_temperature. the code has been reworked and most of the code
   moved to the sysfsparser library.
 
 ======================================================================
