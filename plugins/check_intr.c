@@ -33,7 +33,6 @@
 #include "common.h"
 #include "cpustats.h"
 #include "interrupts.h"
-#include "logging.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
@@ -42,6 +41,11 @@
 /* by default one iteration with 1sec delay */
 #define DELAY_DEFAULT	1
 #define COUNT_DEFAULT	2
+
+#define MIN(a,b) \
+  ({ __typeof__ (a) _a = (a); \
+     __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
 
 static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
@@ -124,7 +128,7 @@ main (int argc, char **argv)
   struct cpu_stats cpu[2];
   unsigned int sleep_time = 1,
 	   tog = 0,		/* toggle switch for cleaner code */
-	   ncpus;
+	   ncpus0, ncpus1;
   unsigned long i, delay, count,
 	   *vintr[2] = { NULL, NULL };
 
@@ -179,7 +183,8 @@ main (int argc, char **argv)
   if (verbose)
     printf ("intr = %Lu\n", nintr);
 
-  vintr[0] = proc_interrupts_get_nintr_per_cpu (&ncpus);
+  if (count <= 2)
+    vintr[0] = proc_interrupts_get_nintr_per_cpu (&ncpus0);
 
   for (i = 1; i < count; i++)
     {
@@ -192,27 +197,24 @@ main (int argc, char **argv)
       if (verbose)
 	printf ("intr = %Lu --> %Lu/s\n", cpu[tog].nintr, nintr);
 
-      if (i + 1 == count)
-	vintr[1] = proc_interrupts_get_nintr_per_cpu (&ncpus);
+      if (count - 2 == i)
+	vintr[0] = proc_interrupts_get_nintr_per_cpu (&ncpus0);
+      else if (count - 1 == i)
+	vintr[1] = proc_interrupts_get_nintr_per_cpu (&ncpus1);
     }
 
   status = get_status (nintr, my_threshold);
   free (my_threshold);
-
-  unsigned long total_delay =
-		  (count > 1) ? count * sleep_time : sleep_time;
-  dbg ("total_delay = %lu\n", total_delay);
 
   char *time_unit = (count > 1) ? "/s" : "";
   printf ("%s %s - number of interrupts%s %Lu | intr%s=%Lu",
 	  program_name_short, state_text (status),
 	  time_unit, nintr, time_unit, nintr);
 
-  /* FIXME: the two vectors 'vintr' can have a different 'ncpus' */
-  for (i = 0; i < ncpus; i++)
+  for (i = 0; i < MIN (ncpus0, ncpus1); i++)
     printf (" intr_cpu%lu%s=%lu", i, time_unit,
 	    (count >
-	     1) ? (vintr[1][i] - vintr[0][i]) / total_delay : vintr[0][i]);
+	     1) ? (vintr[1][i] - vintr[0][i]) / sleep_time : vintr[0][i]);
   printf ("\n");
 
   free (vintr[1]);
