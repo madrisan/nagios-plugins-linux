@@ -152,7 +152,9 @@ get_cputopology_read (unsigned int *nsockets, unsigned int *ncores,
 		      unsigned int *nthreads)
 {
   cpu_set_t *set;
-  size_t cpu, maxcpus, setsize = 0;
+  size_t cpu,	/* most 32 bit architectures use "unsigned int" size_t,
+		 * and all 64 bit architectures use "unsigned long" size_t */
+	 maxcpus, setsize = 0;
 
   *nsockets = *ncores = *nthreads = 1;
   maxcpus = get_processor_number_kernel_max ();
@@ -166,8 +168,8 @@ get_cputopology_read (unsigned int *nsockets, unsigned int *ncores,
       /* thread_siblings: internal kernel map of cpu#'s hardware threads
        * within the same core as cpu#   */
       char *thread_siblings =
-	sysfsparser_getline (PATH_SYS_CPU
-			     "/cpu%u/topology/thread_siblings", cpu);
+	sysfsparser_getline (PATH_SYS_CPU "/cpu%lu/topology/thread_siblings",
+			     (unsigned long)cpu);
       if (!thread_siblings)
         continue;
 
@@ -179,8 +181,8 @@ get_cputopology_read (unsigned int *nsockets, unsigned int *ncores,
       /* core_siblings: internal kernel map of cpu#'s hardware threads
        * within the same physical_package_id.  */
       char *core_siblings =
-	sysfsparser_getline (PATH_SYS_CPU
-			     "/cpu%d/topology/core_siblings", cpu);
+	sysfsparser_getline (PATH_SYS_CPU "/cpu%lu/topology/core_siblings",
+			     (unsigned long)cpu);
       /* cores within one socket */
       *ncores = cpumask_parse (core_siblings, set, setsize) / *nthreads;
       if (*ncores <= 0)
