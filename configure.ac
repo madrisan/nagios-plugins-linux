@@ -228,6 +228,7 @@ AC_PREFIX_DEFAULT(/usr/local/nagios)
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_PROTOTYPES
+AC_C_INLINE
 
 dnl cc_TRY_CFLAGS (CFLAGS, [ACTION-IF-WORKS], [ACTION-IF-FAILS])
 dnl ------------------------------------------------------------
