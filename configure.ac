@@ -223,16 +223,6 @@ AC_CHECK_TYPE(struct sockaddr_in6,
   [#include <sys/types.h>
    #include <netinet/in.h>])
 
-MULTIPATHD_SOCKET="/var/run/multipathd.sock"
-AC_ARG_WITH(
-  [socketfile],
-  [AS_HELP_STRING(
-    [--with-socketfile],
-    [use a different socket file
-     (default is /var/run/multipathd.sock)])],
-  [MULTIPATHD_SOCKET="$with_socketfile"])
-AC_SUBST(MULTIPATHD_SOCKET)
-
 AC_PREFIX_DEFAULT(/usr/local/nagios)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -273,12 +263,27 @@ cc_TRY_CFLAGS([-Wunused])
 
 AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
 
+dnl check the support for soft links
+AC_PROG_LN_S
+
+dnl extra option: '--enable-debug'
 AC_ARG_ENABLE([debug],
    AS_HELP_STRING([--enable-debug],
       [enable debug messages @<:@default=disabled@:>@]),
       [], [enable_debug=no])
 AS_IF([test "x$enable_debug" = "xyes"], [
    AC_DEFINE(ENABLE_DEBUG, [1], [Debug messages.])])
+
+dnl extra option: '--with-socketfile'
+MULTIPATHD_SOCKET="/var/run/multipathd.sock"
+AC_ARG_WITH(
+  [socketfile],
+  [AS_HELP_STRING(
+    [--with-socketfile],
+    [use a different socket file
+     (default is /var/run/multipathd.sock)])],
+  [MULTIPATHD_SOCKET="$with_socketfile"])
+AC_SUBST(MULTIPATHD_SOCKET)
 
 AC_CONFIG_FILES([\
   Makefile \

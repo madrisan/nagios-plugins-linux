@@ -3,6 +3,8 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-DMULTIPATHD_SOCKET=\"$(MULTIPATHD_SOCKET)\"
 
+LN_S=@LN_S@
+
 check_cpu_programs = check_iowait
 
 libexec_PROGRAMS =        \
@@ -72,7 +74,7 @@ all-local: $(check_cpu_programs)
 
 $(check_cpu_programs): check_cpu
 	rm -f $@
-	ln -s check_cpu $@
+	$(LN_S) -s check_cpu $@
 
 install-exec-hook:
 	cd $(DESTDIR)$(libexecdir) && \
