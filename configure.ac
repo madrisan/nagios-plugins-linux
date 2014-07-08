@@ -263,6 +263,11 @@ cc_TRY_CFLAGS([-Wunused])
 
 AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
 
+dnl check for some Linux types
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UID_T
+
 dnl check the support for soft links
 AC_PROG_LN_S
 
