@@ -153,7 +153,7 @@ AC_DEFINE_UNQUOTED(
 
 dnl Checks for header files
 AC_HEADER_STDC
-
+AC_CHECK_HEADER_STDBOOL
 AC_CHECK_HEADERS([ \
   netinet/in.h \
   sys/mount.h \

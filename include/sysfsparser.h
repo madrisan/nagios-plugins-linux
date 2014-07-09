@@ -19,7 +19,7 @@
 #define _SYSFSPARSER_H
 
 #include <limits.h>
-#include <stdbool.h>
+#include "system.h"
 
 #ifdef __cplusplus
 extern "C"

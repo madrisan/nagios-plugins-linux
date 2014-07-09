@@ -18,7 +18,6 @@
 
 #include <sys/resource.h>
 #include <sys/types.h>
-#include <stdbool.h>
 
 #define NBPROCS_NONE	0x00
 #define NBPROCS_VERBOSE	0x01

@@ -20,7 +20,6 @@
 
 #include <errno.h>
 #include <getopt.h>
-#include <stdbool.h>
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +32,7 @@
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
+#include "system.h"
 
 static bool verbose = false;
 static const char *multipathd_socket = MULTIPATHD_SOCKET;

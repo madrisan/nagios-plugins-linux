@@ -18,6 +18,8 @@
 #ifndef _CPUDESC_H
 #define _CPUDESC_H
 
+#include "system.h"
+
 #ifdef __cplusplus
 extern "C"
 {

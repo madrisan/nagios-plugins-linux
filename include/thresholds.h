@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdbool.h>
+#include "system.h"
 
 /* Return codes for _set_thresholds */
 #define NP_RANGE_UNPARSEABLE 1

@@ -29,7 +29,6 @@
 #include <errno.h>
 #include <getopt.h>
 #include <limits.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,6 +43,7 @@
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
+#include "system.h"
 #include "xalloc.h"
 #include "xasprintf.h"
 

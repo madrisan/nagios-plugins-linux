@@ -20,7 +20,6 @@
 #include <sys/utsname.h>
 #include <ctype.h>
 #include <errno.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,6 +29,7 @@
 #include "messages.h"
 #include "procparser.h"
 #include "sysfsparser.h"
+#include "system.h"
 #include "xalloc.h"
 
 #define PATH_PROC_CPUINFO	"/proc/cpuinfo"

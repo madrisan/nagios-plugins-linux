@@ -19,7 +19,6 @@
  */
 
 #include <getopt.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -28,6 +27,7 @@
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
+#include "system.h"
 #include "xasprintf.h"
 
 static const char *program_copyright =

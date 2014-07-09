@@ -19,7 +19,6 @@
 
 #include <sys/types.h>
 #include <errno.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,6 +29,7 @@
 
 #include "common.h"
 #include "messages.h"
+#include "system.h"
 
 #define PROC_TCPINFO  "/proc/net/tcp"
 #define PROC_TCP6INFO  "/proc/net/tcp6"

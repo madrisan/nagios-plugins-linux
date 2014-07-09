@@ -34,6 +34,7 @@ noinst_HEADERS = \
   progname.h    \
   progversion.h \
   sysfsparser.h \
+  system.h      \
   tcpinfo.h     \
   thresholds.h  \
   vminfo.h      \

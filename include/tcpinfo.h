@@ -16,8 +16,6 @@
 #ifndef _TCPINFO_H_
 #define _TCPINFO_H_
 
-#include <stdbool.h>
-
 #define TCP_UNSET   0
 #define TCP_VERBOSE 1
 #define TCP_v4      4

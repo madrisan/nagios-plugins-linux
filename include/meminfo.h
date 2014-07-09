@@ -16,8 +16,6 @@
 #ifndef _MEMINFO_H_
 #define _MEMINFO_H_
 
-#include <stdbool.h>
-
 #ifdef __cplusplus
 extern "C"
 {

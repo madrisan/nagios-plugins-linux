@@ -1,8 +1,8 @@
 #ifndef _MOUNTLIST_H
 #define _MOUNTLIST_H        1
 
-# include <stdbool.h>
-# include <sys/types.h>
+#include <sys/types.h>
+#include "system.h"
 
 /* A mount table entry. */
 struct mount_entry
