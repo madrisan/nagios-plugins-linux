@@ -155,15 +155,34 @@ dnl Checks for header files
 AC_HEADER_STDC
 AC_CHECK_HEADER_STDBOOL
 AC_CHECK_HEADERS([ \
+  arpa/inet.h \
+  fcntl.h \
+  limits.h \
+  mntent.h \
   netinet/in.h \
   sys/mount.h \
   sys/param.h \
+  sys/socket.h \
   sys/sysctl.h \
   sys/sysinfo.h \
+  sys/time.h \
   sys/swap.h \
-  mntent.h])
+  utmpx.h])
 
 AC_CHECK_FUNCS([asprintf])
+AC_CHECK_FUNCS([getmntent])  dnl wanted by: lib/mountlist.c
+AC_CHECK_FUNCS([regcomp])    dnl wanted by: plugins/check_multipath.c
+AC_CHECK_FUNCS([socket])     dnl wanted by: plugins/check_multipath.c
+AC_CHECK_FUNCS([strchr])     dnl wanted by: lib/interrupts.c
+AC_CHECK_FUNCS([strerror])   dnl wanted by: lib/thresholds.c
+AC_CHECK_FUNCS([strrchr])    dnl wanted by: lib/progname.c
+AC_CHECK_FUNCS([strstr])     dnl wanted by: lib/cpudesc.c
+AC_CHECK_FUNCS([strtol])     dnl wanted by: lib/processes.c
+AC_CHECK_FUNCS([strtoul])    dnl wanted by: lib/interrupts.c
+AC_CHECK_FUNCS([strtoull])   dnl wanted by: lib/procparser.c
+AC_CHECK_FUNCS([sysinfo])    dnl wanted by: plugins/check_uptime.c
+AC_CHECK_FUNCS([uname])      dnl wanted by: lib/cpudesc.c
+
 AC_FUNC_GETMNTENT
 
 AC_ARG_WITH(proc-meminfo,
