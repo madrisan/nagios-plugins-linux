@@ -184,6 +184,9 @@ AC_CHECK_FUNCS([sysinfo])    dnl wanted by: plugins/check_uptime.c
 AC_CHECK_FUNCS([uname])      dnl wanted by: lib/cpudesc.c
 
 AC_FUNC_GETMNTENT
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_FUNC_STRTOD
 
 AC_ARG_WITH(proc-meminfo,
   AS_HELP_STRING([--with-proc-meminfo=PATH],
