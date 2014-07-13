@@ -29,7 +29,7 @@ AC_CONFIG_HEADERS(config.h:config.hin)
 AC_CONFIG_LIBOBJ_DIR([lib])
 
 AM_MAINTAINER_MODE
-AM_SILENT_RULES([yes])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl Checks for programs
 #AC_USE_SYSTEM_EXTENSIONS(_GNU_SOURCE)
