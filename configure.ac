@@ -112,21 +112,22 @@ AC_CACHE_CHECK(
     [AC_COMPILE_IFELSE(
       [AC_LANG_PROGRAM([[]],[[
         void f(void *foo) __attribute__((__noreturn__));]])],
-      [cc_cv_attribute_noreturn="via __attribute__"],
+      [cc_cv_attribute_noreturn="using __attribute__"],
       [cc_cv_attribute_noreturn=no])
     ])
   ])
-AS_CASE([$cc_cv_attribute_noreturn],
-  [_Noreturn], [],
-  ["via __attribute__"],
-    [AC_DEFINE_UNQUOTED(
-      [_Noreturn], [__attribute__((__noreturn__))],
-      [Define this if the compiler supports the noreturn __attribute__])],
-  [no],
-    [AC_DEFINE_UNQUOTED([_Noreturn], [],
-      [Define this if the compiler does not supports any noreturn attribute])]
-  )
 CFLAGS="$ac_save_CFLAGS"
+case "$cc_cv_attribute_noreturn" in
+  "using __attribute__")
+    AC_DEFINE_UNQUOTED(
+      [_Noreturn], [__attribute__((__noreturn__))],
+      [Define this if the compiler supports the noreturn __attribute__])
+  ;;
+  "no")
+    AC_DEFINE_UNQUOTED([_Noreturn], [],
+      [Define this if the compiler does not supports any noreturn attribute])
+  ;;
+esac
 
 dnl Check whether the compiler supports the 
 dnl    __attribute__((__format__ (__printf__, x,y))) feature
