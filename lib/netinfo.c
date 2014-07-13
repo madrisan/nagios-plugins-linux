@@ -26,7 +26,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <ifaddrs.h>
-#include <linux/if_link.h>
+#ifdef HAVE_LINUX_IF_LINK_H
+# include <linux/if_link.h>
+#else
+# include <linux/rtnetlink.h>
+#endif
 
 #include "common.h"
 #include "logging.h"

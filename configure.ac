@@ -157,6 +157,7 @@ AC_HEADER_STDC
 AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([ \
   arpa/inet.h \
+  linux/if_link.h \
   fcntl.h \
   limits.h \
   mntent.h \
