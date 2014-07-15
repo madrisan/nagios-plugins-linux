@@ -190,6 +190,13 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_STRTOD
 
+dnl sched.h: check for the macros CPU_*
+AC_CHECK_TYPES([cpu_set_t], [have_cpu_set_t=yes], [], [[#include <sched.h>]])
+AM_CONDITIONAL([HAVE_CPU_SET_T], [test "x$have_cpu_set_t" = xyes])
+AC_CHECK_DECLS([CPU_ALLOC], [], [],
+  [[#define _GNU_SOURCE
+    #include <sched.h>]])
+
 AC_ARG_WITH(proc-meminfo,
   AS_HELP_STRING([--with-proc-meminfo=PATH],
     [path to /proc/meminfo or equivalent]),
