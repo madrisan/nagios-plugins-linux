@@ -37,6 +37,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "cputopology.h"
 #include "sysfsparser.h"
 
 #define PATH_SYS_SYSTEM		"/sys/devices/system"
