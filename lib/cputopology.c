@@ -25,11 +25,13 @@
  * BOOK   The logical book number.  A book can contain several sockets.
  * NODE   The logical NUMA node number.  A node may contain several books.  */
 
-#define _GNU_SOURCE
-#include <sched.h>
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE /* activate extra prototypes for glibc */
+#endif
 
 #include <sys/sysinfo.h>
 #include <ctype.h>
+#include <sched.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -20,6 +20,10 @@
  * This module is based on procps 3.2.8
  */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE /* activate extra prototypes for glibc */
+#endif
+
 #include <sys/types.h>
 #include <errno.h>
 #include <stdio.h>

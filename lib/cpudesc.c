@@ -17,11 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE /* activate extra prototypes for glibc */
+#endif
+
 #include <sys/utsname.h>
 #include <ctype.h>
 #include <errno.h>
-#define _GNU_SOURCE
-# include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
