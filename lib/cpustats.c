@@ -89,10 +89,9 @@ cpu_stats_read (struct cpu_stats *cpustats)
   else
     goto readerr;
 
+  /* Not separated out until the 2.6.0-test4 */
   if ((b = strstr (buff, "softirq ")))
     sscanf (b, "softintr %Lu ", &cpustats->nsoftirq);
-  else
-    goto readerr;
 
   return;
 
