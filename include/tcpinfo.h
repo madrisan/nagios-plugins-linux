@@ -18,8 +18,8 @@
 
 #define TCP_UNSET   0
 #define TCP_VERBOSE 1
-#define TCP_v4      4
-#define TCP_v6      6
+#define TCP_v4      2
+#define TCP_v6      4
 
 #ifdef __cplusplus
 extern "C"
