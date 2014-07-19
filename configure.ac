@@ -297,8 +297,8 @@ AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
 dnl check for some Linux types
 AC_TYPE_SIZE_T
 # 'AC_TYPE_SSIZE_T' unfortunately requires autoconf 2.60+
+#AC_TYPE_SSIZE_T
 # Define to `int' if <sys/types.h> does not define
-AC_TYPE_SSIZE_T
 AC_CHECK_TYPE(ssize_t, [int])
 AC_TYPE_UID_T
 
