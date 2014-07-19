@@ -17,9 +17,9 @@
 #define _TCPINFO_H_
 
 #define TCP_UNSET   0
-#define TCP_VERBOSE 1
-#define TCP_v4      2
-#define TCP_v6      4
+#define TCP_VERBOSE (1 << 1)
+#define TCP_v4      (1 << 2)
+#define TCP_v6      (1 << 3)
 
 #ifdef __cplusplus
 extern "C"
