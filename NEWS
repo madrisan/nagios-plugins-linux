@@ -1,3 +1,23 @@
+    Major changes between "nagios-plugins-linux" versions 12 and 13
+
+-- Enhancements
+
+* The build system, the plugins and libraries are been reworked in
+  order to support some older Linux kernels and (gcc) compilers.
+  The "nagios-plugins-linux" can now be compiled and run on older
+  linux systems, like RHEL 5 (gcc 4.1.2, kernel 2.6.18).
+
+-- Fixes
+
+* check_tcpcount: do not exit with 'error opening /proc/net/tcp6'
+  when the command line option '--tcp6' has not been specified.
+
+* cpustats library: do not exit with an error message if 'softirq'
+  cannot be found in /proc/stat'. This entry is not provided by old
+  kernels.
+
++======================================================================
+    
     Major changes between "nagios-plugins-linux" versions 11 and 12
 
 * New plugin 'check_intr'.
