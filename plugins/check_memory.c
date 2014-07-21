@@ -40,6 +40,7 @@ static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
+  {(char *) "available", no_argument, NULL, 'a'},
   {(char *) "caches", no_argument, NULL, 'C'},
   {(char *) "vmstats", no_argument, NULL, 's'},
   {(char *) "critical", required_argument, NULL, 'c'},
@@ -60,20 +61,24 @@ usage (FILE * out)
   fputs ("This plugin checks the system memory utilization.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-b,-k,-m,-g] [-C] [-s] -w PERC -c PERC\n",
+  fprintf (out, "  %s [-a] [-b,-k,-m,-g] [-C] [-s] -w PERC -c PERC\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
-  fputs ("  -b,-k,-m,-g     "
-	 "show output in bytes, KB (the default), MB, or GB\n", out);
-  fputs ("  -C, --caches    count buffers and cached memory as free memory\n",
+  fputs ("  -a, --available  "
+	 "prefer the kernel counter 'MemAvailable' (kernel 3.14+)\n",
 	 out);
-  fputs ("  -s, --vmstats   display the virtual memory perfdata\n", out);
+  fputs ("  -b,-k,-m,-g      "
+	 "show output in bytes, KB (the default), MB, or GB\n", out);
+  fputs ("  -C, --caches     count buffers and cached memory as free memory\n",
+	 out);
+  fputs ("  -s, --vmstats    display the virtual memory perfdata\n", out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -C --vmstats -w 80%% -c90%%\n", program_name);
+  fprintf (out, "  %s -C -a -w 20%%: -c 10%%:\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -92,12 +97,13 @@ int
 main (int argc, char **argv)
 {
   bool cache_is_free = false, vmem_perfdata = false;
+  bool prefer_memavailable = false;
   int c, status, err;
   int shift = k_shift;
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
-  char *status_msg;
-  char *perfdata_mem_msg, *perfdata_vmem_msg = NULL;
+  char *status_msg, *perfdata_mem_msg,
+       *perfdata_vmem_msg = "", *perfdata_memavailable_msg = "";
   float percent_used = 0;
   thresholds *my_threshold = NULL;
 
@@ -121,16 +127,23 @@ main (int argc, char **argv)
   unsigned long nr_vmem_pgpgout[2];
   unsigned long nr_vmem_pgmajfault[2];
 
+  /* by default we'll select the memory used */
+  unsigned long *kb_mem_monitored = &kb_mem_main_used;
+
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-                           "MSCsc:w:bkmg" GETOPT_HELP_VERSION_STRING,
+                           "aMSCsc:w:bkmg" GETOPT_HELP_VERSION_STRING,
                            longopts, NULL)) != -1)
     {
       switch (c)
         {
         default:
           usage (stderr);
+	case 'a':
+	  prefer_memavailable = true;
+	  kb_mem_monitored = &kb_mem_main_available;
+          break;
         case 'C':
           cache_is_free = true;
           break;
@@ -173,13 +186,17 @@ main (int argc, char **argv)
   kb_mem_committed_as = proc_sysmem_get_committed_as (sysmem);
   kb_mem_dirty        = proc_sysmem_get_dirty (sysmem);
   kb_mem_inactive     = proc_sysmem_get_inactive (sysmem);
-  kb_mem_main_available = proc_sysmem_get_main_available (sysmem);
   kb_mem_main_buffers = proc_sysmem_get_main_buffers (sysmem);
   kb_mem_main_cached  = proc_sysmem_get_main_cached (sysmem);
   kb_mem_main_free    = proc_sysmem_get_main_free (sysmem);
   kb_mem_main_shared  = proc_sysmem_get_main_shared (sysmem);
   kb_mem_main_total   = proc_sysmem_get_main_total (sysmem);
   kb_mem_main_used    = proc_sysmem_get_main_used (sysmem);
+
+  kb_mem_main_available = proc_sysmem_get_main_available (sysmem);
+  if (prefer_memavailable && (MEMINFO_UNSET == kb_mem_main_available))
+    plugin_error (STATE_UNKNOWN, 0,
+		  "'MemAvailable' is not provided by the running kernel");
 
   if (cache_is_free)
     {
@@ -223,16 +240,26 @@ main (int argc, char **argv)
    * See. http://doc.qt.digia.com/qtextended4.4/syscust-oom.html	*/
 
   if (kb_mem_main_total != 0)
-    percent_used = (kb_mem_main_used * 100.0 / kb_mem_main_total);
-
+    percent_used = ((*kb_mem_monitored) * 100.0 / kb_mem_main_total);
   status = get_status (percent_used, my_threshold);
+
+  if (prefer_memavailable)
+    {
+      status_msg = xasprintf ("%s: %.2f%% (%Lu %s) available",
+			      state_text (status), percent_used,
+			      SU (*kb_mem_monitored));
+      perfdata_memavailable_msg =
+	xasprintf ("mem_available=%Lu%s, ", SU (kb_mem_main_available));
+    }
+  else
+    status_msg = xasprintf ("%s: %.2f%% (%Lu %s) used", state_text (status),
+			    percent_used, SU (kb_mem_main_used));
+
   free (my_threshold);
 
-  status_msg = xasprintf ("%s: %.2f%% (%Lu %s) used", state_text (status),
-			  percent_used, SU (kb_mem_main_used));
   perfdata_mem_msg =
     xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
-	       "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, "
+	       "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, %s"
 	       "mem_active=%Lu%s, mem_anonpages=%Lu%s, mem_committed=%Lu%s, "
 	       "mem_dirty=%Lu%s, mem_inactive=%Lu%s"
 	       , SU (kb_mem_main_total)
@@ -241,14 +268,15 @@ main (int argc, char **argv)
 	       , SU (kb_mem_main_shared)
 	       , SU (kb_mem_main_buffers)
 	       , SU (kb_mem_main_cached)
+	       , perfdata_memavailable_msg
 	       , SU (kb_mem_active)
 	       , SU (kb_mem_anon_pages)
 	       , SU (kb_mem_committed_as)
 	       , SU (kb_mem_dirty)
 	       , SU (kb_mem_inactive));
 
-  printf ("%s %s | %s%s\n", program_name_short, status_msg, perfdata_mem_msg,
-	  vmem_perfdata ? perfdata_vmem_msg : "");
+  printf ("%s %s | %s%s\n", program_name_short, status_msg,
+	  perfdata_mem_msg, perfdata_vmem_msg);
 
   proc_sysmem_unref (sysmem);
   proc_vmem_unref (vmem);

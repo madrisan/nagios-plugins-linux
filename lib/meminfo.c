@@ -36,8 +36,14 @@ typedef struct proc_sysmem_data
    * However, unlike the data provided by the Cache or Free fields,
    * MemAvailable takes into account page cache and also that not all
    * reclaimable memory slabs will be reclaimable due to items being in
-   * use.  See:
-   * https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773
+   * use.
+   * See: https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/\
+   *  commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773
+   *
+   * A fallback MemAvailable evaluation for 2.6.27 <= kernels < 3.14 is can be
+   * implemented,
+   * See: https://gitorious.org/procps/procps/commit/\
+   *  b779855cf15d68f9038ff1809db18c0788e9ae70.patch 
    */
   unsigned long kb_main_available;
   /* old but still kicking -- the important stuff */
