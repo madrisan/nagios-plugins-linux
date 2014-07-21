@@ -40,7 +40,7 @@ typedef struct proc_sysmem_data
    * See: https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/\
    *  commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773
    *
-   * A fallback MemAvailable evaluation for 2.6.27 <= kernels < 3.14 is can be
+   * A fallback MemAvailable evaluation for 2.6.27 <= kernels < 3.14 can be
    * implemented,
    * See: https://gitorious.org/procps/procps/commit/\
    *  b779855cf15d68f9038ff1809db18c0788e9ae70.patch 
