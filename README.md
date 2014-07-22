@@ -229,7 +229,7 @@ These two nagios plugins respectivery check for memory and swap usage.
 
 *Examples*
 
-	check_memory -C --vmstats -m -w 80% -c 90%
+	check_memory -C --vmstats -w 80% -c 90%
         memory WARNING: 86.44% (884864 kB) used | mem_total=1023632kB, mem_used=884864kB, mem_free=138768kB, mem_shared=48052kB, mem_buffers=3892kB, mem_cached=118396kB, mem_active=471324kB, mem_anonpages=653996kB, mem_committed=4939408kB, mem_dirty=8848kB, mem_inactive=471808kB, vmem_pageins/s=368, vmem_pageouts/s=1684, vmem_pgmajfault/s=1
 	  # mem_total    : Total usable physical RAM
 	  # mem_used     : Total amount of physical RAM used by the system
