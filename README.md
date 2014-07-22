@@ -210,7 +210,7 @@ These two nagios plugins respectivery check for memory and swap usage.
 
 *Usage*
 
-	check_memory [-C] [-s] [-b,-k,-m,-g] [-w PERC] [-c PERC]
+	check_memory [-a] [-C] [-s] [-b,-k,-m,-g] [-w PERC] [-c PERC]
 	check_swap [-b,-k,-m,-g] [-w PERC] [-c PERC]
 	
 	check_memory --help
@@ -218,6 +218,7 @@ These two nagios plugins respectivery check for memory and swap usage.
 
 *Where*
 
+* -a, --available: prefer the kernel counter MemAvailable (kernel 3.14+)
 * -C, --caches: count buffers and cached memory as free memory
 * -s, --vmstats: display the virtual memory perfdata
 * -b,-k,-m,-g: show output in bytes, KB (the default), MB, or GB
@@ -244,6 +245,10 @@ These two nagios plugins respectivery check for memory and swap usage.
 	  # vmem_pageins
 	  # vmem_pageouts: The number of memory pages the system has written in and out to disk
 	  # vmem_pgmajfault: The number of memory major pagefaults
+
+	check_memory -a -C -m -w 20%: -c 10%:
+	memory WARNING: 18.70% (186 MB) available | mem_total=999MB, mem_used=813MB, mem_free=185MB, mem_shared=38MB, mem_buffers=4MB, mem_cached=146MB, mem_available=186MB, mem_active=431MB, mem_anonpages=676MB, mem_committed=6276MB, mem_dirty=0MB, mem_inactive=444MB
+	# mem_available  : Memory available for starting new applications, without swapping
 
 	check_swap -w 40% -c 60% -m
 	swap WARNING: 42.70% (895104 kB) used | swap_total=2096444kB, swap_used=895104kB, swap_free=1201340kB, swap_cached=117024kB, swap_pageins/s=97, swap_pageouts/s=73

@@ -7,6 +7,10 @@
   The "nagios-plugins-linux" can now be compiled and run on older
   linux systems, like RHEL 5 (gcc 4.1.2, kernel 2.6.18).
 
+* check_memory: new option -a|--available for selecting the kernel
+  counter 'MemAvailable' instead of the default one (memory used).
+  This feature requires a Linux kernel 3.14 or better.
+
 -- Fixes
 
 * check_tcpcount: do not exit with 'error opening /proc/net/tcp6'
