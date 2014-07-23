@@ -188,9 +188,6 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
 	data->kb_inact_dirty + data->kb_inact_clean +
 	data->kb_inact_laundry;
     }
-
-  /* "Cached" includes "Shmem" - we want only the page cache here */
-  data->kb_main_cached -= data->kb_main_shared;
 }
 
 /* Drop a reference of the memory library context. If the refcount of
