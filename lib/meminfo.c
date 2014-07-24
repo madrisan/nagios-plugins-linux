@@ -25,8 +25,10 @@
 #include "messages.h"
 #include "meminfo.h"
 #include "procparser.h"
+#include "system.h"
 
 /*#define PROC_MEMINFO  "/proc/meminfo"*/
+#define MEMINFO_UNSET ~0UL
 
 typedef struct proc_sysmem_data
 {
@@ -40,12 +42,14 @@ typedef struct proc_sysmem_data
    * See: https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/\
    *  commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773
    *
-   * A fallback MemAvailable evaluation for 2.6.27 <= kernels < 3.14 can be
-   * implemented,
+   * FIXME: A fallback MemAvailable evaluation for 2.6.27 <= kernels < 3.14
+   * can be implemented.
    * See: https://gitorious.org/procps/procps/commit/\
    *  b779855cf15d68f9038ff1809db18c0788e9ae70.patch 
    */
+  bool native_memavailable;
   unsigned long kb_main_available;
+
   /* old but still kicking -- the important stuff */
   unsigned long kb_main_buffers;
   unsigned long kb_main_cached;
@@ -174,7 +178,14 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
   procparser (PROC_MEMINFO, sysmem_table, sysmem_table_count, ':');
 
   if (data->kb_main_available == MEMINFO_UNSET)
-    dbg ("MemAvailable is not provided by /proc/meminfo\n");
+    {
+      dbg ("MemAvailable is not provided by /proc/meminfo...\n");
+      dbg ("...falling back to MemFree\n");
+      data->kb_main_available = data->kb_main_free;
+      data->native_memavailable = false;
+    }
+  else
+    data->native_memavailable = true;
 
   if (!data->kb_low_total)
     {				/* low==main except with large-memory support */
@@ -229,7 +240,6 @@ proc_sysmem_get(dirty)
  + have to swap out process pages, or swap out the cache to disk or in the
  * worst case if it runs out of swap space then begin killing processes.  */
 proc_sysmem_get(inactive)
-
 proc_sysmem_get(main_available)
 proc_sysmem_get(main_buffers)
 proc_sysmem_get(main_cached)
@@ -242,6 +252,11 @@ proc_sysmem_get(swap_free)
 proc_sysmem_get(swap_total)
 
 #undef proc_sysmem_get
+
+bool proc_sysmem_native_memavailable (struct proc_sysmem *sysmem)
+{
+  return sysmem->data->native_memavailable;
+}
 
 unsigned long
 proc_sysmem_get_main_used (struct proc_sysmem *sysmem)

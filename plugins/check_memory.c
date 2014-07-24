@@ -78,7 +78,7 @@ usage (FILE * out)
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -C --vmstats -w 80%% -c90%%\n", program_name);
-  fprintf (out, "  %s -C -a -w 20%%: -c 10%%:\n", program_name);
+  fprintf (out, "  %s -a -w 20%%: -c 10%%:\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -186,6 +186,7 @@ main (int argc, char **argv)
   kb_mem_committed_as = proc_sysmem_get_committed_as (sysmem);
   kb_mem_dirty        = proc_sysmem_get_dirty (sysmem);
   kb_mem_inactive     = proc_sysmem_get_inactive (sysmem);
+  kb_mem_main_available = proc_sysmem_get_main_available (sysmem);
   kb_mem_main_buffers = proc_sysmem_get_main_buffers (sysmem);
   kb_mem_main_cached  = proc_sysmem_get_main_cached (sysmem);
   kb_mem_main_free    = proc_sysmem_get_main_free (sysmem);
@@ -193,15 +194,18 @@ main (int argc, char **argv)
   kb_mem_main_total   = proc_sysmem_get_main_total (sysmem);
   kb_mem_main_used    = proc_sysmem_get_main_used (sysmem);
 
-  kb_mem_main_available = proc_sysmem_get_main_available (sysmem);
-  if (prefer_memavailable && (MEMINFO_UNSET == kb_mem_main_available))
-    plugin_error (STATE_UNKNOWN, 0,
-		  "'MemAvailable' is not provided by the running kernel");
-
+  /* XXX This seems to be a misconception, as memory in the page cache
+   * cannot be considered as free...	*/
   if (cache_is_free)
     {
-      kb_mem_main_used -= (kb_mem_main_cached + kb_mem_main_buffers);
-      kb_mem_main_free += (kb_mem_main_cached + kb_mem_main_buffers);
+      unsigned long mem_cached = kb_mem_main_cached + kb_mem_main_buffers;
+
+      /* 'MemAvailable' not provided by the running kernel */
+      if (!proc_sysmem_native_memavailable (sysmem))
+	kb_mem_main_available += mem_cached;
+
+      kb_mem_main_used -= mem_cached;
+      kb_mem_main_free += mem_cached;
     }
 
   if (vmem_perfdata)
@@ -243,17 +247,13 @@ main (int argc, char **argv)
     percent_used = ((*kb_mem_monitored) * 100.0 / kb_mem_main_total);
   status = get_status (percent_used, my_threshold);
 
-  if (prefer_memavailable)
-    {
-      status_msg = xasprintf ("%s: %.2f%% (%Lu %s) available",
-			      state_text (status), percent_used,
-			      SU (*kb_mem_monitored));
-      perfdata_memavailable_msg =
-	xasprintf ("mem_available=%Lu%s, ", SU (kb_mem_main_available));
-    }
-  else
-    status_msg = xasprintf ("%s: %.2f%% (%Lu %s) used", state_text (status),
-			    percent_used, SU (kb_mem_main_used));
+  perfdata_memavailable_msg =
+    xasprintf ("mem_available=%Lu%s, ", SU (kb_mem_main_available));
+
+  status_msg = xasprintf ("%s: %.2f%% (%Lu %s) %s",
+			  state_text (status), percent_used,
+			  SU (*kb_mem_monitored),
+			  prefer_memavailable ? "available" : "used");
 
   free (my_threshold);
 

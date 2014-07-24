@@ -16,6 +16,8 @@
 #ifndef _MEMINFO_H_
 #define _MEMINFO_H_
 
+#include "system.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -25,8 +27,6 @@ extern "C"
   {
     b_shift = 0, k_shift = 10, m_shift = 20, g_shift = 30
   };
-
-#define MEMINFO_UNSET ~0UL
 
 #define SU(X) ( ((unsigned long long)(X) << k_shift) >> shift ), units
 
@@ -59,6 +59,9 @@ extern "C"
   unsigned long proc_sysmem_get_main_shared (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_main_total (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_main_used (struct proc_sysmem *sysmem);
+
+  /* return true if the kernel provides the counter 'MemAvailable' (3.14+) */
+  bool proc_sysmem_native_memavailable (struct proc_sysmem *sysmem);
 
   unsigned long proc_sysmem_get_swap_cached (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_swap_free (struct proc_sysmem *sysmem);
