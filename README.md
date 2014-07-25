@@ -1,3 +1,5 @@
+![alt tag](https://sites.google.com/site/davidemadrisan/files/nagios-logos.png)
+
 # Nagios Plugins for Linux
 
 ## About
