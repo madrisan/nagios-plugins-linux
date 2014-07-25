@@ -76,6 +76,15 @@ usage (FILE * out)
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
+  fputs (USAGE_NOTE, out);
+  fputs ("  The option '-a|--available' gives an estimation of the "
+	 "available memory\n"
+	 "  for starting new applications without swapping.\n", out);
+  fputs ("  It requires a kernel 3.14 and above, which provides this "
+	 "information \n"
+	 "  in /proc/meminfo (see the parameter 'MemAvailable').\n", out);
+  fputs ("  For older kernels this plugin will fall back to 'MemFree'.\n",
+	 out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -C --vmstats -w 80%% -c90%%\n", program_name);
   fprintf (out, "  %s -a -w 20%%: -c 10%%:\n", program_name);

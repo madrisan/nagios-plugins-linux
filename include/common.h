@@ -14,6 +14,7 @@ There is NO WARRANTY, to the extent permitted by law.\n"
 #define USAGE_HEADER     "Usage:\n"
 #define USAGE_OPTIONS    "Options:\n"
 #define USAGE_EXAMPLES   "Examples:\n"
+#define USAGE_NOTE       "Note:\n"
 #define USAGE_SEPARATOR  "\n"
 #define USAGE_HELP \
   "  -h, --help      display this help and exit\n"
