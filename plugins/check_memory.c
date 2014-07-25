@@ -64,14 +64,14 @@ usage (FILE * out)
   fprintf (out, "  %s [-a] [-b,-k,-m,-g] [-C] [-s] -w PERC -c PERC\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
-  fputs ("  -a, --available  "
+  fputs ("  -a, --available "
 	 "prefer the kernel counter 'MemAvailable' (kernel 3.14+)\n",
 	 out);
-  fputs ("  -b,-k,-m,-g      "
+  fputs ("  -b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
-  fputs ("  -C, --caches     count buffers and cached memory as free memory\n",
+  fputs ("  -C, --caches    count buffers and cached memory as free memory\n",
 	 out);
-  fputs ("  -s, --vmstats    display the virtual memory perfdata\n", out);
+  fputs ("  -s, --vmstats   display the virtual memory perfdata\n", out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs (USAGE_HELP, out);
