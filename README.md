@@ -246,9 +246,10 @@ These two nagios plugins respectivery check for memory and swap usage.
 	  # vmem_pageouts: The number of memory pages the system has written in and out to disk
 	  # vmem_pgmajfault: The number of memory major pagefaults
 
-	check_memory -a -C -m -w 20%: -c 10%:
-	memory WARNING: 18.70% (186 MB) available | mem_total=999MB, mem_used=813MB, mem_free=185MB, mem_shared=38MB, mem_buffers=4MB, mem_cached=146MB, mem_available=186MB, mem_active=431MB, mem_anonpages=676MB, mem_committed=6276MB, mem_dirty=0MB, mem_inactive=444MB
-	# mem_available  : Memory available for starting new applications, without swapping
+	check_memory -a -m -w 20%: -c 10%:
+	memory WARNING: 18.13% (181 MB) available | mem_total=999MB, mem_used=980MB, mem_free=18MB, mem_shared=50MB, mem_buffers=5MB, mem_cached=206MB, mem_available=181MB, mem_active=428MB, mem_anonpages=668MB, mem_committed=6594MB, mem_dirty=0MB, mem_inactive=461MB
+	  # mem_available: kernel >= 3.14: memory available for starting new applications, without swapping
+	  # mem_available: kernel < 3.14: falls back to 'mem_free'
 
 	check_swap -w 40% -c 60% -m
 	swap WARNING: 42.70% (895104 kB) used | swap_total=2096444kB, swap_used=895104kB, swap_free=1201340kB, swap_cached=117024kB, swap_pageins/s=97, swap_pageouts/s=73
