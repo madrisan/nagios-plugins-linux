@@ -375,11 +375,17 @@ main (int argc, char **argv)
       putchar ('\n');
       return status;
     }
-  else
-    status = check_all_entries (&ro_filesystems);
 
-  printf ("%s %s %s readonly!\n", program_name_short, state_text (status),
-	  ro_filesystems);
-  free (ro_filesystems);
+  status = check_all_entries (&ro_filesystems);
+
+  if (STATE_CRITICAL == status)
+    {
+      printf ("%s %s: %s readonly!\n", program_name_short, state_text (status),
+	      ro_filesystems);
+      free (ro_filesystems);
+    }
+  else
+    printf ("%s %s\n", program_name_short, state_text (status));
+
   return status;
 }

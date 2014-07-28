@@ -1,3 +1,12 @@
+    Major changes between "nagios-plugins-linux" versions 13 and 14
+
+-- Fixes
+
+* check_readonlys: do not dereference a null pointer string in the
+  output message when no readonly filesystems are detected.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 12 and 13
 
 -- Enhancements
