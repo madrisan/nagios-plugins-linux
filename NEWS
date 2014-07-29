@@ -30,7 +30,7 @@
   cannot be found in /proc/stat'. This entry is not provided by old
   kernels.
 
-+======================================================================
+=====================================================================
     
     Major changes between "nagios-plugins-linux" versions 11 and 12
 
