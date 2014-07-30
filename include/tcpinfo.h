@@ -1,4 +1,4 @@
-/* Library for getting TCP network and socket informations
+/* tcpinfo -- library for getting TCP network and socket informations
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

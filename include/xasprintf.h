@@ -1,4 +1,4 @@
-/* asprintf with out-of-memory checking.
+/* xasprintf.h -- asprintf with out-of-memory checking.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

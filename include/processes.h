@@ -1,4 +1,4 @@
-/* Library for getting informations about the running processes
+/* processes.h -- get informations about running processes
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
