@@ -46,8 +46,6 @@ enum
   TEMP_FAHRENHEIT
 };
 
-static bool verbose = false;
-
 static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
@@ -57,7 +55,6 @@ static struct option const longopts[] = {
   {(char *) "thermal_zone", required_argument, NULL, 't'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
-  {(char *) "verbose", no_argument, NULL, 'v'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -78,8 +75,6 @@ usage (FILE * out)
   fputs ("  -t, --thermal_zone    only consider a specific thermal zone\n", out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
-  fputs ("  -v, --verbose   show details for command-line debugging "
-	 "(Nagios may truncate output)\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
@@ -162,9 +157,6 @@ main (int argc, char **argv)
 	  break;
 	case 'w':
 	  warning = optarg;
-	  break;
-	case 'v':
-	  verbose = true;
 	  break;
 
 	case_GETOPT_HELP_CHAR
