@@ -145,10 +145,13 @@ main (int argc, char **argv)
   if (strftime (outstr, sizeof (outstr), "%s", tm) == 0)
     plugin_error (STATE_UNKNOWN, errno, "strftime() failed");
 
-  if (verbose)
-    printf ("Seconds since the Epoch: \"%s\"\n", outstr);
-
   timedelta = (strtol (outstr, &end, 10) - refclock);
+
+  if (verbose)
+    {
+      printf ("Seconds since the Epoch: %s\n", outstr);
+      printf ("Refclock: %lu  -->  Delta: %ld\n", refclock, timedelta);
+    }
 
   status = get_status (labs (timedelta), my_threshold);
   free (my_threshold);
