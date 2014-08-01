@@ -113,6 +113,9 @@ main (int argc, char **argv)
 	  usage (stderr);
 	case 'r':
 	  refclock = strtol (optarg, &end, 10);
+	  if (errno != 0 || optarg == end || (end != NULL && *end != '\0'))
+	    plugin_error (STATE_UNKNOWN, 0,
+			  "the option '-s' requires an integer");
 	  break;
 	case 'c':
 	  critical = optarg;

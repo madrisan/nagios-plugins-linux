@@ -1,5 +1,10 @@
     Major changes between "nagios-plugins-linux" versions 13 and 14
 
+-- Enhancements
+
+* check_clock: option '--refclock': validate the input instead of
+  returning crap when the date format is unsupported.
+
 -- Fixes
 
 * check_readonlys: do not dereference a null pointer string in the
