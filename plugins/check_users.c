@@ -22,6 +22,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <utmpx.h>
 
 #include "common.h"
@@ -36,6 +37,7 @@ static const char *program_copyright =
 static struct option const longopts[] = {
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
+  {(char *) "verbose", no_argument, NULL, 'v'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -53,6 +55,8 @@ usage (FILE * out)
   fputs (USAGE_OPTIONS, out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
+  fputs ("  -v, --verbose   show details for command-line debugging "
+	 "(Nagios may truncate output)\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
@@ -75,15 +79,16 @@ int
 main (int argc, char **argv)
 {
   int c, numuser;
+  bool verbose = false;
   char *critical = NULL, *warning = NULL;
-  struct utmpx *utmpxstruct;
+  struct utmpx *ut;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "c:w:" GETOPT_HELP_VERSION_STRING,
+			   "c:w:v" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -95,6 +100,9 @@ main (int argc, char **argv)
 	  break;
 	case 'w':
 	  warning = optarg;
+	  break;
+	case 'v':
+	  verbose = true;
 	  break;
 
 	case_GETOPT_HELP_CHAR
@@ -108,12 +116,20 @@ main (int argc, char **argv)
     usage (stderr);
 
   numuser = 0;
+  if (verbose)
+    printf ("user       PID line   host      date/time\n");
   setutxent ();
-  while ((utmpxstruct = getutxent ()))
+  while ((ut = getutxent ()))
     {
-      if ((utmpxstruct->ut_type == USER_PROCESS) &&
-	  (utmpxstruct->ut_user[0] != '\0'))
-	numuser++;
+      if ((ut->ut_type == USER_PROCESS) && (ut->ut_user[0] != '\0'))
+	{
+	  numuser++;
+	  if (!verbose)
+	    continue;
+	  printf ("%-8s %5ld %-6.6s %-9.9s %s", ut->ut_user,
+		  (long) ut->ut_pid, ut->ut_line, ut->ut_host,
+		  ctime ((time_t *) &(ut->ut_tv.tv_sec)));
+	}
     }
   endutxent ();
 

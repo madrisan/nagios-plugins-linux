@@ -1,6 +1,12 @@
     Major changes between "nagios-plugins-linux" versions 13 and 14
      - Korbielow 2014 release -
 
+-- Enhancements
+
+* check_users: new '--verbose' mode, for debugging.
+
+-- Fixes
+
 * check_clock: option '--refclock': validate the input instead of
   returning crap when the date format is unsupported.
 
