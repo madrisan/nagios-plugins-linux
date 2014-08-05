@@ -37,17 +37,11 @@
 #include "thresholds.h"
 #include "xasprintf.h"
 
-/* assume uptime never be zero seconds in practice */
-#define UPTIME_RET_FAIL  0
-
 static const char *program_copyright =
   "Copyright (C) 2010,2012-2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 #define BUFSIZE 0x80
 static char buf[BUFSIZE + 1];
-
-double uptime (void);
-char *sprint_uptime (double);
 
 static struct option const longopts[] = {
   {(char *) "critical", required_argument, NULL, 'c'},
@@ -66,6 +60,8 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [OPTION]\n", program_name);
   fputs (USAGE_OPTIONS, out);
+  fputs ("  -m, --clock-monotonic  "
+	 "use the monotonic clock for retrieving the time\n", out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs (USAGE_HELP, out);
@@ -73,6 +69,7 @@ usage (FILE * out)
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
   fprintf (out, "  %s --critical 15: --warning 30:\n", program_name);
+  fprintf (out, "  %s --clock-monotonic -c 15: -w 30:\n", program_name);
   fputs (USAGE_SEPARATOR, out);
   fputs (USAGE_THRESHOLDS, out);
 
@@ -89,8 +86,8 @@ print_version (void)
   exit (STATE_OK);
 }
 
-double
-uptime ()
+static double
+uptime_sysinfo ()
 {
   struct sysinfo info;
 
@@ -100,7 +97,18 @@ uptime ()
   return info.uptime;
 }
 
-char *
+static double
+uptime_clock_monotonic ()
+{
+  struct timespec ts;
+
+  if (0 != clock_gettime (CLOCK_MONOTONIC, &ts))
+    plugin_error (STATE_UNKNOWN, errno, "cannot get the system uptime");
+
+  return ts.tv_sec;
+}
+
+static char *
 sprint_uptime (double uptime_secs)
 {
   int upminutes, uphours, updays;
@@ -135,16 +143,21 @@ main (int argc, char **argv)
   char *result_line;
   double uptime_secs;
   thresholds *my_threshold = NULL;
+  double (*uptime) ();
 
   set_program_name (argv[0]);
+  uptime = uptime_sysinfo;
 
-  while ((c = getopt_long (argc, argv, "c:w:" GETOPT_HELP_VERSION_STRING,
+  while ((c = getopt_long (argc, argv, "mc:w:" GETOPT_HELP_VERSION_STRING,
                            longopts, NULL)) != -1)
     {
       switch (c)
 	{
 	default:
 	  usage (stderr);
+	case 'm':
+	  uptime = uptime_clock_monotonic;
+	  break;
 	case 'c':
 	  critical = optarg;
 	  break;
@@ -162,8 +175,7 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  if (UPTIME_RET_FAIL == (uptime_secs = uptime ()))
-    plugin_error (STATE_UNKNOWN, 0, "can't get system uptime counter");
+  uptime_secs = uptime ();
 
   uptime_mins = (int) uptime_secs / 60;
   status = get_status (uptime_mins, my_threshold);

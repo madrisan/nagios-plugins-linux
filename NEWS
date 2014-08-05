@@ -5,6 +5,10 @@
 
 * check_users: new '--verbose' mode, for debugging.
 
+* check_uptime: new option '-m|--clock-monotonic' for retrieving the
+  time of the linux monotonic clock instead of using the system 
+  statistics returned by 'sysinfo()'.
+
 -- Fixes
 
 * check_clock: option '--refclock': validate the input instead of
