@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A Nagios plugin that ckecks for the number of logged on users
+ * A Nagios plugin that ckecks for the number of logged on users.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

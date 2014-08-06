@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2010,2012,2013 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A Nagios plugin to check how long the system has been running
+ * A Nagios plugin to check how long the system has been running.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
