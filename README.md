@@ -53,10 +53,11 @@ time and Nagios time.
 	check_clock [-w COUNTER] [-c COUNTER] --refclock TIME
 	check_clock --help
 
-*Where*
+*Command line options*
 
 * -r, --refclock TIME: the clock reference (in seconds since the Epoch)
 * -w, --warning COUNTER: warning threshold
+* -v, --verbose: show details for command-line debugging (Nagios may truncate output)
 * -c, --critical COUNTER: critical threshold
 * -h, --help: display this help and exit
 * -V, --version: output version information and exit
@@ -78,7 +79,7 @@ This Nagios plugin checks the CPU (user mode) utilization.
 	check_cpu --cpuinfo
 	check_cpu --help
 
-*Where*
+*Command line options*
 
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
@@ -109,11 +110,13 @@ This Nagios plugin checks the total number of context switches across all CPUs.
 	check_cswch [-v] [-w COUNTER] -c [COUNTER] [delay [count]]
 	check_cswch --help
 
-*Where*
+*Command line options*
 
 * -w, --warning COUNTER: warning threshold
 * -c, --critical COUNTER: critical threshold
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
+* -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
@@ -143,11 +146,13 @@ This Nagios plugin monitors the total number of system interrupts.
 	check_intr [-v] [-w COUNTER] -c [COUNTER] [delay [count]]
 	check_intr --help
 
-*Where*
+*Command line options*
 
 * -w, --warning COUNTER: warning threshold
 * -c, --critical COUNTER: critical threshold
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
+* -h, --help: display this help and exit
+* -V, --version: output version information and exit
 
 *Examples*
 
@@ -163,7 +168,7 @@ This Nagios plugin checks for I/O wait bottlenecks.
 	check_iowait [-v] [-w PERC] [-c PERC] [delay [count]]
 	check_iowait --help
 
-*Where*
+*Command line options*
 
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
@@ -192,7 +197,7 @@ This Nagios plugin tests the current system load average.
 	check_load [-r] [--load1=w,c] [--load5=w,c] [--load15=w,c]
 	check_load --help
 
-*Where*
+*Command line options*
 
 * -r, --percpu: divide the load averages by the number of CPUs
 * 1, --load1=WLOAD1,CLOAD1: warning and critial thresholds for load1
@@ -218,7 +223,7 @@ These two nagios plugins respectivery check for memory and swap usage.
 	check_memory --help
 	check_swap --help
 
-*Where*
+*Command line options*
 
 * -a, --available: prefer the kernel counter MemAvailable (kernel 3.14+)
 * -C, --caches: count buffers and cached memory as free memory
@@ -272,7 +277,7 @@ This Nagios plugin checks the multipath topology status.
 	check_multipath [-v]
 	check_multipath --help
 
-*Where*
+*Command line options*
 
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
 * -h, --help: display this help and exit
@@ -292,7 +297,7 @@ This Nagios plugin displays the number of running processes per user.
 	check_nbprocs [--verbose] [--threads] [-w COUNT] [-c COUNT]
 	check_nbprocs --help
 
-*Where*
+*Command line options*
 
 * -t, --threads: display the number of threads
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
@@ -314,7 +319,7 @@ This Nagios plugin checks displays some network interfaces.statistics.
 	check_network
 	check_network --help
 
-*Where*
+*Command line options*
 
 * -h, --help: display this help and exit
 * -V, --version: output version information and exit
@@ -329,7 +334,7 @@ This Nagios plugin checks for memory and swap paging.
 	check_paging [--paging] [--swapping]
 	check_paging --help
 
-*Where*
+*Command line options*
 
 * -p, --paging: display the page reads and writes
 * -s, --swapping: display the swap reads amd writes
@@ -350,7 +355,7 @@ This Nagios plugin checks for readonly filesystems.
 	check_readonlyfs [OPTION]... [FILE]...
 	check_readonlyfs --help
 
-*Options*
+*Command line options*
 
 * -l, --local: limit listing to local file systems
 * -L, --list: display the list of checked file systems
@@ -375,7 +380,7 @@ This plugin displays TCP network and socket informations.
 	check_tcpcount [--tcp] [--tcp6] --warning COUNTER --critical COUNTER
 	check_tcpcount --help
 
-*Where*
+*Command line options*
 
 * -t, --tcp: display the statistics for the TCP protocol (the default)
 * -6, --tcp6: display the statistics for the TCPv6 protocol
@@ -396,25 +401,21 @@ This Nagios plugin monitors the hardware's temperature.
 *Usage*
 
 	check_temperature [-f|-k] [-t <thermal_zone>] [-w COUNTER] [-c COUNTER]
-	check_temperature -l
 	check_temperature -.help
 
-*Where*
+*Command line options*
 
 * -f, --fahrenheit: use fahrenheit as the temperature unit
 * -k, --kelvin: use kelvin as the temperature unit
-* -l, --list: list the thermal zones available and exit
 * -t, --thermal_zone: only consider a specific thermal zone
 * -w, --warning COUNTER: warning threshold
 * -c, --critical COUNTER: critical threshold
-* -v, --verbose: show details for command-line debugging (Nagios may truncate output)
 * -h, --help: display this help and exit
 * -V, --version: output version information and exit
 
 *Examples*
 
 	check_temperature -w 80 -c 90
-	check_temperature --list
 	check_temperature -t thermal_zone0 -w 80 -c 90
 
 
@@ -424,11 +425,12 @@ This Nagios plugin checks how long the system has been running.
 
 *Usage*
 
-	check_uptime [--warning [@]start:end] [--critical [@]start:end]
+	check_uptime [-m] [--warning [@]start:end] [--critical [@]start:end]
 	check_uptime --help
 
-*Where*
+*Command line options*
 
+* -m, --clock-monotonic  use the monotonic clock for retrieving the time
 * -w, --warning COUNTER: warning threshold
 * -c, --critical COUNTER: critical threshold
 * -h, --help: display this help and exit
@@ -447,6 +449,7 @@ and
 
 	check_uptime
 	check_uptime --warning 30: --critical 15:
+	check_uptime --clock-monotonic -c 15: -w 30:
 
 
 **The check_users plugin**
@@ -457,10 +460,11 @@ This Nagios plugin displays the number of users that are currently logged on.
 
 	check_users [-w PERC] [-c PERC]
 
-Where
+*Command line options*
 
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
+* -v, --verbose: show details for command-line debugging (Nagios may truncate output)
 * -h, --help: display this help and exit
 * -V, --version: output version information and exit
 
@@ -495,8 +499,9 @@ sticking closely to ANSI C/POSIX.
 A C99-compliant compiler is required anyway.
 
 This package is known to compile with
-* gcc 4.4 (RHEL6),
-* gcc 4.8.2 and clang 3.1 (openmamba GNU/Linux 2.90).
+* gcc 4.1.2 (RHEL 5 / CentOS 5)
+* gcc 4.4 (RHEL6 / CentOS 6),
+* gcc 4.8.2, gcc 4,9,0 and clang 3.1 (openmamba GNU/Linux 2.90+).
 
 
 ## Bugs
