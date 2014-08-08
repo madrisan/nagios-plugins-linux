@@ -172,6 +172,21 @@ AC_CHECK_HEADERS([ \
   utmpx.h])
 
 AC_CHECK_FUNCS([asprintf])
+
+dnl Check for clock_gettime CLOCK_MONOTONIC
+dnl wanted by: plugins/check_uptime.c
+AC_MSG_CHECKING([for clock_gettime with clock CLOCK_MONOTONIC])
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM([[#include <time.h>]],
+    [[struct timespec ts;
+      clock_gettime (CLOCK_MONOTONIC, &ts);]])],
+  [ac_cv_clock_gettime_monotonic=yes
+   AC_DEFINE_UNQUOTED(HAVE_CLOCK_GETTIME_MONOTONIC, 1,
+     [Define to 1 if you have clock_gettime(CLOCK_MONOTONIC).])
+  ],
+  [ac_cv_clock_gettime_monotonic=no])
+AC_MSG_RESULT([$ac_cv_clock_gettime_monotonic])
+
 AC_CHECK_FUNCS([getmntent])  dnl wanted by: lib/mountlist.c
 AC_CHECK_FUNCS([regcomp])    dnl wanted by: plugins/check_multipath.c
 AC_CHECK_FUNCS([socket])     dnl wanted by: plugins/check_multipath.c

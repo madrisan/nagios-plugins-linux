@@ -60,8 +60,10 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [OPTION]\n", program_name);
   fputs (USAGE_OPTIONS, out);
+#if HAVE_CLOCK_GETTIME_MONOTONIC
   fputs ("  -m, --clock-monotonic  "
 	 "use the monotonic clock for retrieving the time\n", out);
+#endif
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs (USAGE_HELP, out);
@@ -69,7 +71,9 @@ usage (FILE * out)
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
   fprintf (out, "  %s --critical 15: --warning 30:\n", program_name);
+#if HAVE_CLOCK_GETTIME_MONOTONIC
   fprintf (out, "  %s --clock-monotonic -c 15: -w 30:\n", program_name);
+#endif
   fputs (USAGE_SEPARATOR, out);
   fputs (USAGE_THRESHOLDS, out);
 
@@ -97,6 +101,7 @@ uptime_sysinfo ()
   return info.uptime;
 }
 
+#if HAVE_CLOCK_GETTIME_MONOTONIC
 static double
 uptime_clock_monotonic ()
 {
@@ -107,6 +112,7 @@ uptime_clock_monotonic ()
 
   return ts.tv_sec;
 }
+#endif
 
 static char *
 sprint_uptime (double uptime_secs)
@@ -155,9 +161,11 @@ main (int argc, char **argv)
 	{
 	default:
 	  usage (stderr);
+#if HAVE_CLOCK_GETTIME_MONOTONIC
 	case 'm':
 	  uptime = uptime_clock_monotonic;
 	  break;
+#endif
 	case 'c':
 	  critical = optarg;
 	  break;
