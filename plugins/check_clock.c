@@ -31,6 +31,7 @@
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
+#include "xstrtol.h"
 
 static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
@@ -112,10 +113,8 @@ main (int argc, char **argv)
 	default:
 	  usage (stderr);
 	case 'r':
-	  refclock = strtol (optarg, &end, 10);
-	  if (errno != 0 || optarg == end || (end != NULL && *end != '\0'))
-	    plugin_error (STATE_UNKNOWN, 0,
-			  "the option '-s' requires an integer");
+	  refclock = strtol_or_err (optarg,
+				    "the option '-s' requires an integer");
 	  break;
 	case 'c':
 	  critical = optarg;

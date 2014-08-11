@@ -26,7 +26,6 @@
   *   requested by a task scheduled on that CPU.  */
 
 #include <ctype.h>
-#include <errno.h>
 #include <getopt.h>
 #include <limits.h>
 #include <stdio.h>
@@ -46,6 +45,7 @@
 #include "system.h"
 #include "xalloc.h"
 #include "xasprintf.h"
+#include "xstrtol.h"
 
 /* by default one iteration with 1sec delay */
 #define DELAY_DEFAULT	1
@@ -107,27 +107,6 @@ print_version (void)
   fputs (GPLv3_DISCLAIMER, stdout);
 
   exit (STATE_OK);
-}
-
-/*
- * same as strtol(3) but exit on failure instead of returning crap
- */
-long
-strtol_or_err (const char *str, const char *errmesg)
-{
-  long num;
-  char *end = NULL;
-
-  if (str != NULL && *str != '\0')
-    {
-      errno = 0;
-      num = strtol (str, &end, 10);
-      if (errno == 0 && str != end && end != NULL && *end == '\0')
-	return num;
-    }
-
-  plugin_error (STATE_UNKNOWN, errno, "%s: '%s'", errmesg, str);
-  return 0;
 }
 
 /* output formats "<key>:  <value>" */

@@ -39,4 +39,6 @@ libutils_a_SOURCES =  \
 	tcpinfo.c     \
 	vminfo.c      \
 	xasprintf.c   \
-	xmalloc.c
+	xmalloc.c     \
+	xstrtol.c
+
