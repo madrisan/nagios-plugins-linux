@@ -1,5 +1,5 @@
     Major changes between "nagios-plugins-linux" versions 13 and 14
-     - Korbielow 2014 release -
+                     -= Korbielow 2014 release =-
 
 -- Enhancements
 
@@ -8,6 +8,9 @@
 * check_uptime: new option '-m|--clock-monotonic' for retrieving the
   time of the linux monotonic clock instead of using the system 
   statistics returned by 'sysinfo()'.
+
+* New library 'xstrtol' containing the function 'strtol_or_err' that
+  was previosly duplicated in several plugins.
 
 -- Fixes
 
