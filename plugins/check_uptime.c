@@ -44,6 +44,9 @@ static const char *program_copyright =
 static char buf[BUFSIZE + 1];
 
 static struct option const longopts[] = {
+#if HAVE_CLOCK_GETTIME_MONOTONIC
+  {(char *) "clock-monotonic", no_argument, NULL, 'm'},
+#endif
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
