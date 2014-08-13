@@ -268,14 +268,14 @@ main (int argc, char **argv)
       cpu_progname = xstrdup ("iowait");
       cpu_value = &diowait;
       program_shorthelp =
-      xstrdup ("This plugin checks I/O wait bottlenecks\n");
+        xstrdup ("This plugin checks I/O wait bottlenecks\n");
     }
   else				/* check_cpu --> cpu_user (the default) */
     {
       cpu_progname = xstrdup ("user");;
       cpu_value = &duser;
       program_shorthelp =
-      xstrdup ("This plugin checks the CPU (user mode) utilization\n");
+        xstrdup ("This plugin checks the CPU (user mode) utilization\n");
     }
 
   err = cpu_desc_new (&cpudesc);
