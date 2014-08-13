@@ -36,7 +36,7 @@ static char buff[BUFFSIZE];
 
 #define PATH_PROC_STAT		"/proc/stat"
 
-/* Fill the proc_cpu structure pointed with the values found in the 
+/* Fill the cpu_stats structure pointed with the values found in the
  * proc filesystem */
 
 void
@@ -51,7 +51,8 @@ cpu_stats_read (struct cpu_stats *cpustats)
     {
       fd = open (PATH_PROC_STAT, O_RDONLY, 0);
       if (fd == -1)
-	plugin_error (STATE_UNKNOWN, errno, "Error opening %s", PATH_PROC_STAT);
+	plugin_error (STATE_UNKNOWN, errno, "Error opening %s",
+		      PATH_PROC_STAT);
     }
 
   read (fd, buff, BUFFSIZE - 1);
