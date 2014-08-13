@@ -1,15 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
 
-m4_define(PROG_VERSION, 13)
-m4_define(PROG_NAME, [nagios-plugins-linux])
-m4_define(PROG_BUGREPORT, [davide.madrisan@gmail.com])
-
 AC_PREREQ([2.59])
 
-AC_INIT([PROG_NAME],
-        [PROG_VERSION],
-        [PROG_BUGREPORT],
-        [PROG_NAME])
+AC_INIT([nagios-plugins-linux],[14],
+        [davide.madrisan@gmail.com])
 
 AC_CANONICAL_TARGET
 
