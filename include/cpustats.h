@@ -25,7 +25,7 @@ extern "C"
 
   typedef unsigned long long jiff;
 
-  struct cpu_stats
+  struct cpu_time
   {
     /* Time spent running non-kernel code. (user time, including nice time) */
     jiff user;
@@ -51,20 +51,21 @@ extern "C"
      * operating systems under the control of the Linux kernel).
      * (since Linux 2.6.33) */
     jiff guestn;
-
-    /* The number of context switches that the system underwent */
-    unsigned long long nctxt;
-    /* The total of all interrupts the system has experienced
-     * (since Linux 2.6.0-test4) */
-    unsigned long long nintr;
-    /* The total of softirqs the system has experienced
-     * (since Linux 2.6.0-test4) */
-    unsigned long long nsoftirq;
   };
 
-  /* Fill the cpu_stats structure pointed with the values found in the 
-   * proc filesystem */
-  extern void cpu_stats_read (struct cpu_stats * __restrict cpustats);
+  /* Get the cpu time statistics */
+  extern void cpu_stats_get_time (struct cpu_time * __restrict cputime);
+
+  /* Get the number of context switches that the system underwent */
+  extern void cpu_stats_get_cswch (unsigned long long * __restrict nctxt);
+
+  /* Get the total of all interrupts the system has experienced
+   * (since Linux 2.6.0-test4) */
+  extern void cpu_stats_get_intr (unsigned long long * __restrict nintr);
+
+  /* Get the total of softirqs the system has experienced
+   * (since Linux 2.6.0-test4) */
+  extern void cpu_stats_get_softirq (unsigned long long * __restrict nsoftirq);
 
 #ifdef __cplusplus
 }

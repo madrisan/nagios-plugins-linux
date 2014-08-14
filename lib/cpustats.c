@@ -39,8 +39,11 @@ static char buff[BUFFSIZE];
 /* Fill the cpu_stats structure pointed with the values found in the
  * proc filesystem */
 
-void
-cpu_stats_read (struct cpu_stats *cpustats)
+static void
+cpu_stats_read (struct cpu_time *cputime,
+		unsigned long long *nctxt,
+		unsigned long long *nintr,
+		unsigned long long *nsoftirq)
 {
   static int fd;
   const char *b;
@@ -57,45 +60,74 @@ cpu_stats_read (struct cpu_stats *cpustats)
 
   read (fd, buff, BUFFSIZE - 1);
 
-  cpustats->iowait = 0;	/* not separated out until the 2.5.41 kernel */
-  cpustats->irq = 0;	/* not separated out until the 2.6.0-test4 */
-  cpustats->softirq = 0;	/* not separated out until the 2.6.0-test4 */
-  cpustats->steal = 0;	/* not separated out until the 2.6.11 */
-  cpustats->guest = 0;	/* since Linux 2.6.24 */
-  cpustats->guestn = 0;	/* since Linux 2.6.33 */
+  if (nctxt) *nctxt = 0;
+  if (nintr) *nintr = 0;
+  if (nsoftirq) *nsoftirq = 0;
 
-  cpustats->nctxt = 0;
-  cpustats->nintr = 0;
-  cpustats->nsoftirq = 0;
+  if (cputime)
+    {
+      if ((b = strstr (buff, "cpu ")))
+	sscanf (b, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
+		&cputime->user, &cputime->nice, &cputime->system,
+		&cputime->idle, &cputime->iowait, &cputime->irq,
+		&cputime->softirq, &cputime->steal, &cputime->guest,
+		&cputime->guestn);
+      else
+	goto readerr;
+    }
 
-  if ((b = strstr (buff, "cpu ")))
-    sscanf (b, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
-	    &cpustats->user, &cpustats->nice, &cpustats->system,
-	    &cpustats->idle, &cpustats->iowait, &cpustats->irq,
-	    &cpustats->softirq, &cpustats->steal, &cpustats->guest,
-	    &cpustats->guestn);
-  else
-    goto readerr;
-
-  if ((b = strstr (buff, "ctxt ")))
-    sscanf (b, "ctxt %Lu", &cpustats->nctxt);
-  else
-    goto readerr;
+  if (nctxt)
+    {
+      if ((b = strstr (buff, "ctxt ")))
+	sscanf (b, "ctxt %Lu", nctxt);
+      else
+	goto readerr;
+    }
 
   /* Get the number of interrupts serviced since boot time, for each of the
    * possible system interrupts, including unnumbered architecture specific
    * interrupts  */
-  if ((b = strstr (buff, "intr ")))
-    sscanf (b, "intr %Lu ", &cpustats->nintr);
-  else
-    goto readerr;
+  if (nintr)
+    {
+      if ((b = strstr (buff, "intr ")))
+	sscanf (b, "intr %Lu ", nintr);
+      else
+	goto readerr;
+    }
 
   /* Not separated out until the 2.6.0-test4 */
-  if ((b = strstr (buff, "softirq ")))
-    sscanf (b, "softintr %Lu ", &cpustats->nsoftirq);
+  if (nsoftirq)
+    if ((b = strstr (buff, "softirq ")))
+      sscanf (b, "softintr %Lu ", nsoftirq);
 
   return;
 
 readerr:
   plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PATH_PROC_STAT);
+}
+
+/* wrappers for cpu_stats_read () */
+
+inline void
+cpu_stats_get_time (struct cpu_time * __restrict cputime)
+{
+  cpu_stats_read (cputime, NULL, NULL, NULL);
+}
+
+inline void
+cpu_stats_get_cswch (unsigned long long * __restrict nctxt)
+{
+  cpu_stats_read (NULL, nctxt, NULL, NULL);
+}
+
+inline void
+cpu_stats_get_intr (unsigned long long * __restrict nintr)
+{
+  cpu_stats_read (NULL, NULL, nintr, NULL);
+}
+
+inline void
+cpu_stats_get_softirq (unsigned long long * __restrict nsoftirq)
+{
+  cpu_stats_read (NULL, NULL, NULL, nsoftirq);
 }

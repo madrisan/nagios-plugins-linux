@@ -104,7 +104,7 @@ main (int argc, char **argv)
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
-  struct cpu_stats cpu[2];
+  unsigned long long nintr[2];
   unsigned int sleep_time = 1,
 	   tog = 0,		/* toggle switch for cleaner code */
 	   ncpus0, ncpus1;
@@ -157,10 +157,10 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  cpu_stats_read (&cpu[0]);
-  unsigned long long nintr = cpu[0].nintr;
+  cpu_stats_get_intr (&nintr[0]);
+  unsigned long long dnintr = nintr[0];
   if (verbose)
-    printf ("intr = %Lu\n", nintr);
+    printf ("intr = %Lu\n", nintr[0]);
 
   if (count <= 2)
     vintr[0] = proc_interrupts_get_nintr_per_cpu (&ncpus0);
@@ -170,11 +170,11 @@ main (int argc, char **argv)
       sleep (sleep_time);
 
       tog = !tog;
-      cpu_stats_read (&cpu[tog]);
+      cpu_stats_get_intr (&nintr[tog]);
 
-      nintr = (cpu[tog].nintr - cpu[!tog].nintr) / sleep_time;
+      dnintr = (nintr[tog] - nintr[!tog]) / sleep_time;
       if (verbose)
-	printf ("intr = %Lu --> %Lu/s\n", cpu[tog].nintr, nintr);
+	printf ("intr = %Lu --> %Lu/s\n", nintr[tog], dnintr);
 
       if (count - 2 == i)
 	vintr[0] = proc_interrupts_get_nintr_per_cpu (&ncpus0);
@@ -182,13 +182,13 @@ main (int argc, char **argv)
 	vintr[1] = proc_interrupts_get_nintr_per_cpu (&ncpus1);
     }
 
-  status = get_status (nintr, my_threshold);
+  status = get_status (dnintr, my_threshold);
   free (my_threshold);
 
   char *time_unit = (count > 1) ? "/s" : "";
   printf ("%s %s - number of interrupts%s %Lu | intr%s=%Lu",
 	  program_name_short, state_text (status),
-	  time_unit, nintr, time_unit, nintr);
+	  time_unit, dnintr, time_unit, dnintr);
 
   for (i = 0; i < MIN (ncpus0, ncpus1); i++)
     printf (" intr_cpu%lu%s=%lu", i, time_unit,

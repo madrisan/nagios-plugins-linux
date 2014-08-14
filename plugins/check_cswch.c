@@ -95,7 +95,7 @@ main (int argc, char **argv)
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
-  struct cpu_stats cpu[2];
+  unsigned long long nctxt[2];
   unsigned int sleep_time = 1,
 	   tog = 0;		/* toggle switch for cleaner code */
   unsigned long i, delay, count;
@@ -146,29 +146,29 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  cpu_stats_read (&cpu[0]);
-  unsigned long long nctxt = cpu[0].nctxt;
+  cpu_stats_get_cswch (&nctxt[0]);
+  unsigned long long dnctxt = nctxt[0];
   if (verbose)
-    printf ("ctxt = %Lu\n", nctxt);
+    printf ("ctxt = %Lu\n", nctxt[0]);
 
   for (i = 1; i < count; i++)
     {
       sleep (sleep_time);
 
       tog = !tog;
-      cpu_stats_read (&cpu[tog]);
+      cpu_stats_get_cswch (&nctxt[tog]);
 
-      nctxt = (cpu[tog].nctxt - cpu[!tog].nctxt) / sleep_time;
+      dnctxt = (nctxt[tog] - nctxt[!tog]) / sleep_time;
 
       if (verbose)
-	printf ("ctxt = %Lu --> %Lu/s\n", cpu[tog].nctxt, nctxt);
+	printf ("ctxt = %Lu --> %Lu/s\n", nctxt[tog], dnctxt);
     }
 
-  status = get_status (nctxt, my_threshold);
+  status = get_status (dnctxt, my_threshold);
   free (my_threshold);
 
   char *time_unit = (count > 1) ? "/s" : "";
   printf ("%s %s - number of context switches%s %Lu | cswch%s=%Lu\n",
 	  program_name_short, state_text (status),
-	  time_unit, nctxt, time_unit, nctxt);
+	  time_unit, dnctxt, time_unit, dnctxt);
 }
