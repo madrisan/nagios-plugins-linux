@@ -17,6 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE /* activate extra prototypes for glibc */
+#endif
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <errno.h>
@@ -29,10 +33,8 @@
 #include "common.h"
 #include "cpustats.h"
 #include "messages.h"
-
-/* note! This buffer may not be big enough if lots of CPUs are online */
-#define BUFFSIZE 0x1000		/* 4kB */
-static char buff[BUFFSIZE];
+#include "procparser.h"
+#include "system.h"
 
 #define PATH_PROC_STAT		"/proc/stat"
 
@@ -45,65 +47,63 @@ cpu_stats_read (struct cpu_time *cputime,
 		unsigned long long *nintr,
 		unsigned long long *nsoftirq)
 {
-  static int fd;
-  const char *b;
+  FILE *fp;
+  size_t len = 0;
+  ssize_t chread;
+  char *line = NULL;
+  bool cputimes_found, intr_found, ctxt_found;
 
-  if (fd)
-    lseek (fd, 0L, SEEK_SET);
-  else
-    {
-      fd = open (PATH_PROC_STAT, O_RDONLY, 0);
-      if (fd == -1)
-	plugin_error (STATE_UNKNOWN, errno, "Error opening %s",
-		      PATH_PROC_STAT);
-    }
-
-  read (fd, buff, BUFFSIZE - 1);
+  if ((fp = fopen (PATH_PROC_STAT,  "r")) == NULL)
+    plugin_error (STATE_UNKNOWN, errno, "error opening %s", PATH_PROC_STAT);
 
   if (nctxt) *nctxt = 0;
   if (nintr) *nintr = 0;
   if (nsoftirq) *nsoftirq = 0;
+  cputimes_found = ctxt_found = intr_found = false;
 
-  if (cputime)
+  while ((chread = getline (&line, &len, fp)) != -1)
     {
-      if ((b = strstr (buff, "cpu ")))
-	sscanf (b, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
-		&cputime->user, &cputime->nice, &cputime->system,
-		&cputime->idle, &cputime->iowait, &cputime->irq,
-		&cputime->softirq, &cputime->steal, &cputime->guest,
-		&cputime->guestn);
-      else
-	goto readerr;
+      if (!strncmp (line, "cpu ", 4))
+	{
+	  cputimes_found = true;
+	  if (NULL == cputime)
+	    continue;
+	  sscanf (line, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
+		  &cputime->user, &cputime->nice, &cputime->system,
+		  &cputime->idle, &cputime->iowait, &cputime->irq,
+		  &cputime->softirq, &cputime->steal, &cputime->guest,
+		  &cputime->guestn);
+	}
+      else if (!strncmp (line, "ctxt ", 5))
+	{
+	  ctxt_found = true;
+	  if (NULL == nctxt)
+	    continue;
+	  sscanf (line, "ctxt %Lu", nctxt);
+	}
+      /* Get the number of interrupts serviced since boot time, for each of the
+       * possible system interrupts, including unnumbered architecture specific
+       * interrupts  */
+      else if (!strncmp (line, "intr ", 5))
+	{
+	  intr_found = true;
+	  if (NULL == nintr)
+	    continue;
+	  sscanf (line, "intr %Lu", nintr);
+	}
+      /* Not separated out until the 2.6.0-test4 */
+      else if (!strncmp (line, "softirq ", 8))
+	{
+	  if (NULL == nsoftirq)
+	    continue;
+	  sscanf (line, "softirq %Lu", nsoftirq);
+	}
     }
 
-  if (nctxt)
-    {
-      if ((b = strstr (buff, "ctxt ")))
-	sscanf (b, "ctxt %Lu", nctxt);
-      else
-	goto readerr;
-    }
+  free (line);
 
-  /* Get the number of interrupts serviced since boot time, for each of the
-   * possible system interrupts, including unnumbered architecture specific
-   * interrupts  */
-  if (nintr)
-    {
-      if ((b = strstr (buff, "intr ")))
-	sscanf (b, "intr %Lu ", nintr);
-      else
-	goto readerr;
-    }
-
-  /* Not separated out until the 2.6.0-test4 */
-  if (nsoftirq)
-    if ((b = strstr (buff, "softirq ")))
-      sscanf (b, "softintr %Lu ", nsoftirq);
-
-  return;
-
-readerr:
-  plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PATH_PROC_STAT);
+  if (!cputimes_found || !ctxt_found || !intr_found)
+    plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PATH_PROC_STAT);
 }
 
 /* wrappers for cpu_stats_read () */
