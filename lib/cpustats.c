@@ -101,6 +101,7 @@ cpu_stats_read (struct cpu_time *cputime,
     }
 
   free (line);
+  fclose (fp);
 
   if (!cputimes_found || !ctxt_found || !intr_found)
     plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PATH_PROC_STAT);
