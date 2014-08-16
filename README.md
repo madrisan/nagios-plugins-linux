@@ -503,6 +503,8 @@ This package is known to compile with
 * gcc 4.4 (RHEL6 / CentOS 6),
 * gcc 4.8.2, gcc 4,9,0 and clang 3.1 (openmamba GNU/Linux 2.90+).
 
+List of the Linux kernels that have been successfully tested: 2.6.18, 2.6.32, 3.10, 3.14.
+
 
 ## Bugs
 
