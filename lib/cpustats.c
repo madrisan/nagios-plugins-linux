@@ -42,10 +42,10 @@
  * proc filesystem */
 
 static void
-cpu_stats_read (struct cpu_time *cputime,
-		unsigned long long *nctxt,
-		unsigned long long *nintr,
-		unsigned long long *nsoftirq)
+cpu_stats_read (struct cpu_time * __restrict cputime,
+		unsigned long long * __restrict nctxt,
+		unsigned long long * __restrict nintr,
+		unsigned long long * __restrict nsoftirq)
 {
   FILE *fp;
   size_t len = 0;
