@@ -60,9 +60,6 @@ extern "C"
   unsigned long proc_sysmem_get_main_total (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_main_used (struct proc_sysmem *sysmem);
 
-  /* return true if the kernel provides the counter 'MemAvailable' (3.14+) */
-  bool proc_sysmem_native_memavailable (struct proc_sysmem *sysmem);
-
   unsigned long proc_sysmem_get_swap_cached (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_swap_free (struct proc_sysmem *sysmem);
   unsigned long proc_sysmem_get_swap_total (struct proc_sysmem *sysmem);

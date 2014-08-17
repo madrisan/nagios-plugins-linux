@@ -61,33 +61,19 @@ usage (FILE * out)
   fputs ("This plugin checks the system memory utilization.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-a] [-b,-k,-m,-g] [-C] [-s] -w PERC -c PERC\n",
+  fprintf (out, "  %s [-b,-k,-m,-g] [-s] -w PERC -c PERC\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
-  fputs ("  -a, --available "
-	 "prefer the kernel counter 'MemAvailable' (kernel 3.14+)\n",
-	 out);
   fputs ("  -b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
-  fputs ("  -C, --caches    count buffers and cached memory as free memory\n",
-	 out);
   fputs ("  -s, --vmstats   display the virtual memory perfdata\n", out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_NOTE, out);
-  fputs ("  The option '-a|--available' gives an estimation of the "
-	 "available memory\n"
-	 "  for starting new applications without swapping.\n", out);
-  fputs ("  It requires a kernel 3.14 and above, which provides this "
-	 "information \n"
-	 "  in /proc/meminfo (see the parameter 'MemAvailable').\n", out);
-  fputs ("  For older kernels this plugin will fall back to 'MemFree'.\n",
-	 out);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s -C --vmstats -w 80%% -c90%%\n", program_name);
-  fprintf (out, "  %s -a -w 20%%: -c 10%%:\n", program_name);
+  fprintf (out, "  %s --vmstats -w 80%% -c90%%\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -105,8 +91,7 @@ print_version (void)
 int
 main (int argc, char **argv)
 {
-  bool cache_is_free = false, vmem_perfdata = false;
-  bool prefer_memavailable = false;
+  bool vmem_perfdata = false;
   int c, status, err;
   int shift = k_shift;
   char *critical = NULL, *warning = NULL;
@@ -136,9 +121,6 @@ main (int argc, char **argv)
   unsigned long nr_vmem_pgpgout[2];
   unsigned long nr_vmem_pgmajfault[2];
 
-  /* by default we'll select the memory used */
-  unsigned long *kb_mem_monitored = &kb_mem_main_used;
-
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
@@ -150,11 +132,10 @@ main (int argc, char **argv)
         default:
           usage (stderr);
 	case 'a':
-	  prefer_memavailable = true;
-	  kb_mem_monitored = &kb_mem_main_available;
+	  /* does nothing, exists for compatibility */
           break;
         case 'C':
-          cache_is_free = true;
+          /* does nothing, exists for compatibility */
           break;
         case 's':
           vmem_perfdata = true;
@@ -203,20 +184,6 @@ main (int argc, char **argv)
   kb_mem_main_total   = proc_sysmem_get_main_total (sysmem);
   kb_mem_main_used    = proc_sysmem_get_main_used (sysmem);
 
-  /* XXX This seems to be a misconception, as memory in the page cache
-   * cannot be considered as free...	*/
-  if (cache_is_free)
-    {
-      unsigned long mem_cached = kb_mem_main_cached + kb_mem_main_buffers;
-
-      /* 'MemAvailable' not provided by the running kernel */
-      if (!proc_sysmem_native_memavailable (sysmem))
-	kb_mem_main_available += mem_cached;
-
-      kb_mem_main_used -= mem_cached;
-      kb_mem_main_free += mem_cached;
-    }
-
   if (vmem_perfdata)
     {
       err = proc_vmem_new (&vmem);
@@ -253,16 +220,15 @@ main (int argc, char **argv)
    * See. http://doc.qt.digia.com/qtextended4.4/syscust-oom.html	*/
 
   if (kb_mem_main_total != 0)
-    percent_used = ((*kb_mem_monitored) * 100.0 / kb_mem_main_total);
+    percent_used = ((kb_mem_main_used) * 100.0 / kb_mem_main_total);
   status = get_status (percent_used, my_threshold);
 
   perfdata_memavailable_msg =
     xasprintf ("mem_available=%Lu%s, ", SU (kb_mem_main_available));
 
-  status_msg = xasprintf ("%s: %.2f%% (%Lu %s) %s",
+  status_msg = xasprintf ("%s: %.2f%% (%Lu %s) used",
 			  state_text (status), percent_used,
-			  SU (*kb_mem_monitored),
-			  prefer_memavailable ? "available" : "used");
+			  SU (kb_mem_main_used));
 
   free (my_threshold);
 

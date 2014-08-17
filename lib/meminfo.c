@@ -48,11 +48,9 @@ typedef struct proc_sysmem_data
    *  b779855cf15d68f9038ff1809db18c0788e9ae70.patch 
    */
   bool native_memavailable;
-  unsigned long kb_main_available;
-
   /* old but still kicking -- the important stuff */
   unsigned long kb_main_buffers;
-  unsigned long kb_main_cached;
+  unsigned long kb_page_cache;
   unsigned long kb_main_free;
   unsigned long kb_main_total;
   unsigned long kb_swap_free;
@@ -91,6 +89,11 @@ typedef struct proc_sysmem_data
   unsigned long kb_nfs_unstable;
   unsigned long kb_swap_reclaimable;
   unsigned long kb_swap_unreclaimable;
+  /* 3.14+ */
+  unsigned long kb_main_available;
+  /* derived values */
+  unsigned long kb_main_cached;
+  unsigned long kb_main_used;
 } proc_sysmem_data_t;
 
 typedef struct proc_sysmem
@@ -138,7 +141,7 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
     { "AnonPages", &data->kb_anon_pages },
     { "Bounce", &data->kb_bounce },
     { "Buffers", &data->kb_main_buffers }, /* important */
-    { "Cached", &data->kb_main_cached },   /* important */
+    { "Cached", &data->kb_page_cache },   /* important */
     { "CommitLimit", &data->kb_commit_limit },
     { "Committed_AS", &data->kb_committed_as },
     { "Dirty", &data->kb_dirty },  /* kB version of vmstat nr_dirty */
@@ -172,23 +175,14 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
   };
   const int sysmem_table_count = sizeof (sysmem_table) / sizeof (proc_table_struct);
 
-  data->kb_main_available = MEMINFO_UNSET;
   data->kb_inactive = MEMINFO_UNSET;
+  data->kb_low_total = MEMINFO_UNSET;
+  data->kb_main_available = MEMINFO_UNSET;
 
   procparser (PROC_MEMINFO, sysmem_table, sysmem_table_count, ':');
 
-  if (data->kb_main_available == MEMINFO_UNSET)
-    {
-      dbg ("MemAvailable is not provided by /proc/meminfo...\n");
-      dbg ("...falling back to MemFree\n");
-      data->kb_main_available = data->kb_main_free;
-      data->native_memavailable = false;
-    }
-  else
-    data->native_memavailable = true;
-
   if (!data->kb_low_total)
-    {				/* low==main except with large-memory support */
+    {			       /* low==main except with large-memory support */
       data->kb_low_total = data->kb_main_total;
       data->kb_low_free = data->kb_main_free;
     }
@@ -199,6 +193,23 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
 	data->kb_inact_dirty + data->kb_inact_clean +
 	data->kb_inact_laundry;
     }
+
+  if (data->kb_main_available == MEMINFO_UNSET)
+    {
+      /* FIXME - implement the fallback for 2.6.27 <= kernel < 3.14 */
+      dbg ("MemAvailable is not provided by /proc/meminfo...\n");
+      dbg ("...falling back to MemFree\n");
+      data->kb_main_available = data->kb_main_free;
+      data->native_memavailable = false;
+    }
+  else
+    data->native_memavailable = true;
+  
+  /* derived values */
+  data->kb_main_cached = data->kb_page_cache + data->kb_slab;
+  data->kb_main_used =
+    data->kb_main_total - data->kb_main_free - data->kb_main_cached -
+    data->kb_main_buffers;
 }
 
 /* Drop a reference of the memory library context. If the refcount of
@@ -246,24 +257,13 @@ proc_sysmem_get(main_cached)
 proc_sysmem_get(main_free)
 proc_sysmem_get(main_shared)
 proc_sysmem_get(main_total)
+proc_sysmem_get(main_used)
 
 proc_sysmem_get(swap_cached)
 proc_sysmem_get(swap_free)
 proc_sysmem_get(swap_total)
 
 #undef proc_sysmem_get
-
-bool proc_sysmem_native_memavailable (struct proc_sysmem *sysmem)
-{
-  return sysmem->data->native_memavailable;
-}
-
-unsigned long
-proc_sysmem_get_main_used (struct proc_sysmem *sysmem)
-{
-  return (sysmem == NULL) ? 0 :
-    sysmem->data->kb_main_total - sysmem->data->kb_main_free;
-}
 
 unsigned long
 proc_sysmem_get_swap_used (struct proc_sysmem *sysmem)

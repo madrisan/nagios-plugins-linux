@@ -217,7 +217,7 @@ These two nagios plugins respectivery check for memory and swap usage.
 
 *Usage*
 
-	check_memory [-a] [-C] [-s] [-b,-k,-m,-g] [-w PERC] [-c PERC]
+	check_memory [-s] [-b,-k,-m,-g] [-w PERC] [-c PERC]
 	check_swap [-b,-k,-m,-g] [-w PERC] [-c PERC]
 	
 	check_memory --help
@@ -225,8 +225,6 @@ These two nagios plugins respectivery check for memory and swap usage.
 
 *Command line options*
 
-* -a, --available: prefer the kernel counter MemAvailable (kernel 3.14+)
-* -C, --caches: count buffers and cached memory as free memory
 * -s, --vmstats: display the virtual memory perfdata
 * -b,-k,-m,-g: show output in bytes, KB (the default), MB, or GB
 * -w, --warning PERCENT: warning threshold
@@ -236,14 +234,16 @@ These two nagios plugins respectivery check for memory and swap usage.
 
 *Examples*
 
-	check_memory -C --vmstats -w 80% -c 90%
-        memory WARNING: 86.44% (884864 kB) used | mem_total=1023632kB, mem_used=884864kB, mem_free=138768kB, mem_shared=48052kB, mem_buffers=3892kB, mem_cached=118396kB, mem_active=471324kB, mem_anonpages=653996kB, mem_committed=4939408kB, mem_dirty=8848kB, mem_inactive=471808kB, vmem_pageins/s=368, vmem_pageouts/s=1684, vmem_pgmajfault/s=1
+	check_memory --vmstats -w 80% -c 90%
+	memory OK: 26.05% (266580 kB) used | mem_total=1023312kB, mem_used=266580kB, mem_free=171548kB, mem_shared=51244kB, mem_buffers=34744kB, mem_cached=550440kB, mem_available=674712kB, mem_active=325136kB, mem_anonpages=240464kB, mem_committed=1704152kB, mem_dirty=604kB, mem_inactive=468904kB, vmem_pageins/s=128, vmem_pageouts/s=0, vmem_pgmajfault/s=0
 	  # mem_total    : Total usable physical RAM
 	  # mem_used     : Total amount of physical RAM used by the system
 	  # mem_free     : Amount of RAM that is currently unused
 	  # mem_shared   : Now always zero; not calculated
 	  # mem_buffers  : Amount of physical RAM used for file buffers
 	  # mem_cached   : In-memory cache for files read from the disk (the page cache)
+	  # mem_available: kernel >= 3.14: memory available for starting new applications, without swapping
+	  # mem_available: kernel < 3.14: falls back to 'mem_free'
 	  # mem_active   : Memory that has been used more recently
 	  # mem_anonpages: Non-file backed pages mapped into user-space page tables
 	  # mem_committed: The amount of memory presently allocated on the system
@@ -252,11 +252,6 @@ These two nagios plugins respectivery check for memory and swap usage.
 	  # vmem_pageins
 	  # vmem_pageouts: The number of memory pages the system has written in and out to disk
 	  # vmem_pgmajfault: The number of memory major pagefaults
-
-	check_memory -a -m -w 20%: -c 10%:
-	memory WARNING: 18.13% (181 MB) available | mem_total=999MB, mem_used=980MB, mem_free=18MB, mem_shared=50MB, mem_buffers=5MB, mem_cached=206MB, mem_available=181MB, mem_active=428MB, mem_anonpages=668MB, mem_committed=6594MB, mem_dirty=0MB, mem_inactive=461MB
-	  # mem_available: kernel >= 3.14: memory available for starting new applications, without swapping
-	  # mem_available: kernel < 3.14: falls back to 'mem_free'
 
 	check_swap -w 40% -c 60% -m
 	swap WARNING: 42.70% (895104 kB) used | swap_total=2096444kB, swap_used=895104kB, swap_free=1201340kB, swap_cached=117024kB, swap_pageins/s=97, swap_pageouts/s=73

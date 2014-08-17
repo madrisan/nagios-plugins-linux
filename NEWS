@@ -1,3 +1,15 @@
+    Major changes between "nagios-plugins-linux" versions 14 and 15
+
+-- Enhancements
+
+* check_memory: the command line options '-C|--caches' and
+  '-a|--available' now do nothing but are accepted for compatibility.
+  The memory usage calculation has been reviewed and is now more
+  accurate. The changes are based on the (long) discussions and
+  patches that have been recently posted in the procps mailing list.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 13 and 14
                      -= Korbielow 2014 release =-
 
