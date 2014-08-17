@@ -225,6 +225,7 @@ These two nagios plugins respectivery check for memory and swap usage.
 
 *Command line options*
 
+* -a, --available: display the memory availabe (kernel 3.14+) or free
 * -s, --vmstats: display the virtual memory perfdata
 * -b,-k,-m,-g: show output in bytes, KB (the default), MB, or GB
 * -w, --warning PERCENT: warning threshold
@@ -252,6 +253,9 @@ These two nagios plugins respectivery check for memory and swap usage.
 	  # vmem_pageins
 	  # vmem_pageouts: The number of memory pages the system has written in and out to disk
 	  # vmem_pgmajfault: The number of memory major pagefaults
+
+	check_memory -a -m -w 20%: -c 10%:
+	memory OK: 65.40% (653 MB) available | mem_total=999MB, mem_used=264MB, mem_free=105MB, mem_shared=50MB, mem_buffers=38MB, mem_cached=590MB, mem_available=653MB, mem_active=341MB, mem_anonpages=238MB, mem_committed=1663MB, mem_dirty=0MB, mem_inactive=495MB
 
 	check_swap -w 40% -c 60% -m
 	swap WARNING: 42.70% (895104 kB) used | swap_total=2096444kB, swap_used=895104kB, swap_free=1201340kB, swap_cached=117024kB, swap_pageins/s=97, swap_pageouts/s=73

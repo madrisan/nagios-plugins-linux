@@ -61,9 +61,11 @@ usage (FILE * out)
   fputs ("This plugin checks the system memory utilization.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-b,-k,-m,-g] [-s] -w PERC -c PERC\n",
+  fprintf (out, "  %s [-a] [-b,-k,-m,-g] [-s] -w PERC -c PERC\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
+  fputs ("  -a, --available "
+        "display the memory available (kernel 3.14+) or free\n", out);
   fputs ("  -b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs ("  -s, --vmstats   display the virtual memory perfdata\n", out);
@@ -72,8 +74,17 @@ usage (FILE * out)
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_NOTE, out);
+  fputs ("  The option '-a|--available' gives an estimation of the "
+	 "available memory\n"
+	 "  for starting new applications without swapping.\n", out);
+  fputs ("  It requires a kernel 3.14 and above, which provides this "
+	 "information \n"
+	 "  in /proc/meminfo (see the parameter 'MemAvailable').\n", out);
+  fputs ("  For older kernels this plugin will fall back to 'MemFree'.\n",
+	 out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s --vmstats -w 80%% -c90%%\n", program_name);
+  fprintf (out, "  %s -a -w 20%%: -c 10%%:\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -98,7 +109,7 @@ main (int argc, char **argv)
   char *units = NULL;
   char *status_msg, *perfdata_mem_msg,
        *perfdata_vmem_msg = "", *perfdata_memavailable_msg = "";
-  float percent_used = 0;
+  float mem_percent = 0;
   thresholds *my_threshold = NULL;
 
   struct proc_sysmem *sysmem = NULL;
@@ -121,6 +132,9 @@ main (int argc, char **argv)
   unsigned long nr_vmem_pgpgout[2];
   unsigned long nr_vmem_pgmajfault[2];
 
+  /* by default we display the memory used */
+  unsigned long *kb_mem_monitored = &kb_mem_main_used;
+
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
@@ -132,7 +146,7 @@ main (int argc, char **argv)
         default:
           usage (stderr);
 	case 'a':
-	  /* does nothing, exists for compatibility */
+	  kb_mem_monitored = &kb_mem_main_available;
           break;
         case 'C':
           /* does nothing, exists for compatibility */
@@ -220,15 +234,17 @@ main (int argc, char **argv)
    * See. http://doc.qt.digia.com/qtextended4.4/syscust-oom.html	*/
 
   if (kb_mem_main_total != 0)
-    percent_used = ((kb_mem_main_used) * 100.0 / kb_mem_main_total);
-  status = get_status (percent_used, my_threshold);
+    mem_percent = ((*kb_mem_monitored) * 100.0 / kb_mem_main_total);
+  status = get_status (mem_percent, my_threshold);
 
   perfdata_memavailable_msg =
     xasprintf ("mem_available=%Lu%s, ", SU (kb_mem_main_available));
 
-  status_msg = xasprintf ("%s: %.2f%% (%Lu %s) used",
-			  state_text (status), percent_used,
-			  SU (kb_mem_main_used));
+  status_msg =
+    xasprintf ("%s: %.2f%% (%Lu %s) %s",
+	       state_text (status), mem_percent, SU (*kb_mem_monitored),
+	       (kb_mem_monitored == &kb_mem_main_available) ?
+		 "available" : "used");
 
   free (my_threshold);
 
