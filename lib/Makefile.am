@@ -26,6 +26,7 @@ libutils_a_SOURCES =  \
 	cpufreq.c     \
 	cpustats.c    \
 	cputopology.c \
+	kernelver.c   \
 	interrupts.c  \
 	meminfo.c     \
 	messages.c    \

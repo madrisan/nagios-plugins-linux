@@ -64,8 +64,8 @@ usage (FILE * out)
   fprintf (out, "  %s [-a] [-b,-k,-m,-g] [-s] -w PERC -c PERC\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
-  fputs ("  -a, --available "
-        "display the memory available (kernel 3.14+) or free\n", out);
+  fputs ("  -a, --available display the free/available memory\n",
+	 out);
   fputs ("  -b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs ("  -s, --vmstats   display the virtual memory perfdata\n", out);
@@ -77,14 +77,16 @@ usage (FILE * out)
   fputs ("  The option '-a|--available' gives an estimation of the "
 	 "available memory\n"
 	 "  for starting new applications without swapping.\n", out);
-  fputs ("  It requires a kernel 3.14 and above, which provides this "
-	 "information \n"
-	 "  in /proc/meminfo (see the parameter 'MemAvailable').\n", out);
-  fputs ("  For older kernels this plugin will fall back to 'MemFree'.\n",
+  fputs ("  It requires at least a kernel 3.14, which provides this "
+	 "information in\n"
+	 "  /proc/meminfo (see the parameter 'MemAvailable').\n", out);
+  fputs ("  A MemAvailable fall-back code is implemented for "
+	  "kernels 2.6.27 and above.\n", out);
+  fputs ("  For older kernels 'MemFree' is returned instead.\n",
 	 out);
   fputs (USAGE_EXAMPLES, out);
+  fprintf (out, "  %s --available -w 20%%: -c 10%%:\n", program_name);
   fprintf (out, "  %s --vmstats -w 80%% -c90%%\n", program_name);
-  fprintf (out, "  %s -a -w 20%%: -c 10%%:\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }

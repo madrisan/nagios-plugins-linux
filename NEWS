@@ -8,6 +8,10 @@
   accurate.  The changes are based on the (long) discussions and
   patches that have been recently posted in the procps mailing list.
 
+* check_memory / meminfo lib: a fall-back has been implemented in
+  order to provide the memory available counter for the linux kernels
+  2.6.27 and above,
+
 ======================================================================
 
     Major changes between "nagios-plugins-linux" versions 13 and 14

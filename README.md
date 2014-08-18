@@ -225,7 +225,7 @@ These two nagios plugins respectivery check for memory and swap usage.
 
 *Command line options*
 
-* -a, --available: display the memory availabe (kernel 3.14+) or free
+* -a, --available: display the memory available (kernel 2.6.27+) / free (older kernels)
 * -s, --vmstats: display the virtual memory perfdata
 * -b,-k,-m,-g: show output in bytes, KB (the default), MB, or GB
 * -w, --warning PERCENT: warning threshold
@@ -243,8 +243,8 @@ These two nagios plugins respectivery check for memory and swap usage.
 	  # mem_shared   : Now always zero; not calculated
 	  # mem_buffers  : Amount of physical RAM used for file buffers
 	  # mem_cached   : In-memory cache for files read from the disk (the page cache)
-	  # mem_available: kernel >= 3.14: memory available for starting new applications, without swapping
-	  # mem_available: kernel < 3.14: falls back to 'mem_free'
+	  # mem_available: kernel >= 2.6.27: memory available for starting new applications, without swapping
+	  # mem_available: kernel < 2.6.27: same as 'mem_free'
 	  # mem_active   : Memory that has been used more recently
 	  # mem_anonpages: Non-file backed pages mapped into user-space page tables
 	  # mem_committed: The amount of memory presently allocated on the system

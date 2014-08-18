@@ -17,37 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <linux/version.h>
 #include <sys/types.h>
 #include <errno.h>
 #include <stdlib.h>
 
+#include "kernelver.h"
 #include "logging.h"
 #include "messages.h"
 #include "meminfo.h"
 #include "procparser.h"
+#include "sysfsparser.h"
 #include "system.h"
 
-/*#define PROC_MEMINFO  "/proc/meminfo"*/
 #define MEMINFO_UNSET ~0UL
+
+//#define PROC_MEMINFO		"/proc/meminfo"
+#define PATH_PROC_SYS		"/proc/sys"
+#define PATH_VM_MIN_FREE_KB	PATH_PROC_SYS "/vm/min_free_kbytes"
 
 typedef struct proc_sysmem_data
 {
-  /* 3.14+
-   * MemAvailable provides an estimate of how much memory is available for
-   * starting new applications, without swapping.
-   * However, unlike the data provided by the Cache or Free fields,
-   * MemAvailable takes into account page cache and also that not all
-   * reclaimable memory slabs will be reclaimable due to items being in
-   * use.
-   * See: https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/\
-   *  commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773
-   *
-   * FIXME: A fallback MemAvailable evaluation for 2.6.27 <= kernels < 3.14
-   * can be implemented.
-   * See: https://gitorious.org/procps/procps/commit/\
-   *  b779855cf15d68f9038ff1809db18c0788e9ae70.patch 
-   */
-  bool native_memavailable;
   /* old but still kicking -- the important stuff */
   unsigned long kb_main_buffers;
   unsigned long kb_page_cache;
@@ -82,14 +72,27 @@ typedef struct proc_sysmem_data
   unsigned long kb_vmalloc_chunk;
   unsigned long kb_vmalloc_total;
   unsigned long kb_vmalloc_used;
+  // 2.6.19+
+  unsigned long kb_slab_reclaimable;
+  unsigned long kb_slab_unreclaimable;
   /* seen on 2.6.24-rc6-git12 */
   unsigned long kb_anon_pages;
   unsigned long kb_bounce;
   unsigned long kb_commit_limit;
   unsigned long kb_nfs_unstable;
-  unsigned long kb_swap_reclaimable;
-  unsigned long kb_swap_unreclaimable;
-  /* 3.14+ */
+  // 2.6.27+
+  unsigned long kb_active_file;
+  unsigned long kb_inactive_file;
+  /* 3.14+
+   * MemAvailable provides an estimate of how much memory is available for
+   * starting new applications, without swapping.
+   * However, unlike the data provided by the Cache or Free fields,
+   * MemAvailable takes into account page cache and also that not all
+   * reclaimable memory slabs will be reclaimable due to items being in
+   * use.
+   * See: https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/\
+   *  commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773
+   */
   unsigned long kb_main_available;
   /* derived values */
   unsigned long kb_main_cached;
@@ -138,6 +141,7 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
 
   const struct proc_table_struct sysmem_table[] = {
     { "Active", &data->kb_active },        /* important */
+    { "Active(file)", &data->kb_active_file },
     { "AnonPages", &data->kb_anon_pages },
     { "Bounce", &data->kb_bounce },
     { "Buffers", &data->kb_main_buffers }, /* important */
@@ -152,6 +156,7 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
     { "Inact_laundry", &data->kb_inact_laundry },
     { "Inact_target", &data->kb_inact_target },
     { "Inactive", &data->kb_inactive },	 /* important */
+    { "Inactive(file)", &data->kb_inactive_file },
     { "LowFree", &data->kb_low_free },
     { "LowTotal", &data->kb_low_total },
     { "Mapped", &data->kb_mapped },        /* kB version of vmstat nr_mapped */
@@ -161,8 +166,8 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
     { "NFS_Unstable", &data->kb_nfs_unstable },
     { "PageTables", &data->kb_pagetables },   /* kB version of vmstat nr_page_table_pages */
     { "ReverseMaps", &data->nr_reversemaps }, /* same as vmstat nr_page_table_pages */
-    { "SReclaimable", &data->kb_swap_reclaimable },  /* "swap reclaimable" (dentry and inode structures) */
-    { "SUnreclaim", &data->kb_swap_unreclaimable },
+    { "SReclaimable", &data->kb_slab_reclaimable }, /* dentry and inode structures */
+    { "SUnreclaim", &data->kb_slab_unreclaimable },
     { "Shmem", &data->kb_main_shared},        /* kernel 2.6.32 and later */
     { "Slab", &data->kb_slab },               /* kB version of vmstat nr_slab */
     { "SwapCached", &data->kb_swap_cached },  /* late 2.4 and 2.6+ only */
@@ -194,16 +199,37 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
 	data->kb_inact_laundry;
     }
 
+  /* zero? might need fallback for 2.6.27 <= kernel < 3.14 */
   if (data->kb_main_available == MEMINFO_UNSET)
     {
-      /* FIXME - implement the fallback for 2.6.27 <= kernel < 3.14 */
-      dbg ("MemAvailable is not provided by /proc/meminfo...\n");
-      dbg ("...falling back to MemFree\n");
-      data->kb_main_available = data->kb_main_free;
-      data->native_memavailable = false;
+      dbg ("MemAvailable is not provided by /proc/meminfo (kernel %u)...",
+	   linux_version ());
+      if (linux_version () < KERNEL_VERSION (2, 6, 27))
+	{
+	  dbg ("...falling back to MemFree\n");
+	  data->kb_main_available = data->kb_main_free;
+	}
+      else
+	{
+	  dbg ("...let's calculate the value...\n");
+	  unsigned long kb_min_free =
+	    sysfsparser_getvalue (PATH_VM_MIN_FREE_KB);
+	  /* should be equal to sum of all 'low' fields in /proc/zoneinfo */
+	  unsigned long watermark_low = kb_min_free * 5 / 4;
+
+	  signed long mem_available =
+	    (signed long) data->kb_main_free - watermark_low
+	    + data->kb_inactive_file + data->kb_active_file
+#define MIN(x,y) ((x) < (y) ? (x) : (y))
+	    - MIN((data->kb_inactive_file + data->kb_active_file) / 2,
+		   watermark_low) + data->kb_slab_reclaimable
+	    - MIN(data->kb_slab_reclaimable / 2, watermark_low);
+#undef MIN
+	  if (mem_available < 0)
+	    mem_available = 0;
+	  data->kb_main_available = (unsigned long) mem_available;
+	}
     }
-  else
-    data->native_memavailable = true;
   
   /* derived values */
   data->kb_main_cached = data->kb_page_cache + data->kb_slab;
