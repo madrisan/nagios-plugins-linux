@@ -38,6 +38,7 @@
 #include "cpufreq.h"
 #include "cpustats.h"
 #include "cputopology.h"
+#include "logging.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
@@ -246,9 +247,10 @@ main (int argc, char **argv)
   thresholds *my_threshold = NULL;
 
   struct cpu_time cpu[2];
-  jiff duser, dsystem, didle, diowait, dsteal, ratio, half_ratio;
+  jiff duser, dsystem, didle, diowait, dsteal, ratio;
   jiff *cpu_value;
-  unsigned int cpu_perc, sleep_time = 1,
+  float cpu_perc;
+  unsigned int sleep_time = 1,
                tog = 0;		/* toggle switch for cleaner code */
   int debt = 0;			/* handle idle ticks running backwards */
 
@@ -344,7 +346,6 @@ main (int argc, char **argv)
   ratio = duser + dsystem + didle + diowait + dsteal;
   if (!ratio)
     ratio = 1, didle = 1;
-  half_ratio = ratio / 2UL;
 
   for (i = 1; i < count; i++)
     {
@@ -379,35 +380,34 @@ main (int argc, char **argv)
       ratio = duser + dsystem + didle + diowait + dsteal;
       if (!ratio)
 	ratio = 1, didle = 1;
-      half_ratio = ratio / 2UL;
 
       if (verbose)
-        printf
-          ("cpu_user=%u%%, cpu_system=%u%%, cpu_idle=%u%%, cpu_iowait=%u%%, "
-           "cpu_steal=%u%%\n"
-           , (unsigned) ((100 * duser   + half_ratio) / ratio)
-           , (unsigned) ((100 * dsystem + half_ratio) / ratio)
-           , (unsigned) ((100 * didle   + half_ratio) / ratio)
-           , (unsigned) ((100 * diowait + half_ratio) / ratio)
-           , (unsigned) ((100 * dsteal  + half_ratio) / ratio));
+	printf
+	 ("cpu_user=%.1f%%, cpu_system=%.1f%%, cpu_idle=%.1f%%, "
+	  "cpu_iowait=%.1f%%, cpu_steal=%.1f%%\n"
+	   , 100.0 * duser   / ratio
+	   , 100.0 * dsystem / ratio
+	   , 100.0 * didle   / ratio
+	   , 100.0 * diowait / ratio
+	   , 100.0 * dsteal  / ratio);
     }
 
-  cpu_perc = (unsigned) ((100 * (*cpu_value) + half_ratio) / ratio);
+  cpu_perc = (100.0 * (*cpu_value) / ratio);
   status = get_status (cpu_perc, my_threshold);
 
   cpu_desc_read (cpudesc);
 
   printf
-    ("%s (CPU: %s) %s - cpu %s %u%% | "
-     "cpu_user=%u%% cpu_system=%u%% cpu_idle=%u%% cpu_iowait=%u%% "
-     "cpu_steal=%u%%"
+    ("%s (CPU: %s) %s - cpu %s %.1f%% | "
+     "cpu_user=%.1f%% cpu_system=%.1f%% cpu_idle=%.1f%% "
+     "cpu_iowait=%.1f%% cpu_steal=%.1f%%"
      , program_name_short, cpu_desc_get_model_name (cpudesc)
      , state_text (status), cpu_progname, cpu_perc
-     , (unsigned) ((100 * duser   + half_ratio) / ratio)
-     , (unsigned) ((100 * dsystem + half_ratio) / ratio)
-     , (unsigned) ((100 * didle   + half_ratio) / ratio)
-     , (unsigned) ((100 * diowait + half_ratio) / ratio)
-     , (unsigned) ((100 * dsteal  + half_ratio) / ratio)
+     , 100.0 * duser   / ratio
+     , 100.0 * dsystem / ratio
+     , 100.0 * didle   / ratio
+     , 100.0 * diowait / ratio
+     , 100.0 * dsteal  / ratio
   );
 
   if (show_freq)
@@ -428,6 +428,10 @@ main (int argc, char **argv)
 	}
     }
   putchar ('\n');
+
+  dbg ("sum (cpu_*) = %.1f%%\n", (100.0 * duser / ratio) +
+       (100.0 * dsystem / ratio) + (100.0 * didle  / ratio) +
+       (100.0 * diowait / ratio) + (100.0 * dsteal / ratio));
 
   cpu_desc_unref (cpudesc);
   return status;

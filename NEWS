@@ -12,6 +12,9 @@
   order to provide the memory available counter for the linux kernels
   2.6.27 and above,
 
+* check_cpu: add one decimal digit to the counters 'cpu_user',
+  'cpu_system', 'cpu_idle', 'cpu_iowait', and 'cpu_steal'.
+
 ======================================================================
 
     Major changes between "nagios-plugins-linux" versions 13 and 14

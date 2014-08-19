@@ -94,11 +94,11 @@ This Nagios plugin checks the CPU (user mode) utilization.
 *Examples*
 
 	check_cpu -w 85% -c 95%
-	cpu OK - cpu user 23% | cpu_user=23%, cpu_system=10%, cpu_idle=66%, cpu_iowait=0%, cpu_steal=0%
-	
+	cpu (CPU: Intel(R) Atom(TM) CPU N270 @ 1.60GHz) OK - cpu user 79.5% | cpu_user=79.5% cpu_system=20.5% cpu_idle=0.0% cpu_iowait=0.0% cpu_steal=0.0%
+
 	# count = 1 means the percentages of total CPU time from boottime
 	check_cpu -w 85% -c 95% 1 1
-	cpu OK - cpu user 34% | cpu_user=34%, cpu_system=11%, cpu_idle=49%, cpu_iowait=7%, cpu_steal=0%
+	cpu (CPU: Intel(R) Atom(TM) CPU N270 @ 1.60GHz) OK - cpu user 33.2% | cpu_user=33.2% cpu_system=6.5% cpu_idle=57.1% cpu_iowait=3.2% cpu_steal=0.0%
 
 
 **The check_cswch plugin**
