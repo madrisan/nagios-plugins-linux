@@ -15,6 +15,9 @@
 * check_cpu: add one decimal digit to the counters 'cpu_user',
   'cpu_system', 'cpu_idle', 'cpu_iowait', and 'cpu_steal'.
 
+* check_cpu: new command line option '-m|--no-cpu-model' for removing
+  the cpu model description from the output message.
+
 ======================================================================
 
     Major changes between "nagios-plugins-linux" versions 13 and 14

@@ -75,7 +75,7 @@ This Nagios plugin checks the CPU (user mode) utilization.
 
 *Usage*
 
-	check_cpu [-f] [-v] [-w PERC] [-c PERC] [delay [count]]
+	check_cpu [-f] [-m] [-v] [-w PERC] [-c PERC] [delay [count]]
 	check_cpu --cpuinfo
 	check_cpu --help
 
@@ -84,6 +84,7 @@ This Nagios plugin checks the CPU (user mode) utilization.
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
 * -f, --cpufreq: show the CPU frequency characteristics
+* -m, --no-cpu-model: do not display the cpu model in the output message
 * -i, --cpuinfo: show the CPU characteristics (for debugging)
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
 * delay is the delay between updates in seconds (default: 1sec)
@@ -97,8 +98,8 @@ This Nagios plugin checks the CPU (user mode) utilization.
 	cpu (CPU: Intel(R) Atom(TM) CPU N270 @ 1.60GHz) OK - cpu user 79.5% | cpu_user=79.5% cpu_system=20.5% cpu_idle=0.0% cpu_iowait=0.0% cpu_steal=0.0%
 
 	# count = 1 means the percentages of total CPU time from boottime
-	check_cpu -w 85% -c 95% 1 1
-	cpu (CPU: Intel(R) Atom(TM) CPU N270 @ 1.60GHz) OK - cpu user 33.2% | cpu_user=33.2% cpu_system=6.5% cpu_idle=57.1% cpu_iowait=3.2% cpu_steal=0.0%
+	check_cpu -m -w 85% -c 95% 1 1
+	cpu OK - cpu user 33.2% | cpu_user=33.2% cpu_system=6.5% cpu_idle=57.1% cpu_iowait=3.2% cpu_steal=0.0%
 
 
 **The check_cswch plugin**

@@ -60,6 +60,7 @@ static const char *program_shorthelp = NULL;
 static struct option const longopts[] = {
   {(char *) "cpuinfo", no_argument, NULL, 'i'},
   {(char *) "cpufreq", no_argument, NULL, 'f'},
+  {(char *) "no-cpu-model", no_argument, NULL, 'm'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "verbose", no_argument, NULL, 'v'},
@@ -75,7 +76,7 @@ usage (FILE * out)
   fputs (program_shorthelp, out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-v] [-w PERC] [-c PERC] [delay [count]]\n",
+  fprintf (out, "  %s [-v] [-f] [-m] [-w PERC] [-c PERC] [delay [count]]\n",
 	   program_name);
   fprintf (out, "  %s --cpuinfo\n", program_name);
   fputs (USAGE_OPTIONS, out);
@@ -86,6 +87,8 @@ usage (FILE * out)
   fputs ("  -f, --cpufreq   show the CPU frequency characteristics\n", out);
   fputs ("  -i, --cpuinfo   show the CPU characteristics (for debugging)\n",
 	 out);
+  fputs ("  -m, --no-cpu-model  "
+	 "do not display the cpu model in the output message\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fprintf (out, "  delay is the delay between updates in seconds "
@@ -94,7 +97,8 @@ usage (FILE * out)
            "(default: %d)\n", COUNT_DEFAULT);
   fputs ("\t1 means the percentages of total CPU time from boottime.\n", out);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s -f -w 10%% -c 20%% 1 2\n", program_name);
+  fprintf (out, "  %s -m -w 85%% -c 95%%\n", program_name);
+  fprintf (out, "  %s -f -w 85%% -c 95%% 1 2\n", program_name);
   fprintf (out, "  %s --cpuinfo\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
@@ -239,7 +243,7 @@ int
 main (int argc, char **argv)
 {
   int c, err;
-  bool verbose = false, show_freq = false;
+  bool verbose, show_freq, cpu_model;
   unsigned long i, len, delay, count;
   char *critical = NULL, *warning = NULL;
   char *p = NULL, *cpu_progname;
@@ -284,8 +288,12 @@ main (int argc, char **argv)
   if (err < 0)
     plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
+  /* default values */
+  verbose = show_freq = false;
+  cpu_model = true;
+
   while ((c = getopt_long (
-		argc, argv, "c:w:vif"
+		argc, argv, "c:w:vifm"
 		GETOPT_HELP_VERSION_STRING, longopts, NULL)) != -1)
     {
       switch (c)
@@ -298,6 +306,9 @@ main (int argc, char **argv)
 	  return STATE_UNKNOWN;
 	case 'f':
 	  show_freq = true;
+	  break;
+	case 'm':
+	  cpu_model = false;
 	  break;
 	case 'c':
 	  critical = optarg;
@@ -397,11 +408,15 @@ main (int argc, char **argv)
 
   cpu_desc_read (cpudesc);
 
+  char *cpu_model_str =
+    cpu_model ?	xasprintf ("(%s) ",
+			   cpu_desc_get_model_name (cpudesc)) : NULL;
+
   printf
-    ("%s (CPU: %s) %s - cpu %s %.1f%% | "
+    ("%s %s%s - cpu %s %.1f%% | "
      "cpu_user=%.1f%% cpu_system=%.1f%% cpu_idle=%.1f%% "
      "cpu_iowait=%.1f%% cpu_steal=%.1f%%"
-     , program_name_short, cpu_desc_get_model_name (cpudesc)
+     , program_name_short, cpu_model ? cpu_model_str : ""
      , state_text (status), cpu_progname, cpu_perc
      , 100.0 * duser   / ratio
      , 100.0 * dsystem / ratio
