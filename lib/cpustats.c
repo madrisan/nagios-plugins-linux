@@ -73,7 +73,8 @@ cpu_stats_get_time (struct cpu_time * __restrict cputime)
   fclose (fp);
 
   if (!found)
-    plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PATH_PROC_STAT);
+    plugin_error (STATE_UNKNOWN, 0,
+		  "%s: pattern not found: 'cpu '", PATH_PROC_STAT);
 }
 
 static unsigned long long
@@ -107,7 +108,8 @@ cpu_stats_get_value_with_pattern (const char *pattern, bool mandatory)
   fclose (fp);
 
   if (!found && mandatory)
-    plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PATH_PROC_STAT);
+    plugin_error (STATE_UNKNOWN, 0,
+		  "%s: pattern not found: '%s'", PATH_PROC_STAT, pattern);
 
   return value;
 }
