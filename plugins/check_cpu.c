@@ -80,15 +80,15 @@ usage (FILE * out)
 	   program_name);
   fprintf (out, "  %s --cpuinfo\n", program_name);
   fputs (USAGE_OPTIONS, out);
+  fputs ("  -f, --cpufreq   show the CPU frequency characteristics\n", out);
+  fputs ("  -m, --no-cpu-model  "
+	 "do not display the cpu model in the output message\n", out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs ("  -v, --verbose   show details for command-line debugging "
          "(Nagios may truncate output)\n", out);
-  fputs ("  -f, --cpufreq   show the CPU frequency characteristics\n", out);
   fputs ("  -i, --cpuinfo   show the CPU characteristics (for debugging)\n",
 	 out);
-  fputs ("  -m, --no-cpu-model  "
-	 "do not display the cpu model in the output message\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fprintf (out, "  delay is the delay between updates in seconds "
