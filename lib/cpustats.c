@@ -32,6 +32,7 @@
 
 #include "common.h"
 #include "cpustats.h"
+#include "logging.h"
 #include "messages.h"
 #include "procparser.h"
 #include "system.h"
@@ -41,94 +42,93 @@
 /* Fill the cpu_stats structure pointed with the values found in the
  * proc filesystem */
 
-static void
-cpu_stats_read (struct cpu_time * __restrict cputime,
-		unsigned long long * __restrict nctxt,
-		unsigned long long * __restrict nintr,
-		unsigned long long * __restrict nsoftirq)
+void
+cpu_stats_get_time (struct cpu_time * __restrict cputime)
 {
   FILE *fp;
   size_t len = 0;
   ssize_t chread;
   char *line = NULL;
-  bool cputimes_found, intr_found, ctxt_found;
+  bool found;
 
   if ((fp = fopen (PATH_PROC_STAT,  "r")) == NULL)
     plugin_error (STATE_UNKNOWN, errno, "error opening %s", PATH_PROC_STAT);
 
-  if (nctxt) *nctxt = 0;
-  if (nintr) *nintr = 0;
-  if (nsoftirq) *nsoftirq = 0;
-  cputimes_found = ctxt_found = intr_found = false;
-
+  found = false;
   while ((chread = getline (&line, &len, fp)) != -1)
     {
       if (!strncmp (line, "cpu ", 4))
 	{
-	  cputimes_found = true;
-	  if (NULL == cputime)
-	    continue;
+	  found = true;
 	  sscanf (line, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
 		  &cputime->user, &cputime->nice, &cputime->system,
 		  &cputime->idle, &cputime->iowait, &cputime->irq,
 		  &cputime->softirq, &cputime->steal, &cputime->guest,
 		  &cputime->guestn);
-	}
-      else if (!strncmp (line, "ctxt ", 5))
-	{
-	  ctxt_found = true;
-	  if (NULL == nctxt)
-	    continue;
-	  sscanf (line, "ctxt %Lu", nctxt);
-	}
-      /* Get the number of interrupts serviced since boot time, for each of the
-       * possible system interrupts, including unnumbered architecture specific
-       * interrupts  */
-      else if (!strncmp (line, "intr ", 5))
-	{
-	  intr_found = true;
-	  if (NULL == nintr)
-	    continue;
-	  sscanf (line, "intr %Lu", nintr);
-	}
-      /* Not separated out until the 2.6.0-test4 */
-      else if (!strncmp (line, "softirq ", 8))
-	{
-	  if (NULL == nsoftirq)
-	    continue;
-	  sscanf (line, "softirq %Lu", nsoftirq);
+	  break;
 	}
     }
 
   free (line);
   fclose (fp);
 
-  if (!cputimes_found || !ctxt_found || !intr_found)
+  if (!found)
     plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PATH_PROC_STAT);
 }
 
-/* wrappers for cpu_stats_read () */
-
-inline void
-cpu_stats_get_time (struct cpu_time * __restrict cputime)
+static unsigned long long
+cpu_stats_get_value_with_pattern (const char *pattern, bool mandatory)
 {
-  cpu_stats_read (cputime, NULL, NULL, NULL);
+  FILE *fp;
+  size_t len = 0;
+  ssize_t chread;
+  char *line = NULL;
+  bool found;
+  unsigned long long value;
+
+  if ((fp = fopen (PATH_PROC_STAT,  "r")) == NULL)
+    plugin_error (STATE_UNKNOWN, errno, "error opening %s", PATH_PROC_STAT);
+
+  value = 0;
+  found = false;
+
+  while ((chread = getline (&line, &len, fp)) != -1)
+    {
+      if (!strncmp (line, pattern, strlen (pattern)))
+	{
+	  sscanf (line + strlen (pattern), "%Lu", &value);
+	  dbg ("line: %s \\ value for '%s': %Lu\n", line, pattern, value);
+	  found = true;
+	  break;
+	}
+    }
+
+  free (line);
+  fclose (fp);
+
+  if (!found && mandatory)
+    plugin_error (STATE_UNKNOWN, errno, "Error reading %s", PATH_PROC_STAT);
+
+  return value;
 }
 
-inline void
-cpu_stats_get_cswch (unsigned long long * __restrict nctxt)
+/* wrappers */
+
+unsigned long long
+cpu_stats_get_cswch ()
 {
-  cpu_stats_read (NULL, nctxt, NULL, NULL);
+  return cpu_stats_get_value_with_pattern ("ctxt ", true);
 }
 
-inline void
-cpu_stats_get_intr (unsigned long long * __restrict nintr)
+unsigned long long
+cpu_stats_get_intr ()
 {
-  cpu_stats_read (NULL, NULL, nintr, NULL);
+  return cpu_stats_get_value_with_pattern ("intr ", true);
 }
 
-inline void
-cpu_stats_get_softirq (unsigned long long * __restrict nsoftirq)
+unsigned long long
+cpu_stats_get_softirq ()
 {
-  cpu_stats_read (NULL, NULL, NULL, nsoftirq);
+  /* Not separated out until the 2.6.0-test4, hence 'false' */
+  return cpu_stats_get_value_with_pattern ("softirq ", false);
 }

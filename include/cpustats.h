@@ -57,15 +57,16 @@ extern "C"
   extern void cpu_stats_get_time (struct cpu_time * __restrict cputime);
 
   /* Get the number of context switches that the system underwent */
-  extern void cpu_stats_get_cswch (unsigned long long * __restrict nctxt);
+  extern unsigned long long cpu_stats_get_cswch ();
 
-  /* Get the total of all interrupts the system has experienced
-   * (since Linux 2.6.0-test4) */
-  extern void cpu_stats_get_intr (unsigned long long * __restrict nintr);
+  /* Get the number of interrupts serviced since boot time, for each of the
+   * possible system interrupts, including unnumbered architecture specific
+   * interrupts (since Linux 2.6.0-test4)  */
+  extern unsigned long long cpu_stats_get_intr ();
 
   /* Get the total of softirqs the system has experienced
    * (since Linux 2.6.0-test4) */
-  extern void cpu_stats_get_softirq (unsigned long long * __restrict nsoftirq);
+  extern unsigned long long cpu_stats_get_softirq ();
 
 #ifdef __cplusplus
 }

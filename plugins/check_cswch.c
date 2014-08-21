@@ -146,18 +146,16 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  cpu_stats_get_cswch (&nctxt[0]);
-  unsigned long long dnctxt = nctxt[0];
+  unsigned long long dnctxt = nctxt[0] = cpu_stats_get_cswch ();
   if (verbose)
-    printf ("ctxt = %Lu\n", nctxt[0]);
+    printf ("ctxt = %Lu\n", dnctxt);
 
   for (i = 1; i < count; i++)
     {
       sleep (sleep_time);
 
       tog = !tog;
-      cpu_stats_get_cswch (&nctxt[tog]);
-
+      nctxt[tog] = cpu_stats_get_cswch ();
       dnctxt = (nctxt[tog] - nctxt[!tog]) / sleep_time;
 
       if (verbose)

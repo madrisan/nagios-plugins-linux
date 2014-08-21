@@ -157,10 +157,9 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  cpu_stats_get_intr (&nintr[0]);
-  unsigned long long dnintr = nintr[0];
+  unsigned long long dnintr = nintr[0] = cpu_stats_get_intr ();
   if (verbose)
-    printf ("intr = %Lu\n", nintr[0]);
+    printf ("intr = %Lu\n", dnintr);
 
   if (count <= 2)
     vintr[0] = proc_interrupts_get_nintr_per_cpu (&ncpus0);
@@ -170,7 +169,7 @@ main (int argc, char **argv)
       sleep (sleep_time);
 
       tog = !tog;
-      cpu_stats_get_intr (&nintr[tog]);
+      nintr[tog] = cpu_stats_get_intr ();
 
       dnintr = (nintr[tog] - nintr[!tog]) / sleep_time;
       if (verbose)
