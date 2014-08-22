@@ -36,6 +36,8 @@
 #include "messages.h"
 #include "procparser.h"
 #include "system.h"
+#include "xalloc.h"
+#include "xasprintf.h"
 
 #define PATH_PROC_STAT		"/proc/stat"
 
@@ -43,7 +45,7 @@
  * proc filesystem */
 
 void
-cpu_stats_get_time (struct cpu_time * __restrict cputime)
+cpu_stats_get_time (struct cpu_time * __restrict cputime, unsigned int lines)
 {
   FILE *fp;
   size_t len = 0;
@@ -54,18 +56,46 @@ cpu_stats_get_time (struct cpu_time * __restrict cputime)
   if ((fp = fopen (PATH_PROC_STAT,  "r")) == NULL)
     plugin_error (STATE_UNKNOWN, errno, "error opening %s", PATH_PROC_STAT);
 
+  memset (cputime, '\0', lines * sizeof (struct cpu_time));
+
   found = false;
   while ((chread = getline (&line, &len, fp)) != -1)
     {
       if (!strncmp (line, "cpu ", 4))
 	{
-	  found = true;
+	  cputime->cpuname = xstrdup ("cpu");
 	  sscanf (line, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
 		  &cputime->user, &cputime->nice, &cputime->system,
 		  &cputime->idle, &cputime->iowait, &cputime->irq,
 		  &cputime->softirq, &cputime->steal, &cputime->guest,
 		  &cputime->guestn);
-	  break;
+	  dbg ("line: %s", line);
+	  dbg (" \\ %s >> [1]user:%Lu ... [5]iowait:%Lu ...\n",
+	       cputime->cpuname, cputime->user, cputime->iowait);
+	  found = true;
+	  if (lines == 1)
+	    break;
+	}
+      else if (!strncmp (line, "cpu", 3))
+	{
+	  char *endptr;
+	  unsigned int cpunum = strtol (line + 3, &endptr, 10);
+	  if (lines <= cpunum + 1)
+	    plugin_error (STATE_UNKNOWN, 0,
+			  "BUG: %s(): lines(%d) <= cpunum(%d) + 1",
+			  __FUNCTION__, lines, cpunum);
+
+	  unsigned int i = cpunum + 1;
+	  cputime[i].cpuname = xasprintf ("cpu%d", cpunum);
+	  sscanf (endptr, "%Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
+		  &cputime[i].user, &cputime[i].nice,
+		  &cputime[i].system, &cputime[i].idle,
+		  &cputime[i].iowait, &cputime[i].irq,
+		  &cputime[i].softirq, &cputime[i].steal,
+		  &cputime[i].guest, &cputime[i].guestn);
+	  dbg ("line: %s", line);
+	  dbg (" \\ %s >> [1]user:%Lu ... [5]iowait:%Lu ...\n",
+	       cputime[i].cpuname, cputime[i].user, cputime[i].iowait);
 	}
     }
 

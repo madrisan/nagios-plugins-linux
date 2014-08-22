@@ -346,7 +346,7 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  cpu_stats_get_time (&cpu[0]);
+  cpu_stats_get_time (&cpu[0], 1);
 
   duser   = cpu[0].user + cpu[0].nice;
   dsystem = cpu[0].system + cpu[0].irq + cpu[0].softirq;
@@ -363,7 +363,7 @@ main (int argc, char **argv)
       sleep (sleep_time);
 
       tog = !tog;
-      cpu_stats_get_time (&cpu[tog]);
+      cpu_stats_get_time (&cpu[tog], 1);
 
       duser =
 	cpu[tog].user - cpu[!tog].user +

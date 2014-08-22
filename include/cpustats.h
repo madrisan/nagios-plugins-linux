@@ -27,6 +27,7 @@ extern "C"
 
   struct cpu_time
   {
+    const char *cpuname;
     /* Time spent running non-kernel code. (user time, including nice time) */
     jiff user;
     /* Time spent in user mode with low priority (nice) */
@@ -53,8 +54,12 @@ extern "C"
     jiff guestn;
   };
 
-  /* Get the cpu time statistics */
-  extern void cpu_stats_get_time (struct cpu_time * __restrict cputime);
+  /* Get the cpu time statistics
+   *  lines = 1 --> 'cpu' only
+   *  lines = 3 --> 'cpu', 'cpu0', 'cpu1'
+   * and so on  */
+  extern void cpu_stats_get_time (struct cpu_time * __restrict cputime,
+				  unsigned int lines);
 
   /* Get the number of context switches that the system underwent */
   extern unsigned long long cpu_stats_get_cswch ();
