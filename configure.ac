@@ -182,6 +182,7 @@ AC_COMPILE_IFELSE(
 AC_MSG_RESULT([$ac_cv_clock_gettime_monotonic])
 
 AC_CHECK_FUNCS([getmntent])  dnl wanted by: lib/mountlist.c
+AC_CHECK_FUNCS([hasmntopt])  dnl wanted by: lib/mountlist.c
 AC_CHECK_FUNCS([memset])     dnl wanted by: lib/cpustats.c
 AC_CHECK_FUNCS([regcomp])    dnl wanted by: plugins/check_multipath.c
 AC_CHECK_FUNCS([socket])     dnl wanted by: plugins/check_multipath.c

@@ -77,10 +77,19 @@
 
 /* Check for the "ro" pattern in the MOUNT_OPTIONS.
  *    Return true if found, Otherwise return false.  */
+#if HAVE_HASMNTOPT
+static bool
+fs_check_if_readonly (const struct mntent *mnt)
+{
+  static char const readonly_pattern[] = "ro";
+  return hasmntopt (mnt, readonly_pattern) ? true : false;
+}
+#else
 static bool
 fs_check_if_readonly (char *mount_options)
 {
   static char const readonly_pattern[] = "ro";
+
   char *str1, *token, *saveptr1;
   int j;
 
@@ -95,6 +104,7 @@ fs_check_if_readonly (char *mount_options)
 
   return false;
 }
+#endif
 
 /* Return the device number from MOUNT_OPTIONS, if possible.
  *    Otherwise return (dev_t) -1.  */
@@ -141,7 +151,11 @@ read_file_system_list (bool need_fs_type)
 	me->me_opts_malloced = 1;
 	me->me_dummy = ME_DUMMY (me->me_devname, me->me_type);
 	me->me_remote = ME_REMOTE (me->me_devname, me->me_type);
+#if HAVE_HASMNTOPT
+	me->me_readonly = fs_check_if_readonly (mnt);
+#else
 	me->me_readonly = fs_check_if_readonly (me->me_opts);
+#endif
 	me->me_dev = dev_from_mount_options (mnt->mnt_opts);
 
 	/* Add to the linked list. */
