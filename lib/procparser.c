@@ -46,7 +46,7 @@ void
 procparser (char *filename, const proc_table_struct *proc_table,
 	    int proc_table_count, char separator)
 {
-  char namebuf[16];		/* big enough to hold any row name */
+  char namebuf[32];		/* big enough to hold any row name */
   proc_table_struct findme = { namebuf, NULL };
   proc_table_struct *found;
   char *line = NULL, *head, *tail;
