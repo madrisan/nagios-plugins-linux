@@ -53,7 +53,7 @@ usage (FILE * out)
 	 out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s -w COUNTER -c COUNTER\n",
+  fprintf (out, "  %s [-w COUNTER ] [-c COUNTER]\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -t, --threads   display the number of threads\n", out);

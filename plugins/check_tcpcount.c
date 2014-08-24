@@ -51,7 +51,7 @@ usage (FILE * out)
   fputs ("This plugin displays TCP network and socket informations.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [--tcp] [--tcp6] -w COUNTER -c COUNTER\n",
+  fprintf (out, "  %s [--tcp] [--tcp6] [-w COUNTER] [-c COUNTER]\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -t, --tcp       display the statistics for the TCP protocol "

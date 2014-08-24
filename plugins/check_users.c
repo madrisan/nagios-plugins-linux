@@ -51,10 +51,10 @@ usage (FILE * out)
 	 "that are currently logged on.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s -w PERC -c PERC\n", program_name);
+  fprintf (out, "  %s [-w COUNTER] [-c COUNTER]\n", program_name);
   fputs (USAGE_OPTIONS, out);
-  fputs ("  -w, --warning PERCENT   warning threshold\n", out);
-  fputs ("  -c, --critical PERCENT   critical threshold\n", out);
+  fputs ("  -w, --warning COUNTER    warning threshold\n", out);
+  fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs ("  -v, --verbose   show details for command-line debugging "
 	 "(Nagios may truncate output)\n", out);
   fputs (USAGE_HELP, out);
