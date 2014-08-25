@@ -1,1 +1,32 @@
-Davide Madrisan <davide.madrisan@gmail.com>
+Author:
+   Davide Madrisan <davide.madrisan@gmail.com>
+
+
+Some code and coding styles/ideas belong to other great open source projects:
+
+ * cpufrequtils    https://www.kernel.org/pub/linux/utils/kernel/cpufreq/
+                   License: GPLv2
+
+ * gnulib          http://git.savannah.gnu.org/gitweb/?p=gnulib.git
+                   License: GPLv2
+
+ * kmod            http://git.kernel.org/cgit/utils/kernel/kmod/kmod.git
+                   License: GPLv2
+
+ * libabc          https://git.kernel.org/cgit/linux/kernel/git/kay/libabc.git
+                   License: LGPLv2 (with an unrestricted usage clause)
+
+ * nagios plugins  https://github.com/nagios-plugins/nagios-plugins
+                   License: GPLv3
+
+ * util-linux      https://github.com/karelzak/util-linux
+                   License: GPLv2
+
+ * procps          https://gitorious.org/procps
+                   License: GPLv2, LGPLv2 (libprocps)
+
+and also to Mickael Kerrisk of "The Linux Programming Interface":
+
+ * tlpi            http://man7.org/tlpi/code/
+                   License: GNU Affero GPLv3
+
