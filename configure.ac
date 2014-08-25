@@ -169,6 +169,7 @@ AC_CHECK_FUNCS([asprintf])
 
 dnl Check for clock_gettime CLOCK_MONOTONIC
 dnl wanted by: plugins/check_uptime.c
+AC_CHECK_LIB([rt], [clock_gettime])
 AC_MSG_CHECKING([for clock_gettime with clock CLOCK_MONOTONIC])
 AC_COMPILE_IFELSE(
   [AC_LANG_PROGRAM([[#include <time.h>]],
