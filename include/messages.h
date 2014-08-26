@@ -22,18 +22,17 @@
 extern "C" {
 #endif
 
-/* Print a message with 'fprintf (stderr, FORMAT, ...)';
-   if ERRNUM is nonzero, follow it with ": " and strerror (ERRNUM).
-   If STATUS is nonzero, terminate the program with 'exit (STATUS)'.  */
+  /* Print a message with 'fprintf (stderr, FORMAT, ...)';
+     if ERRNUM is nonzero, follow it with ": " and strerror (ERRNUM).
+     If STATUS is nonzero, terminate the program with 'exit (STATUS)'.  */
+  void plugin_error (nagstatus status, int errnum,
+		     const char *message, ...)
+       _attribute_format_printf_(3, 4);
 
-extern void plugin_error (nagstatus status, int errnum,
-			  const char *message, ...)
-     _attribute_format_printf_(3, 4);
+  /* This variable is incremented each time 'error' is called.  */
+  unsigned int error_message_count;
 
-/* This variable is incremented each time 'error' is called.  */
-extern unsigned int error_message_count;
-
-extern const char *state_text (nagstatus status);
+  const char *state_text (nagstatus status);
 
 #ifdef __cplusplus
 }

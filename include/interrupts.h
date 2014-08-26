@@ -25,7 +25,7 @@ extern "C"
    * Since Linux 2.6.24, for the i386 and x86_64 architectures, at least, this
    * also includes interrupts internal to the system (that is, not associated
    * with a device as such).  */
-  extern unsigned long *proc_interrupts_get_nintr_per_cpu (unsigned int *ncpus);
+  unsigned long *proc_interrupts_get_nintr_per_cpu (unsigned int *ncpus);
 
 #ifdef __cplusplus
 }

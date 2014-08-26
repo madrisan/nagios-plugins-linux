@@ -26,34 +26,34 @@ extern "C"
 
   /* generic functions */
 
-  extern bool sysfsparser_path_exist (const char *path, ...)
+  bool sysfsparser_path_exist (const char *path, ...)
        _attribute_format_printf_(1, 2);
-  extern char *sysfsparser_getline (const char *filename, ...)
+  char *sysfsparser_getline (const char *filename, ...)
        _attribute_format_printf_(1, 2);
-  extern unsigned long sysfsparser_getvalue (const char *filename, ...)
+  unsigned long sysfsparser_getvalue (const char *filename, ...)
        _attribute_format_printf_(1, 2);
 
   /* cpufreq */
 
-  extern int sysfsparser_cpufreq_get_hardware_limits (unsigned int cpu,
-						      unsigned long *min,
-						      unsigned long *max);
-  extern unsigned long sysfsparser_cpufreq_get_freq_kernel (unsigned int cpu);
-  extern unsigned long sysfsparser_cpufreq_get_transition_latency (unsigned int cpu);
+  int sysfsparser_cpufreq_get_hardware_limits (unsigned int cpu,
+					       unsigned long *min,
+					       unsigned long *max);
+  unsigned long sysfsparser_cpufreq_get_freq_kernel (unsigned int cpu);
+  unsigned long sysfsparser_cpufreq_get_transition_latency (unsigned int cpu);
 
-  extern char *sysfsparser_cpufreq_get_available_freqs (unsigned int cpu);
-  extern char *sysfsparser_cpufreq_get_driver (unsigned int cpu);
-  extern char *sysfsparser_cpufreq_get_governor (unsigned int cpu);
-  extern char *sysfsparser_cpufreq_get_available_governors (unsigned int cpu);
+  char *sysfsparser_cpufreq_get_available_freqs (unsigned int cpu);
+  char *sysfsparser_cpufreq_get_driver (unsigned int cpu);
+  char *sysfsparser_cpufreq_get_governor (unsigned int cpu);
+  char *sysfsparser_cpufreq_get_available_governors (unsigned int cpu);
 
   /* thermal sensors */
 
 # define ALL_THERMAL_ZONES   UINT_MAX
 
-  extern bool sysfsparser_thermal_kernel_support (void);
-  extern int sysfsparser_thermal_get_temperature (unsigned int selected_zone,
+  bool sysfsparser_thermal_kernel_support (void);
+  int sysfsparser_thermal_get_temperature (unsigned int selected_zone,
 						  unsigned int *zone, char **type);
-  extern int sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone);
+  int sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone);
 
 #ifdef __cplusplus
 }
