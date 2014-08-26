@@ -30,7 +30,7 @@ extern "C" {
        _attribute_format_printf_(3, 4);
 
   /* This variable is incremented each time 'error' is called.  */
-  unsigned int error_message_count;
+  extern unsigned int error_message_count;
 
   const char *state_text (nagstatus status);
 

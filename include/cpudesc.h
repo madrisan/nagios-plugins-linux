@@ -23,10 +23,6 @@ extern "C"
 {
 #endif
 
-  /* Get the number of total and active cpus */
-  int get_processor_number_total ();
-  int get_processor_number_online ();
-
   /* Processor characteristics */
   bool get_processor_is_hot_pluggable (unsigned int cpu);
   int get_processor_is_online (unsigned int cpu);

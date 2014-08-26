@@ -23,7 +23,8 @@
 #include <stdlib.h>
 
 #include "common.h"
-#include "cpudesc.h"
+//#include "cpudesc.h"
+#include "cputopology.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"

@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include "common.h"
-#include "cpudesc.h"
+#include "cputopology.h"
 #include "logging.h"
 #include "system.h"
 #include "xalloc.h"
