@@ -48,7 +48,7 @@ check_temperature_SOURCES = check_temperature.c
 check_uptime_SOURCES     = check_uptime.c
 check_users_SOURCES      = check_users.c
 
-LDADD = $(top_srcdir)/lib/libutils.a
+LDADD = $(top_builddir)/lib/libutils.a
 
 check_clock_LDADD        = $(LDADD)
 check_cpu_LDADD          = $(LDADD)
