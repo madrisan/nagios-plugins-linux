@@ -25,39 +25,89 @@ AC_CONFIG_LIBOBJ_DIR([lib])
 AM_MAINTAINER_MODE
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
-dnl Checks for programs
 #AC_USE_SYSTEM_EXTENSIONS(_GNU_SOURCE)
 
-AC_PROG_CC_STDC
-AC_C_BIGENDIAN(
-   [AC_DEFINE(WORDS_BIGENDIAN,1, [Define if byte ordering is bigendian])])
+dnl Checks for the compiler features
 
+AC_C_CONST
+AC_C_PROTOTYPES
+AC_C_INLINE
+
+AC_PROG_CC_STDC
 if test "$cross_compiling" = no; then
   if test "x$ac_cv_prog_cc_c99" = "xno" || test "x$ac_cv_prog_cc_c99" = "x"; then
-  # We might be on RHEL5 with a git checkout and so broken
-  # autoconf. Check if CC is gcc and if it bails when given -std=gnu99.
-  # If not, use that.  Yuck.
+    # Check if CC is gcc and if it bails when given -std=gnu99.
+    # If not, use that.  Yuck.
     if test "x$ac_cv_c_compiler_gnu" = "xyes"; then
-       CC="$CC -std=gnu99"
-       AC_RUN_IFELSE(
-          [AC_LANG_PROGRAM([],[[
-  return 0;
-      ]])],
-      [],
-      [AC_MSG_ERROR([Could not find a C99 compatible compiler])])
+      CC="$CC -std=gnu99"
+      AC_RUN_IFELSE(
+        [AC_LANG_PROGRAM([],[[return 0;]])],
+        [],
+        [AC_MSG_ERROR([Could not find a C99 compatible compiler])])
     else
       AC_MSG_ERROR([Could not find a C99 compatible compiler])
     fi
+
+    # Check for variable-length arrays support
+    AC_MSG_CHECKING(for variable-lenght arrays)
+    AC_TRY_COMPILE([],
+      [int foo;
+       foo = 10;
+       int array[foo];],
+      [cc_has_variable_length_arrays=yes;
+       AC_DEFINE([VARIABLE_LENGTH_ARRAYS], [],
+                 [Define this if the compiler supports variable-length arrays])],
+       cc_has_variable_length_arrays=no)
+    AC_MSG_RESULT($cc_has_variable_length_arrays)
+    if test "x$cc_has_variable_length_arrays" = "xno"; then
+      AC_MSG_ERROR([The compiler does not support variable-length arrays])
+    fi
   fi
 fi
-AC_PROG_RANLIB
 
-AM_PROG_CC_C_O
+dnl Checks for some compiler warning flags
 
+dnl cc_TRY_CFLAGS (CFLAGS, [ACTION-IF-WORKS], [ACTION-IF-FAILS])
+dnl ------------------------------------------------------------
+dnl Checks if $CC supports a given set of CFLAGS.
+dnl If supported, the current CFLAGS is appended to SUPPORTED_CFLAGS
+AC_DEFUN([cc_TRY_CFLAGS],
+   [AC_MSG_CHECKING([whether compiler accepts $1])
+   ac_save_CFLAGS="$CFLAGS"
+   CFLAGS="$CFLAGS $1"
+   AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+      int x;])],
+      [ac_cv_try_cflags_ok=yes
+       SUPPORTED_CFLAGS="$SUPPORTED_CFLAGS $1"],
+      [ac_cv_try_cflags_ok=no])
+   CFLAGS="$ac_save_CFLAGS"
+   AC_MSG_RESULT([$ac_cv_try_cflags_ok])
+   if test x"$ac_cv_try_cflags_ok" = x"yes"; then
+      ifelse([$2],[],[:],[$2])
+   else
+      ifelse([$3],[],[:],[$3])
+   fi
+])  dnl end of cc_TRY_CFLAGS
+
+cc_TRY_CFLAGS([-Wall])
+cc_TRY_CFLAGS([-Wformat])
+cc_TRY_CFLAGS([-Wformat-security])
+cc_TRY_CFLAGS([-Wmissing-noreturn])
+cc_TRY_CFLAGS([-Wmissing-format-attribute])
+cc_TRY_CFLAGS([-Wredundant-decls])
+cc_TRY_CFLAGS([-Wshadow])
+cc_TRY_CFLAGS([-Wsign-compare])
+cc_TRY_CFLAGS([-Wstrict-aliasing=2])
+cc_TRY_CFLAGS([-Wunused])
+
+AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
+
+dnl Checks whether the compiler supports the
+dnl    __attribute__((__alloc_size__ args)) feature
 ac_save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"
 AC_CACHE_CHECK(
-  [if compiler supports __attribute__((__alloc_size__ args))],
+  [whether compiler supports __attribute__((__alloc_size__ args))],
   [cc_cv_attribute_alloc_size],
   [AC_COMPILE_IFELSE(
     [AC_LANG_PROGRAM([[]],[[
@@ -73,10 +123,12 @@ AC_DEFINE_UNQUOTED(
   [_attribute_alloc_size_(args)], [$ac_cc_attribute_alloc_size],
   [Define this if the compiler supports the alloc_size attribute])
 
+dnl Checks whether the compiler supports the
+dnl    __attribute__((__malloc__)) feature
 ac_save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"
 AC_CACHE_CHECK(
-  [if compiler supports __attribute__((__malloc__))],
+  [whether compiler supports __attribute__((__malloc__))],
   [cc_cv_attribute_malloc],
   [AC_COMPILE_IFELSE(
     [AC_LANG_PROGRAM([[]],[[
@@ -92,12 +144,13 @@ AC_DEFINE_UNQUOTED(
   [_attribute_malloc_], [$ac_cc_attribute_malloc],
   [Define this if the compiler supports the malloc attribute])
 
-dnl Check whether the compiler supports the __attribute__((__noreturn__)) feature
+dnl Check whether the compiler supports the
+dnl    __attribute__((__noreturn__)) feature
 ac_cc_attribute_noreturn=
 ac_save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"
 AC_CACHE_CHECK(
-  [if compiler supports the noreturn feature],
+  [whether compiler supports the noreturn feature],
   [cc_cv_attribute_noreturn],
   [AC_COMPILE_IFELSE(
     [AC_LANG_PROGRAM([[]],[[
@@ -129,7 +182,7 @@ ac_cc_attribute_format_printf=
 ac_save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"
 AC_CACHE_CHECK(
-  [if compiler supports __attribute__((__format__ (__printf__, x,y))],
+  [whether compiler supports __attribute__((__format__ (__printf__, x,y))],
   [cc_cv_attribute_format_printf],
   [AC_COMPILE_IFELSE(
     [AC_LANG_PROGRAM([[]],[[
@@ -164,6 +217,8 @@ AC_CHECK_HEADERS([ \
   sys/time.h \
   sys/swap.h \
   utmpx.h])
+
+dnl Checks for functions and libraries
 
 AC_CHECK_FUNCS([asprintf])
 
@@ -209,6 +264,7 @@ AC_CHECK_DECLS([CPU_ALLOC], [], [],
   [[#define _GNU_SOURCE
     #include <sched.h>]])
 
+dnl Add the option '--with-proc-meminfo=PATH'
 AC_ARG_WITH(proc-meminfo,
   AS_HELP_STRING([--with-proc-meminfo=PATH],
     [path to /proc/meminfo or equivalent]),
@@ -235,6 +291,25 @@ if test -z "$with_procmeminfo"; then
   AC_MSG_FAILURE([no /proc/meminfo (or equivalent) found])
 fi
 
+dnl Add the option: '--enable-debug'
+AC_ARG_ENABLE([debug],
+   AS_HELP_STRING([--enable-debug],
+      [enable debug messages @<:@default=disabled@:>@]),
+      [], [enable_debug=no])
+AS_IF([test "x$enable_debug" = "xyes"], [
+   AC_DEFINE(ENABLE_DEBUG, [1], [Debug messages.])])
+
+dnl Add the option: '--with-socketfile'
+MULTIPATHD_SOCKET="/var/run/multipathd.sock"
+AC_ARG_WITH(
+  [socketfile],
+  [AS_HELP_STRING(
+    [--with-socketfile],
+    [use a different socket file
+     (default is /var/run/multipathd.sock)])],
+  [MULTIPATHD_SOCKET="$with_socketfile"])
+AC_SUBST(MULTIPATHD_SOCKET)
+
 dnl Check whether we can get the number of CPU
 AC_CHECK_FUNCS([get_nprocs_conf get_nprocs], [],
   [AC_MSG_CHECKING([for number of online cpus])
@@ -255,10 +330,12 @@ AC_CHECK_FUNCS([get_nprocs_conf get_nprocs], [],
      AC_MSG_RESULT([not available]))
   ])
 
+dnl Checks for the function getloadavg
 have_func_getloadavg=false
 AC_CHECK_FUNC([getloadavg], [have_func_getloadavg=true])
 AM_CONDITIONAL([HAVE_GETLOADAVG], [test x$have_func_getloadavg = xtrue])
 
+dnl Checks for struct sockaddr_in6
 AC_CHECK_TYPE(struct sockaddr_in6,
   [AC_DEFINE(HAVE_AFINET6, 1,
     [Define to 1 if struct sockaddr_in6 is available])],
@@ -266,49 +343,7 @@ AC_CHECK_TYPE(struct sockaddr_in6,
   [#include <sys/types.h>
    #include <netinet/in.h>])
 
-AC_PREFIX_DEFAULT(/usr/local/nagios)
-
-dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-AC_C_PROTOTYPES
-AC_C_INLINE
-
-dnl cc_TRY_CFLAGS (CFLAGS, [ACTION-IF-WORKS], [ACTION-IF-FAILS])
-dnl ------------------------------------------------------------
-dnl Checks if $CC supports a given set of CFLAGS.
-dnl If supported, the current CFLAGS is appended to SUPPORTED_CFLAGS
-AC_DEFUN([cc_TRY_CFLAGS],
-   [AC_MSG_CHECKING([whether compiler accepts $1])
-   ac_save_CFLAGS="$CFLAGS"
-   CFLAGS="$CFLAGS $1"
-   AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-      int x;])],
-      [ac_cv_try_cflags_ok=yes
-       SUPPORTED_CFLAGS="$SUPPORTED_CFLAGS $1"],
-      [ac_cv_try_cflags_ok=no])
-   CFLAGS="$ac_save_CFLAGS"
-   AC_MSG_RESULT([$ac_cv_try_cflags_ok])
-   if test x"$ac_cv_try_cflags_ok" = x"yes"; then
-      ifelse([$2],[],[:],[$2])
-   else
-      ifelse([$3],[],[:],[$3])
-   fi
-])  dnl end of cc_TRY_CFLAGS
-
-cc_TRY_CFLAGS([-Wall])
-cc_TRY_CFLAGS([-Wformat])
-cc_TRY_CFLAGS([-Wformat-security])
-cc_TRY_CFLAGS([-Wmissing-noreturn])
-cc_TRY_CFLAGS([-Wmissing-format-attribute])
-cc_TRY_CFLAGS([-Wredundant-decls])
-cc_TRY_CFLAGS([-Wshadow])
-cc_TRY_CFLAGS([-Wsign-compare])
-cc_TRY_CFLAGS([-Wstrict-aliasing=2])
-cc_TRY_CFLAGS([-Wunused])
-
-AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
-
-dnl check for some Linux types
+dnl Check for some Linux types
 AC_TYPE_SIZE_T
 # 'AC_TYPE_SSIZE_T' unfortunately requires autoconf 2.60+
 #AC_TYPE_SSIZE_T
@@ -316,27 +351,14 @@ AC_TYPE_SIZE_T
 AC_CHECK_TYPE(ssize_t, [int])
 AC_TYPE_UID_T
 
-dnl check the support for soft links
+dnl Checks for programs
+AC_PROG_RANLIB
+
+dnl Check the support for soft links
 AC_PROG_LN_S
 
-dnl extra option: '--enable-debug'
-AC_ARG_ENABLE([debug],
-   AS_HELP_STRING([--enable-debug],
-      [enable debug messages @<:@default=disabled@:>@]),
-      [], [enable_debug=no])
-AS_IF([test "x$enable_debug" = "xyes"], [
-   AC_DEFINE(ENABLE_DEBUG, [1], [Debug messages.])])
-
-dnl extra option: '--with-socketfile'
-MULTIPATHD_SOCKET="/var/run/multipathd.sock"
-AC_ARG_WITH(
-  [socketfile],
-  [AS_HELP_STRING(
-    [--with-socketfile],
-    [use a different socket file
-     (default is /var/run/multipathd.sock)])],
-  [MULTIPATHD_SOCKET="$with_socketfile"])
-AC_SUBST(MULTIPATHD_SOCKET)
+dnl Set the default --prefix
+AC_PREFIX_DEFAULT(/usr/local/nagios)
 
 AC_CONFIG_FILES([\
   Makefile \
