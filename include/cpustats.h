@@ -27,6 +27,7 @@ extern "C"
 
   struct cpu_time
   {
+    /* The name of the cpu found in /proc/stat: cpu, cpu0, cpu1, ... */
     const char *cpuname;
     /* Time spent running non-kernel code. (user time, including nice time) */
     jiff user;
