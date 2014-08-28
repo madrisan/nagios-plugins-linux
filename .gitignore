@@ -1,18 +1,28 @@
 # Object files
 *.o
-*.ko
-
 # Libraries
-*.lib
 *.a
-
-# Shared objects (inc. Windows DLLs)
-*.dll
+# Shared objects
 *.so
 *.so.*
 *.dylib
-
-# Executables
-*.exe
-*.out
-*.app
+# Files creared by autotools
+.deps
+aclocal.m4
+autom4te.cache
+autoscan.log
+compile
+compile.scan
+config.cache
+config.guess
+config.h
+config.h.in
+config.hin
+config.hin~
+config.log
+config.status
+configure
+configure.scan
+stamp-h1
+Makefile.in
+Makefile
