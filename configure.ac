@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.59])
 
-AC_INIT([nagios-plugins-linux],[14],
+AC_INIT([nagios-plugins-linux],[15],
         [davide.madrisan@gmail.com])
 
 AC_CANONICAL_TARGET
