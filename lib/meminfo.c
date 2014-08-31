@@ -48,7 +48,6 @@ typedef struct proc_sysmem_data
   /* Shmem in 2.6.32+ */
   unsigned long kb_main_shared;
   /* recently introduced */
-  unsigned long kb_high_free;
   unsigned long kb_high_total;
   unsigned long kb_low_free;
   unsigned long kb_low_total;
@@ -57,29 +56,16 @@ typedef struct proc_sysmem_data
   unsigned long kb_inact_laundry;
   unsigned long kb_inact_dirty;
   unsigned long kb_inact_clean;
-  unsigned long kb_inact_target;
   unsigned long kb_swap_cached;  /* late 2.4 and 2.6+ only */
   /* 2.5.41+ */
-  unsigned long kb_writeback;
   unsigned long kb_slab;
-  unsigned long nr_reversemaps;
   unsigned long kb_committed_as;
   unsigned long kb_dirty;
   unsigned long kb_inactive;
-  unsigned long kb_mapped;
-  unsigned long kb_pagetables;
-  /* seen on a 2.6.x kernel: */
-  unsigned long kb_vmalloc_chunk;
-  unsigned long kb_vmalloc_total;
-  unsigned long kb_vmalloc_used;
   // 2.6.19+
   unsigned long kb_slab_reclaimable;
-  unsigned long kb_slab_unreclaimable;
   /* seen on 2.6.24-rc6-git12 */
   unsigned long kb_anon_pages;
-  unsigned long kb_bounce;
-  unsigned long kb_commit_limit;
-  unsigned long kb_nfs_unstable;
   // 2.6.27+
   unsigned long kb_active_file;
   unsigned long kb_inactive_file;
@@ -143,40 +129,27 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
     { "Active", &data->kb_active },        /* important */
     { "Active(file)", &data->kb_active_file },
     { "AnonPages", &data->kb_anon_pages },
-    { "Bounce", &data->kb_bounce },
     { "Buffers", &data->kb_main_buffers }, /* important */
     { "Cached", &data->kb_page_cache },   /* important */
-    { "CommitLimit", &data->kb_commit_limit },
     { "Committed_AS", &data->kb_committed_as },
     { "Dirty", &data->kb_dirty },  /* kB version of vmstat nr_dirty */
-    { "HighFree", &data->kb_high_free },
     { "HighTotal", &data->kb_high_total },
     { "Inact_clean", &data->kb_inact_clean },
     { "Inact_dirty", &data->kb_inact_dirty },
     { "Inact_laundry", &data->kb_inact_laundry },
-    { "Inact_target", &data->kb_inact_target },
     { "Inactive", &data->kb_inactive },	 /* important */
     { "Inactive(file)", &data->kb_inactive_file },
     { "LowFree", &data->kb_low_free },
     { "LowTotal", &data->kb_low_total },
-    { "Mapped", &data->kb_mapped },        /* kB version of vmstat nr_mapped */
     { "MemAvailable", &data->kb_main_available },  /* kernel 3.14 and later */
     { "MemFree", &data->kb_main_free },	    /* important */
     { "MemTotal", &data->kb_main_total },    /* important */
-    { "NFS_Unstable", &data->kb_nfs_unstable },
-    { "PageTables", &data->kb_pagetables },   /* kB version of vmstat nr_page_table_pages */
-    { "ReverseMaps", &data->nr_reversemaps }, /* same as vmstat nr_page_table_pages */
     { "SReclaimable", &data->kb_slab_reclaimable }, /* dentry and inode structures */
-    { "SUnreclaim", &data->kb_slab_unreclaimable },
     { "Shmem", &data->kb_main_shared},        /* kernel 2.6.32 and later */
     { "Slab", &data->kb_slab },               /* kB version of vmstat nr_slab */
     { "SwapCached", &data->kb_swap_cached },  /* late 2.4 and 2.6+ only */
     { "SwapFree", &data->kb_swap_free },      /* important */
     { "SwapTotal", &data->kb_swap_total },    /* important */
-    { "VmallocChunk", &data->kb_vmalloc_chunk },
-    { "VmallocTotal", &data->kb_vmalloc_total },
-    { "VmallocUsed", &data->kb_vmalloc_used },
-    { "Writeback", &data->kb_writeback },     /* kB version of vmstat nr_writeback */
   };
   const int sysmem_table_count = sizeof (sysmem_table) / sizeof (proc_table_struct);
 
