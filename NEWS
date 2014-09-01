@@ -1,3 +1,12 @@
+    Major changes between "nagios-plugins-linux" versions 15 and 16
+
+-- Enhancements
+
+* meminfo lib: reduce the memory footprint by not allocating the
+  variable exported by /proc/memory and not used by any plugin.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 14 and 15
 
 -- Enhancements
