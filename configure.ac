@@ -21,6 +21,7 @@ AM_INIT_AUTOMAKE([
 AC_CONFIG_SRCDIR([plugins/check_cpu.c])
 AC_CONFIG_HEADERS(config.h:config.hin)
 AC_CONFIG_LIBOBJ_DIR([lib])
+AC_CONFIG_MACRO_DIR([m4])
 
 AM_MAINTAINER_MODE
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -66,28 +67,6 @@ if test "$cross_compiling" = no; then
 fi
 
 dnl Checks for some compiler warning flags
-
-dnl cc_TRY_CFLAGS (CFLAGS, [ACTION-IF-WORKS], [ACTION-IF-FAILS])
-dnl ------------------------------------------------------------
-dnl Checks if $CC supports a given set of CFLAGS.
-dnl If supported, the current CFLAGS is appended to SUPPORTED_CFLAGS
-AC_DEFUN([cc_TRY_CFLAGS],
-   [AC_MSG_CHECKING([whether compiler accepts $1])
-   ac_save_CFLAGS="$CFLAGS"
-   CFLAGS="$CFLAGS $1"
-   AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-      int x;])],
-      [ac_cv_try_cflags_ok=yes
-       SUPPORTED_CFLAGS="$SUPPORTED_CFLAGS $1"],
-      [ac_cv_try_cflags_ok=no])
-   CFLAGS="$ac_save_CFLAGS"
-   AC_MSG_RESULT([$ac_cv_try_cflags_ok])
-   if test x"$ac_cv_try_cflags_ok" = x"yes"; then
-      ifelse([$2],[],[:],[$2])
-   else
-      ifelse([$3],[],[:],[$3])
-   fi
-])  dnl end of cc_TRY_CFLAGS
 
 cc_TRY_CFLAGS([-Wall])
 cc_TRY_CFLAGS([-Wformat])
