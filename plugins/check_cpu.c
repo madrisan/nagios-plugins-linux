@@ -61,6 +61,7 @@ static struct option const longopts[] = {
   {(char *) "cpuinfo", no_argument, NULL, 'i'},
   {(char *) "cpufreq", no_argument, NULL, 'f'},
   {(char *) "no-cpu-model", no_argument, NULL, 'm'},
+  {(char *) "per-cpu", no_argument, NULL, 'p'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "verbose", no_argument, NULL, 'v'},
@@ -76,13 +77,15 @@ usage (FILE * out)
   fputs (program_shorthelp, out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-v] [-f] [-m] [-w PERC] [-c PERC] [delay [count]]\n",
+  fprintf (out,
+	   "  %s [-v] [-f] [-m] [-p] [-w PERC] [-c PERC] [delay [count]]\n",
 	   program_name);
   fprintf (out, "  %s --cpuinfo\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -f, --cpufreq   show the CPU frequency characteristics\n", out);
   fputs ("  -m, --no-cpu-model  "
-	 "do not display the cpu model in the output message\n", out);
+	 "do not display the CPU model in the output message\n", out);
+  fputs ("  -p, --per-cpu   display the utilization of each CPU\n", out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs ("  -v, --verbose   show details for command-line debugging "
@@ -97,7 +100,7 @@ usage (FILE * out)
            "(default: %d)\n", COUNT_DEFAULT);
   fputs ("\t1 means the percentages of total CPU time from boottime.\n", out);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s -m -w 85%% -c 95%%\n", program_name);
+  fprintf (out, "  %s -m -p -w 85%% -c 95%%\n", program_name);
   fprintf (out, "  %s -f -w 85%% -c 95%% 1 2\n", program_name);
   fprintf (out, "  %s --cpuinfo\n", program_name);
 
@@ -243,21 +246,17 @@ int
 main (int argc, char **argv)
 {
   int c, err;
-  bool verbose, show_freq, cpu_model;
+  bool verbose, show_freq, cpu_model, per_cpu_stats;
   unsigned long i, len, delay, count;
   char *critical = NULL, *warning = NULL;
   char *p = NULL, *cpu_progname;
-  nagstatus status = STATE_OK;
+  nagstatus currstatus, status;
   thresholds *my_threshold = NULL;
 
-  struct cpu_time cpu[2];
-  jiff duser, dsystem, didle, diowait, dsteal, ratio;
   jiff *cpu_value;
   float cpu_perc;
   unsigned int sleep_time = 1,
                tog = 0;		/* toggle switch for cleaner code */
-  int debt = 0;			/* handle idle ticks running backwards */
-
   struct cpu_desc *cpudesc = NULL;
 
   set_program_name (argv[0]);
@@ -272,14 +271,12 @@ main (int argc, char **argv)
   if (!strncmp (p, "iowait", 6))	/* check_iowait --> cpu_iowait */
     {
       cpu_progname = xstrdup ("iowait");
-      cpu_value = &diowait;
       program_shorthelp =
         xstrdup ("This plugin checks I/O wait bottlenecks\n");
     }
   else				/* check_cpu --> cpu_user (the default) */
     {
       cpu_progname = xstrdup ("user");;
-      cpu_value = &duser;
       program_shorthelp =
         xstrdup ("This plugin checks the CPU (user mode) utilization\n");
     }
@@ -291,9 +288,10 @@ main (int argc, char **argv)
   /* default values */
   verbose = show_freq = false;
   cpu_model = true;
+  per_cpu_stats = false;
 
   while ((c = getopt_long (
-		argc, argv, "c:w:vifm"
+		argc, argv, "c:w:vifmp"
 		GETOPT_HELP_VERSION_STRING, longopts, NULL)) != -1)
     {
       switch (c)
@@ -309,6 +307,9 @@ main (int argc, char **argv)
 	  break;
 	case 'm':
 	  cpu_model = false;
+	  break;
+	case 'p':
+	  per_cpu_stats = true;
 	  break;
 	case 'c':
 	  critical = optarg;
@@ -346,84 +347,106 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  cpu_stats_get_time (&cpu[0], 1);
+  int ncpus = per_cpu_stats ? get_processor_number_total () + 1 : 1;
 
-  duser   = cpu[0].user + cpu[0].nice;
-  dsystem = cpu[0].system + cpu[0].irq + cpu[0].softirq;
-  didle   = cpu[0].idle;
-  diowait = cpu[0].iowait;
-  dsteal  = cpu[0].steal;
+  jiff duser[ncpus], dsystem[ncpus], didle[ncpus],
+       diowait[ncpus], dsteal[ncpus], ratio[ncpus];
+  int debt[ncpus];			/* handle idle ticks running backwards */
+  struct cpu_time cpuv[2][ncpus];
 
-  ratio = duser + dsystem + didle + diowait + dsteal;
-  if (!ratio)
-    ratio = 1, didle = 1;
+  cpu_stats_get_time (cpuv[0], ncpus);
+
+  for (c = 0; c < ncpus; c++)
+    {
+      duser[c]   = cpuv[0][c].user + cpuv[0][c].nice;
+      dsystem[c] = cpuv[0][c].system + cpuv[0][c].irq + cpuv[0][c].softirq;
+      didle[c]   = cpuv[0][c].idle;
+      diowait[c] = cpuv[0][c].iowait;
+      dsteal[c]  = cpuv[0][c].steal;
+
+      debt[c] = 0;
+      ratio[c] = duser[c] + dsystem[c] + didle[c] + diowait[c] + dsteal[c];
+      if (!ratio[c])
+	ratio[c] = 1, didle[c] = 1;
+    }
 
   for (i = 1; i < count; i++)
     {
       sleep (sleep_time);
-
       tog = !tog;
-      cpu_stats_get_time (&cpu[tog], 1);
+      cpu_stats_get_time (cpuv[tog], ncpus);
 
-      duser =
-	cpu[tog].user - cpu[!tog].user +
-	cpu[tog].nice - cpu[!tog].nice;
-      dsystem =
-	cpu[tog].system  - cpu[!tog].system +
-	cpu[tog].irq     - cpu[!tog].irq +
-	cpu[tog].softirq - cpu[!tog].softirq;
-      didle   = cpu[tog].idle   - cpu[!tog].idle;
-      diowait = cpu[tog].iowait - cpu[!tog].iowait;
-      dsteal  = cpu[tog].steal  - cpu[!tog].steal;
-
-      /* idle can run backwards for a moment -- kernel "feature" */
-      if (debt)
+      for (c = 0; c < ncpus; c++)
 	{
-	  didle = (int) didle + debt;
-	  debt = 0;
-	}
-      if ((int) didle < 0)
-	{
-	  debt = (int) didle;
-	  didle = 0;
-	}
+	  duser[c] =
+	    cpuv[tog][c].user - cpuv[!tog][c].user +
+	    cpuv[tog][c].nice - cpuv[!tog][c].nice;
+	  dsystem[c] =
+	    cpuv[tog][c].system  - cpuv[!tog][c].system +
+	    cpuv[tog][c].irq     - cpuv[!tog][c].irq +
+	    cpuv[tog][c].softirq - cpuv[!tog][c].softirq;
+	  didle[c]   = cpuv[tog][c].idle   - cpuv[!tog][c].idle;
+	  diowait[c] = cpuv[tog][c].iowait - cpuv[!tog][c].iowait;
+	  dsteal[c]  = cpuv[tog][c].steal  - cpuv[!tog][c].steal;
 
-      ratio = duser + dsystem + didle + diowait + dsteal;
-      if (!ratio)
-	ratio = 1, didle = 1;
+	  /* idle can run backwards for a moment -- kernel "feature" */
+	  if (debt[c])
+	    {
+	      didle[c] = (int) didle[c] + debt[c];
+	      debt[c] = 0;
+	    }
+	  if ((int) didle[c] < 0)
+	    {
+	      debt[c] = (int) didle[c];
+	      didle[c] = 0;
+	    }
 
-      if (verbose)
-	printf
-	 ("cpu_user=%.1f%%, cpu_system=%.1f%%, cpu_idle=%.1f%%, "
-	  "cpu_iowait=%.1f%%, cpu_steal=%.1f%%\n"
-	   , 100.0 * duser   / ratio
-	   , 100.0 * dsystem / ratio
-	   , 100.0 * didle   / ratio
-	   , 100.0 * diowait / ratio
-	   , 100.0 * dsteal  / ratio);
+	  ratio[c] = duser[c] + dsystem[c] + didle[c] + diowait[c] + dsteal[c];
+	  if (!ratio[c])
+	    ratio[c] = 1, didle[c] = 1;
+
+	  if (verbose)
+	    printf
+	     ("cpu%d_user=%.1f%%, cpu%d_system=%.1f%%, cpu%d_idle=%.1f%%, "
+	      "cpu%d_iowait=%.1f%%, cpu%d_steal=%.1f%%\n"
+	       , c, 100.0 * duser[c]   / ratio[c]
+	       , c, 100.0 * dsystem[c] / ratio[c]
+	       , c, 100.0 * didle[c]   / ratio[c]
+	       , c, 100.0 * diowait[c] / ratio[c]
+	       , c, 100.0 * dsteal[c]  / ratio[c]);
+	}
     }
 
-  cpu_perc = (100.0 * (*cpu_value) / ratio);
-  status = get_status (cpu_perc, my_threshold);
+  cpu_value = strncmp (p, "iowait", 6) ? duser : diowait;
+
+  for (c = 0, status = STATE_OK; c < ncpus; c++)
+    {
+      cpu_perc = (100.0 * (cpu_value[c]) / ratio[c]);
+      currstatus = get_status (cpu_perc, my_threshold);
+      if (currstatus > status)
+	status = currstatus;
+    }
 
   cpu_desc_read (cpudesc);
-
   char *cpu_model_str =
     cpu_model ?	xasprintf ("(%s) ",
 			   cpu_desc_get_model_name (cpudesc)) : NULL;
 
-  printf
-    ("%s %s%s - cpu %s %.1f%% | "
-     "cpu_user=%.1f%% cpu_system=%.1f%% cpu_idle=%.1f%% "
-     "cpu_iowait=%.1f%% cpu_steal=%.1f%%"
-     , program_name_short, cpu_model ? cpu_model_str : ""
-     , state_text (status), cpu_progname, cpu_perc
-     , 100.0 * duser   / ratio
-     , 100.0 * dsystem / ratio
-     , 100.0 * didle   / ratio
-     , 100.0 * diowait / ratio
-     , 100.0 * dsteal  / ratio
-  );
+  printf ("%s %s%s - cpu %s %.1f%% |"
+	  , program_name_short, cpu_model ? cpu_model_str : ""
+	  , state_text (status), cpu_progname, cpu_perc);
+  for (c = 0; c < ncpus; c++)
+    {
+      const char *cpuname = cpuv[0][c].cpuname;
+      if (cpuname)
+        printf (" %s_user=%.1f%% %s_system=%.1f%% %s_idle=%.1f%%"
+		" %s_iowait=%.1f%% %s_steal=%.1f%%"
+		, cpuname, 100.0 * duser[c]   / ratio[c]
+		, cpuname, 100.0 * dsystem[c] / ratio[c]
+		, cpuname, 100.0 * didle[c]   / ratio[c]
+		, cpuname, 100.0 * diowait[c] / ratio[c]
+		, cpuname, 100.0 * dsteal[c]  / ratio[c]);
+    }
 
   if (show_freq)
     {
@@ -444,10 +467,11 @@ main (int argc, char **argv)
     }
   putchar ('\n');
 
+/*
   dbg ("sum (cpu_*) = %.1f%%\n", (100.0 * duser / ratio) +
        (100.0 * dsystem / ratio) + (100.0 * didle  / ratio) +
        (100.0 * diowait / ratio) + (100.0 * dsteal / ratio));
-
+*/
   cpu_desc_unref (cpudesc);
   return status;
 }
