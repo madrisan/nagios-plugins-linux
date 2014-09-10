@@ -438,6 +438,7 @@ main (int argc, char **argv)
   for (c = 0; c < ncpus; c++)
     {
       const char *cpuname = cpuv[0][c].cpuname;
+      unsigned long freq_min, freq_max, freq_kernel;
       if (cpuname)
         printf (" %s_user=%.1f%% %s_system=%.1f%% %s_idle=%.1f%%"
 		" %s_iowait=%.1f%% %s_steal=%.1f%%"
@@ -446,23 +447,15 @@ main (int argc, char **argv)
 		, cpuname, 100.0 * didle[c]   / ratio[c]
 		, cpuname, 100.0 * diowait[c] / ratio[c]
 		, cpuname, 100.0 * dsteal[c]  / ratio[c]);
-    }
-
-  if (show_freq)
-    {
-      int cpuid;
-      unsigned long freq_min, freq_max, freq_kernel;
-      for (cpuid = 0; cpuid < cpu_desc_get_ncpus (cpudesc); cpuid++)
+      if (show_freq && ((ncpus > 1) && (c > 1))
+	  && (0 == cpufreq_get_hardware_limits (c - 1, &freq_min, &freq_max)))
 	{
-	  if (0 == cpufreq_get_hardware_limits (cpuid, &freq_min, &freq_max))
-	    {
-	      freq_kernel = cpufreq_get_freq_kernel (cpuid);
-	      /* expected format for the Nagios performance data:
-	       *   'label'=value[UOM];[warn];[crit];[min];[max]	*/
-	      if (freq_kernel)
-		printf (" cpu%d_freq=%luHz;;;%lu;%lu",
-			cpuid, freq_kernel, freq_min, freq_max);
-	    }
+	  freq_kernel = cpufreq_get_freq_kernel (c - 1);
+	  /* expected format for the Nagios performance data:
+	   *   'label'=value[UOM];[warn];[crit];[min];[max]	*/
+	  if (freq_kernel)
+	    printf (" cpu%d_freq=%luHz;;;%lu;%lu",
+		    c - 1, freq_kernel, freq_min, freq_max);
 	}
     }
   putchar ('\n');
