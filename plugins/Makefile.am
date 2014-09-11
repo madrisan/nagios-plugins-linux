@@ -10,6 +10,7 @@ check_cpu_programs = check_iowait
 libexec_PROGRAMS =        \
 	check_clock       \
 	check_cpu         \
+	check_cpufreq     \
 	check_cswch       \
 	check_ifmountfs   \
 	check_intr        \
@@ -30,6 +31,7 @@ endif
 
 check_clock_SOURCES      = check_clock.c
 check_cpu_SOURCES        = check_cpu.c
+check_cpufreq_SOURCES    = check_cpufreq.c
 check_cswch_SOURCES      = check_cswch.c
 check_ifmountfs_SOURCES  = check_ifmountfs.c
 check_intr_SOURCES       = check_intr.c
@@ -52,6 +54,7 @@ LDADD = $(top_builddir)/lib/libutils.a
 
 check_clock_LDADD        = $(LDADD)
 check_cpu_LDADD          = $(LDADD)
+check_cpufreq_LDADD      = $(LDADD)
 check_cswch_LDADD        = $(LDADD)
 check_ifmountfs_LDADD    = $(LDADD)
 check_intr_LDADD         = $(LDADD)

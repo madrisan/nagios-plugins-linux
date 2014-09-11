@@ -253,7 +253,6 @@ main (int argc, char **argv)
   nagstatus currstatus, status;
   thresholds *my_threshold = NULL;
 
-  jiff *cpu_value;
   float cpu_perc;
   unsigned int sleep_time = 1,
                tog = 0;		/* toggle switch for cleaner code */
@@ -353,6 +352,7 @@ main (int argc, char **argv)
        diowait[ncpus], dsteal[ncpus], ratio[ncpus];
   int debt[ncpus];			/* handle idle ticks running backwards */
   struct cpu_time cpuv[2][ncpus];
+  jiff *cpu_value = strncmp (p, "iowait", 6) ? duser : diowait;
 
   cpu_stats_get_time (cpuv[0], ncpus);
 
@@ -416,8 +416,6 @@ main (int argc, char **argv)
 	       , c, 100.0 * dsteal[c]  / ratio[c]);
 	}
     }
-
-  cpu_value = strncmp (p, "iowait", 6) ? duser : diowait;
 
   for (c = 0, status = STATE_OK; c < ncpus; c++)
     {
