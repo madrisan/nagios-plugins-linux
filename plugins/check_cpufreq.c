@@ -20,28 +20,20 @@
  * This software is based on the source code of the tool "vmstat".
  */
 
-#include <ctype.h>
 #include <getopt.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
 #include "common.h"
 #include "cpudesc.h"
 #include "cpufreq.h"
 #include "cpustats.h"
 #include "cputopology.h"
-#include "logging.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
-#include "system.h"
-#include "xalloc.h"
 #include "xasprintf.h"
-#include "xstrtol.h"
 
 static const char *program_copyright =
   "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
