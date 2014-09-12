@@ -75,22 +75,22 @@ This Nagios plugin checks the CPU (user mode) utilization.
 
 *Usage*
 
-	check_cpu [-f] [-m] [-v] [-w PERC] [-c PERC] [delay [count]]
+	check_cpu [-m] [-v] [-w PERC] [-c PERC] [delay [count]]
 	check_cpu --cpuinfo
 	check_cpu --help
 
 *Command line options*
 
+* -m, --no-cpu-model: do not display the cpu model in the output message
+* -p, --per-cpu: display the utilization of each CPU
 * -w, --warning PERCENT: warning threshold
 * -c, --critical PERCENT: critical threshold
-* -f, --cpufreq: show the CPU frequency characteristics
-* -m, --no-cpu-model: do not display the cpu model in the output message
-* -i, --cpuinfo: show the CPU characteristics (for debugging)
 * -v, --verbose: show details for command-line debugging (Nagios may truncate output)
-* delay is the delay between updates in seconds (default: 1sec)
-* count is the number of updates (default: 2)
+* -i, --cpuinfo: show the CPU characteristics (for debugging)
 * -h, --help: display this help and exit
 * -V, --version: output version information and exit
+* delay is the delay between updates in seconds (default: 1sec)
+* count is the number of updates (default: 2)
 
 *Examples*
 
