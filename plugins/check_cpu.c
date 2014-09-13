@@ -407,6 +407,10 @@ main (int argc, char **argv)
 	       , c, 100.0 * didle[c]   / ratio[c]
 	       , c, 100.0 * diowait[c] / ratio[c]
 	       , c, 100.0 * dsteal[c]  / ratio[c]);
+
+	  dbg ("sum (cpu%d_*) = %.1f%%\n", c, (100.0 * duser[c] / ratio[c]) +
+	       (100.0 * dsystem[c] / ratio[c]) + (100.0 * didle[c]  / ratio[c]) +
+	       (100.0 * diowait[c] / ratio[c]) + (100.0 * dsteal[c] / ratio[c]));
 	}
     }
 
@@ -440,11 +444,6 @@ main (int argc, char **argv)
     }
   putchar ('\n');
 
-/*
-  dbg ("sum (cpu_*) = %.1f%%\n", (100.0 * duser / ratio) +
-       (100.0 * dsystem / ratio) + (100.0 * didle  / ratio) +
-       (100.0 * diowait / ratio) + (100.0 * dsteal / ratio));
-*/
   cpu_desc_unref (cpudesc);
   return status;
 }
