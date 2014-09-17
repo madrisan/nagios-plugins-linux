@@ -11,6 +11,7 @@ Here is the list of the available plugins:
 
 * **check_clock** - returns the number of seconds elapsed between local time and Nagios server time 
 * **check_cpu** - checks the CPU (user mode) utilization 
+* **check_cpufreq** - displays the CPU frequency characteristics
 * **check_cswch** - checks the total number of context switches across all CPUs
 * **check_ifmountfs** - checks whether the given filesystems are mounted
 * **check_intr** - monitors the total number of system interrupts
@@ -103,6 +104,29 @@ This Nagios plugin checks the CPU (user mode) utilization.
 
 	check_cpu -m -p -w 85% -c 95% 1 2
 	cpu OK - cpu user 20.6% | cpu_user=20.2% cpu_system=6.7% cpu_idle=66.8% cpu_iowait=6.2% cpu_steal=0.0% cpu0_user=20.8% cpu0_system=7.3% cpu0_idle=59.4% cpu0_iowait=12.5% cpu0_steal=0.0% cpu1_user=20.6% cpu1_system=5.2% cpu1_idle=74.2% cpu1_iowait=0.0% cpu1_steal=0.0%
+
+
+**The check_cpufreq plugin**
+
+This Nagios plugin displays the CPU frequency characteristics.
+
+*Usage*
+
+	check_cpufreq [-m] [-w COUNTER] -c [COUNTER]
+	check_cpufreq --help
+
+*Command line options*
+
+* -m, --no-cpu-model: do not display the cpu model in the output message
+* -w, --warning PERCENT: warning threshold
+* -c, --critical PERCENT: critical threshold
+* -h, --help: display this help and exit
+* -V, --version: output version information and exit
+
+*Examples*
+
+	check_cpufreq -m -w 800000:
+
 
 **The check_cswch plugin**
 
