@@ -346,6 +346,7 @@ main (int argc, char **argv)
   int debt[ncpus];			/* handle idle ticks running backwards */
   struct cpu_time cpuv[2][ncpus];
   jiff *cpu_value = strncmp (p, "iowait", 6) ? duser : diowait;
+  const char *cpuname;
 
   cpu_stats_get_time (cpuv[0], ncpus);
 
@@ -398,17 +399,20 @@ main (int argc, char **argv)
 	  if (!ratio[c])
 	    ratio[c] = 1, didle[c] = 1;
 
+	  if (NULL == (cpuname = cpuv[0][c].cpuname))
+	    cpuname = "n/a";
+
 	  if (verbose)
 	    printf
-	     ("cpu%d_user=%.1f%%, cpu%d_system=%.1f%%, cpu%d_idle=%.1f%%, "
-	      "cpu%d_iowait=%.1f%%, cpu%d_steal=%.1f%%\n"
-	       , c, 100.0 * duser[c]   / ratio[c]
-	       , c, 100.0 * dsystem[c] / ratio[c]
-	       , c, 100.0 * didle[c]   / ratio[c]
-	       , c, 100.0 * diowait[c] / ratio[c]
-	       , c, 100.0 * dsteal[c]  / ratio[c]);
+	     ("%s_user=%.1f%%, %s_system=%.1f%%, %s_idle=%.1f%%, "
+	      "%s_iowait=%.1f%%, %s_steal=%.1f%%\n"
+	      , cpuname, 100.0 * duser[c]   / ratio[c]
+	      , cpuname, 100.0 * dsystem[c] / ratio[c]
+	      , cpuname, 100.0 * didle[c]   / ratio[c]
+	      , cpuname, 100.0 * diowait[c] / ratio[c]
+	      , cpuname, 100.0 * dsteal[c]  / ratio[c]);
 
-	  dbg ("sum (cpu%d_*) = %.1f%%\n", c, (100.0 * duser[c] / ratio[c]) +
+	  dbg ("sum (%s_*) = %.1f%%\n", cpuname, (100.0 * duser[c] / ratio[c]) +
 	       (100.0 * dsystem[c] / ratio[c]) + (100.0 * didle[c]  / ratio[c]) +
 	       (100.0 * diowait[c] / ratio[c]) + (100.0 * dsteal[c] / ratio[c]));
 	}
@@ -432,8 +436,7 @@ main (int argc, char **argv)
 	  , state_text (status), cpu_progname, cpu_perc);
   for (c = 0; c < ncpus; c++)
     {
-      const char *cpuname = cpuv[0][c].cpuname;
-      if (cpuname)
+      if ((cpuname = cpuv[0][c].cpuname))
         printf (" %s_user=%.1f%% %s_system=%.1f%% %s_idle=%.1f%%"
 		" %s_iowait=%.1f%% %s_steal=%.1f%%"
 		, cpuname, 100.0 * duser[c]   / ratio[c]
