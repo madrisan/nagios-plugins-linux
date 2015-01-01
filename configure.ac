@@ -34,7 +34,10 @@ AC_C_CONST
 AC_C_PROTOTYPES
 AC_C_INLINE
 
+# 'AC_PROG_CC_C99' unfortunately requires autoconf 2.60+
+#AC_PROG_CC_C99
 AC_PROG_CC_STDC
+
 if test "$cross_compiling" = no; then
   if test "x$ac_cv_prog_cc_c99" = "xno" || test "x$ac_cv_prog_cc_c99" = "x"; then
     # Check if CC is gcc and if it bails when given -std=gnu99.
@@ -44,7 +47,8 @@ if test "$cross_compiling" = no; then
       AC_RUN_IFELSE(
         [AC_LANG_PROGRAM([],[[return 0;]])],
         [],
-        [AC_MSG_ERROR([Could not find a C99 compatible compiler])])
+        [AC_MSG_ERROR([Could not find a C99 compatible compiler])],
+        [AC_MSG_ERROR([Internal error: not reached in cross-compile])])
     else
       AC_MSG_ERROR([Could not find a C99 compatible compiler])
     fi
