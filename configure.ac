@@ -48,23 +48,22 @@ if test "$cross_compiling" = no; then
     else
       AC_MSG_ERROR([Could not find a C99 compatible compiler])
     fi
-
-    # Check for variable-length arrays support
-    AC_MSG_CHECKING(for variable-lenght arrays)
-    AC_TRY_COMPILE([],
-      [int foo;
-       foo = 10;
-       int array[foo];],
-      [cc_has_variable_length_arrays=yes;
-       AC_DEFINE([VARIABLE_LENGTH_ARRAYS], [],
-                 [Define this if the compiler supports variable-length arrays])],
-       cc_has_variable_length_arrays=no)
-    AC_MSG_RESULT($cc_has_variable_length_arrays)
-    if test "x$cc_has_variable_length_arrays" = "xno"; then
-      AC_MSG_ERROR([The compiler does not support variable-length arrays])
-    fi
   fi
 fi
+
+dnl Check for variable-length arrays support
+AC_MSG_CHECKING(for variable-lenght arrays)
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM([[]],[[
+    int foo;
+    foo = 10;
+    int array[foo];]])],
+  [AC_MSG_RESULT([yes])
+   AC_DEFINE([VARIABLE_LENGTH_ARRAYS], [],
+             [Define this if the compiler supports variable-length arrays])],
+  [AC_MSG_RESULT([no])
+   AC_MSG_ERROR([The compiler does not support variable-length arrays])
+  ])
 
 dnl Checks for some compiler warning flags
 
@@ -292,22 +291,22 @@ AC_SUBST(MULTIPATHD_SOCKET)
 dnl Check whether we can get the number of CPU
 AC_CHECK_FUNCS([get_nprocs_conf get_nprocs], [],
   [AC_MSG_CHECKING([for number of online cpus])
-   AC_TRY_COMPILE(
-     [#include <unistd.h>],
-     [sysconf(_SC_NPROCESSORS_ONLN) > 0;],
-     AC_DEFINE(HAVE_SYSCONF__SC_NPROCESSORS_ONLN, 1,
-               [Define if sysconf returns number of online cpus])
-     AC_MSG_RESULT([sysconf(_SC_NPROCESSORS_ONLN)]),
-     AC_MSG_RESULT([not available]))
+   AC_COMPILE_IFELSE(
+     [AC_LANG_PROGRAM([[#include <unistd.h>]],[[
+       sysconf(_SC_NPROCESSORS_ONLN) > 0;]])],
+     [AC_MSG_RESULT([sysconf(_SC_NPROCESSORS_ONLN)])
+      AC_DEFINE(HAVE_SYSCONF__SC_NPROCESSORS_ONLN, 1,
+                [Define if sysconf returns number of online cpus])],
+     [AC_MSG_RESULT([not available])])
    AC_MSG_CHECKING([for number of available cpus])
-   AC_TRY_COMPILE(
-     [#include <unistd.h>],
-     [sysconf(_SC_NPROCESSORS_CONF) > 0;],
-     AC_DEFINE(HAVE_SYSCONF__SC_NPROCESSORS_CONF, 1,
-               [Define if sysconf returns number of available cpus])
-     AC_MSG_RESULT([sysconf(_SC_NPROCESSORS_CONF)]),
-     AC_MSG_RESULT([not available]))
-  ])
+   AC_COMPILE_IFELSE(
+     [AC_LANG_PROGRAM([[#include <unistd.h>]],[[
+       sysconf(_SC_NPROCESSORS_CONF) > 0;]])],
+     [AC_MSG_RESULT([sysconf(_SC_NPROCESSORS_CONF)])
+      AC_DEFINE(HAVE_SYSCONF__SC_NPROCESSORS_CONF, 1,
+                [Define if sysconf returns number of available cpus])],
+     [AC_MSG_RESULT([not available])]
+   )])
 
 dnl Checks for the function getloadavg
 have_func_getloadavg=false
