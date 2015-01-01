@@ -314,7 +314,7 @@ AC_CHECK_FUNC([getloadavg], [have_func_getloadavg=true])
 AM_CONDITIONAL([HAVE_GETLOADAVG], [test x$have_func_getloadavg = xtrue])
 
 dnl Checks for struct sockaddr_in6
-AC_CHECK_TYPE(struct sockaddr_in6,
+AC_CHECK_TYPES([struct sockaddr_in6],
   [AC_DEFINE(HAVE_AFINET6, 1,
     [Define to 1 if struct sockaddr_in6 is available])],
   [working_ipv6=no],
@@ -326,7 +326,7 @@ AC_TYPE_SIZE_T
 # 'AC_TYPE_SSIZE_T' unfortunately requires autoconf 2.60+
 #AC_TYPE_SSIZE_T
 # Define to `int' if <sys/types.h> does not define
-AC_CHECK_TYPE(ssize_t, [int])
+AC_CHECK_TYPES([ssize_t])
 AC_TYPE_UID_T
 
 dnl Checks for programs
