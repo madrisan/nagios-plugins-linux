@@ -2,4 +2,22 @@ language: c
 compiler:
   - gcc
   - clang
-script: autoreconf -v -Wall -i -Im4 && ./configure && make
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "WqpTr19IWav//MQEQ7RcerdTVhbYt9faBh2QoEZmRLDPm+0RBidw1kvP73Di9pozURqisdB1P5LJ5eVFuocaD2eM+pO4399hHD48QsupDoLxgcJfmeP5YfT7Kmq97vyOs5dV01uopRMTJ9SDD1rt2oia+Ez6B/AeTCEpENb/76Y="
+
+addons:
+  coverity_scan:
+    project:
+      name: "madrisan/nagios-plugins-linux"
+      description: "Nagios Plugins for Linux"
+    notification_email: davide.madrisan@gmail.com
+    build_command_prepend: "autoreconf -v -Wall -i -Im4 && ./configure"
+    build_command: "make"
+    branch_pattern: master
+
+script:
+  - autoreconf -v -Wall -i -Im4 && ./configure && make

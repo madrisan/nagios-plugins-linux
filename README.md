@@ -3,6 +3,7 @@
 # Nagios Plugins for Linux
 
 [![Build Status](https://travis-ci.org/madrisan/nagios-plugins-linux.svg?branch=master)](https://travis-ci.org/madrisan/nagios-plugins-linux)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/3779/badge.svg)](https://scan.coverity.com/projects/3779)
 
 ## About
 
