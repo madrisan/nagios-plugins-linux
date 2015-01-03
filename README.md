@@ -2,6 +2,8 @@
 
 # Nagios Plugins for Linux
 
+[![Build Status](https://travis-ci.org/madrisan/nagios-plugins-linux.svg?branch=master)](https://travis-ci.org/madrisan/nagios-plugins-linux)
+
 ## About
 
 This package contains several `nagios plugins` for monitoring Linux boxes.
