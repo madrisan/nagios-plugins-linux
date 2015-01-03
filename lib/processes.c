@@ -175,7 +175,7 @@ procs_list_getall (unsigned int flags)
   bool gotname, gotuid, gotthreads,
        threads = (flags & NBPROCS_THREADS) ? true : false,
        verbose = (flags & NBPROCS_VERBOSE) ? true : false;
-  char *line, *p, path[PATH_MAX];
+  char *line = NULL, *p, path[PATH_MAX];
   uid_t uid = -1;
   unsigned long threads_nbr;
   struct procs_list_node *plist = NULL;
