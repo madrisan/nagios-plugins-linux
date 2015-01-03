@@ -1,4 +1,5 @@
 language: c
+
 compiler:
   - gcc
   - clang
@@ -15,9 +16,16 @@ addons:
       name: "madrisan/nagios-plugins-linux"
       description: "Nagios Plugins for Linux"
     notification_email: davide.madrisan@gmail.com
+    # Commands to prepare for build_command
     build_command_prepend: "autoreconf -v -Wall -i -Im4 && ./configure"
-    build_command: "make"
+    # This command will be added as an argument to "cov-build" to compile
+    # the project for analisys
+    build_command: "make clean all"
     branch_pattern: master
 
+#before_script:
+#  - autoreconf -v -Wall -i -Im4
+#  - ./configure || { cat config.log; false; }
+
 script:
-  - autoreconf -v -Wall -i -Im4 && ./configure && make
+  - if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then make clean all; fi
