@@ -2,4 +2,4 @@ language: c
 compiler:
   - gcc
   - clang
-script: autoreconf -v -Wall --install && ./configure && make
+script: autoreconf -v -Wall -i -Im4 && ./configure && make
