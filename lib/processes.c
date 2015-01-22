@@ -257,7 +257,9 @@ procs_list_getall (unsigned int flags)
 		uid_to_username (uid), dp->d_name, threads_nbr, cmd);
     }
 
+  closedir (dirp);
   free (cmd);
   free (line);
+
   return plist;
 }
