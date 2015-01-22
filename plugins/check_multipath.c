@@ -165,7 +165,7 @@ multipathd_query (const char *query, char *buf, size_t bufsize)
 }
 
 static int
-check_for_faulty_paths (char *buf)
+check_for_faulty_paths (char *buf, size_t bufsize)
 {
   char *str1, *token, *saveptr1;
   char *dm_st_ok_pattern = "[ \t]+[?active]?[ \t]*[?ready]?[ \t]+";
@@ -174,7 +174,7 @@ check_for_faulty_paths (char *buf)
 
   if ((rc = regcomp (&regex, dm_st_ok_pattern, REG_EXTENDED | REG_NOSUB)))
     {
-      regerror (rc, &regex, buf, sizeof (buf));
+      regerror (rc, &regex, buf, bufsize);
       plugin_error (STATE_UNKNOWN, 0, "regcomp() failed: %s", buf);
     }
 
@@ -207,7 +207,8 @@ int
 main (int argc, char **argv)
 {
   int c, faulty_paths;
-  static char buffer[2048];
+  enum { bufsize = 2014 };
+  static char buffer[bufsize];
 
   set_program_name (argv[0]);
 
@@ -232,7 +233,7 @@ main (int argc, char **argv)
     plugin_error (STATE_UNKNOWN, 0, "need to be root");
 
   multipathd_query ("show paths", buffer, sizeof (buffer));
-  faulty_paths = check_for_faulty_paths (buffer);
+  faulty_paths = check_for_faulty_paths (buffer, bufsize);
 
   if (faulty_paths > 0)
     {
