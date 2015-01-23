@@ -190,6 +190,7 @@ set_thresholds (thresholds ** my_thresholds, char *warn_string,
       if ((temp_thresholds->critical =
 	   parse_range_string (critical_string)) == NULL)
 	{
+	  free (temp_thresholds);
 	  return NP_RANGE_UNPARSEABLE;
 	}
     }
