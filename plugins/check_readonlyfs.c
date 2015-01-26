@@ -265,7 +265,6 @@ main (int argc, char **argv)
   int c, i;
   int status = STATE_OK;
   char *ro_filesystems = NULL;
-  struct stat *stats = 0;
 
   fs_select_list = NULL;
   fs_exclude_list = NULL;
@@ -326,22 +325,13 @@ main (int argc, char **argv)
       /* Open each of the given entries to make sure any corresponding
        * partition is automounted.  This must be done before reading the
        * file system table.  */
-      stats = xnmalloc (argc - optind, sizeof *stats);
       for (i = optind; i < argc; ++i)
 	{
-	  /* Prefer to open with O_NOCTTY and use fstat, but fall back
-	   * on using "stat", in case the file is unreadable.  */
 	  int fd = open (argv[i], O_RDONLY | O_NOCTTY);
-	  if ((fd < 0 || fstat (fd, &stats[i - optind]))
-	      && stat (argv[i], &stats[i - optind]))
-	    {
-	      plugin_error (STATE_UNKNOWN, 0, "cannot open `%s'", argv[i]);
-	      argv[i] = NULL;
-	    }
-	  if (0 <= fd)
-	    close (fd);
+	  if (fd < 0)
+	    plugin_error (STATE_UNKNOWN, 0, "cannot open `%s'", argv[i]);
+	  close (fd);
 	}
-      free (stats);
     }
 
   mount_list =
