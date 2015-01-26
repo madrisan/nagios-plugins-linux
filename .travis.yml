@@ -4,6 +4,12 @@ compiler:
   - gcc
   - clang
 
+# Don't use Clang for Coverity Scan
+matrix:
+  exclude:
+    - compiler: clang
+    - env: COVERITY_SCAN_BRANCH=1
+
 env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
