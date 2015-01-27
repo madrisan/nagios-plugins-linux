@@ -143,12 +143,14 @@ char_to_val (int c)
 static int
 cpumask_parse (const char *str, cpu_set_t *set, size_t setsize)
 {
-  int len = strlen (str);
-  const char *ptr = str + len - 1;
-  int cpu = 0;
+  const char *ptr;
+  int len, cpu = 0;
 
   if (!str)
     return -1;
+
+  len = strlen (str);
+  ptr = str + len - 1;
 
   /* skip 0x, it's all hex anyway */
   if (len > 1 && !memcmp (str, "0x", 2L))
