@@ -2,8 +2,26 @@
 
 -- Enhancements
 
+* check_cpufreq: new plugin.
+
 * meminfo lib: reduce the memory footprint by not allocating the
   variable exported by /proc/memory and not used by any plugin.
+
+* check_cpu: new option '--per-cpu' for checking the CPU utilization
+  for each CPU.  A warning message is returned if at least one CPU
+  exceeds the warning threshold and no CPU exceed the critical state.
+  A critical message is returned if at least one CPU exceeds the
+  critical threshold.
+  The option '--cpufreq' has been removed because this information is
+  now provided by the new plugin 'check_cpufreq'.
+
+-- Fixes
+
+* Improved code quality based on the Coverity scan analysis.
+
+* Build system: minor fixes to make the Travis-CI Continuous
+  Integration work - gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) environment.
+  Update some obsolete macros used by configure.ac.
 
 ======================================================================
 
