@@ -186,7 +186,6 @@ AC_HEADER_STDC
 AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([ \
   arpa/inet.h \
-  linux/if_link.h \
   fcntl.h \
   limits.h \
   mntent.h \
@@ -196,9 +195,20 @@ AC_CHECK_HEADERS([ \
   sys/socket.h \
   sys/sysctl.h \
   sys/sysinfo.h \
+  sys/types.h \
   sys/time.h \
   sys/swap.h \
   utmpx.h])
+
+AC_CHECK_HEADERS(linux/if_link.h, [], [],
+[
+#if HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
+])
 
 dnl Checks for functions and libraries
 
