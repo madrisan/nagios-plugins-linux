@@ -25,6 +25,7 @@
 * Build system: minor fixes to make the Travis-CI Continuous
   Integration work - gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) environment.
   Update some obsolete macros used by configure.ac.
+  Portability has been improved.
 
 ======================================================================
 
