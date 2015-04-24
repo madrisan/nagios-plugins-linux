@@ -17,6 +17,9 @@
 
 -- Fixes
 
+* check_multipath: fix the regular expression that catches the failed
+  paths and that prevented the plugin from working correctly.
+
 * Improved code quality based on the Coverity scan analysis.
 
 * Build system: minor fixes to make the Travis-CI Continuous
