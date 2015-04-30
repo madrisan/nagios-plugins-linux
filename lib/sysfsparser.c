@@ -97,7 +97,7 @@ char *
 sysfsparser_getline (const char *format, ...)
 {
   FILE *fp;
-  char *line, *filename;
+  char *filename, *line = NULL;
   size_t len = 0;
   ssize_t chread;
   va_list args;

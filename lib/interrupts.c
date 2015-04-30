@@ -42,7 +42,7 @@ unsigned long *
 proc_interrupts_get_nintr_per_cpu (unsigned int *ncpus)
 {
   FILE *fp;
-  char *p, *line, *end;
+  char *p, *end, *line = NULL;
   size_t len = 0;
   ssize_t chread;
   bool header = true;
