@@ -19,9 +19,14 @@
  *
  */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE	/* activate extra prototypes for glibc */
+#endif
+
 #include <dirent.h>
 #include <errno.h>
 #include <getopt.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -83,39 +88,29 @@ print_version (void)
 #define PATH_SYS_FC   "/sys/class"
 #define PATH_SYS_FC_HOST   PATH_SYS_FC "/fc_host"
 
+void dir_open (DIR **dirp, const char *path, ...)
+       _attribute_format_printf_(2, 3);
+
 void
-fc_status (int *n_ports, int *n_online, bool verbose)
+dir_open(DIR **dirp, const char *path, ...)
 {
-  DIR *dirp;
+  char *dirname;
+  va_list args;
+
+  va_start (args, path);
+  if (vasprintf (&dirname, path, args) < 0)
+    plugin_error (STATE_UNKNOWN, errno, "vasprintf has failed");
+  va_end (args);
+
+  if ((*dirp = opendir (dirname)) == NULL)
+    plugin_error (STATE_UNKNOWN, errno, "Cannot open %s", dirname);
+}
+
+struct dirent *
+dir_readname(DIR *dirp, unsigned int flags)
+{
   struct dirent *dp;
-  char *line, path[PATH_MAX];
 
-  // https://www.kernel.org/doc/Documentation/scsi/scsi_fc_transport.txt
-  static const char *const fc_host_check[] = {
-    "dev_loss_tmo",
-    "fabric_name",
-    "max_npiv_vports",
-    "node_name",		/* The WWNN of the vport */
-    "npiv_vports_inuse",
-    "port_id",
-    "port_name",		/* The WWPN of the vport */
-    "port_state",
-    "port_type",
-    "speed",
-    "supported_classes",
-    "supported_speeds",
-    "symbolic_name",
-    "system_hostname",
-    "tgtid_bind_type",
-  };
-  const int fc_host_check_len =
-    sizeof fc_host_check / sizeof fc_host_check[0];
-
-  if ((dirp = opendir (PATH_SYS_FC_HOST)) == NULL)
-    plugin_error (STATE_UNKNOWN, errno, "Cannot open %s", PATH_SYS_FC_HOST);
-
-  /* Scan entries under /sys/class/fc_host directory */
-  *n_ports = *n_online = 0;
   for (;;)
     {
       errno = 0;
@@ -124,35 +119,69 @@ fc_status (int *n_ports, int *n_online, bool verbose)
 	  if (errno != 0)
 	    plugin_error (STATE_UNKNOWN, errno, "readdir() failure");
 	  else
-	    break;		/* end-of-directory */
+	    {
+	      closedir(dirp);
+	      return NULL;		/* end-of-directory */
+	    }
 	}
 
       /* ignore directory entries */
       if (!strcmp (dp->d_name, ".") || !strcmp (dp->d_name, ".."))
 	continue;
 
-      if (dp->d_type != DT_DIR && dp->d_type != DT_LNK)
-	continue;
+     if (dp->d_type & flags)
+	return dp;
+    }
+}
 
-      if (verbose)
+void
+fc_host_summary ()
+{
+  DIR *dirp;
+  struct dirent *dp;
+  char *line, path[PATH_MAX];
+
+  dir_open(&dirp, PATH_SYS_FC_HOST);
+
+  /* Scan entries under /sys/class/fc_host directory */
+  while ((dp = dir_readname(dirp, DT_DIR | DT_LNK)))
+    {
+      printf ("Class Device = \"%s\"\n", dp->d_name);
+
+      DIR *dirp_host;
+      struct dirent *dp_host;
+      dir_open(&dirp_host, "%s/%s", PATH_SYS_FC_HOST, dp->d_name);
+
+      /* https://www.kernel.org/doc/Documentation/scsi/scsi_fc_transport.txt */
+      while ((dp_host = dir_readname(dirp_host, DT_REG)))
 	{
-	  printf ("Class Device = \"%s\"\n", dp->d_name);
-	  for (int i = 0; i < fc_host_check_len; i++)
+	  snprintf (path, PATH_MAX, "%s/%s/%s",
+		    PATH_SYS_FC_HOST, dp->d_name, dp_host->d_name);
+ 	  if ((line = sysfsparser_getline ("%s", path)))
 	    {
-	      snprintf (path, PATH_MAX, "%s/%s/%s",
-			PATH_SYS_FC_HOST, dp->d_name, fc_host_check[i]);
-	      if ((line = sysfsparser_getline ("%s", path)))
-		{
-		  fprintf (stdout, "%25s = \"%s\"\n", fc_host_check[i], line);
-		  free (line);
-		}
+	      fprintf (stdout, "%25s = \"%s\"\n", dp_host->d_name, line);
+	      free (line);
 	    }
-	  fputs ("\n", stdout);
-	  continue;
 	}
 
-      (*n_ports)++;
+	fputs ("\n", stdout);
+    }
+}
 
+void
+fc_host_status (int *n_ports, int *n_online)
+{
+  DIR *dirp;
+  struct dirent *dp;
+  char *line, path[PATH_MAX];
+
+  *n_ports = *n_online = 0;
+  dir_open(&dirp, PATH_SYS_FC_HOST);
+
+  /* Scan entries under /sys/class/fc_host directory */
+  while ((dp = dir_readname(dirp, DT_DIR | DT_LNK)))
+    {
+      (*n_ports)++;
       snprintf (path, PATH_MAX, "%s/%s/port_state",
 		PATH_SYS_FC_HOST, dp->d_name);
 
@@ -162,8 +191,6 @@ fc_status (int *n_ports, int *n_online, bool verbose)
 
       free (line);
     }
-
-  closedir (dirp);
 }
 
 int
@@ -186,7 +213,7 @@ main (int argc, char **argv)
 	default:
 	  usage (stderr);
 	case 'i':
-	  fc_status (&n_ports, &n_online, verbose = true);
+	  fc_host_summary (&n_ports, &n_online);
 	  return STATE_UNKNOWN;
 	case 'c':
 	  critical = optarg;
@@ -208,7 +235,7 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  fc_status (&n_ports, &n_online, verbose);
+  fc_host_status (&n_ports, &n_online);
   status = get_status (n_online, my_threshold);
 
   printf ("%s %s - Fiber Channel ports status: %d Online, %d Offline\n",
