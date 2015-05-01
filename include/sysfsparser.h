@@ -16,6 +16,7 @@
 #ifndef _SYSFSPARSER_H
 #define _SYSFSPARSER_H
 
+#include <dirent.h>
 #include <limits.h>
 #include "system.h"
 
@@ -28,6 +29,11 @@ extern "C"
 
   bool sysfsparser_path_exist (const char *path, ...)
        _attribute_format_printf_(1, 2);
+  void sysfsparser_opendir(DIR **dirp, const char *path, ...)
+       _attribute_format_printf_(2, 3);
+  void sysfsparser_closedir(DIR *dirp);
+  struct dirent *sysfsparser_readfilename(DIR *dirp, unsigned int flags);
+
   char *sysfsparser_getline (const char *filename, ...)
        _attribute_format_printf_(1, 2);
   unsigned long sysfsparser_getvalue (const char *filename, ...)

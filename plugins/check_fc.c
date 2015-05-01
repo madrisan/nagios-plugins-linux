@@ -19,14 +19,9 @@
  *
  */
 
-#ifndef _GNU_SOURCE
-# define _GNU_SOURCE	/* activate extra prototypes for glibc */
-#endif
-
 #include <dirent.h>
 #include <errno.h>
 #include <getopt.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -88,52 +83,6 @@ print_version (void)
 #define PATH_SYS_FC   "/sys/class"
 #define PATH_SYS_FC_HOST   PATH_SYS_FC "/fc_host"
 
-void dir_open (DIR **dirp, const char *path, ...)
-       _attribute_format_printf_(2, 3);
-
-void
-dir_open(DIR **dirp, const char *path, ...)
-{
-  char *dirname;
-  va_list args;
-
-  va_start (args, path);
-  if (vasprintf (&dirname, path, args) < 0)
-    plugin_error (STATE_UNKNOWN, errno, "vasprintf has failed");
-  va_end (args);
-
-  if ((*dirp = opendir (dirname)) == NULL)
-    plugin_error (STATE_UNKNOWN, errno, "Cannot open %s", dirname);
-}
-
-struct dirent *
-dir_readname(DIR *dirp, unsigned int flags)
-{
-  struct dirent *dp;
-
-  for (;;)
-    {
-      errno = 0;
-      if ((dp = readdir (dirp)) == NULL)
-	{
-	  if (errno != 0)
-	    plugin_error (STATE_UNKNOWN, errno, "readdir() failure");
-	  else
-	    {
-	      closedir(dirp);
-	      return NULL;		/* end-of-directory */
-	    }
-	}
-
-      /* ignore directory entries */
-      if (!strcmp (dp->d_name, ".") || !strcmp (dp->d_name, ".."))
-	continue;
-
-     if (dp->d_type & flags)
-	return dp;
-    }
-}
-
 void
 fc_host_summary ()
 {
@@ -141,19 +90,19 @@ fc_host_summary ()
   struct dirent *dp;
   char *line, path[PATH_MAX];
 
-  dir_open(&dirp, PATH_SYS_FC_HOST);
+  sysfsparser_opendir(&dirp, PATH_SYS_FC_HOST);
 
   /* Scan entries under /sys/class/fc_host directory */
-  while ((dp = dir_readname(dirp, DT_DIR | DT_LNK)))
+  while ((dp = sysfsparser_readfilename(dirp, DT_DIR | DT_LNK)))
     {
       printf ("Class Device = \"%s\"\n", dp->d_name);
 
       DIR *dirp_host;
       struct dirent *dp_host;
-      dir_open(&dirp_host, "%s/%s", PATH_SYS_FC_HOST, dp->d_name);
+      sysfsparser_opendir(&dirp_host, "%s/%s", PATH_SYS_FC_HOST, dp->d_name);
 
       /* https://www.kernel.org/doc/Documentation/scsi/scsi_fc_transport.txt */
-      while ((dp_host = dir_readname(dirp_host, DT_REG)))
+      while ((dp_host = sysfsparser_readfilename(dirp_host, DT_REG)))
 	{
 	  snprintf (path, PATH_MAX, "%s/%s/%s",
 		    PATH_SYS_FC_HOST, dp->d_name, dp_host->d_name);
@@ -165,7 +114,10 @@ fc_host_summary ()
 	}
 
 	fputs ("\n", stdout);
+	sysfsparser_closedir (dirp_host);
     }
+
+  sysfsparser_closedir (dirp);
 }
 
 void
@@ -176,10 +128,10 @@ fc_host_status (int *n_ports, int *n_online)
   char *line, path[PATH_MAX];
 
   *n_ports = *n_online = 0;
-  dir_open(&dirp, PATH_SYS_FC_HOST);
+  sysfsparser_opendir(&dirp, PATH_SYS_FC_HOST);
 
   /* Scan entries under /sys/class/fc_host directory */
-  while ((dp = dir_readname(dirp, DT_DIR | DT_LNK)))
+  while ((dp = sysfsparser_readfilename(dirp, DT_DIR | DT_LNK)))
     {
       (*n_ports)++;
       snprintf (path, PATH_MAX, "%s/%s/port_state",
@@ -191,7 +143,12 @@ fc_host_status (int *n_ports, int *n_online)
 
       free (line);
     }
+
+  sysfsparser_closedir (dirp);
 }
+
+#undef PATH_SYS_FC
+#undef PATH_SYS_FC_HOST
 
 int
 main (int argc, char **argv)
