@@ -120,4 +120,6 @@ main (int argc, char **argv)
 
   printf ("%s %s - <STATUS-MSG> | <PERFDATA>\n",
 	  program_name_short, state_text (status));
+
+  return status;
 }
