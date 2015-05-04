@@ -25,13 +25,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "common.h"
+#include "logging.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
 #include "sysfsparser.h"
 #include "thresholds.h"
+#include "xstrtol.h"
+
+/* by default one iteration with 1sec delay */
+#define DELAY_DEFAULT	1
+#define COUNT_DEFAULT	2
 
 static const char *program_copyright =
   "Copyright (C) 2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
@@ -53,7 +60,7 @@ usage (FILE * out)
   fputs ("This plugin monitors the status of the fiber status ports.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s -w COUNTER -c COUNTER\n", program_name);
+  fprintf (out, "  %s -w COUNTER -c COUNTER [delay [count]]\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
@@ -63,6 +70,11 @@ usage (FILE * out)
 	 out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
+  fprintf (out, "  delay is the delay between updates in seconds "
+	   "(default: %dsec)\n", DELAY_DEFAULT);
+  fprintf (out, "  count is the number of updates "
+	   "(default: %d)\n", COUNT_DEFAULT);
+  fputs ("\t1 means the total inbound/outbound traffic from boottime.\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -c 2:\n", program_name);
   fprintf (out, "  %s -i -v\n", program_name);
@@ -125,11 +137,15 @@ fc_host_summary (bool verbose)
 }
 
 void
-fc_host_status (int *n_ports, int *n_online)
+fc_host_status (int *n_ports, int *n_online,
+		unsigned long long *drx_frames, unsigned long long *dtx_frames,
+		unsigned int  sleep_time, unsigned long count)
 {
   DIR *dirp;
   struct dirent *dp;
   char *line, path[PATH_MAX];
+  unsigned int i, tog = 0;
+  unsigned long long drx_frames_tot = 0, dtx_frames_tot = 0;
 
   *n_ports = *n_online = 0;
   sysfsparser_opendir(&dirp, PATH_SYS_FC_HOST);
@@ -146,9 +162,52 @@ fc_host_status (int *n_ports, int *n_online)
 	(*n_online)++;
 
       free (line);
+
+      // collect some statistics
+      unsigned long long rx_frames[2], tx_frames[2];
+
+      *drx_frames = rx_frames[0] =
+	sysfsparser_getvalue ("%s/%s/statistics/rx_frames", PATH_SYS_FC_HOST,
+			      dp->d_name);
+      dbg ("%s/%s/statistics/rx_frames = %Lu\n",
+	   PATH_SYS_FC_HOST, dp->d_name, *drx_frames);
+
+      *dtx_frames = tx_frames[0] =
+	sysfsparser_getvalue ("%s/%s/statistics/tx_frames", PATH_SYS_FC_HOST,
+			      dp->d_name);
+      dbg ("%s/%s/statistics/tx_frames = %Lu\n",
+	   PATH_SYS_FC_HOST, dp->d_name, *dtx_frames);
+
+      for (i = 1; i < count; i++)
+	{
+	  sleep (sleep_time);
+	  tog = !tog;
+
+	  rx_frames[tog] =
+	    sysfsparser_getvalue ("%s/%s/statistics/rx_frames",
+				  PATH_SYS_FC_HOST, dp->d_name);
+	  tx_frames[tog] =
+	    sysfsparser_getvalue ("%s/%s/statistics/tx_frames",
+				  PATH_SYS_FC_HOST, dp->d_name);
+	  dbg ("%s/%s/statistics/rx_frames = %Lu\n",
+	       PATH_SYS_FC_HOST, dp->d_name, rx_frames[tog]);
+	  dbg ("%s/%s/statistics/tx_frames = %Lu\n",
+	       PATH_SYS_FC_HOST, dp->d_name, tx_frames[tog]);
+
+	  *drx_frames = rx_frames[tog] - rx_frames[!tog];
+	  *dtx_frames = tx_frames[tog] - tx_frames[!tog];
+	}
+
+	drx_frames_tot += *drx_frames;
+	dtx_frames_tot += *dtx_frames;
+	dbg ("%s: drx_frames_tot = %Lu\n", dp->d_name, drx_frames_tot);
+	dbg ("%s: dtx_frames_tot = %Lu\n", dp->d_name, dtx_frames_tot);
     }
 
   sysfsparser_closedir (dirp);
+
+  *drx_frames = drx_frames_tot;
+  *dtx_frames = dtx_frames_tot;
 }
 
 #undef PATH_SYS_FC
@@ -162,6 +221,9 @@ main (int argc, char **argv)
   char *critical = NULL, *warning = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
+
+  unsigned long delay, count;
+  unsigned int sleep_time = 1;
 
   set_program_name (argv[0]);
 
@@ -198,16 +260,35 @@ main (int argc, char **argv)
       return STATE_UNKNOWN;
     }
 
+  delay = DELAY_DEFAULT, count = COUNT_DEFAULT;
+  if (optind < argc)
+    {
+      delay = strtol_or_err (argv[optind++], "failed to parse argument");
+
+      if (delay < 1)
+	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
+      else if (UINT_MAX < delay)
+	plugin_error (STATE_UNKNOWN, 0, "too large delay value");
+
+      sleep_time = delay;
+    }
+
+  if (optind < argc)
+    count = strtol_or_err (argv[optind++], "failed to parse argument");
+
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  fc_host_status (&n_ports, &n_online);
+  unsigned long long drx_frames, dtx_frames;
+  fc_host_status (&n_ports, &n_online, &drx_frames, &dtx_frames,
+		  sleep_time, count);
   status = get_status (n_online, my_threshold);
 
-  printf ("%s %s - Fiber Channel ports status: %d Online, %d Offline\n",
+  printf ("%s %s - Fiber Channel ports status: %d Online, %d Offline "
+	  "| rx_frames=%Lu, tx_frames=%Lu\n",
 	  program_name_short, state_text (status),
-	  n_online, (n_ports - n_online));
+	  n_online, (n_ports - n_online), drx_frames, dtx_frames);
 
   return status;
 }
