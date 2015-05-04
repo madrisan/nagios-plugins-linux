@@ -65,7 +65,7 @@ usage (FILE * out)
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -c 2:\n", program_name);
-  fprintf (out, "  %s --fchostinfo\n", program_name);
+  fprintf (out, "  %s -i -v\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -84,7 +84,7 @@ print_version (void)
 #define PATH_SYS_FC_HOST   PATH_SYS_FC "/fc_host"
 
 void
-fc_host_summary ()
+fc_host_summary (bool verbose)
 {
   DIR *dirp;
   struct dirent *dp;
@@ -95,10 +95,14 @@ fc_host_summary ()
   /* Scan entries under /sys/class/fc_host directory */
   while ((dp = sysfsparser_readfilename(dirp, DT_DIR | DT_LNK)))
     {
-      printf ("Class Device = \"%s\"\n", dp->d_name);
-
       DIR *dirp_host;
       struct dirent *dp_host;
+
+      printf ("Class Device = \"%s\"\n", dp->d_name);
+
+      if (!verbose)
+	continue;
+
       sysfsparser_opendir(&dirp_host, "%s/%s", PATH_SYS_FC_HOST, dp->d_name);
 
       /* https://www.kernel.org/doc/Documentation/scsi/scsi_fc_transport.txt */
@@ -113,8 +117,8 @@ fc_host_summary ()
 	    }
 	}
 
-	fputs ("\n", stdout);
-	sysfsparser_closedir (dirp_host);
+      fputs ("\n", stdout);
+      sysfsparser_closedir (dirp_host);
     }
 
   sysfsparser_closedir (dirp);
@@ -154,7 +158,7 @@ int
 main (int argc, char **argv)
 {
   int c, n_ports, n_online;
-  bool verbose = false;
+  bool verbose = false, summary = false;
   char *critical = NULL, *warning = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
@@ -170,8 +174,8 @@ main (int argc, char **argv)
 	default:
 	  usage (stderr);
 	case 'i':
-	  fc_host_summary (&n_ports, &n_online);
-	  return STATE_UNKNOWN;
+	  summary = true;
+	  break;
 	case 'c':
 	  critical = optarg;
 	  break;
@@ -188,6 +192,12 @@ main (int argc, char **argv)
 	}
     }
 
+  if (summary)
+    {
+      fc_host_summary (verbose);
+      return STATE_UNKNOWN;
+    }
+
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
@@ -198,4 +208,6 @@ main (int argc, char **argv)
   printf ("%s %s - Fiber Channel ports status: %d Online, %d Offline\n",
 	  program_name_short, state_text (status),
 	  n_online, (n_ports - n_online));
+
+  return status;
 }
