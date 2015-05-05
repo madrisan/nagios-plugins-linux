@@ -184,7 +184,7 @@ sysfsparser_getvalue (const char *format, ...)
     return 0;
 
   errno = 0;
-  value = strtoul (line, &endptr, 10);
+  value = strtoul (line, &endptr, 0);
   if ((endptr == line) || (errno == ERANGE))
     value = 0;
 

@@ -144,7 +144,6 @@ fc_host_status (int *n_ports, int *n_online,
   DIR *dirp;
   struct dirent *dp;
   char *line, path[PATH_MAX];
-  unsigned int i, tog = 0;
   unsigned long long drx_frames_tot = 0, dtx_frames_tot = 0;
 
   *n_ports = *n_online = 0;
@@ -165,16 +164,17 @@ fc_host_status (int *n_ports, int *n_online,
 
       // collect some statistics
       unsigned long long rx_frames[2], tx_frames[2];
+      unsigned int i, tog = 0;
 
       *drx_frames = rx_frames[0] =
 	sysfsparser_getvalue ("%s/%s/statistics/rx_frames", PATH_SYS_FC_HOST,
 			      dp->d_name);
-      dbg ("%s/%s/statistics/rx_frames = %Lu\n",
-	   PATH_SYS_FC_HOST, dp->d_name, *drx_frames);
-
       *dtx_frames = tx_frames[0] =
 	sysfsparser_getvalue ("%s/%s/statistics/tx_frames", PATH_SYS_FC_HOST,
 			      dp->d_name);
+
+      dbg ("%s/%s/statistics/rx_frames = %Lu\n",
+	   PATH_SYS_FC_HOST, dp->d_name, *drx_frames);
       dbg ("%s/%s/statistics/tx_frames = %Lu\n",
 	   PATH_SYS_FC_HOST, dp->d_name, *dtx_frames);
 
@@ -200,8 +200,6 @@ fc_host_status (int *n_ports, int *n_online,
 
 	drx_frames_tot += *drx_frames;
 	dtx_frames_tot += *dtx_frames;
-	dbg ("%s: drx_frames_tot = %Lu\n", dp->d_name, drx_frames_tot);
-	dbg ("%s: dtx_frames_tot = %Lu\n", dp->d_name, dtx_frames_tot);
     }
 
   sysfsparser_closedir (dirp);
