@@ -22,6 +22,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <getopt.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -136,15 +137,47 @@ fc_host_summary (bool verbose)
   sysfsparser_closedir (dirp);
 }
 
+static uint64_t
+fc_host_get_statistic (const char *which, const char *host)
+{
+  uint64_t value =
+    sysfsparser_getvalue (PATH_SYS_FC_HOST "/%s/statistics/%s", host, which);
+
+  dbg (PATH_SYS_FC_HOST "/%s/statistics/%s = %Lu\n",
+       host, which, (unsigned long long)value);
+  return value;
+}
+
+#define fc_get_stat(name)                            \
+static uint64_t fc_get_stat_##name(const char *host) \
+{                                                    \
+  return fc_host_get_statistic (#name, host);        \
+}
+fc_get_stat(rx_frames);
+fc_get_stat(tx_frames);
+fc_get_stat(invalid_crc_count);
+fc_get_stat(link_failure_count);
+fc_get_stat(loss_of_signal_count);
+fc_get_stat(loss_of_sync_count);
+
+/* see <http://osxr.org/linux/source/drivers/scsi/scsi_transport_fc.c> */
+typedef struct fc_host_statistics {
+  uint64_t rx_frames;
+  uint64_t tx_frames;
+  uint64_t invalid_crc_count;
+  uint64_t link_failure_count;
+  uint64_t loss_of_signal_count;
+  uint64_t loss_of_sync_count;
+} fc_host_statistics;
+
 void
-fc_host_status (int *n_ports, int *n_online,
-		unsigned long long *drx_frames, unsigned long long *dtx_frames,
+fc_host_status (int *n_ports, int *n_online, fc_host_statistics *stats,
 		unsigned int  sleep_time, unsigned long count)
 {
   DIR *dirp;
   struct dirent *dp;
   char *line, path[PATH_MAX];
-  unsigned long long drx_frames_tot = 0, dtx_frames_tot = 0;
+  uint64_t drx_frames_tot = 0, dtx_frames_tot = 0;
 
   *n_ports = *n_online = 0;
   sysfsparser_opendir(&dirp, PATH_SYS_FC_HOST);
@@ -162,50 +195,41 @@ fc_host_status (int *n_ports, int *n_online,
 
       free (line);
 
-      // collect some statistics
+      /* collect some statistics */
       unsigned long long rx_frames[2], tx_frames[2];
       unsigned int i, tog = 0;
 
-      *drx_frames = rx_frames[0] =
-	sysfsparser_getvalue ("%s/%s/statistics/rx_frames", PATH_SYS_FC_HOST,
-			      dp->d_name);
-      *dtx_frames = tx_frames[0] =
-	sysfsparser_getvalue ("%s/%s/statistics/tx_frames", PATH_SYS_FC_HOST,
-			      dp->d_name);
-
-      dbg ("%s/%s/statistics/rx_frames = %Lu\n",
-	   PATH_SYS_FC_HOST, dp->d_name, *drx_frames);
-      dbg ("%s/%s/statistics/tx_frames = %Lu\n",
-	   PATH_SYS_FC_HOST, dp->d_name, *dtx_frames);
+      stats->rx_frames = rx_frames[0] = fc_get_stat_rx_frames (dp->d_name);
+      stats->tx_frames = tx_frames[0] = fc_get_stat_tx_frames (dp->d_name);
 
       for (i = 1; i < count; i++)
 	{
 	  sleep (sleep_time);
 	  tog = !tog;
 
-	  rx_frames[tog] =
-	    sysfsparser_getvalue ("%s/%s/statistics/rx_frames",
-				  PATH_SYS_FC_HOST, dp->d_name);
-	  tx_frames[tog] =
-	    sysfsparser_getvalue ("%s/%s/statistics/tx_frames",
-				  PATH_SYS_FC_HOST, dp->d_name);
-	  dbg ("%s/%s/statistics/rx_frames = %Lu\n",
-	       PATH_SYS_FC_HOST, dp->d_name, rx_frames[tog]);
-	  dbg ("%s/%s/statistics/tx_frames = %Lu\n",
-	       PATH_SYS_FC_HOST, dp->d_name, tx_frames[tog]);
-
-	  *drx_frames = rx_frames[tog] - rx_frames[!tog];
-	  *dtx_frames = tx_frames[tog] - tx_frames[!tog];
+	  rx_frames[tog] = fc_get_stat_rx_frames (dp->d_name);
+	  stats->rx_frames = rx_frames[tog] - rx_frames[!tog];
+	  tx_frames[tog] = fc_get_stat_tx_frames (dp->d_name);
+	  stats->tx_frames = tx_frames[tog] - tx_frames[!tog];
 	}
 
-	drx_frames_tot += *drx_frames;
-	dtx_frames_tot += *dtx_frames;
+	drx_frames_tot += stats->rx_frames;
+	dtx_frames_tot += stats->tx_frames;
+
+	stats->invalid_crc_count +=
+	  fc_get_stat_invalid_crc_count (dp->d_name);
+	stats->link_failure_count +=
+	  fc_get_stat_link_failure_count (dp->d_name);
+	stats->loss_of_signal_count +=
+	  fc_get_stat_loss_of_signal_count (dp->d_name);
+	stats->loss_of_sync_count +=
+	  fc_get_stat_loss_of_sync_count (dp->d_name);
     }
 
   sysfsparser_closedir (dirp);
 
-  *drx_frames = drx_frames_tot;
-  *dtx_frames = dtx_frames_tot;
+  stats->rx_frames = drx_frames_tot;
+  stats->tx_frames = dtx_frames_tot;
 }
 
 #undef PATH_SYS_FC
@@ -278,15 +302,26 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  unsigned long long drx_frames, dtx_frames;
-  fc_host_status (&n_ports, &n_online, &drx_frames, &dtx_frames,
-		  sleep_time, count);
+  fc_host_statistics stats = {0};
+
+  fc_host_status (&n_ports, &n_online, &stats, sleep_time, count);
   status = get_status (n_online, my_threshold);
 
   printf ("%s %s - Fiber Channel ports status: %d Online, %d Offline "
-	  "| rx_frames=%Lu, tx_frames=%Lu\n",
+	  "| rx_frames=%Lu, tx_frames=%Lu"
+	  ", invalid_crc_count=%Lu"
+	  ", link_failure_count=%Lu"
+	  ", loss_of_signal_count=%Lu"
+	  ", loss_of_sync_count=%Lu\n",
 	  program_name_short, state_text (status),
-	  n_online, (n_ports - n_online), drx_frames, dtx_frames);
+	  n_online, (n_ports - n_online),
+	  (unsigned long long) stats.rx_frames,
+	  (unsigned long long) stats.tx_frames,
+	  (unsigned long long) stats.invalid_crc_count,
+	  (unsigned long long) stats.link_failure_count,
+	  (unsigned long long) stats.loss_of_signal_count,
+	  (unsigned long long) stats.loss_of_sync_count
+  );
 
   return status;
 }
