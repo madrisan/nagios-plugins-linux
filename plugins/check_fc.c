@@ -148,10 +148,10 @@ fc_host_get_statistic (const char *which, const char *host)
   return value;
 }
 
-#define fc_get_stat(name)                            \
-static uint64_t fc_get_stat_##name(const char *host) \
-{                                                    \
-  return fc_host_get_statistic (#name, host);        \
+#define fc_get_stat(name)                         \
+static uint64_t fc_stat_##name(const char *host)  \
+{                                                 \
+  return fc_host_get_statistic (#name, host);     \
 }
 fc_get_stat(rx_frames);
 fc_get_stat(tx_frames);
@@ -199,31 +199,28 @@ fc_host_status (int *n_ports, int *n_online, fc_host_statistics *stats,
       unsigned long long rx_frames[2], tx_frames[2];
       unsigned int i, tog = 0;
 
-      stats->rx_frames = rx_frames[0] = fc_get_stat_rx_frames (dp->d_name);
-      stats->tx_frames = tx_frames[0] = fc_get_stat_tx_frames (dp->d_name);
+      stats->rx_frames = rx_frames[0] = fc_stat_rx_frames (dp->d_name);
+      stats->tx_frames = tx_frames[0] = fc_stat_tx_frames (dp->d_name);
 
       for (i = 1; i < count; i++)
 	{
 	  sleep (sleep_time);
 	  tog = !tog;
 
-	  rx_frames[tog] = fc_get_stat_rx_frames (dp->d_name);
+	  rx_frames[tog] = fc_stat_rx_frames (dp->d_name);
 	  stats->rx_frames = rx_frames[tog] - rx_frames[!tog];
-	  tx_frames[tog] = fc_get_stat_tx_frames (dp->d_name);
+	  tx_frames[tog] = fc_stat_tx_frames (dp->d_name);
 	  stats->tx_frames = tx_frames[tog] - tx_frames[!tog];
 	}
 
 	drx_frames_tot += stats->rx_frames;
 	dtx_frames_tot += stats->tx_frames;
 
-	stats->invalid_crc_count +=
-	  fc_get_stat_invalid_crc_count (dp->d_name);
-	stats->link_failure_count +=
-	  fc_get_stat_link_failure_count (dp->d_name);
+	stats->invalid_crc_count += fc_stat_invalid_crc_count (dp->d_name);
+	stats->link_failure_count += fc_stat_link_failure_count (dp->d_name);
 	stats->loss_of_signal_count +=
-	  fc_get_stat_loss_of_signal_count (dp->d_name);
-	stats->loss_of_sync_count +=
-	  fc_get_stat_loss_of_sync_count (dp->d_name);
+	  fc_stat_loss_of_signal_count (dp->d_name);
+	stats->loss_of_sync_count += fc_stat_loss_of_sync_count (dp->d_name);
     }
 
   sysfsparser_closedir (dirp);
