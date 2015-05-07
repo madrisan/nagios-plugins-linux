@@ -116,6 +116,10 @@ fc_host_summary (bool verbose)
       if (!verbose)
 	continue;
 
+      snprintf (path, PATH_MAX, "%s/%s/device", PATH_SYS_FC_HOST, dp->d_name);
+      char *cdevpath = realpath (path, NULL);
+      printf ("Class Device path = \"%s\"\n", cdevpath);
+
       sysfsparser_opendir(&dirp_host, "%s/%s", PATH_SYS_FC_HOST, dp->d_name);
 
       /* https://www.kernel.org/doc/Documentation/scsi/scsi_fc_transport.txt */
@@ -131,7 +135,9 @@ fc_host_summary (bool verbose)
 	}
 
       fputs ("\n", stdout);
+
       sysfsparser_closedir (dirp_host);
+      free (cdevpath);
     }
 
   sysfsparser_closedir (dirp);
