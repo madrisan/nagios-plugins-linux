@@ -36,7 +36,7 @@ extern "C"
 
   char *sysfsparser_getline (const char *filename, ...)
        _attribute_format_printf_(1, 2);
-  unsigned long sysfsparser_getvalue (const char *filename, ...)
+  unsigned long long sysfsparser_getvalue (const char *filename, ...)
        _attribute_format_printf_(1, 2);
 
   /* cpufreq */

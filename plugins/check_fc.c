@@ -151,6 +151,10 @@ fc_host_get_statistic (const char *which, const char *host)
 
   dbg (PATH_SYS_FC_HOST "/%s/statistics/%s = %Lu\n",
        host, which, (unsigned long long)value);
+
+  if (value == ~0UL)		/* FIXME: unknown/unsupported counter */
+    return 0;
+
   return value;
 }
 
@@ -161,6 +165,7 @@ static uint64_t fc_stat_##name(const char *host)  \
 }
 fc_get_stat(rx_frames);
 fc_get_stat(tx_frames);
+fc_get_stat(error_frames);
 fc_get_stat(invalid_crc_count);
 fc_get_stat(link_failure_count);
 fc_get_stat(loss_of_signal_count);
@@ -170,6 +175,7 @@ fc_get_stat(loss_of_sync_count);
 typedef struct fc_host_statistics {
   uint64_t rx_frames;
   uint64_t tx_frames;
+  uint64_t error_frames;
   uint64_t invalid_crc_count;
   uint64_t link_failure_count;
   uint64_t loss_of_signal_count;
@@ -202,7 +208,7 @@ fc_host_status (int *n_ports, int *n_online, fc_host_statistics *stats,
       free (line);
 
       /* collect some statistics */
-      unsigned long long rx_frames[2], tx_frames[2];
+      uint64_t rx_frames[2], tx_frames[2];
       unsigned int i, tog = 0;
 
       stats->rx_frames = rx_frames[0] = fc_stat_rx_frames (dp->d_name);
@@ -222,6 +228,7 @@ fc_host_status (int *n_ports, int *n_online, fc_host_statistics *stats,
 	drx_frames_tot += stats->rx_frames;
 	dtx_frames_tot += stats->tx_frames;
 
+	stats->error_frames += fc_stat_error_frames (dp->d_name);
 	stats->invalid_crc_count += fc_stat_invalid_crc_count (dp->d_name);
 	stats->link_failure_count += fc_stat_link_failure_count (dp->d_name);
 	stats->loss_of_signal_count +=
@@ -312,6 +319,7 @@ main (int argc, char **argv)
 
   printf ("%s %s - Fiber Channel ports status: %d/%d Online "
 	  "| rx_frames=%Lu, tx_frames=%Lu"
+	  ", error_frames=%Lu"
 	  ", invalid_crc_count=%Lu"
 	  ", link_failure_count=%Lu"
 	  ", loss_of_signal_count=%Lu"
@@ -320,6 +328,7 @@ main (int argc, char **argv)
 	  n_online, n_ports,
 	  (unsigned long long) stats.rx_frames,
 	  (unsigned long long) stats.tx_frames,
+	  (unsigned long long) stats.error_frames,
 	  (unsigned long long) stats.invalid_crc_count,
 	  (unsigned long long) stats.link_failure_count,
 	  (unsigned long long) stats.loss_of_signal_count,
