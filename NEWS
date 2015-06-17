@@ -1,3 +1,19 @@
+    Major changes between "nagios-plugins-linux" versions 16 and 17
+    -- "400th (git) commit" release
+
+-- Enhancements
+
+* check_fc: new plugin for checking the status of the fiber channel
+  ports.
+
+-- Fixes
+
+* Fix a resource leak in the library 'thresholds'.
+
+* Minor fix in the library 'interrupt'.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 15 and 16
     -- "25 aprile" release
 
