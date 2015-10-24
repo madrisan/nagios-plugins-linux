@@ -205,7 +205,7 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
     }
   
   /* derived values */
-  data->kb_main_cached = data->kb_page_cache + data->kb_slab;
+  data->kb_main_cached = data->kb_page_cache + data->kb_slab_reclaimable;
   data->kb_main_used =
     data->kb_main_total - data->kb_main_free - data->kb_main_cached -
     data->kb_main_buffers;
