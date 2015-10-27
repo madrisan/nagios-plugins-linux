@@ -187,8 +187,8 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
       if (freq_kernel > 0)
 	print_s("Current CPU Frequency:", cpufreq_freq_to_string (freq_kernel));
 
-      struct cpufreq_available_frequencies *curr;
-      curr = cpufreq_get_available_freqs (cpu);
+      struct cpufreq_available_frequencies *cpufreqs, *curr;
+      cpufreqs = curr = cpufreq_get_available_freqs (cpu);
       if (curr)
 	{
 	  print_key_s("Available CPU Frequencies:");
@@ -200,6 +200,7 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 	      curr = cpufreq_get_available_freqs_next (curr);
 	    }
 	  printf ("\n");
+	  cpufreq_available_frequencies_unref(cpufreqs);
 	}
 
       unsigned long freq_min, freq_max;

@@ -87,6 +87,18 @@ cpufreq_get_available_freqs_value (struct cpufreq_available_frequencies *curr)
   return curr->value;
 }
 
+void
+cpufreq_available_frequencies_unref(struct cpufreq_available_frequencies *first)
+{
+  struct cpufreq_available_frequencies *tmp, *curr = first;
+  while (curr)
+    {
+      tmp = curr;
+      curr = curr->next;
+      free(tmp);
+    }
+}
+
 int
 cpufreq_get_hardware_limits (unsigned int cpu,
 			     unsigned long *min, unsigned long *max)

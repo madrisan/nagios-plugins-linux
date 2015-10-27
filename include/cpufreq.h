@@ -31,9 +31,12 @@ extern "C"
   struct cpufreq_available_frequencies *
 	cpufreq_get_available_freqs (unsigned int cpu);
   struct cpufreq_available_frequencies *
-	cpufreq_get_available_freqs_next (struct cpufreq_available_frequencies *curr);
+	cpufreq_get_available_freqs_next (
+                         struct cpufreq_available_frequencies *curr);
   unsigned long cpufreq_get_available_freqs_value (
 			 struct cpufreq_available_frequencies *curr);
+  void cpufreq_available_frequencies_unref(
+                         struct cpufreq_available_frequencies *first);
 
   char *cpufreq_get_driver (unsigned int cpu);
   char *cpufreq_get_governor (unsigned int cpu);
