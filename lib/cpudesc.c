@@ -151,7 +151,7 @@ cpu_desc_read (struct cpu_desc *cpudesc)
 
   if (cpudesc->flags)
     {
-      size_t buflen = sizeof (cpudesc->flags) + 2;
+      size_t buflen = strlen (cpudesc->flags) + 2;
       buf = xmalloc (buflen);
 
       snprintf (buf, buflen, " %s ", cpudesc->flags);
