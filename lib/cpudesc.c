@@ -139,7 +139,6 @@ cpu_desc_read (struct cpu_desc *cpudesc)
     {
       if (linelookup (line, "vendor", &cpudesc->vendor));
       else if (linelookup (line, "vendor_id", &cpudesc->vendor));
-      else if (linelookup (line, "vendor_id", &cpudesc->vendor));
       else if (linelookup (line, "family", &cpudesc->family));
       else if (linelookup (line, "cpu family", &cpudesc->family));
       else if (linelookup (line, "model", &cpudesc->model));
