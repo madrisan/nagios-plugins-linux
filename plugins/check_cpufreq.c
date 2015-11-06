@@ -157,7 +157,7 @@ main (int argc, char **argv)
 	}
     }
   putchar ('\n');
-
   cpu_desc_unref (cpudesc);
+
   return status;
 }

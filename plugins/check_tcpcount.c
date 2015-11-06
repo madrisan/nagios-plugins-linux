@@ -182,4 +182,6 @@ main (int argc, char **argv)
 	  tcp_fin_wait1, tcp_fin_wait2, tcp_time_wait,
 	  tcp_close, tcp_close_wait, tcp_last_ack,
 	  tcp_listen, tcp_closing);
+
+  return status;
 }

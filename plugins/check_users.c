@@ -140,4 +140,6 @@ main (int argc, char **argv)
   printf ("%s %s - %d user%s logged on | logged_users=%d\n",
 	  program_name_short, state_text (status), numuser,
 	  (numuser == 1 ) ? "" : "s", numuser);
+
+  return status;
 }

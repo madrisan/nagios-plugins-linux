@@ -157,4 +157,6 @@ main (int argc, char **argv)
 
   printf ("%s %s - time delta %lds | clock_delta=%ld\n",
 	  program_name_short, state_text (status), timedelta, timedelta);
+
+  return status;
 }

@@ -110,5 +110,8 @@ main (int argc, char **argv)
             ifl->ifname, ifl->multicast,  ifl->ifname, ifl->collisions
     );
   putchar ('\n');
+
   freeiflist (iflhead);
+
+  return status;
 }

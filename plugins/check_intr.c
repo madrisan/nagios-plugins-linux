@@ -197,4 +197,6 @@ main (int argc, char **argv)
 
   free (vintr[1]);
   free (vintr[0]);
+
+  return status;
 }

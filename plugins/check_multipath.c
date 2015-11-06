@@ -239,9 +239,11 @@ main (int argc, char **argv)
     {
       printf ("%s %s: found %d faulty path(s)\n", program_name_short,
 	      state_text (STATE_CRITICAL), faulty_paths);
+
       return STATE_CRITICAL;
     }
 
   printf ("%s %s\n", program_name_short, state_text (STATE_OK));
+
   return STATE_OK;
 }

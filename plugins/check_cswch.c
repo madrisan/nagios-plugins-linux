@@ -169,4 +169,6 @@ main (int argc, char **argv)
   printf ("%s %s - number of context switches%s %Lu | cswch%s=%Lu\n",
 	  program_name_short, state_text (status),
 	  time_unit, dnctxt, time_unit, dnctxt);
+
+  return status;
 }

@@ -145,4 +145,6 @@ main (int argc, char **argv)
 	    procs_list_node_get_nbr (node));
 #endif
   putchar ('\n');
+
+  return status;
 }
