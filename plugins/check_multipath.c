@@ -38,7 +38,7 @@ static bool verbose = false;
 static const char *multipathd_socket = MULTIPATHD_SOCKET;
 
 static const char *program_copyright =
-  "Copyright (C) 2013 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2013,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "verbose", no_argument, NULL, 'v'},

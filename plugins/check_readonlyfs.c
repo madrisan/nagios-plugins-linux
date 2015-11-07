@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2013 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2013-2015 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check for readonly filesystems.
  *
@@ -38,7 +38,7 @@
 #define STREQ(a, b) (strcmp (a, b) == 0)
 
 static const char *program_copyright =
-  "Copyright (C) 2013-2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2013-2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 /* A file system type to display. */
 

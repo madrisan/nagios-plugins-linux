@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2015 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that displays the number of running processes per user.
  *
@@ -33,7 +33,7 @@
 #include "thresholds.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014-2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "threads", no_argument, NULL, 't'},

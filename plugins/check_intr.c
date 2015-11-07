@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2015 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that monitors the interrupts serviced per second,
  * including unnumbered architecture specific interrupts.
@@ -48,7 +48,7 @@
      _a < _b ? _a : _b; })
 
 static const char *program_copyright =
-  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014-2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "critical", required_argument, NULL, 'c'},

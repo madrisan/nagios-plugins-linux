@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2015 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that ckecks for the number of logged on users.
  *
