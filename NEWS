@@ -1,3 +1,31 @@
+    Major changes between "nagios-plugins-linux" versions 17 and 18
+
+-- Fixes
+
+* check_clock.c,
+  check_cpufreq.c,
+  check_cswch.c,
+  check_intr.c,
+  check_multipath.c,
+  check_nbprocs.c,
+  check_network.c,
+  check_tcpcount.c,
+  check_users.c: fix the return code of the warning and critical
+  case.  Thanks Paul Dunkler for pointing out this issue.
+
+* check_cpu: fix the detection of the CPU 64-bit op-mode.
+
+* check_cpu: Fix a memory resource leak reported by the Coverity Scan
+  tool.
+
+* meminfo lib (check_memory): use SReclaimable in cached.
+  The cached memory is something you can get back and reclaim if
+  under memory pressure.  Make cached only use the reclaimable
+  component and ignore the unreclaimable values which doesn't make
+  sense in this context.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 16 and 17
     -- "400th (git) commit" release
 
