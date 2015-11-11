@@ -1,9 +1,10 @@
-![alt tag](https://sites.google.com/site/davidemadrisan/files/nagios-logos.png)
 
 # Nagios Plugins for Linux
 
 [![Build Status](https://travis-ci.org/madrisan/nagios-plugins-linux.svg?branch=master)](https://travis-ci.org/madrisan/nagios-plugins-linux)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/3779/badge.svg)](https://scan.coverity.com/projects/3779)
+
+![alt tag](https://madrisan.files.wordpress.com/2015/11/nagios-plugins-linux-logo-256.png)
 
 ## About
 
