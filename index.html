@@ -1,25 +1,34 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html>
   <head>
-    <meta charset="UTF-8">
-    <title>Nagios-plugins-linux by madrisan</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-  </head>
-  <body>
-    <section class="page-header">
-      <h1 class="project-name">Nagios-plugins-linux</h1>
-      <h2 class="project-tagline">Nagios Plugins for Linux</h2>
-      <a href="https://github.com/madrisan/nagios-plugins-linux" class="btn">View on GitHub</a>
-      <a href="https://github.com/madrisan/nagios-plugins-linux/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/madrisan/nagios-plugins-linux/tarball/master" class="btn">Download .tar.gz</a>
-    </section>
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
-    <section class="main-content">
-      <h3>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Nagios-plugins-linux by madrisan</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Nagios-plugins-linux</h1>
+        <h2>Nagios Plugins for Linux</h2>
+        <a href="https://github.com/madrisan/nagios-plugins-linux" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h3>
 <a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview.</h3>
 
 <p>The <em>nagios-plugins-linux</em> is a set of several Nagios plugins for monitoring Linux boxes. 
@@ -28,35 +37,65 @@ Nagios is an open source computer system monitoring, network monitoring and infr
 <p>Here is the list of the available plugins:</p>
 
 <ul>
-<li>check_clock - returns the number of seconds elapsed between local time and Nagios server time</li>
-<li>check_cpu - checks the CPU (user mode) utilization</li>
-<li>check_cpufreq - displays the CPU frequency characteristics</li>
-<li>check_cswch - checks the total number of context switches across all CPUs</li>
-<li>check_fc - monitors the status of the fiber status ports</li>
-<li>check_ifmountfs - checks whether the given filesystems are mounted</li>
-<li>check_intr - monitors the total number of system interrupts</li>
-<li>check_iowait - monitors the I/O wait bottlenecks</li>
-<li>check_load - checks the current system load average</li>
-<li>check_memory - checks the memory usage</li>
-<li>check_multipath - checks the multipath topology status</li>
-<li>check_nbprocs - displays the number of running processes per user</li>
-<li>check_network - displays some network interfaces statistics</li>
-<li>check_paging - checks the memory and swap paging</li>
-<li>check_readonlyfs - checks for readonly filesystems</li>
-<li>check_swap - checks the swap usage</li>
-<li>check_tcpcount - checks the tcp network usage</li>
-<li>check_temperature - monitors the hardware's temperature</li>
-<li>check_uptime - checks how long the system has been running</li>
-<li>check_users - displays the number of users that are currently logged on</li>
+<li>
+<strong>check_clock</strong> - returns the number of seconds elapsed between local time and Nagios server time</li>
+<li>
+<strong>check_cpu</strong> - checks the CPU (user mode) utilization</li>
+<li>
+<strong>check_cpufreq</strong> - displays the CPU frequency characteristics</li>
+<li>
+<strong>check_cswch</strong> - checks the total number of context switches across all CPUs</li>
+<li>
+<strong>check_fc</strong> - monitors the status of the fiber status ports</li>
+<li>
+<strong>check_ifmountfs</strong> - checks whether the given filesystems are mounted</li>
+<li>
+<strong>check_intr</strong> - monitors the total number of system interrupts</li>
+<li>
+<strong>check_iowait</strong> - monitors the I/O wait bottlenecks</li>
+<li>
+<strong>check_load</strong> - checks the current system load average</li>
+<li>
+<strong>check_memory</strong> - checks the memory usage</li>
+<li>
+<strong>check_multipath</strong> - checks the multipath topology status</li>
+<li>
+<strong>check_nbprocs</strong> - displays the number of running processes per user</li>
+<li>
+<strong>check_network</strong> - displays some network interfaces statistics</li>
+<li>
+<strong>check_paging</strong> - checks the memory and swap paging</li>
+<li>
+<strong>check_readonlyfs</strong> - checks for readonly filesystems</li>
+<li>
+<strong>check_swap</strong> - checks the swap usage</li>
+<li>
+<strong>check_tcpcount</strong> - checks the tcp network usage</li>
+<li>
+<strong>check_temperature</strong> - monitors the hardware's temperature</li>
+<li>
+<strong>check_uptime</strong> - checks how long the system has been running</li>
+<li>
+<strong>check_users</strong> - displays the number of users that are currently logged on.</li>
 </ul>
+        </section>
 
-      <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/madrisan/nagios-plugins-linux">Nagios-plugins-linux</a> is maintained by <a href="https://github.com/madrisan">madrisan</a>.</span>
+        <aside id="sidebar">
+          <a href="https://github.com/madrisan/nagios-plugins-linux/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/madrisan/nagios-plugins-linux/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
 
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
-      </footer>
+          <p class="repo-owner"><a href="https://github.com/madrisan/nagios-plugins-linux"></a> is maintained by <a href="https://github.com/madrisan">madrisan</a>.</p>
 
-    </section>
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
 
             <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
