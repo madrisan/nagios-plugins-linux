@@ -137,6 +137,50 @@
 </tr>
 </tbody>
 </table>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>This package uses <code>GNU autotools</code> for configuration and installation.</p>
+
+<p>If you have cloned the git repository then you will need to run
+<code>autoreconf --install</code> to generate the required files.</p>
+
+<p>Run <code>./configure --help</code> to see a list of available install options.
+The plugin will be installed by default into <code>LIBEXECDIR</code>.</p>
+
+<p>It is highly likely that you will want to customise this location to
+suit your needs, i.e.:</p>
+
+<pre><code>    ./configure --libexecdir=/usr/lib/nagios/plugins
+</code></pre>
+
+<p>After <code>./configure</code> has completed successfully run <code>make install</code> and
+you're done!</p>
+
+<h2>
+<a id="supported-platforms" class="anchor" href="#supported-platforms" aria-hidden="true"><span class="octicon octicon-link"></span></a>Supported Platforms</h2>
+
+<p>This package is written in plain C, making as few assumptions as possible, and
+sticking closely to ANSI C/POSIX. 
+A C99-compliant compiler is required anyway.</p>
+
+<p>This package is known to compile with</p>
+
+<ul>
+<li>gcc 4.1.2 (RHEL 5 / CentOS 5)</li>
+<li>gcc 4.4 (RHEL6 / CentOS 6),</li>
+<li>gcc 4.8.2 (RHEL7 / CentOS 7),</li>
+<li>gcc 4.9.0-4.9.2, clang 3.1 and 3.5.1 (openmamba GNU/Linux 2.90+).</li>
+</ul>
+
+<p>List of the Linux kernels that have been successfully tested: 2.6.18, 2.6.32, 3.10, 3.14.</p>
+
+<h2>
+<a id="bugs" class="anchor" href="#bugs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bugs</h2>
+
+<p>If you find a bug please create an issue in the project bug tracker at
+<a href="https://github.com/madrisan/nagios-plugins-linux/issues">github</a></p>
       </section>
     </div>
 
