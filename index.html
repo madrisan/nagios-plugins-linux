@@ -13,13 +13,13 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <title>Nagios-plugins-linux by madrisan</title>
+    <title>Nagios Plugins for Linux by madrisan</title>
   </head>
 
   <body>
     <header>
       <div class="inner">
-        <h1>Nagios-plugins-linux</h1>
+        <h1>Nagios Plugins for Linux</h1>
         <h2>Nagios Plugins for Linux</h2>
         <a href="https://github.com/madrisan/nagios-plugins-linux" class="button"><small>View project on</small> GitHub</a>
       </div>
@@ -28,11 +28,116 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h3>
+          <p><img src="https://madrisan.files.wordpress.com/2015/11/nagios-plugins-linux-logo-256.png" alt="project logo"></p>
+
+<h3>
 <a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview.</h3>
 
-<p>The <em>nagios-plugins-linux</em> is a set of several Nagios plugins for monitoring Linux boxes. 
-Nagios is an open source computer system monitoring, network monitoring and infrastructure monitoring software application (see: <a href="http://www.nagios.org/">http://www.nagios.org/</a>).</p>
+<p><a href="http://www.nagios.org/">Nagios</a> is an open source computer system monitoring, network monitoring and infrastructure monitoring software application. Nagios, originally created under the name NetSaint, was written and is currently maintained by Ethan Galstad along with a group of developers who are actively maintaining both the official and unofficial plugins.</p>
+
+<p>The <em>Nagios Plugins</em> for Linux are intended to be run by <em>NRPE</em>, the Nagios Remote Plugin Executor, that "allows you to remotely execute Nagios plugins on other Linux/Unix machines. This allows you to monitor remote machine metrics (disk usage, CPU load, etc.)."</p>
+
+<p><a href="http://www.nagios.org">Nagios</a> is an open source computer system monitoring, network monitoring and infrastructure monitoring software application. <em>Nagios</em>, originally created under the name <em>NetSaint</em>, was written and is currently maintained by Ethan Galstad along with a group of developers who are actively maintaining both the official and unofficial plugins.</p>
+
+<p>The <em>Nagios Plugins for Linux</em> are intended to be run by <em>NRPE</em>, the Nagios Remote Plugin Executor, that "allows you to remotely execute Nagios plugins on other Linux/Unix machines. This allows you to monitor remote machine metrics (disk usage, CPU load, etc.)."</p>
+
+<p>These plugins have been reported to also work with 
+<a href="https://www.icinga.org/">Icinga</a> and
+<a href="https://www.icinga.org/icinga/icinga-2/">Icinga2</a>.</p>
+
+<h3>
+<a id="available-nagios-plugins" class="anchor" href="#available-nagios-plugins" aria-hidden="true"><span class="octicon octicon-link"></span></a>Available Nagios Plugins</h3>
+
+<table>
+<thead>
+<tr>
+<th align="left">Plugin Name</th>
+<th align="left">Detailed Informations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_clock">check_clock</a></td>
+<td align="left">Returns the number of seconds elapsed between local time and Nagios time</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_cpu">check_cpu</a></td>
+<td align="left">Checks the CPU (user mode) utilization</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_cpufreq">check_cpufreq</a></td>
+<td align="left">Displays the CPU frequency characteristics</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_cswch">check_cswch</a></td>
+<td align="left">Checks the total number of context switches across all CPUs</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_fc">check_fc</a></td>
+<td align="left">Monitors the status of the fiber status ports</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_ifmountfs">check_ifmountfs</a></td>
+<td align="left">Checks whether the given filesystems are mounted</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_intr">check_intr</a></td>
+<td align="left">Monitors the total number of system interrupts</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_iowait">check_iowait</a></td>
+<td align="left">Monitors the I/O wait bottlenecks</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_load">check_load</a></td>
+<td align="left">Checks the current system load average</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_memory">check_memory</a></td>
+<td align="left">Checks the memory usage</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_multipath">check_multipath</a></td>
+<td align="left">Checks the multipath topology status</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_nbprocs">check_nbprocs</a></td>
+<td align="left">Displays the number of running processes per user</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_network">check_network</a></td>
+<td align="left">Displays some network interfaces statistics</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_paging">check_paging</a></td>
+<td align="left">Checks the memory and swap paging</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_readonlyfs">check_readonlyfs</a></td>
+<td align="left">Checks for readonly filesystems</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_swap">check_swap</a></td>
+<td align="left">Checks the swap usage</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_tcpcount">check_tcpcount</a></td>
+<td align="left">Checks the tcp network usage</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_temperature">check_temperature</a></td>
+<td align="left">Monitors the hardware's temperature</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_uptime">check_uptime</a></td>
+<td align="left">Checks how long the system has been running</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_users">check_users</a></td>
+<td align="left">Displays the number of users that are currently logged on</td>
+</tr>
+</tbody>
+</table>
 
 <p>Here is the list of the available plugins:</p>
 
