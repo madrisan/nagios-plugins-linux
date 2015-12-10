@@ -318,12 +318,12 @@ main (int argc, char **argv)
   status = get_status (n_online, my_threshold);
 
   printf ("%s %s - Fiber Channel ports status: %d/%d Online "
-	  "| rx_frames=%Lu, tx_frames=%Lu"
-	  ", error_frames=%Lu"
-	  ", invalid_crc_count=%Lu"
-	  ", link_failure_count=%Lu"
-	  ", loss_of_signal_count=%Lu"
-	  ", loss_of_sync_count=%Lu\n",
+	  "| rx_frames=%Lu tx_frames=%Lu"
+	  " error_frames=%Lu"
+	  " invalid_crc_count=%Lu"
+	  " link_failure_count=%Lu"
+	  " loss_of_signal_count=%Lu"
+	  " loss_of_sync_count=%Lu\n",
 	  program_name_short, state_text (status),
 	  n_online, n_ports,
 	  (unsigned long long) stats.rx_frames,
