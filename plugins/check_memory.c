@@ -240,7 +240,7 @@ main (int argc, char **argv)
   status = get_status (mem_percent, my_threshold);
 
   perfdata_memavailable_msg =
-    xasprintf ("mem_available=%Lu%s, ", SU (kb_mem_main_available));
+    xasprintf ("mem_available=%Lu%s ", SU (kb_mem_main_available));
 
   status_msg =
     xasprintf ("%s: %.2f%% (%Lu %s) %s",
@@ -251,10 +251,10 @@ main (int argc, char **argv)
   free (my_threshold);
 
   perfdata_mem_msg =
-    xasprintf ("mem_total=%Lu%s, mem_used=%Lu%s, mem_free=%Lu%s, "
-	       "mem_shared=%Lu%s, mem_buffers=%Lu%s, mem_cached=%Lu%s, %s"
-	       "mem_active=%Lu%s, mem_anonpages=%Lu%s, mem_committed=%Lu%s, "
-	       "mem_dirty=%Lu%s, mem_inactive=%Lu%s"
+    xasprintf ("mem_total=%Lu%s mem_used=%Lu%s mem_free=%Lu%s "
+	       "mem_shared=%Lu%s mem_buffers=%Lu%s mem_cached=%Lu%s %s"
+	       "mem_active=%Lu%s mem_anonpages=%Lu%s mem_committed=%Lu%s "
+	       "mem_dirty=%Lu%s mem_inactive=%Lu%s"
 	       , SU (kb_mem_main_total)
 	       , SU (kb_mem_main_used)
 	       , SU (kb_mem_main_free)

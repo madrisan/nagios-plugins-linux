@@ -193,9 +193,9 @@ main (int argc, char **argv)
   status_msg =
     xasprintf ("%s: %lu majfault/s", state_text (status), *tracked_value);
   perfdata_paging_msg =
-    xasprintf ("vmem_pgpgin/s=%lu, vmem_pgpgout/s=%lu, vmem_pgfault/s=%lu, "
-	       "vmem_pgmajfault/s=%lu, vmem_pgfree/s=%lu, vmem_pgsteal/s=%lu, "
-	       "vmem_pgscand/s=%lu, vmem_pgscank/s=%lu",
+    xasprintf ("vmem_pgpgin/s=%lu vmem_pgpgout/s=%lu vmem_pgfault/s=%lu "
+	       "vmem_pgmajfault/s=%lu vmem_pgfree/s=%lu vmem_pgsteal/s=%lu "
+	       "vmem_pgscand/s=%lu vmem_pgscank/s=%lu",
 	       dpgpgin, dpgpgout, dpgfault, dpgmajfault, dpgfree, dpgsteal,
 	       dpgscand, dpgscank);
 

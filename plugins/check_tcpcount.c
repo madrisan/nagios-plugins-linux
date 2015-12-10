@@ -173,10 +173,10 @@ main (int argc, char **argv)
   free (my_threshold);
 
   printf ("%s %s - %lu tcp established | "
-	  "tcp_established=%lu, tcp_syn_sent=%lu, tcp_syn_recv=%lu, "
-	  "tcp_fin_wait1=%lu, tcp_fin_wait2=%lu, tcp_time_wait=%lu, "
-	  "tcp_close=%lu, tcp_close_wait=%lu, tcp_last_ack=%lu, "
-	  "tcp_listen=%lu, tcp_closing=%lu\n",
+	  "tcp_established=%lu tcp_syn_sent=%lu tcp_syn_recv=%lu "
+	  "tcp_fin_wait1=%lu tcp_fin_wait2=%lu tcp_time_wait=%lu "
+	  "tcp_close=%lu tcp_close_wait=%lu tcp_last_ack=%lu "
+	  "tcp_listen=%lu tcp_closing=%lu\n",
 	  program_name_short, state_text (status), tcp_established,
 	  tcp_established, tcp_syn_sent, tcp_syn_recv,
 	  tcp_fin_wait1, tcp_fin_wait2, tcp_time_wait,

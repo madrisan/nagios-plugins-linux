@@ -176,7 +176,7 @@ main (int argc, char **argv)
       dpswpout = kb_swap_pageouts[1] - kb_swap_pageouts[0];
 
       perfdata_vmem_msg =
-	xasprintf (", swap_pageins/s=%lu, swap_pageouts/s=%lu",
+	xasprintf (", swap_pageins/s=%lu swap_pageouts/s=%lu",
 		   dpswpin, dpswpout);
     }
 
@@ -190,7 +190,7 @@ main (int argc, char **argv)
 			  percent_used, SU (kb_swap_used));
 
   perfdata_swap_msg =
-    xasprintf ("swap_total=%Lu%s, swap_used=%Lu%s, swap_free=%Lu%s, "
+    xasprintf ("swap_total=%Lu%s swap_used=%Lu%s swap_free=%Lu%s "
 	       /* The amount of swap, in kB, used as cache memory */
 	       "swap_cached=%Lu%s", SU (kb_swap_total), SU (kb_swap_used),
 	       SU (kb_swap_free), SU (kb_swap_cached));
