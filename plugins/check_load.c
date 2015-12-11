@@ -165,8 +165,8 @@ main (int argc, char **argv)
   /* performance data format:
    *'label'=value[UOM];[warn];[crit];[min];[max]  */
   perfdata_msg =
-    xasprintf ("load%d=%.3lf;%.3lf;%.3lf;0, "
-	       "load%d=%.3lf;%.3lf;%.3lf;0, "
+    xasprintf ("load%d=%.3lf;%.3lf;%.3lf;0 "
+	       "load%d=%.3lf;%.3lf;%.3lf;0 "
 	       "load%d=%.3lf;%.3lf;%.3lf;0"
 	       , lamin[0], loadavg[0], wload[0], cload[0]
 	       , lamin[1], loadavg[1], wload[1], cload[1]
