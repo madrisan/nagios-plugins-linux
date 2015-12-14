@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014-2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2015 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that ckecks for the number of logged on users.
  *
@@ -32,7 +32,7 @@
 #include "thresholds.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "critical", required_argument, NULL, 'c'},

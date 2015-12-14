@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2015 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that tests the current system load average.
  *
@@ -32,7 +32,7 @@
 #include "xasprintf.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "load1", required_argument, NULL, '1'},
@@ -163,7 +163,7 @@ main (int argc, char **argv)
 	       state_text (status), loadavg[0], loadavg[1], loadavg[2]);
 
   /* performance data format:
-   *'label'=value[UOM];[warn];[crit];[min];[max]  */
+   * 'label'=value[UOM];[warn];[crit];[min];[max] */
   perfdata_msg =
     xasprintf ("load%d=%.3lf;%.3lf;%.3lf;0 "
 	       "load%d=%.3lf;%.3lf;%.3lf;0 "

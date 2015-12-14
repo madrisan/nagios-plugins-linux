@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014-2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2015 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that monitors the total number of context switches
  * per second across all CPUs.
@@ -38,7 +38,7 @@
 #define COUNT_DEFAULT	2
 
 static const char *program_copyright =
-  "Copyright (C) 2014-2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "critical", required_argument, NULL, 'c'},
