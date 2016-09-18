@@ -129,26 +129,28 @@ read_all (int fd, void *buf, size_t len)
 static void
 multipathd_query (const char *query, char *buf, size_t bufsize)
 {
-  int sock;
+  int sock, sunlen = 0;
   struct sockaddr_un sun;
   size_t len = strlen (query) + 1;
-  int sunlen = 0;
 
   if ((sock = socket (PF_UNIX, SOCK_STREAM, 0)) < 0)
     plugin_error (STATE_UNKNOWN, errno, "cannot create unix stream socket");
 
-  memset(&sun, 0, sizeof(sun));
+  memset (&sun, 0, sizeof (sun));
   sun.sun_family = AF_LOCAL;
 
-  if(multipathd_socket[0]=='@'){
-    sunlen = strlen(multipathd_socket) + sizeof(sa_family_t);
-    strncpy (sun.sun_path, multipathd_socket, sunlen);
-    sun.sun_path[0]='\0';
-  }else{
-    strncpy (sun.sun_path, multipathd_socket, sizeof (sun.sun_path));
-    sun.sun_path[sizeof (sun.sun_path) - 1] = 0;
-    sunlen = sizeof (sun);
-  }
+  if (multipathd_socket[0] == '@')
+    {
+      sunlen = strlen (multipathd_socket) + sizeof (sa_family_t);
+      strncpy (sun.sun_path, multipathd_socket, sunlen);
+      sun.sun_path[0] = '\0';
+    }
+  else
+    {
+      strncpy (sun.sun_path, multipathd_socket, sizeof (sun.sun_path));
+      sun.sun_path[sizeof (sun.sun_path) - 1] = 0;
+      sunlen = sizeof (sun);
+    }
 
   if (connect (sock, (struct sockaddr *) &sun, sunlen) < 0)
     plugin_error (STATE_UNKNOWN, errno, "cannot connect to %s",
