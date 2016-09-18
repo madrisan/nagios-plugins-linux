@@ -296,13 +296,13 @@ AS_IF([test "x$enable_debug" = "xyes"], [
    AC_DEFINE(ENABLE_DEBUG, [1], [Debug messages.])])
 
 dnl Add the option: '--with-socketfile'
-MULTIPATHD_SOCKET="/var/run/multipathd.sock"
+MULTIPATHD_SOCKET="@/org/kernel/linux/storage/multipathd"
 AC_ARG_WITH(
   [socketfile],
   [AS_HELP_STRING(
     [--with-socketfile],
     [use a different socket file
-     (default is /var/run/multipathd.sock)])],
+     (default is @/org/kernel/linux/storage/multipathd)])],
   [MULTIPATHD_SOCKET="$with_socketfile"])
 AC_SUBST(MULTIPATHD_SOCKET)
 
