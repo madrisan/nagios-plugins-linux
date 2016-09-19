@@ -543,6 +543,15 @@ suit your needs, i.e.:
 
         ./configure --libexecdir=/usr/lib/nagios/plugins
 
+The plugin `check_multipath` grabs the status of each path by opening a
+connection to the multipathd socket.  The default value is currently set to
+the Linux abstract socket namespace `@/org/kernel/linux/storage/multipathd`,
+but can be modified at build time by using the option `--with-socketfile`.
+
+Example (RHEL5 and RHEL6 and other old distributions):
+
+        ./configure --with-socketfile=/var/run/multipathd.sock
+
 After `./configure` has completed successfully run `make install` and
 you're done!
 
