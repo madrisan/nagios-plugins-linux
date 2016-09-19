@@ -126,33 +126,49 @@ read_all (int fd, void *buf, size_t len)
   return total;
 }
 
-static void
-multipathd_query (const char *query, char *buf, size_t bufsize)
+static int
+multipathd_connect(void)
 {
-  int sock, sunlen = 0;
-  struct sockaddr_un sun;
-  size_t len = strlen (query) + 1;
+  int fd, len;
+  struct sockaddr_un addr;
 
-  if ((sock = socket (PF_UNIX, SOCK_STREAM, 0)) < 0)
-    plugin_error (STATE_UNKNOWN, errno, "cannot create unix stream socket");
-
-  memset (&sun, 0, sizeof (sun));
-  sun.sun_family = AF_LOCAL;
+  memset (&addr, 0, sizeof (addr));
+  addr.sun_family = AF_LOCAL;
 
   if (multipathd_socket[0] == '@')
     {
-      sunlen = strlen (multipathd_socket) + sizeof (sa_family_t);
-      strncpy (sun.sun_path, multipathd_socket, sunlen);
-      sun.sun_path[0] = '\0';
+      // the multipath socket held in an abstract namespace
+      addr.sun_path[0] = '\0';
+      len = strlen (multipathd_socket) + 1 + sizeof (sa_family_t);
+      strncpy (&addr.sun_path[1], multipathd_socket, len);
     }
   else
     {
-      strncpy (sun.sun_path, multipathd_socket, sizeof (sun.sun_path));
-      sun.sun_path[sizeof (sun.sun_path) - 1] = 0;
-      sunlen = sizeof (sun);
+      strncpy (addr.sun_path, multipathd_socket, sizeof (addr.sun_path));
+      addr.sun_path[sizeof (addr.sun_path) - 1] = 0;
+      len = sizeof (addr);
     }
 
-  if (connect (sock, (struct sockaddr *) &sun, sunlen) < 0)
+  fd = socket (AF_LOCAL, SOCK_STREAM, 0);
+  if (fd == -1)
+    return -1;
+
+  if (connect (fd, (struct sockaddr *)&addr, len) == -1)
+    {
+      close(fd);
+      return -1;
+    }
+
+  return fd;
+}
+
+static void
+multipathd_query (const char *query, char *buf, size_t bufsize)
+{
+  int sock;
+  size_t len = strlen (query) + 1;
+
+  if ((sock = multipathd_connect ()) < 0)
     plugin_error (STATE_UNKNOWN, errno, "cannot connect to %s",
 		  multipathd_socket);
 
