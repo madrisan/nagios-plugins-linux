@@ -306,7 +306,11 @@ main (int argc, char **argv)
     }
 
   if (optind < argc)
-    count = strtol_or_err (argv[optind++], "failed to parse argument");
+    {
+      count = strtol_or_err (argv[optind++], "failed to parse argument");
+      if (UINT_MAX < count)
+	plugin_error (STATE_UNKNOWN, 0, "too large count value");
+    }
 
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
