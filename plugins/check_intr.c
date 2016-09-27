@@ -107,7 +107,7 @@ main (int argc, char **argv)
   unsigned long long nintr[2];
   unsigned int sleep_time = 1,
 	   tog = 0,		/* toggle switch for cleaner code */
-	   ncpus0, ncpus1;
+	   ncpus0 = 0, ncpus1 = 0;
   unsigned long i, delay, count,
 	   *vintr[2] = { NULL, NULL };
 
