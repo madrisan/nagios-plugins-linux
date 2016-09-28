@@ -29,7 +29,8 @@
 #include "testutils.h"
 #include "../plugins/check_clock.c"
 
-struct test_data {
+struct test_data
+{
   char *w;
   char *c;
   long delta;
@@ -61,7 +62,7 @@ test_clock_timedelta (const void *tdata)
 
   const struct test_data *data = tdata;
   long w_threshold = strtol (data->w, NULL, 10),
-       c_threshold = strtol (data->c, NULL, 10);
+    c_threshold = strtol (data->c, NULL, 10);
 
   status = set_thresholds (&my_threshold, data->w, data->c);
   if (status == NP_RANGE_UNPARSEABLE)
@@ -96,12 +97,9 @@ mymain (void)
   int ret = 0;
   struct test_data data;
 
-  TEST_DATA("check clock for ok condition",
-            test_clock_timedelta, 0);
-  TEST_DATA("check clock for warning condition",
-            test_clock_timedelta, 10);
-  TEST_DATA("check clock for critical condition",
-            test_clock_timedelta, 50);
+  TEST_DATA ("check clock for ok condition", test_clock_timedelta, 0);
+  TEST_DATA ("check clock for warning condition", test_clock_timedelta, 10);
+  TEST_DATA ("check clock for critical condition", test_clock_timedelta, 50);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

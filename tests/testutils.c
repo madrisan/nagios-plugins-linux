@@ -31,7 +31,7 @@ int
 test_main (int argc, char **argv, int (*func) (void), ...)
 {
   int ret;
-  ret = (func)();
+  ret = (func) ();
 
   return ret;
 }
