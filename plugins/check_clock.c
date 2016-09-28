@@ -86,6 +86,32 @@ print_version (void)
   exit (STATE_OK);
 }
 
+static int
+get_timedelta (unsigned long refclock, bool verbose)
+{
+  struct tm *tm;
+  time_t t;
+  char outstr[32];
+  char *end = NULL;
+  long timedelta;
+
+  t = time (NULL);
+  tm = localtime (&t);
+  if (strftime (outstr, sizeof (outstr), "%s", tm) == 0)
+    plugin_error (STATE_UNKNOWN, errno, "strftime() failed");
+
+  timedelta = (strtol (outstr, &end, 10) - refclock);
+
+  if (verbose)
+    {
+      printf ("Seconds since the Epoch: %s\n", outstr);
+      printf ("Refclock: %lu  -->  Delta: %ld\n", refclock, timedelta);
+    }
+
+  return timedelta;
+}
+
+#ifndef NPL_TESTING
 int
 main (int argc, char **argv)
 {
@@ -95,10 +121,6 @@ main (int argc, char **argv)
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
-  struct tm *tm;
-  time_t t;
-  char outstr[32];
-  char *end = NULL;
   unsigned long refclock = ~0UL;
   long timedelta;
 
@@ -139,18 +161,7 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  t = time (NULL);
-  tm = localtime (&t);
-  if (strftime (outstr, sizeof (outstr), "%s", tm) == 0)
-    plugin_error (STATE_UNKNOWN, errno, "strftime() failed");
-
-  timedelta = (strtol (outstr, &end, 10) - refclock);
-
-  if (verbose)
-    {
-      printf ("Seconds since the Epoch: %s\n", outstr);
-      printf ("Refclock: %lu  -->  Delta: %ld\n", refclock, timedelta);
-    }
+  timedelta = get_timedelta (refclock, verbose);
 
   status = get_status (labs (timedelta), my_threshold);
   free (my_threshold);
@@ -160,3 +171,4 @@ main (int argc, char **argv)
 
   return status;
 }
+#endif			/* NPL_TESTING */
