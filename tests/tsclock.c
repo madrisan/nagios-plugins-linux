@@ -85,8 +85,6 @@ test_clock_timedelta (const void *tdata)
 }
 
 #define TEST_DATA(MSG, FUNC, DELTA)        \
-  data.w = "20";                           \
-  data.c = "40";                           \
   data.delta = DELTA;                      \
   if (test_run (MSG, FUNC, &data) < 0)     \
     ret = -1;
@@ -95,7 +93,8 @@ static int
 mymain (void)
 {
   int ret = 0;
-  struct test_data data;
+  /* set the warning and critical thresholds */
+  struct test_data data = { .w = "20", .c = "40" };
 
   TEST_DATA ("check clock for ok condition", test_clock_timedelta, 0);
   TEST_DATA ("check clock for warning condition", test_clock_timedelta, 10);
