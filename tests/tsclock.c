@@ -29,6 +29,12 @@
 #include "testutils.h"
 #include "../plugins/check_clock.c"
 
+struct test_data {
+  char *w;
+  char *c;
+  long delta;
+};
+
 static long
 get_current_datetime ()
 {
@@ -46,38 +52,56 @@ get_current_datetime ()
 }
 
 static int
-test_clock_zero_timedelta ()
+test_clock_timedelta (const void *tdata)
 {
   unsigned long refclock;
   long timedelta;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
-  status = set_thresholds (&my_threshold, "5", "10");
+  const struct test_data *data = tdata;
+  long w_threshold = strtol (data->w, NULL, 10),
+       c_threshold = strtol (data->c, NULL, 10);
+
+  status = set_thresholds (&my_threshold, data->w, data->c);
   if (status == NP_RANGE_UNPARSEABLE)
     return EXIT_AM_HARDFAIL;
 
-  refclock = get_current_datetime ();
+  refclock = data->delta + get_current_datetime ();
   timedelta = get_timedelta (refclock, false);
 
   status = get_status (labs (timedelta), my_threshold);
   free (my_threshold);
 
-  if (status != STATE_OK)
-    return -1;
+  if (data->delta <= w_threshold && status == STATE_OK)
+    return 0;
+  if (data->delta <= c_threshold && status == STATE_WARNING)
+    return 0;
+  if (data->delta > c_threshold && status == STATE_CRITICAL)
+    return 0;
 
-  return 0;
+  return -1;
 }
+
+#define TEST_DATA(MSG, FUNC, DELTA)        \
+  data.w = "20";                           \
+  data.c = "40";                           \
+  data.delta = DELTA;                      \
+  if (test_run (MSG, FUNC, &data) < 0)     \
+    ret = -1;
 
 static int
 mymain (void)
 {
   int ret = 0;
+  struct test_data data;
 
-  if (test_run
-      ("check clock with timedelta set to zero", test_clock_zero_timedelta,
-       NULL) < 0)
-    ret = -1;
+  TEST_DATA("check clock for ok condition",
+            test_clock_timedelta, 0);
+  TEST_DATA("check clock for warning condition",
+            test_clock_timedelta, 10);
+  TEST_DATA("check clock for critical condition",
+            test_clock_timedelta, 50);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
