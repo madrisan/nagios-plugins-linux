@@ -1,7 +1,6 @@
 AM_CPPFLAGS = \
 	-include $(top_builddir)/config.h \
-	-I$(top_srcdir)/include \
-	-I$(top_srcdir)/tests
+	-I$(top_srcdir)/include
 
 test_programs = tsclock
 

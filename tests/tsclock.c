@@ -23,11 +23,12 @@
 #include <stdlib.h>
 
 #include "common.h"
+#include "testutils.h"
 #include "thresholds.h"
 
 #define NPL_TESTING
-#include "testutils.h"
-#include "../plugins/check_clock.c"
+# include "../plugins/check_clock.c"
+#undef NPL_TESTING
 
 struct test_data
 {
