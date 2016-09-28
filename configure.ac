@@ -36,6 +36,7 @@ AC_C_INLINE
 
 # 'AC_PROG_CC_C99' unfortunately requires autoconf 2.60+
 #AC_PROG_CC_C99
+AM_PROG_CC_C_O
 AC_PROG_CC_STDC
 
 if test "$cross_compiling" = no; then
@@ -361,6 +362,7 @@ AC_CONFIG_FILES([\
   Makefile \
   include/Makefile \
   lib/Makefile \
-  plugins/Makefile])
+  plugins/Makefile \
+  tests/Makefile])
 
 AC_OUTPUT
