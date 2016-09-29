@@ -90,10 +90,12 @@ test_clock_timedelta (const void *tdata)
   return -1;
 }
 
-#define TEST_DATA(MSG, FUNC, DELTA)        \
-  data.delta = DELTA;                      \
-  if (test_run (MSG, FUNC, &data) < 0)     \
-    ret = -1;
+#define TEST_DATA(MSG, FUNC, DELTA)          \
+  do {                                       \
+    data.delta = DELTA;                      \
+    if (test_run (MSG, FUNC, &data) < 0)     \
+      ret = -1;                              \
+  } while (0)
 
 static int
 mymain (void)
@@ -108,5 +110,7 @@ mymain (void)
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+
+#undef TEST_DATA
 
 TEST_MAIN (mymain)
