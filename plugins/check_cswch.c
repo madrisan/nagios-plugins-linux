@@ -86,6 +86,33 @@ print_version (void)
   exit (STATE_OK);
 }
 
+static unsigned long long
+get_ctxtdelta (unsigned long count, unsigned int sleep_time, bool verbose)
+{
+  unsigned int tog = 0;		/* toggle switch for cleaner code */
+  unsigned long i;
+  unsigned long long nctxt[2],
+                     dnctxt = nctxt[0] = cpu_stats_get_cswch ();
+
+  if (verbose)
+    printf ("ctxt = %Lu\n", dnctxt);
+
+  for (i = 1; i < count; i++)
+    {
+      sleep (sleep_time);
+
+      tog = !tog;
+      nctxt[tog] = cpu_stats_get_cswch ();
+      dnctxt = (nctxt[tog] - nctxt[!tog]) / sleep_time;
+
+      if (verbose)
+	printf ("ctxt = %Lu --> %Lu/s\n", nctxt[tog], dnctxt);
+    }
+
+   return dnctxt;
+}
+
+#ifndef NPL_TESTING
 int
 main (int argc, char **argv)
 {
@@ -95,10 +122,9 @@ main (int argc, char **argv)
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
-  unsigned long long nctxt[2];
-  unsigned int sleep_time = 1,
-	   tog = 0;		/* toggle switch for cleaner code */
-  unsigned long i, delay, count;
+  unsigned int sleep_time = 1;
+  unsigned long delay, count;
+  unsigned long long dnctxt;
 
   set_program_name (argv[0]);
 
@@ -150,21 +176,7 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  unsigned long long dnctxt = nctxt[0] = cpu_stats_get_cswch ();
-  if (verbose)
-    printf ("ctxt = %Lu\n", dnctxt);
-
-  for (i = 1; i < count; i++)
-    {
-      sleep (sleep_time);
-
-      tog = !tog;
-      nctxt[tog] = cpu_stats_get_cswch ();
-      dnctxt = (nctxt[tog] - nctxt[!tog]) / sleep_time;
-
-      if (verbose)
-	printf ("ctxt = %Lu --> %Lu/s\n", nctxt[tog], dnctxt);
-    }
+  dnctxt = get_ctxtdelta (count, sleep_time, verbose);
 
   status = get_status (dnctxt, my_threshold);
   free (my_threshold);
@@ -176,3 +188,4 @@ main (int argc, char **argv)
 
   return status;
 }
+#endif			/* NPL_TESTING */

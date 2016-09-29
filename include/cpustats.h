@@ -18,6 +18,8 @@
 
 #include <sys/sysinfo.h>
 
+#define PATH_PROC_STAT		"/proc/stat"
+
 #ifdef __cplusplus
 extern "C"
 {
