@@ -82,7 +82,8 @@ cc_TRY_CFLAGS([-Wshadow])
 cc_TRY_CFLAGS([-Wsign-compare])
 cc_TRY_CFLAGS([-Wstrict-aliasing=2])
 cc_TRY_CFLAGS([-Wunused])
-cc_TRY_CFLAGS([-Warray-bounds])
+# The gcc compiler shipped by RHEL5 (gcc-4.1.2) does not recognize it
+#cc_TRY_CFLAGS([-Warray-bounds])
 
 AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
 
