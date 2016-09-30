@@ -142,9 +142,9 @@ multipathd_connect(void)
   if (multipathd_socket[0] == '@')
     {
       /* the multipath socket held in an abstract namespace */
+      len = strlen (multipathd_socket) + sizeof (sa_family_t);
+      strncpy (u.ux.sun_path, multipathd_socket, len);
       u.ux.sun_path[0] = '\0';
-      len = strlen (multipathd_socket) + 1 + sizeof (sa_family_t);
-      strncpy (&u.ux.sun_path[1], multipathd_socket, len);
     }
   else
     {
