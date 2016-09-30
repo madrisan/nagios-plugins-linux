@@ -130,30 +130,34 @@ static int
 multipathd_connect(void)
 {
   int fd, len;
-  struct sockaddr_un addr;
+  union
+  {
+    struct sockaddr addr;
+    struct sockaddr_un ux;
+  } u;
 
-  memset (&addr, 0, sizeof (addr));
-  addr.sun_family = AF_LOCAL;
+  memset (&u.ux, 0, sizeof (u.ux));
+  u.ux.sun_family = AF_LOCAL;
 
   if (multipathd_socket[0] == '@')
     {
-      // the multipath socket held in an abstract namespace
-      addr.sun_path[0] = '\0';
+      /* the multipath socket held in an abstract namespace */
+      u.ux.sun_path[0] = '\0';
       len = strlen (multipathd_socket) + 1 + sizeof (sa_family_t);
-      strncpy (&addr.sun_path[1], multipathd_socket, len);
+      strncpy (&u.ux.sun_path[1], multipathd_socket, len);
     }
   else
     {
-      strncpy (addr.sun_path, multipathd_socket, sizeof (addr.sun_path));
-      addr.sun_path[sizeof (addr.sun_path) - 1] = 0;
-      len = sizeof (addr);
+      strncpy (u.ux.sun_path, multipathd_socket, sizeof (u.ux.sun_path));
+      u.ux.sun_path[sizeof (u.ux.sun_path) - 1] = 0;
+      len = sizeof (u.ux);
     }
 
   fd = socket (AF_LOCAL, SOCK_STREAM, 0);
   if (fd == -1)
     return -1;
 
-  if (connect (fd, (struct sockaddr *)&addr, len) == -1)
+  if (connect (fd, &u.addr, len) == -1)
     {
       close(fd);
       return -1;
