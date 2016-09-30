@@ -127,7 +127,7 @@ read_all (int fd, void *buf, size_t len)
 }
 
 static int
-multipathd_connect(void)
+multipathd_connect (void)
 {
   int fd, len;
   union
@@ -159,7 +159,7 @@ multipathd_connect(void)
 
   if (connect (fd, &u.addr, len) == -1)
     {
-      close(fd);
+      close (fd);
       return -1;
     }
 
