@@ -41,14 +41,12 @@ static bool
 test_cswch_proc_stat_exists ()
 {
   FILE *fp;
-  bool ret = true;
 
   if ((fp = fopen (PATH_PROC_STAT, "r")) == NULL)
-    ret = false;
+    return false;
 
   fclose (fp);
-
-  return ret;
+  return true;
 }
 
 static int
