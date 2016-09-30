@@ -235,7 +235,7 @@ int
 main (int argc, char **argv)
 {
   int c, faulty_paths;
-  enum { bufsize = 2014 };
+  enum { bufsize = 10240 };
   static char buffer[bufsize];
 
   set_program_name (argv[0]);
