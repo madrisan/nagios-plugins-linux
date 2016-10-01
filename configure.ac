@@ -308,6 +308,28 @@ AC_ARG_WITH(
   [MULTIPATHD_SOCKET="$with_socketfile"])
 AC_SUBST(MULTIPATHD_SOCKET)
 
+dnl Add the option: '--with-tests'
+AC_ARG_WITH(
+  [test-suite],
+  [AS_HELP_STRING(
+    [--with-test-suite],
+    [build test suite by default @<:@default=check@:>@])],
+  [case "${withval}" in
+    yes|no|check) ;;
+    *) AC_MSG_ERROR([bad value ${withval} for tests option]) ;;
+   esac],
+  [withval=check])
+AC_MSG_CHECKING([Whether to build test suite by default])
+if test "$withval" = "check" ; then
+  if test -d $srcdir/.git ; then
+    withval=yes
+  else
+    withval=no
+  fi
+fi
+AC_MSG_RESULT([$withval])
+AM_CONDITIONAL([WITH_TESTS], [test "$withval" = "yes"])
+
 dnl Check whether we can get the number of CPU
 AC_CHECK_FUNCS([get_nprocs_conf get_nprocs], [],
   [AC_MSG_CHECKING([for number of online cpus])

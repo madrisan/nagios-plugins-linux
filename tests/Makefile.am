@@ -24,7 +24,9 @@ test_programs = \
 	tscswch \
 	tsintr
 
-test_utils = testutils.h testutils.c
+test_utils = \
+	$(top_srcdir)/include/testutils.h \
+	testutils.c
 
 LDADDS = $(top_builddir)/lib/libutils.a
 
@@ -37,5 +39,10 @@ tscswch_LDADD   = $(LDADDS)
 tsintr_SOURCES  = $(test_utils) tsintr.c
 tsintr_LDADD    = $(LDADDS)
 
+if WITH_TESTS
 noinst_PROGRAMS = $(test_programs)
+else ! WITH_TESTS
+check_PROGRAMS = $(test_programs)
+endif ! WITH_TESTS
+
 TESTS = $(test_programs)
