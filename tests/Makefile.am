@@ -22,7 +22,8 @@ AM_CPPFLAGS = \
 test_programs = \
 	tsclock \
 	tscswch \
-	tsintr
+	tsintr  \
+        tsmessages
 
 test_utils = \
 	$(top_srcdir)/include/testutils.h \
@@ -38,6 +39,9 @@ tscswch_LDADD   = $(LDADDS)
 
 tsintr_SOURCES  = $(test_utils) tsintr.c
 tsintr_LDADD    = $(LDADDS)
+
+tsmessages_SOURCES = $(test_utils) tsmessages.c
+tsmessages_LDADD   = $(LDADDS)
 
 if WITH_TESTS
 noinst_PROGRAMS = $(test_programs)
