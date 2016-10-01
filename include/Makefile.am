@@ -37,6 +37,7 @@ noinst_HEADERS = \
   sysfsparser.h \
   system.h      \
   tcpinfo.h     \
+  testutils.h   \
   thresholds.h  \
   vminfo.h      \
   xalloc.h      \
