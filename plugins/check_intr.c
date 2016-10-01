@@ -95,6 +95,44 @@ print_version (void)
   exit (STATE_OK);
 }
 
+static unsigned long long
+get_intrdelta (unsigned int *ncpus0, unsigned int *ncpus1,
+	       unsigned long * (*vintr)[2], unsigned long count,
+	       unsigned int sleep_time, bool verbose)
+{
+  unsigned long long nintr[2], dnintr;
+  unsigned long i;
+  unsigned int tog = 0;		/* toggle switch for cleaner code */
+
+  dnintr = nintr[0] = cpu_stats_get_intr ();
+
+  if (verbose)
+    printf ("intr = %Lu\n", dnintr);
+
+  if (count <= 2)
+    (*vintr)[0] = proc_interrupts_get_nintr_per_cpu (ncpus0);
+
+  for (i = 1; i < count; i++)
+    {
+      sleep (sleep_time);
+
+      tog = !tog;
+      nintr[tog] = cpu_stats_get_intr ();
+
+      dnintr = (nintr[tog] - nintr[!tog]) / sleep_time;
+      if (verbose)
+	printf ("intr = %Lu --> %Lu/s\n", nintr[tog], dnintr);
+
+      if (count - 2 == i)
+	(*vintr)[0] = proc_interrupts_get_nintr_per_cpu (ncpus0);
+      else if (count - 1 == i)
+	(*vintr)[1] = proc_interrupts_get_nintr_per_cpu (ncpus1);
+    }
+
+  return dnintr;
+}
+
+#ifndef NPL_TESTING
 int
 main (int argc, char **argv)
 {
@@ -104,12 +142,9 @@ main (int argc, char **argv)
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
-  unsigned long long nintr[2];
-  unsigned int sleep_time = 1,
-	   tog = 0,		/* toggle switch for cleaner code */
-	   ncpus0 = 0, ncpus1 = 0;
-  unsigned long i, delay, count,
-	   *vintr[2] = { NULL, NULL };
+  unsigned int sleep_time = 1, ncpus0 = 0, ncpus1 = 0;
+  unsigned long i, delay, count, *vintr[2] = { NULL, NULL };
+  unsigned long long dnintr;
 
   set_program_name (argv[0]);
 
@@ -161,29 +196,8 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  unsigned long long dnintr = nintr[0] = cpu_stats_get_intr ();
-  if (verbose)
-    printf ("intr = %Lu\n", dnintr);
-
-  if (count <= 2)
-    vintr[0] = proc_interrupts_get_nintr_per_cpu (&ncpus0);
-
-  for (i = 1; i < count; i++)
-    {
-      sleep (sleep_time);
-
-      tog = !tog;
-      nintr[tog] = cpu_stats_get_intr ();
-
-      dnintr = (nintr[tog] - nintr[!tog]) / sleep_time;
-      if (verbose)
-	printf ("intr = %Lu --> %Lu/s\n", nintr[tog], dnintr);
-
-      if (count - 2 == i)
-	vintr[0] = proc_interrupts_get_nintr_per_cpu (&ncpus0);
-      else if (count - 1 == i)
-	vintr[1] = proc_interrupts_get_nintr_per_cpu (&ncpus1);
-    }
+  dnintr =
+    get_intrdelta (&ncpus0, &ncpus1, &vintr, count, sleep_time, verbose);
 
   status = get_status (dnintr, my_threshold);
   free (my_threshold);
@@ -204,3 +218,4 @@ main (int argc, char **argv)
 
   return status;
 }
+#endif			/* NPL_TESTING */
