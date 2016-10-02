@@ -20,17 +20,48 @@
  * This software is based on the source code of the tool "vmstat".
  */
 
+#include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <sys/stat.h>
 
 #include "common.h"
+#include "progname.h"
+#include "system.h"
 #include "testutils.h"
 
 static size_t test_counter;
 
+/* Check that a file is regular and has executable bits.
+ * If false is returned, errno is valid. */
+bool
+test_file_is_executable (const char *file)
+{
+  struct stat sb;
+
+  if (stat (file, &sb) < 0)
+    return false;
+
+  if (S_ISREG (sb.st_mode) && (sb.st_mode & 0111) != 0)
+    return true;
+
+  errno = S_ISDIR (sb.st_mode) ? EISDIR : EACCES;
+  return false;
+}
+
 int
 test_main (int argc, char **argv, int (*func) (void), ...)
 {
+  const char *lib;
+  va_list ap;
   int ret;
+
+  va_start (ap, func);
+  while ((lib = va_arg(ap, const char *)))
+    TEST_PRELOAD(lib);
+  va_end(ap);
+
+  program_name = argv[0];
   ret = (func) ();
 
   return ret;

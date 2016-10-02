@@ -16,7 +16,9 @@ AM_INIT_AUTOMAKE([
         no-dist-gzip
         dist-bzip2
         dist-xz
-        subdir-objects])
+        subdir-objects
+        -Wno-portability
+])
 
 AC_CONFIG_SRCDIR([plugins/check_cpu.c])
 AC_CONFIG_HEADERS(config.h:config.hin)
@@ -33,6 +35,12 @@ dnl Checks for the compiler features
 AC_C_CONST
 AC_C_PROTOTYPES
 AC_C_INLINE
+
+m4_ifndef([LT_INIT], [
+  AM_PROG_LIBTOOL
+], [
+  LT_INIT([shared disable-static])
+])
 
 # 'AC_PROG_CC_C99' unfortunately requires autoconf 2.60+
 #AC_PROG_CC_C99
