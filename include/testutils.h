@@ -16,7 +16,15 @@
 #ifndef _TESTUTILS_H
 #define _TESTUTILS_H
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE 		/* activate extra prototypes for glibc */
+#endif
+
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #define EXIT_AM_SKIP 77		/* tell Automake we're skipping a test */
 #define EXIT_AM_HARDFAIL 99	/* tell Automake that the framework is broken */
@@ -39,9 +47,43 @@ extern "C"
   int test_main (int argc, char **argv, int (*func) (void), ...);
 
   #define TEST_MAIN(func)                           \
-    int main(int argc, char **argv) {               \
-      return test_main(argc, argv, func, NULL);     \
-    }
+    int main(int argc, char **argv)                 \
+      {                                             \
+	return test_main (argc, argv, func, NULL); \
+      }
+
+  #define TEST_PRELOAD(lib)                                            \
+    do                                                                 \
+      {                                                                \
+	const char *preload = getenv ("LD_PRELOAD");                   \
+	if (preload == NULL || strstr (preload, lib) == NULL)          \
+	  {                                                            \
+	    char *newenv;                                              \
+	    if (!test_file_is_executable (lib))                        \
+	      {                                                        \
+		perror (lib);                                          \
+		return EXIT_FAILURE;                                   \
+	      }                                                        \
+	    if (!preload)                                              \
+	      {                                                        \
+		newenv = (char *) lib;                                 \
+	      }                                                        \
+	    else if (asprintf (&newenv, "%s:%s", lib, preload) < 0)    \
+	      {                                                        \
+		perror ("asprintf");                                   \
+		return EXIT_FAILURE;                                   \
+	      }                                                        \
+	    setenv ("LD_PRELOAD", newenv, 1);                          \
+	    execv (argv[0], argv);                                     \
+	  }                                                            \
+      }                                                                \
+    while (0)
+
+  #define TEST_MAIN_PRELOAD(func, ...)                                 \
+    int main (int argc, char **argv)                                   \
+      {                                                                \
+	return test_main (argc, argv, func, __VA_ARGS__, NULL);        \
+      }
 
   int test_run (const char *title,
 		int (*body) (const void *data), const void *data);

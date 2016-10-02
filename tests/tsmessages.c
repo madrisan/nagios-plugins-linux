@@ -50,4 +50,4 @@ mymain (void)
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-TEST_MAIN (mymain)
+TEST_MAIN(mymain);

@@ -15,7 +15,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+abs_builddir = $(shell pwd)
+
 AM_CPPFLAGS = \
+        -Dabs_builddir="\"$(abs_builddir)\"" \
 	-include $(top_builddir)/config.h \
 	-I$(top_srcdir)/include
 
@@ -25,11 +28,16 @@ test_programs = \
 	tsintr  \
         tsmessages
 
+#test_libraries = \
+#	tslib_plugin_error.la
+
 test_utils = \
 	$(top_srcdir)/include/testutils.h \
 	testutils.c
 
 LDADDS = $(top_builddir)/lib/libutils.a
+#TSLIBS_LDFLAGS = -module -avoid-version \
+#	-rpath /evil/libtool/hack/to/force/shared/lib/creation
 
 tsclock_SOURCES = $(test_utils) tsclock.c
 tsclock_LDADD   = $(LDADDS)
@@ -43,10 +51,15 @@ tsintr_LDADD    = $(LDADDS)
 tsmessages_SOURCES = $(test_utils) tsmessages.c
 tsmessages_LDADD   = $(LDADDS)
 
+#tslib_plugin_error_la_SOURCES = tslib_plugin_error.c
+#tslib_plugin_error_la_LDFLAGS = $(TSLIBS_LDFLAGS)
+
 if WITH_TESTS
 noinst_PROGRAMS = $(test_programs)
+#noinst_LTLIBRARIES = $(test_libraries)
 else ! WITH_TESTS
 check_PROGRAMS = $(test_programs)
+#check_LTLIBRARIES = $(test_libraries)
 endif ! WITH_TESTS
 
 TESTS = $(test_programs)
