@@ -16,10 +16,6 @@
 #ifndef _TESTUTILS_H
 #define _TESTUTILS_H
 
-#ifndef _GNU_SOURCE
-# define _GNU_SOURCE 		/* activate extra prototypes for glibc */
-#endif
-
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -20,6 +20,10 @@
  * This software is based on the source code of the tool "vmstat".
  */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE		/* activate extra prototypes for glibc */
+#endif
+
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
