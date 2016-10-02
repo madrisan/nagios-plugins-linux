@@ -26,18 +26,19 @@ test_programs = \
 	tsclock \
 	tscswch \
 	tsintr  \
-        tsmessages
+        tsmessages \
+        tskernelver
 
-#test_libraries = \
-#	tslib_plugin_error.la
+test_libraries = \
+	tslib_uname.la
 
 test_utils = \
 	$(top_srcdir)/include/testutils.h \
 	testutils.c
 
 LDADDS = $(top_builddir)/lib/libutils.a
-#TSLIBS_LDFLAGS = -module -avoid-version \
-#	-rpath /evil/libtool/hack/to/force/shared/lib/creation
+TSLIBS_LDFLAGS = -module -avoid-version \
+	-rpath /evil/libtool/hack/to/force/shared/lib/creation
 
 tsclock_SOURCES = $(test_utils) tsclock.c
 tsclock_LDADD   = $(LDADDS)
@@ -51,15 +52,18 @@ tsintr_LDADD    = $(LDADDS)
 tsmessages_SOURCES = $(test_utils) tsmessages.c
 tsmessages_LDADD   = $(LDADDS)
 
-#tslib_plugin_error_la_SOURCES = tslib_plugin_error.c
-#tslib_plugin_error_la_LDFLAGS = $(TSLIBS_LDFLAGS)
+tskernelver_SOURCES = $(test_utils) tskernelver.c
+tskernelver_LDADD   = $(LDADDS)
+
+tslib_uname_la_SOURCES = tslib_uname.c
+tslib_uname_la_LDFLAGS = $(TSLIBS_LDFLAGS)
 
 if WITH_TESTS
 noinst_PROGRAMS = $(test_programs)
-#noinst_LTLIBRARIES = $(test_libraries)
+noinst_LTLIBRARIES = $(test_libraries)
 else ! WITH_TESTS
 check_PROGRAMS = $(test_programs)
-#check_LTLIBRARIES = $(test_libraries)
+check_LTLIBRARIES = $(test_libraries)
 endif ! WITH_TESTS
 
 TESTS = $(test_programs)
