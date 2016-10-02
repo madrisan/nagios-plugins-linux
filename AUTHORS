@@ -1,8 +1,13 @@
 Author:
    Davide Madrisan <davide.madrisan@gmail.com>
 
+Contributors:
+   flexdev - https://github.com/flexdev
+             Bug report and patch (several plugins)
+   chr15p  - https://github.com/chr15p
+             Bug report and patch (check_multipath)
 
-Some code and coding styles/ideas belong to other great open source projects:
+Some code and coding styles/ideas belong to the following open source projects:
 
  * cpufrequtils    https://www.kernel.org/pub/linux/utils/kernel/cpufreq/
                    License: GPLv2
@@ -16,17 +21,20 @@ Some code and coding styles/ideas belong to other great open source projects:
  * libabc          https://git.kernel.org/cgit/linux/kernel/git/kay/libabc.git
                    License: LGPLv2 (with an unrestricted usage clause)
 
+ * libvirt         http://libvirt.org/
+                   License: GPLv2, LGPLv2
+
  * nagios plugins  https://github.com/nagios-plugins/nagios-plugins
                    License: GPLv3
+
+ * procps          https://gitorious.org/procps
+                   License: GPLv2, LGPLv2 (libprocps)
 
  * util-linux      https://github.com/karelzak/util-linux
                    License: GPLv2
 
- * procps          https://gitorious.org/procps
-                   License: GPLv2, LGPLv2 (libprocps)
 
 and also to Mickael Kerrisk of "The Linux Programming Interface":
 
  * tlpi            http://man7.org/tlpi/code/
                    License: GNU Affero GPLv3
-
