@@ -46,15 +46,15 @@
 
 -- Fixes
 
-* check_clock.c,
-  check_cpufreq.c,
-  check_cswch.c,
-  check_intr.c,
-  check_multipath.c,
-  check_nbprocs.c,
-  check_network.c,
-  check_tcpcount.c,
-  check_users.c: fix the return code of the warning and critical
+* check_clock,
+  check_cpufreq,
+  check_cswch,
+  check_intr,
+  check_multipath,
+  check_nbprocs,
+  check_network,
+  check_tcpcount,
+  check_users: fix the return code of the warning and critical
   case.  Thanks Paul Dunkler for pointing out this issue.
 
 * check_cpu: fix the detection of the CPU 64-bit op-mode.
