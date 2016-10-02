@@ -25,6 +25,11 @@
 #define EXIT_AM_SKIP 77		/* tell Automake we're skipping a test */
 #define EXIT_AM_HARDFAIL 99	/* tell Automake that the framework is broken */
 
+#define TEST_KERNEL_VERSION_MAJOR 2
+#define TEST_KERNEL_VERSION_MINOR 6
+#define TEST_KERNEL_VERSION_PATCH 27
+#define TEST_KERNEL_VERSION "2.6.27"
+
 #define TEST_ASSERT_EQUAL_NUMERIC(A, B)  \
   do {                                   \
     if (A != B) ret = -1;                \
