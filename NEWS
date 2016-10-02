@@ -1,3 +1,47 @@
+    Major changes between "nagios-plugins-linux" versions 18 and 19
+
+-- Fixes
+
+* check_multipath: recent versions of multipath no longer open a
+  multipathd socket file in the file system, but instead use an
+  abstract namespace socket: @/org/kernel/linux/storage/multipathd.
+  Thanks to Chris Procter "chr15p" for reporting the issue and
+  creating a pull request.
+
+* check_load: fixed the performance data output
+
+-- Security fixes
+
+  check_cpu: fixed coverity 152987 "Untrusted loop bound"
+  check_cswch: fixed coverity 152985 "Untrusted loop bound"
+  check_fc: fixed coverity 152984 "Untrusted value as argument"
+  check_intr: fixed coverity 152986 "Untrusted loop bound"
+
+-- Enhancements
+
+* check_multipath: fixed the long-standing gcc compiler warning:
+    "dereferencing type-punned pointer might break strict-aliasing
+     rules [-Wstrict-aliasing]".
+  This was a false problem, but the code has been modified to quiet
+  the warning.
+
+* check_multipath: use a larger buffer for queries to make this
+  plugin working with systems that have lots of mapped disks.
+
+* test-suite: a framework for testing the code (make check) has been
+  added and some tests are now available.
+
+-- Compatibility issues
+
+* check_multipath: by default the abstract namespace socket
+  "@/org/kernel/linux/storage/multipathd" is now selected at build
+  time.  If you need to monitor old distributions (RHEL5 and RHEL6
+  for instance) you need to configure this package as followed:
+
+    ./configure --with-socketfile=/var/run/multipathd.sock
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 17 and 18
 
 -- Fixes
@@ -15,7 +59,7 @@
 
 * check_cpu: fix the detection of the CPU 64-bit op-mode.
 
-* check_cpu: Fix a memory resource leak reported by the Coverity Scan
+* check_cpu: fix a memory resource leak reported by the Coverity Scan
   tool.
 
 * meminfo lib (check_memory): use SReclaimable in cached.
