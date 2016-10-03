@@ -17,6 +17,10 @@
 
 abs_builddir = $(shell pwd)
 
+test_clang_checker = tsclang_checker.sh 
+check-clang-checker: 
+	$(top_builddir)/tests/$(test_clang_checker)
+
 AM_CPPFLAGS = \
         -Dabs_builddir="\"$(abs_builddir)\"" \
 	-include $(top_builddir)/config.h \
@@ -29,8 +33,7 @@ test_programs = \
         tsmessages \
         tskernelver
 
-test_libraries = \
-	tslib_uname.la
+test_libraries = tslib_uname.la
 
 test_utils = \
 	$(top_srcdir)/include/testutils.h \
