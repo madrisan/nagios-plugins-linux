@@ -245,15 +245,15 @@ main (int argc, char **argv)
 {
   int c, err;
   bool verbose, cpu_model, per_cpu_stats;
-  unsigned long i, len, delay, count;
+  unsigned long len;
+  long i, count, delay;
   char *critical = NULL, *warning = NULL;
   char *p = NULL, *cpu_progname;
   nagstatus currstatus, status;
   thresholds *my_threshold = NULL;
 
   float cpu_perc = 0.0;
-  unsigned int sleep_time = 1,
-               tog = 0;		/* toggle switch for cleaner code */
+  unsigned int tog = 0;		/* toggle switch for cleaner code */
   struct cpu_desc *cpudesc = NULL;
 
   set_program_name (argv[0]);
@@ -327,16 +327,14 @@ main (int argc, char **argv)
 
       if (delay < 1)
 	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
-      else if (UINT_MAX < delay)
+      else if (INT_MAX < delay)
 	plugin_error (STATE_UNKNOWN, 0, "too large delay value");
-
-      sleep_time = delay;
     }
 
   if (optind < argc)
     {
       count = strtol_or_err (argv[optind++], "failed to parse argument");
-      if (UINT_MAX < count)
+      if (INT_MAX < count)
 	plugin_error (STATE_UNKNOWN, 0, "too large count value");
     }
 
@@ -371,7 +369,7 @@ main (int argc, char **argv)
 
   for (i = 1; i < count; i++)
     {
-      sleep (sleep_time);
+      sleep (delay);
       tog = !tog;
       cpu_stats_get_time (cpuv[tog], ncpus);
 

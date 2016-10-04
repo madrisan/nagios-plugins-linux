@@ -87,10 +87,10 @@ print_version (void)
 }
 
 static unsigned long long
-get_ctxtdelta (unsigned long count, unsigned int sleep_time, bool verbose)
+get_ctxtdelta (long count, long delay, bool verbose)
 {
-  unsigned int tog = 0;		/* toggle switch for cleaner code */
-  unsigned long i;
+  int tog = 0;
+  long i;
   unsigned long long nctxt[2],
                      dnctxt = nctxt[0] = cpu_stats_get_cswch ();
 
@@ -99,11 +99,11 @@ get_ctxtdelta (unsigned long count, unsigned int sleep_time, bool verbose)
 
   for (i = 1; i < count; i++)
     {
-      sleep (sleep_time);
+      sleep (delay);
 
       tog = !tog;
       nctxt[tog] = cpu_stats_get_cswch ();
-      dnctxt = (nctxt[tog] - nctxt[!tog]) / sleep_time;
+      dnctxt = (nctxt[tog] - nctxt[!tog]) / delay;
 
       if (verbose)
 	printf ("ctxt = %Lu --> %Lu/s\n", nctxt[tog], dnctxt);
@@ -122,8 +122,7 @@ main (int argc, char **argv)
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
-  unsigned int sleep_time = 1;
-  unsigned long delay, count;
+  long count, delay;
   unsigned long long dnctxt;
 
   set_program_name (argv[0]);
@@ -159,16 +158,14 @@ main (int argc, char **argv)
 
       if (delay < 1)
 	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
-      else if (UINT_MAX < delay)
+      else if (INT_MAX < delay)
 	plugin_error (STATE_UNKNOWN, 0, "too large delay value");
-
-      sleep_time = delay;
     }
 
   if (optind < argc)
     {
       count = strtol_or_err (argv[optind++], "failed to parse argument");
-      if (UINT_MAX < count)
+      if (INT_MAX < count)
 	plugin_error (STATE_UNKNOWN, 0, "too large count value");
     }
 
@@ -176,7 +173,7 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  dnctxt = get_ctxtdelta (count, sleep_time, verbose);
+  dnctxt = get_ctxtdelta (count, delay, verbose);
 
   status = get_status (dnctxt, my_threshold);
   free (my_threshold);

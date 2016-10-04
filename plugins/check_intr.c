@@ -97,12 +97,12 @@ print_version (void)
 
 static unsigned long long
 get_intrdelta (unsigned int *ncpus0, unsigned int *ncpus1,
-	       unsigned long * (*vintr)[2], unsigned long count,
-	       unsigned int sleep_time, bool verbose)
+	       unsigned long * (*vintr)[2], long count, long delay,
+	       bool verbose)
 {
   unsigned long long nintr[2], dnintr;
-  unsigned long i;
-  unsigned int tog = 0;		/* toggle switch for cleaner code */
+  unsigned int tog = 0;
+  long i;
 
   dnintr = nintr[0] = cpu_stats_get_intr ();
 
@@ -114,12 +114,12 @@ get_intrdelta (unsigned int *ncpus0, unsigned int *ncpus1,
 
   for (i = 1; i < count; i++)
     {
-      sleep (sleep_time);
+      sleep (delay);
 
       tog = !tog;
       nintr[tog] = cpu_stats_get_intr ();
 
-      dnintr = (nintr[tog] - nintr[!tog]) / sleep_time;
+      dnintr = (nintr[tog] - nintr[!tog]) / delay;
       if (verbose)
 	printf ("intr = %Lu --> %Lu/s\n", nintr[tog], dnintr);
 
@@ -142,8 +142,9 @@ main (int argc, char **argv)
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
-  unsigned int sleep_time = 1, ncpus0 = 0, ncpus1 = 0;
-  unsigned long i, delay, count, *vintr[2] = { NULL, NULL };
+  unsigned int ncpus0 = 0, ncpus1 = 0;
+  long i, delay, count;
+  unsigned long *vintr[2] = { NULL, NULL };
   unsigned long long dnintr;
 
   set_program_name (argv[0]);
@@ -181,8 +182,6 @@ main (int argc, char **argv)
 	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
       else if (UINT_MAX < delay)
 	plugin_error (STATE_UNKNOWN, 0, "too large delay value");
-
-      sleep_time = delay;
     }
 
   if (optind < argc)
@@ -197,7 +196,7 @@ main (int argc, char **argv)
     usage (stderr);
 
   dnintr =
-    get_intrdelta (&ncpus0, &ncpus1, &vintr, count, sleep_time, verbose);
+    get_intrdelta (&ncpus0, &ncpus1, &vintr, count, delay, verbose);
 
   status = get_status (dnintr, my_threshold);
   free (my_threshold);
@@ -210,7 +209,7 @@ main (int argc, char **argv)
   for (i = 0; i < MIN (ncpus0, ncpus1); i++)
     printf (" intr_cpu%lu%s=%lu", i, time_unit,
 	    (count >
-	     1) ? (vintr[1][i] - vintr[0][i]) / sleep_time : vintr[0][i]);
+	     1) ? (vintr[1][i] - vintr[0][i]) / delay : vintr[0][i]);
   printf ("\n");
 
   free (vintr[1]);
