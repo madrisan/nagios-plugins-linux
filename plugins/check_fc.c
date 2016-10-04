@@ -182,9 +182,9 @@ typedef struct fc_host_statistics {
   uint64_t loss_of_sync_count;
 } fc_host_statistics;
 
-void
+static void
 fc_host_status (int *n_ports, int *n_online, fc_host_statistics *stats,
-		unsigned int  sleep_time, unsigned long count)
+		long delay, long count)
 {
   DIR *dirp;
   struct dirent *dp;
@@ -209,14 +209,15 @@ fc_host_status (int *n_ports, int *n_online, fc_host_statistics *stats,
 
       /* collect some statistics */
       uint64_t rx_frames[2], tx_frames[2];
-      unsigned int i, tog = 0;
+      unsigned int tog = 0;
+      long i;
 
       stats->rx_frames = rx_frames[0] = fc_stat_rx_frames (dp->d_name);
       stats->tx_frames = tx_frames[0] = fc_stat_tx_frames (dp->d_name);
 
       for (i = 1; i < count; i++)
 	{
-	  sleep (sleep_time);
+	  sleep (delay);
 	  tog = !tog;
 
 	  rx_frames[tog] = fc_stat_rx_frames (dp->d_name);
@@ -253,9 +254,7 @@ main (int argc, char **argv)
   char *critical = NULL, *warning = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
-
-  unsigned long delay, count;
-  unsigned int sleep_time = 1;
+  long count, delay;
 
   set_program_name (argv[0]);
 
@@ -299,16 +298,14 @@ main (int argc, char **argv)
 
       if (delay < 1)
 	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
-      else if (UINT_MAX < delay)
+      else if (INT_MAX < delay)
 	plugin_error (STATE_UNKNOWN, 0, "too large delay value");
-
-      sleep_time = delay;
     }
 
   if (optind < argc)
     {
       count = strtol_or_err (argv[optind++], "failed to parse argument");
-      if (UINT_MAX < count)
+      if (INT_MAX < count)
 	plugin_error (STATE_UNKNOWN, 0, "too large count value");
     }
 
@@ -318,7 +315,7 @@ main (int argc, char **argv)
 
   fc_host_statistics stats = {0};
 
-  fc_host_status (&n_ports, &n_online, &stats, sleep_time, count);
+  fc_host_status (&n_ports, &n_online, &stats, delay, count);
   status = get_status (n_online, my_threshold);
 
   printf ("%s %s - Fiber Channel ports status: %d/%d Online "
