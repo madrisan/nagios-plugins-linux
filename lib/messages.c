@@ -92,8 +92,7 @@ plugin_error (nagstatus status, int errnum, const char *message, ...)
   fputs ("\n", stdout);
   fflush (stdout);
 
-  if (status)
-    exit (status);
+  exit (status);
 }
 
 const char *
