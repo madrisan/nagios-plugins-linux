@@ -19,15 +19,16 @@
 #include "common.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /* Print a message with 'fprintf (stderr, FORMAT, ...)';
      if ERRNUM is nonzero, follow it with ": " and strerror (ERRNUM).
      If STATUS is nonzero, terminate the program with 'exit (STATUS)'.  */
-  void plugin_error (nagstatus status, int errnum,
-		     const char *message, ...)
-       _attribute_format_printf_(3, 4);
+  _Noreturn void plugin_error (nagstatus status, int errnum,
+			       const char *message, ...)
+    _attribute_format_printf_ (3, 4);
 
   /* This variable is incremented each time 'error' is called.  */
   extern unsigned int error_message_count;
@@ -38,4 +39,4 @@ extern "C" {
 }
 #endif
 
-#endif /* _MESSAGES_H */
+#endif				/* _MESSAGES_H */
