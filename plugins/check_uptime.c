@@ -133,13 +133,10 @@ sprint_uptime (double uptime_secs)
   upminutes = upminutes % 60;
 
   if (uphours)
-    {
-      pos +=
-	snprintf (buf + pos, BUFSIZE - pos, "%d hour%s %d min", uphours,
-		  (uphours != 1) ? "s" : "", upminutes);
-    }
+    snprintf (buf + pos, BUFSIZE - pos, "%d hour%s %d min", uphours,
+	      (uphours != 1) ? "s" : "", upminutes);
   else
-    pos += snprintf (buf + pos, BUFSIZE - pos, "%d min", upminutes);
+    snprintf (buf + pos, BUFSIZE - pos, "%d min", upminutes);
 
   return buf;
 }
