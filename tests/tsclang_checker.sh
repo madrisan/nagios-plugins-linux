@@ -9,7 +9,7 @@ OUTPUT_DIR="/tmp/clang-checker-analysis"
 SCAN_BUILD_COMMAND="make clean all" 
 SCAN_BUILD_COMMAND_PREPEND="autoreconf -v -Wall -i -Im4 && ./configure" 
  
-function __die() { 
+function die() { 
    echo "${__PROGNAME}: error: $1" 1>&2 
    exit ${2:-0} 
 } 
