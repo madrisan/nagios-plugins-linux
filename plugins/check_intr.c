@@ -93,7 +93,7 @@ print_version (void)
 
 static unsigned long long
 get_intrdelta (unsigned int *ncpus0, unsigned int *ncpus1,
-	       unsigned long * (*vintr)[2], unsigned int count,
+	       unsigned long *(*vintr)[2], unsigned int count,
 	       unsigned int delay, bool verbose)
 {
   unsigned long long nintr[2], dnintr;
@@ -163,7 +163,6 @@ main (int argc, char **argv)
 
 	case_GETOPT_HELP_CHAR
 	case_GETOPT_VERSION_CHAR
-
 	}
     }
 
@@ -175,22 +174,23 @@ main (int argc, char **argv)
       if (delay < 1)
 	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
       else if (DELAY_MAX < delay)
-	plugin_error (STATE_UNKNOWN, 0, "too large delay value");
+	plugin_error (STATE_UNKNOWN, 0,
+		      "too large delay value (greater than %d)", DELAY_MAX);
     }
 
   if (optind < argc)
     {
       count = strtol_or_err (argv[optind++], "failed to parse argument");
       if (COUNT_MAX < count)
-	plugin_error (STATE_UNKNOWN, 0, "too large count value");
+	plugin_error (STATE_UNKNOWN, 0,
+		      "too large count value (greater than %d)", COUNT_MAX);
     }
 
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  dnintr =
-    get_intrdelta (&ncpus0, &ncpus1, &vintr, count, delay, verbose);
+  dnintr = get_intrdelta (&ncpus0, &ncpus1, &vintr, count, delay, verbose);
 
   status = get_status (dnintr, my_threshold);
   free (my_threshold);
@@ -202,8 +202,7 @@ main (int argc, char **argv)
 
   for (i = 0; i < MIN (ncpus0, ncpus1); i++)
     printf (" intr_cpu%lu%s=%lu", i, time_unit,
-	    (count >
-	     1) ? (vintr[1][i] - vintr[0][i]) / delay : vintr[0][i]);
+	    (count > 1) ? (vintr[1][i] - vintr[0][i]) / delay : vintr[0][i]);
   printf ("\n");
 
   free (vintr[1]);
