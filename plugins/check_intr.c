@@ -38,10 +38,6 @@
 #include "thresholds.h"
 #include "xstrtol.h"
 
-/* by default one iteration with 1sec delay */
-#define DELAY_DEFAULT	1
-#define COUNT_DEFAULT	2
-
 #define MIN(a,b) \
   ({ __typeof__ (a) _a = (a); \
      __typeof__ (b) _b = (b); \
@@ -97,12 +93,11 @@ print_version (void)
 
 static unsigned long long
 get_intrdelta (unsigned int *ncpus0, unsigned int *ncpus1,
-	       unsigned long * (*vintr)[2], long count, long delay,
-	       bool verbose)
+	       unsigned long * (*vintr)[2], unsigned int count,
+	       unsigned int delay, bool verbose)
 {
   unsigned long long nintr[2], dnintr;
-  unsigned int tog = 0;
-  long i;
+  unsigned int i, tog = 0;
 
   dnintr = nintr[0] = cpu_stats_get_intr ();
 
@@ -143,8 +138,7 @@ main (int argc, char **argv)
   thresholds *my_threshold = NULL;
 
   unsigned int ncpus0 = 0, ncpus1 = 0;
-  long i, delay, count;
-  unsigned long *vintr[2] = { NULL, NULL };
+  unsigned long i, delay, count, *vintr[2] = { NULL, NULL };
   unsigned long long dnintr;
 
   set_program_name (argv[0]);
@@ -180,14 +174,14 @@ main (int argc, char **argv)
 
       if (delay < 1)
 	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
-      else if (UINT_MAX < delay)
+      else if (DELAY_MAX < delay)
 	plugin_error (STATE_UNKNOWN, 0, "too large delay value");
     }
 
   if (optind < argc)
     {
       count = strtol_or_err (argv[optind++], "failed to parse argument");
-      if (UINT_MAX < count)
+      if (COUNT_MAX < count)
 	plugin_error (STATE_UNKNOWN, 0, "too large count value");
     }
 

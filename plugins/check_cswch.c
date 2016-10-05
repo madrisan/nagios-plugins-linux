@@ -33,10 +33,6 @@
 #include "thresholds.h"
 #include "xstrtol.h"
 
-/* by default one iteration with 1sec delay */
-#define DELAY_DEFAULT	1
-#define COUNT_DEFAULT	2
-
 static const char *program_copyright =
   "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
@@ -87,10 +83,10 @@ print_version (void)
 }
 
 static unsigned long long
-get_ctxtdelta (long count, long delay, bool verbose)
+get_ctxtdelta (unsigned int count, unsigned int delay, bool verbose)
 {
   int tog = 0;
-  long i;
+  unsigned int i;
   unsigned long long nctxt[2],
                      dnctxt = nctxt[0] = cpu_stats_get_cswch ();
 
@@ -122,7 +118,7 @@ main (int argc, char **argv)
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
-  long count, delay;
+  unsigned long count, delay;
   unsigned long long dnctxt;
 
   set_program_name (argv[0]);
@@ -158,14 +154,14 @@ main (int argc, char **argv)
 
       if (delay < 1)
 	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
-      else if (INT_MAX < delay)
+      else if (DELAY_MAX < delay)
 	plugin_error (STATE_UNKNOWN, 0, "too large delay value");
     }
 
   if (optind < argc)
     {
       count = strtol_or_err (argv[optind++], "failed to parse argument");
-      if (INT_MAX < count)
+      if (COUNT_MAX < count)
 	plugin_error (STATE_UNKNOWN, 0, "too large count value");
     }
 

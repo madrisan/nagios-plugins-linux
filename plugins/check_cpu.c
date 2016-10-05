@@ -48,10 +48,6 @@
 #include "xasprintf.h"
 #include "xstrtol.h"
 
-/* by default one iteration with 1sec delay */
-#define DELAY_DEFAULT	1
-#define COUNT_DEFAULT	2
-
 static const char *program_copyright =
   "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
@@ -245,8 +241,7 @@ main (int argc, char **argv)
 {
   int c, err;
   bool verbose, cpu_model, per_cpu_stats;
-  unsigned long len;
-  long i, count, delay;
+  unsigned long len, i, count, delay;
   char *critical = NULL, *warning = NULL;
   char *p = NULL, *cpu_progname;
   nagstatus currstatus, status;
@@ -327,14 +322,14 @@ main (int argc, char **argv)
 
       if (delay < 1)
 	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
-      else if (INT_MAX < delay)
+      else if (DELAY_MAX < delay)
 	plugin_error (STATE_UNKNOWN, 0, "too large delay value");
     }
 
   if (optind < argc)
     {
       count = strtol_or_err (argv[optind++], "failed to parse argument");
-      if (INT_MAX < count)
+      if (COUNT_MAX < count)
 	plugin_error (STATE_UNKNOWN, 0, "too large count value");
     }
 

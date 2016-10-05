@@ -37,10 +37,6 @@
 #include "thresholds.h"
 #include "xstrtol.h"
 
-/* by default one iteration with 1sec delay */
-#define DELAY_DEFAULT	1
-#define COUNT_DEFAULT	2
-
 static const char *program_copyright =
   "Copyright (C) 2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
@@ -184,7 +180,7 @@ typedef struct fc_host_statistics {
 
 static void
 fc_host_status (int *n_ports, int *n_online, fc_host_statistics *stats,
-		long delay, long count)
+		unsigned int delay, unsigned int count)
 {
   DIR *dirp;
   struct dirent *dp;
@@ -209,8 +205,7 @@ fc_host_status (int *n_ports, int *n_online, fc_host_statistics *stats,
 
       /* collect some statistics */
       uint64_t rx_frames[2], tx_frames[2];
-      unsigned int tog = 0;
-      long i;
+      unsigned int i, tog = 0;
 
       stats->rx_frames = rx_frames[0] = fc_stat_rx_frames (dp->d_name);
       stats->tx_frames = tx_frames[0] = fc_stat_tx_frames (dp->d_name);
@@ -254,7 +249,7 @@ main (int argc, char **argv)
   char *critical = NULL, *warning = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
-  long count, delay;
+  unsigned long count, delay;
 
   set_program_name (argv[0]);
 
@@ -298,14 +293,14 @@ main (int argc, char **argv)
 
       if (delay < 1)
 	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
-      else if (INT_MAX < delay)
+      else if (DELAY_MAX < delay)
 	plugin_error (STATE_UNKNOWN, 0, "too large delay value");
     }
 
   if (optind < argc)
     {
       count = strtol_or_err (argv[optind++], "failed to parse argument");
-      if (INT_MAX < count)
+      if (COUNT_MAX < count)
 	plugin_error (STATE_UNKNOWN, 0, "too large count value");
     }
 

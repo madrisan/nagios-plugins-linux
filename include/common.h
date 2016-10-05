@@ -57,6 +57,13 @@ See the Nagios Developer Guidelines for range format:\n\
     exit (EXIT_SUCCESS);                        \
     break;
 
+/* One iteration with 1sec delay by default,
+   for plugins that support iterations */
+#define DELAY_DEFAULT   1
+#define COUNT_DEFAULT   2
+#define DELAY_MAX      60
+#define COUNT_MAX     100
+
 /* Nagios Plugins error codes */
 
 typedef enum nagstatus
