@@ -155,14 +155,16 @@ main (int argc, char **argv)
       if (delay < 1)
 	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
       else if (DELAY_MAX < delay)
-	plugin_error (STATE_UNKNOWN, 0, "too large delay value");
+	plugin_error (STATE_UNKNOWN, 0,
+		      "too large delay value (greater than %d)", DELAY_MAX);
     }
 
   if (optind < argc)
     {
       count = strtol_or_err (argv[optind++], "failed to parse argument");
       if (COUNT_MAX < count)
-	plugin_error (STATE_UNKNOWN, 0, "too large count value");
+	plugin_error (STATE_UNKNOWN, 0,
+		      "too large count value (greater than %d)", COUNT_MAX);
     }
 
   status = set_thresholds (&my_threshold, warning, critical);
