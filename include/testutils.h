@@ -75,7 +75,8 @@ extern "C"
 		return EXIT_FAILURE;                                   \
 	      }                                                        \
 	    setenv ("LD_PRELOAD", newenv, 1);                          \
-	    execv (argv[0], argv);                                     \
+	    if (argv[0] != NULL)                                       \
+	      execv (argv[0], argv);                                   \
 	  }                                                            \
       }                                                                \
     while (0)
