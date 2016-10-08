@@ -17,9 +17,23 @@
 
 abs_builddir = $(shell pwd)
 
-test_clang_checker = tsclang_checker.sh 
-check-clang-checker: 
-	$(top_builddir)/tests/$(test_clang_checker)
+SCAN_BUILD_BINARY = /usr/bin/scan-build
+SCAN_BUILD_COMMAND = make clean all
+SCAN_BUILD_OUTDIR = /tmp/clang-checker-analysis
+SCAN_BUILD_OPTS = \
+	-analyze-headers \
+	-enable-checker alpha.deadcode.UnreachableCode \
+	-enable-checker alpha.security.ArrayBoundV2 \
+	-enable-checker alpha.security.taint.TaintPropagation \
+	-enable-checker nullability.NullableDereferenced \
+	-enable-checker security.insecureAPI.strcpy \
+	-o $(SCAN_BUILD_OUTDIR)
+
+check-clang-checker:
+	test -x $(SCAN_BUILD_BINARY) || \
+	  { echo 'WARNING: scan-build not found' >&2; exit 77; }; \
+	$(SCAN_BUILD_BINARY) \
+	  $(SCAN_BUILD_OPTS) $(SCAN_BUILD_COMMAND)
 
 AM_CPPFLAGS = \
         -Dabs_builddir="\"$(abs_builddir)\"" \
