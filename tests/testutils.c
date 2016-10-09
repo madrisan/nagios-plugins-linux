@@ -62,7 +62,7 @@ test_main (int argc, char **argv, int (*func) (void), ...)
 
   va_start (ap, func);
   while ((lib = va_arg(ap, const char *)))
-    TEST_PRELOAD(lib);
+    TEST_PRELOAD (lib);
   va_end(ap);
 
   program_name = argv[0];
