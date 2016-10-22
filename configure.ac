@@ -394,6 +394,7 @@ AC_CONFIG_FILES([\
   include/Makefile \
   lib/Makefile \
   plugins/Makefile \
-  tests/Makefile])
+  tests/Makefile \
+  tests-build/Makefile])
 
 AC_OUTPUT
