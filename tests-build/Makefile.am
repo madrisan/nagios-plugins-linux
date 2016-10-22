@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-## Copyright (c) 2014-2016 Davide Madrisan <davide.madrisan@gmail.com>
+## Copyright (c) 2016 Davide Madrisan <davide.madrisan@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -15,10 +15,22 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AM_MAKEFLAGS = --no-print-directory
-ACLOCAL_AMFLAGS = -I m4
+multibuilddir = $(shell pwd)
 
-SUBDIRS = include lib plugins tests tests-build
-EXTRA_DIST = check_skel.c.sample
+DOCKER_BINARY = /usr/bin/docker
+SPECFILE = $(PACKAGE).spec
 
-check-local: all tests
+MULTIBUILD_SCRIPT = $(multibuilddir)/multibuild.sh
+MULTIBUILD_OPTS = -s $(top_srcdir):/shared:rw \
+	--spec $(multibuilddir)/specs/$(SPECFILE)
+
+check-build-centos5: $(DOCKER_BINARY) $(BUILD_SCRIPT)
+	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:centos5
+
+check-build-centos6: $(DOCKER_BINARY) $(BUILD_SCRIPT)
+	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:centos6
+
+check-build-centos7: check-build-latest
+
+check-build-latest: $(DOCKER_BINARY) $(BUILD_SCRIPT)
+	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:latest
