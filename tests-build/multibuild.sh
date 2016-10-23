@@ -22,11 +22,13 @@ Usage: $PROGNAME -o <os> -s <shared> [-d <distro>] [--spec <file>] \
        $PROGNAME --version
 
 Where:
-   -d | --distro : distribution name (default: no distribution set)
-   -o | --os     : distribution (example: centos:centos6)
-   -s | --shared : shared folder that will be mounted on the docker instance
-        --spec   : the specfile to be used for building the rpm packages
-   -t | --target : the directory where to copy the rpm packages
+   -d|--distro : distribution name (default: no distribution set)
+   -o|--os     : distribution (example: centos:centos6)
+   -s|--shared : shared folder that will be mounted on the docker instance
+      --spec   : the specfile to be used for building the rpm packages
+   -t|--target : the directory where to copy the rpm packages
+   -g|--gid    : group ID of the user 'developer' used for building the software
+   -u|--uid    : user ID of the user 'developer' used for building the software
 
 Supported distributions:
    CentOS 5/6/7
@@ -35,7 +37,7 @@ Supported distributions:
 Example:
        $0 -s $PROGPATH/../../nagios-plugins-linux:/shared:rw \\
           --spec specs/nagios-plugins-linux.spec \\
-          -t pcks -d mamba -o centos:latest
+          -t pcks -d mamba -g 100 -u 1000 -o centos:latest
 
 __EOF
 }
@@ -50,12 +52,6 @@ __EOF
    usage
 }
 
-usr_os=
-usr_disk=
-usr_distro=
-usr_specfile=
-usr_targetdir=
-
 while test -n "$1"; do
    case "$1" in
       --help|-h) help; exit 0 ;;
@@ -64,6 +60,8 @@ while test -n "$1"; do
          exit 0 ;;
       --distro|-d)
          usr_distro="$2"; shift ;;
+      --gid|-g)
+         usr_gid="$2"; shift ;;
       --os|-o)
          usr_os="$2"; shift ;;
       --shared|-s)
@@ -72,6 +70,8 @@ while test -n "$1"; do
          usr_specfile="$2"; shift ;;
       --target|-t)
          usr_targetdir="$2"; shift ;;
+      --uid|-u)
+         usr_uid="$2"; shift ;;
       --*|-*) die "unknown argument: $1" ;;
       *) die "unknown option: $1" ;;
     esac
@@ -92,7 +92,6 @@ IFS="$IFS_save"
 
 ([ "$shared_disk_host" ] && [ "$shared_disk_container" ]) ||
    die "bad syntax for --shared"
-
 
 if [ "$usr_specfile" ]; then
    specfile="$(readlink -f $usr_specfile)"
@@ -123,15 +122,17 @@ os="$(container_property --os "$container")"
 
 case "$os" in
    centos*) pckmgr="yum" ;;
+   fedora*) pckmgr="dnf" ;;
+esac
+case "$os" in
    centos-7.*) rpm_dist=".el7" ;;
    centos-6.*) rpm_dist=".el6" ;;
    centos-5.*) rpm_dist=".el5" ;;
-   fedora*) pckmgr="dnf" ;;
    fedora-24) rpm_dist=".fc24" ;;
    fedora-25) rpm_dist=".fc25" ;;
    *) die "FIXME: unsupported os: $os" ;;
 esac
-[ "$usr_distro" ] && rpm_dist="${rpm_dist}.${usr_distro}"
+rpm_dist="${rpm_dist}${usr_distro:+.$usr_distro}"
 
 pckname="nagios-plugins-linux"
 
@@ -145,7 +146,8 @@ container_exec_command "$container" "\
 '$pckmgr' install -y bzip2 make gcc xz rpm-build
 
 # create a non-root user for building the software (developer) ...
-useradd -c 'Developer' developer
+useradd '${usr_gid:+-g $usr_gid}' '${usr_uid:+-u $usr_uid}' \
+   -c Developer developer
 
 # ... and switch to this user
 su - developer -c '
