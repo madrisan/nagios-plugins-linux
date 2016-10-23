@@ -23,10 +23,14 @@ Usage: $PROGNAME -o <os> -s <shared> [-d <distro>] [--spec <file>] \
 
 Where:
    -d | --distro : distribution name (default: no distribution set)
-   -o | --os     : distribution (example: centos:centos6)"
+   -o | --os     : distribution (example: centos:centos6)
    -s | --shared : shared folder that will be mounted on the docker instance
         --spec   : the specfile to be used for building the rpm packages
    -t | --target : the directory where to copy the rpm packages
+
+Supported distributions:
+   CentOS 5/6/7
+   Fedora 24/rawhide
 
 Example:
        $0 -s $PROGPATH/../../nagios-plugins-linux:/shared:rw \\
@@ -124,6 +128,7 @@ case "$os" in
    centos-5.*) rpm_dist=".el5" ;;
    fedora*) pckmgr="dnf" ;;
    fedora-24) rpm_dist=".fc24" ;;
+   fedora-25) rpm_dist=".fc25" ;;
    *) die "FIXME: unsupported os: $os" ;;
 esac
 [ "$usr_distro" ] && rpm_dist="${rpm_dist}.${usr_distro}"
