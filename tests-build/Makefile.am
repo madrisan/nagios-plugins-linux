@@ -39,3 +39,6 @@ check-build-fedora-24: check-build-fedora-latest
 
 check-build-fedora-latest: $(DOCKER_BINARY) $(BUILD_SCRIPT)
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o fedora:latest
+
+check-build-fedora-rawhide: $(DOCKER_BINARY) $(BUILD_SCRIPT)
+	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o fedora:rawhide
