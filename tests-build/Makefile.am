@@ -20,9 +20,14 @@ multibuilddir = $(shell pwd)
 DOCKER_BINARY = /usr/bin/docker
 SPECFILE = $(PACKAGE).spec
 
+# GID and UID of the user 'developer'
+GID ?= 100
+UID ?= 1000
+
 MULTIBUILD_SCRIPT = $(multibuilddir)/multibuild.sh
-MULTIBUILD_OPTS = -s $(top_srcdir):/shared:rw -g 100 -u 1000 \
-	--spec $(multibuilddir)/specs/$(SPECFILE) -t pcks
+MULTIBUILD_OPTS = -s $(top_srcdir):/shared:rw \
+	--gid $(DEVELOPER_GID) --uid $(DEVELOPER_UID) \
+	--spec $(multibuilddir)/specs/$(SPECFILE) --target pcks
 
 check-build-centos5: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:centos5

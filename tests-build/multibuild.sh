@@ -78,6 +78,10 @@ while test -n "$1"; do
     shift
 done
 
+echo gid:$usr_gid
+echo uid:$usr_uid
+exit 0
+
 [ "$usr_disk" ] || { usage; exit 1; }
 [ "$usr_os" ] || { usage; exit 1; }
 [ "$usr_specfile" ] &&
