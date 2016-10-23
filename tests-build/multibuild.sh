@@ -172,13 +172,6 @@ if [ \"'$specfile'\" ]; then
 
    if [ \"'$targetdir'\" ]; then
       msg \"copying the rpm packages to the target folder ...\"
-      id
-      ls -ld '$targetdir'
-      ls -l '$targetdir'
-      ls -ld /shared
-      ls -l /shared
-      ls -ld /shared/tests-build
-      ls -l /shared/tests-build
       mkdir -p '$targetdir' &&
       cp -p ../SRPMS/*.src.rpm ../RPMS/*/*.rpm '$targetdir'
    fi
