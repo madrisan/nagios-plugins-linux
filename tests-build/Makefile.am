@@ -30,7 +30,12 @@ check-build-centos5: $(DOCKER_BINARY) $(BUILD_SCRIPT)
 check-build-centos6: $(DOCKER_BINARY) $(BUILD_SCRIPT)
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:centos6
 
-check-build-centos7: check-build-latest
+check-build-centos7: check-build-centos-latest
 
-check-build-latest: $(DOCKER_BINARY) $(BUILD_SCRIPT)
+check-build-centos-latest: $(DOCKER_BINARY) $(BUILD_SCRIPT)
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:latest
+
+check-build-fedora-24: check-build-fedora-latest
+
+check-build-fedora-latest: $(DOCKER_BINARY) $(BUILD_SCRIPT)
+	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o fedora:latest
