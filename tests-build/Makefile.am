@@ -24,21 +24,21 @@ MULTIBUILD_SCRIPT = $(multibuilddir)/multibuild.sh
 MULTIBUILD_OPTS = -s $(top_srcdir):/shared:rw \
 	--spec $(multibuilddir)/specs/$(SPECFILE)
 
-check-build-centos5: $(DOCKER_BINARY) $(BUILD_SCRIPT)
+check-build-centos5: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:centos5
 
-check-build-centos6: $(DOCKER_BINARY) $(BUILD_SCRIPT)
+check-build-centos6: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:centos6
 
 check-build-centos7: check-build-centos-latest
 
-check-build-centos-latest: $(DOCKER_BINARY) $(BUILD_SCRIPT)
+check-build-centos-latest: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:latest
 
 check-build-fedora-24: check-build-fedora-latest
 
-check-build-fedora-latest: $(DOCKER_BINARY) $(BUILD_SCRIPT)
+check-build-fedora-latest: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o fedora:latest
 
-check-build-fedora-rawhide: $(DOCKER_BINARY) $(BUILD_SCRIPT)
+check-build-fedora-rawhide: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o fedora:rawhide
