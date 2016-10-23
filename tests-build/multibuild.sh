@@ -108,7 +108,6 @@ if [ "$usr_targetdir" ]; then
 fi
 
 msg "instantiating a new container based on $usr_os ..."
-
 container="$(container_create --random-name --os "$usr_os" \
                 --disk "$shared_disk_host:$shared_disk_container")" ||
    die "failed to create a new container with os $usr_os"
@@ -119,11 +118,15 @@ ipaddr="$(container_property --ipaddr "$container")"
 os="$(container_property --os "$container")"
 
 case "$os" in
-   centos-7.*) rpm_dist=".el7${usr_distro:+.$usr_distro}" ;;
-   centos-6.*) rpm_dist=".el6${usr_distro:+.$usr_distro}" ;;
-   centos-5.*) rpm_dist=".el5${usr_distro:+.$usr_distro}" ;;
+   centos*) pckmgr="yum" ;;
+   centos-7.*) rpm_dist=".el7" ;;
+   centos-6.*) rpm_dist=".el6" ;;
+   centos-5.*) rpm_dist=".el5" ;;
+   fedora*) pckmgr="dnf" ;;
+   fedora-24) rpm_dist=".fc24" ;;
    *) die "FIXME: unsupported os: $os" ;;
 esac
+[ "$usr_distro" ] && rpm_dist="${rpm_dist}.${usr_distro}"
 
 pckname="nagios-plugins-linux"
 
@@ -134,7 +137,7 @@ Container \"$container\"  status:running  ipaddr:$ipaddr  os:$os
 msg "testing the build process inside $container ..."
 container_exec_command "$container" "\
 # install the build prereqs
-yum install -y bzip2 make gcc xz rpm-build
+'$pckmgr' install -y bzip2 make gcc xz rpm-build
 
 # create a non-root user for building the software (developer) ...
 useradd -c 'Developer' developer
