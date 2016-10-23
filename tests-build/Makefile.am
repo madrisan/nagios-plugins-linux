@@ -26,7 +26,7 @@ UID ?= 1000
 
 MULTIBUILD_SCRIPT = $(multibuilddir)/multibuild.sh
 MULTIBUILD_OPTS = -s $(top_srcdir):/shared:rw \
-	--gid $(DEVELOPER_GID) --uid $(DEVELOPER_UID) \
+	--gid $(GID) --uid $(UID) \
 	--spec $(multibuilddir)/specs/$(SPECFILE) --target pcks
 
 check-build-centos5: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
