@@ -121,15 +121,12 @@ ipaddr="$(container_property --ipaddr "$container")"
 os="$(container_property --os "$container")"
 
 case "$os" in
-   centos*) pckmgr="yum" ;;
-   fedora*) pckmgr="dnf" ;;
-esac
-case "$os" in
-   centos-7.*) rpm_dist=".el7" ;;
-   centos-6.*) rpm_dist=".el6" ;;
-   centos-5.*) rpm_dist=".el5" ;;
-   fedora-24) rpm_dist=".fc24" ;;
-   fedora-25) rpm_dist=".fc25" ;;
+   centos-*)
+      pckmgr="yum"
+      rpm_dist=".el${os:7:1}" ;;
+   fedora-*)
+      pckmgr="dnf"
+      rpm_dist=".fc${os:7:2}" ;;
    *) die "FIXME: unsupported os: $os" ;;
 esac
 rpm_dist="${rpm_dist}${usr_distro:+.$usr_distro}"
