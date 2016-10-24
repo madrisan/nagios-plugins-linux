@@ -29,21 +29,13 @@ MULTIBUILD_OPTS = -s $(top_srcdir):/shared:rw \
 	--gid $(GID) --uid $(UID) \
 	--spec $(multibuilddir)/specs/$(SPECFILE) --target pcks
 
-check-build-centos5: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
-	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:centos5
+TARGETS = \
+	centos-centos5 centos-centos6 centos-latest \
+	fedora-latest fedora-rawhide
 
-check-build-centos6: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
-	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:centos6
+centos-centos7: centos-latest
+fedora-fedora24: fedora-latest
 
-check-build-centos7: check-build-centos-latest
-
-check-build-centos-latest: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
-	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o centos:latest
-
-check-build-fedora-24: check-build-fedora-latest
-
-check-build-fedora-latest: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
-	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o fedora:latest
-
-check-build-fedora-rawhide: $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
-	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o fedora:rawhide
+$(TARGETS): $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
+	@ostarget=`echo $@ | sed s/-/:/`; \
+	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o $$ostarget
