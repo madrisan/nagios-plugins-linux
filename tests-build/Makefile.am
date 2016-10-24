@@ -21,8 +21,8 @@ DOCKER_BINARY = /usr/bin/docker
 SPECFILE = $(PACKAGE).spec
 
 # GID and UID of the user 'developer'
-GID ?= 100
-UID ?= 1000
+GID ?= "$(shell id -g)"
+UID ?= "$(shell id -u)"
 
 MULTIBUILD_SCRIPT = $(multibuilddir)/multibuild.sh
 MULTIBUILD_OPTS = -s $(top_srcdir):/shared:rw \
