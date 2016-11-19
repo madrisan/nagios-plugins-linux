@@ -15,29 +15,20 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-multibuilddir = $(shell pwd)
+INFILES := $(wildcard *.spec.in)
+OUTFILES := $(INFILES:.in=)
 
-DOCKER_BINARY = /usr/bin/docker
-SPECFILE = $(PACKAGE).spec
+SUFFIXES = .in
+.in:; @echo "Generating $@...";\
+	sed "s,@package@,$(PACKAGE),g;\
+	     s,@version@,$(VERSION),g;\
+	     s,@release@,$(RELEASE),g;\
+	     s,@plugindir@,$(PLUGINDIR),g;\
+	     s,@date@,`LC_ALL="C" date "+%a %b %d %Y"`," $< > $@
 
-# GID and UID of the user 'developer'
-GID ?= "$(shell id -g)"
-UID ?= "$(shell id -u)"
+EXTRA_DIST = $(INFILES)
 
-MULTIBUILD_SCRIPT = $(multibuilddir)/multibuild.sh
-MULTIBUILD_OPTS = -s $(top_srcdir):/shared:rw \
-	--gid $(GID) --uid $(UID) \
-	--spec $(multibuilddir)/specs/$(SPECFILE) --target pcks
+all: $(OUTFILES)
 
-TARGETS = \
-	centos-centos5 centos-centos6 centos-latest \
-	fedora-latest fedora-rawhide
-
-centos-centos7: centos-latest
-fedora-fedora24: fedora-latest
-
-$(TARGETS): $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT) specs/$(SPECFILE)
-	@ostarget=`echo $@ | sed s/-/:/`; \
-	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o $$ostarget
-
-SUBDIRS = specs
+clean:
+	rm -f $(OUTFILES)

@@ -1,6 +1,6 @@
 Name: nagios-plugins-linux
-Version: 19
-Release: 1%{?dist}
+Version: @version@
+Release: @release@%{?dist}
 Summary: Linux monitoring program plugins for Nagios
 
 Group: Applications/System
@@ -287,5 +287,6 @@ make DESTDIR=%{buildroot} install
 %{_libdir}/nagios/plugins/check_users
 
 %changelog
-* Sat Nov 21 2015 Davide Madrisan <davide.madrisan@gmail.com> 19-1mamba
-- ported version 19 from openmamba GNU/Linux
+
+* @date@ Davide Madrisan <davide.madrisan@gmail.com> @version@-@release@
+- ported version @version@ from openmamba GNU/Linux
