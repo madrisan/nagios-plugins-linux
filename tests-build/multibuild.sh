@@ -4,7 +4,7 @@
 
 PROGNAME="${0##*/}"
 PROGPATH="${0%/*}"
-REVISION=1
+REVISION=2
 
 die () { echo -e "$PROGNAME: error: $1" 1>&2; exit 1; }
 msg () { echo "*** info: $1"; }
@@ -32,12 +32,15 @@ Where:
 
 Supported distributions:
    CentOS 5/6/7
+   Debian jessie
    Fedora 24/rawhide
 
 Example:
        $0 -s $PROGPATH/../../nagios-plugins-linux:/shared:rw \\
           --spec specs/nagios-plugins-linux.spec \\
           -t pcks -d mamba -g 100 -u 1000 -o centos:latest
+       $0 -s $PROGPATH/../../nagios-plugins-linux:/shared:rw \\
+          -t pcks -d mamba -o debian:jessie
 
 __EOF
 }
@@ -122,11 +125,19 @@ os="$(container_property --os "$container")"
 
 case "$os" in
    centos-*)
-      pckmgr="yum"
-      rpm_dist=".el${os:7:1}" ;;
+      pck_install="yum install -y"
+      rpm_dist=".el${os:7:1}"
+      pcks_dev="bzip2 make gcc xz rpm-build" ;;
+   debian-*)
+      pck_install="\
+export DEBIAN_FRONTEND=noninteractive;
+apt-get update && apt-get -y install"
+      pcks_dev="bzip2 make gcc xz-utils"
+      ;;
    fedora-*)
-      pckmgr="dnf"
-      rpm_dist=".fc${os:7:2}" ;;
+      pckmgr="dnf install -y"
+      rpm_dist=".fc${os:7:2}"
+      pcks_dev="bzip2 make gcc xz rpm-build" ;;
    *) die "FIXME: unsupported os: $os" ;;
 esac
 rpm_dist="${rpm_dist}${usr_distro:+.$usr_distro}"
@@ -140,10 +151,10 @@ Container \"$container\"  status:running  ipaddr:$ipaddr  os:$os
 msg "testing the build process inside $container ..."
 container_exec_command "$container" "\
 # install the build prereqs
-'$pckmgr' install -y bzip2 make gcc xz rpm-build
+$pck_install $pcks_dev
 
 # create a non-root user for building the software (developer) ...
-useradd '${usr_gid:+-g $usr_gid}' '${usr_uid:+-u $usr_uid}' \
+useradd -m '${usr_gid:+-g $usr_gid}' '${usr_uid:+-u $usr_uid}' \
    -c Developer developer
 
 # ... and switch to this user

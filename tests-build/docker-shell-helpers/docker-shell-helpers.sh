@@ -11,7 +11,7 @@
 #    container_exec_command centos7 "echo 'Hello World!'"
 #    container_remove centos7
 
-docker_bash_helpers_revision="2"
+docker_bash_helpers_revision="3"
 
 # 'private' definitions and functions
 
@@ -104,13 +104,21 @@ sudo docker inspect \
           # CentOS release 6.8 (Final)
           # CentOS Linux release 7.2.1511 (Core)
           # Fedora release 24 (Twenty Four)
-          local redhat_os="$(\
-container_exec_command "$container_name" "cat /etc/redhat-release" 2>/dev/null)"
-          set -- $redhat_os
+          local container_os="$(\
+container_exec_command "$container_name" "\
+   if [ -r /etc/redhat-release ]; then
+      cat /etc/redhat-release
+   elif [ -r /etc/os-release ]; then
+      . /etc/os-release
+      echo \$ID \$VERSION_ID
+   fi")"
+          set -- $container_os
           if [ "$1" = "CentOS" ]; then
              [ "$2" = "Linux" ] && os="centos-${4}" || os="centos-${3}"
           elif [ "$1" = "Fedora" ]; then
              os="fedora-${3}"
+          elif [ "$1" = "debian" ]; then
+             os="debian-${2}"
           fi
           echo "$os"
       ;;
