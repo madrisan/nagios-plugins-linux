@@ -1,0 +1,5 @@
+nagios-plugins-linux (19-1) UNRELEASED; urgency=low
+
+  * Initial release.
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Sat, 19 Nov 2016 21:44:49 +0000

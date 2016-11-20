@@ -1,0 +1,14 @@
+Source: nagios-plugins-linux
+Section: net
+Priority: extra
+Maintainer: Davide Madrisan <davide.madrisan@gmail.com>
+Build-Depends: debhelper (>= 9)
+Homepage: https://github.com/madrisan/nagios-plugins-linux
+Standards-Version: 3.9.2
+
+Package: nagios-plugins-linux
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: nagios3 | icinga
+Description: Linux monitoring program plugins for Nagios
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
