@@ -391,6 +391,7 @@ AC_PREFIX_DEFAULT(/usr/local/nagios)
 
 AC_CONFIG_FILES([\
   Makefile \
+  debian/Makefile \
   include/Makefile \
   lib/Makefile \
   plugins/Makefile \
