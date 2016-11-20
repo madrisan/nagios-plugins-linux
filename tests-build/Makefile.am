@@ -26,10 +26,11 @@ UID ?= "$(shell id -u)"
 
 MULTIBUILD_SCRIPT = $(multibuilddir)/multibuild.sh
 
-MULTIBUILD_OPTS = -s $(top_srcdir):/shared:rw \
-	--gid $(GID) --uid $(UID) --target pcks --pckver $(PACKAGE_VERSION)
-MULTIBUILD_OPTS_REDHAT = $(MULTIBUILD_OPTS) \
-	--spec $(multibuilddir)/specs/$(SPECFILE)
+MULTIBUILD_OPTS = \
+	--shared $(top_srcdir):/shared:rw \
+	--gid $(GID) \
+	--uid $(UID) \
+	--pckver $(PACKAGE_VERSION)
 
 TARGETS_REDHAT = \
 	centos-centos5 centos-centos6 centos-latest \
@@ -41,12 +42,15 @@ fedora-fedora24: fedora-latest
 TARGETS_DEBIAN = debian-jessie
 
 $(TARGETS_REDHAT): $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT) specs/$(SPECFILE)
-	@ostarget=`echo $@ | sed s/-/:/`; \
-	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS_REDHAT) -o $$ostarget
+	@distr=`echo $@ | sed s/-/:/`; \
+	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
+	   --spec $(multibuilddir)/specs/$(SPECFILE) \
+	   --os $$distr --target pcks/$@
 
 $(TARGETS_DEBIAN): $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
-	@ostarget=`echo $@ | sed s/-/:/`; \
-	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) -o $$ostarget
+	@distr=`echo $@ | sed s/-/:/`; \
+	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
+	   --os $$distr --target pcks/$@
 
 EXTRA_DIST = docker-shell-helpers multibuild.sh
 SUBDIRS = specs

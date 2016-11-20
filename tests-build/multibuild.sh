@@ -109,7 +109,7 @@ if [ "$usr_specfile" ]; then
    esac
 fi
 if [ "$usr_targetdir" ]; then
-   targetdir="$(readlink -f $usr_targetdir)"
+   targetdir="$(readlink -m $usr_targetdir)"
    case "$targetdir" in
       ${shared_disk_host}*)
          targetdir="$shared_disk_container/${targetdir#$shared_disk_host}" ;;
@@ -168,6 +168,8 @@ useradd -m '${usr_gid:+-g $usr_gid}' '${usr_uid:+-u $usr_uid}' \
 su - developer -c '
 msg () { echo \"*** info: \$1\"; }
 
+mkdir -p $targetdir
+
 if [ \"'$pck_format'\" = rpm ] && [ \"'$specfile'\" ]; then
    mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
    cp -p $shared_disk_container/$specfile ~/rpmbuild/SPECS/
@@ -186,7 +188,7 @@ if [ \"'$pck_format'\" = rpm ] && [ \"'$specfile'\" ]; then
    if [ \"'$targetdir'\" ]; then
       msg \"copying the rpm packages to the target folder ...\"
       mkdir -p '$targetdir' &&
-      cp -p ../SRPMS/*.src.rpm ../RPMS/*/*.rpm '$targetdir'
+      cp -p ../SRPMS/*.src.rpm ../RPMS/*/*.rpm $targetdir
    fi
    popd &>/dev/null
 elif [ \"'$pck_format'\" = deb ]; then
@@ -199,7 +201,7 @@ elif [ \"'$pck_format'\" = deb ]; then
    tar xf ${pckname}_${usr_pckver}.orig.tar.xz
    cd ~/debian-build/${pckname}-${usr_pckver}
    debuild -us -uc &&
-   cp -p ../*.{changes,deb,dsc,orig.tar.*} '$targetdir'
+   cp -p ../*.{changes,deb,dsc,orig.tar.*} $targetdir
 fi
 '"
 
