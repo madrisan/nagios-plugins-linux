@@ -18,11 +18,13 @@
 INFILES := $(wildcard *.spec.in)
 OUTFILES := $(INFILES:.in=)
 
+PACKAGE_RELEASE = 1
+
 SUFFIXES = .in
 .in:; @echo "Generating $@...";\
-	sed "s,@package@,$(PACKAGE),g;\
-	     s,@version@,$(VERSION),g;\
-	     s,@release@,$(RELEASE),g;\
+	sed "s,@package@,$(PACKAGE_NAME),g;\
+	     s,@version@,$(PACKAGE_VERSION),g;\
+	     s,@release@,$(PACKAGE_RELEASE),g;\
 	     s,@plugindir@,$(PLUGINDIR),g;\
 	     s,@date@,`LC_ALL="C" date "+%a %b %d %Y"`," $< > $@
 
