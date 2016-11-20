@@ -33,7 +33,7 @@ Where:
 
 Supported distributions:
    CentOS 5/6/7
-   Debian jessie
+   Debian wheezy/jessie
    Fedora 24/rawhide
 
 Example:
