@@ -39,7 +39,7 @@ TARGETS_REDHAT = \
 centos-centos7: centos-latest
 fedora-fedora24: fedora-latest
 
-TARGETS_DEBIAN = debian-jessie
+TARGETS_DEBIAN = debian-wheezy debian-jessie
 
 $(TARGETS_REDHAT): $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT) specs/$(SPECFILE)
 	@distr=`echo $@ | sed s/-/:/`; \
