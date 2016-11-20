@@ -27,7 +27,7 @@ UID ?= "$(shell id -u)"
 MULTIBUILD_SCRIPT = $(multibuilddir)/multibuild.sh
 
 MULTIBUILD_OPTS = -s $(top_srcdir):/shared:rw \
-	--gid $(GID) --uid $(UID) --target pcks
+	--gid $(GID) --uid $(UID) --target pcks --pckver $(PACKAGE_VERSION)
 MULTIBUILD_OPTS_REDHAT = $(MULTIBUILD_OPTS) \
 	--spec $(multibuilddir)/specs/$(SPECFILE)
 

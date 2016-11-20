@@ -17,7 +17,7 @@ docker_helpers="$PROGPATH/docker-shell-helpers/docker-shell-helpers.sh"
 usage () {
    cat <<__EOF
 Usage: $PROGNAME -o <os> -s <shared> [-d <distro>] [--spec <file>] \
-[-t <folder>]
+[-t <folder>] -v <version>
        $PROGNAME --help
        $PROGNAME --version
 
@@ -27,6 +27,7 @@ Where:
    -s|--shared : shared folder that will be mounted on the docker instance
       --spec   : the specfile to be used for building the rpm packages
    -t|--target : the directory where to copy the rpm packages
+   -v|--pckver : the package version
    -g|--gid    : group ID of the user 'developer' used for building the software
    -u|--uid    : user ID of the user 'developer' used for building the software
 
@@ -40,7 +41,7 @@ Example:
           --spec specs/nagios-plugins-linux.spec \\
           -t pcks -d mamba -g 100 -u 1000 -o centos:latest
        $0 -s $PROGPATH/../../nagios-plugins-linux:/shared:rw \\
-          -t pcks -d mamba -o debian:jessie
+          -t pcks -d mamba v 19 -o debian:jessie
 
 __EOF
 }
@@ -73,6 +74,8 @@ while test -n "$1"; do
          usr_specfile="$2"; shift ;;
       --target|-t)
          usr_targetdir="$2"; shift ;;
+      --pckver|-v)
+         usr_pckver="$2"; shift ;;
       --uid|-u)
          usr_uid="$2"; shift ;;
       --*|-*) die "unknown argument: $1" ;;
@@ -85,6 +88,7 @@ done
 [ "$usr_os" ] || { usage; exit 1; }
 [ "$usr_specfile" ] &&
  { [ -r "$usr_specfile" ] || die "no such file: $usr_specfile"; }
+[ "$usr_pckver" ] || { usage; exit 1; }
 
 # parse the shared disk string
 IFS_save="$IFS"
@@ -125,22 +129,25 @@ os="$(container_property --os "$container")"
 
 case "$os" in
    centos-*)
+      pck_format="rpm"
       pck_install="yum install -y"
-      rpm_dist=".el${os:7:1}"
+      pck_dist=".el${os:7:1}"
       pcks_dev="bzip2 make gcc xz rpm-build" ;;
    debian-*)
+      pck_format="deb"
       pck_install="\
 export DEBIAN_FRONTEND=noninteractive;
 apt-get update && apt-get -y install"
-      pcks_dev="bzip2 make gcc xz-utils"
+      pcks_dev="bzip2 make gcc xz-utils devscripts"
       ;;
    fedora-*)
-      pckmgr="dnf install -y"
-      rpm_dist=".fc${os:7:2}"
+      pck_format="rpm"
+      pck_install="dnf install -y"
+      pck_dist=".fc${os:7:2}"
       pcks_dev="bzip2 make gcc xz rpm-build" ;;
    *) die "FIXME: unsupported os: $os" ;;
 esac
-rpm_dist="${rpm_dist}${usr_distro:+.$usr_distro}"
+pck_dist="${pck_dist}${usr_distro:+.$usr_distro}"
 
 pckname="nagios-plugins-linux"
 
@@ -155,25 +162,21 @@ $pck_install $pcks_dev
 
 # create a non-root user for building the software (developer) ...
 useradd -m '${usr_gid:+-g $usr_gid}' '${usr_uid:+-u $usr_uid}' \
-   -c Developer developer
+   -c Developer developer -s /bin/bash
 
 # ... and switch to this user
 su - developer -c '
 msg () { echo \"*** info: \$1\"; }
 
-cp -pr '"$shared_disk_container"/*' .
-./configure
-make dist
-
-if [ \"'$specfile'\" ]; then
+if [ \"'$pck_format'\" = rpm ] && [ \"'$specfile'\" ]; then
    mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-   cp -p '$specfile' ~/rpmbuild/SPECS/
-   cp -p ${pckname}*.tar.* ~/rpmbuild/SOURCES/
+   cp -p $shared_disk_container/$specfile ~/rpmbuild/SPECS/
+   cp -p $shared_disk_container/${pckname}*.tar.* ~/rpmbuild/SOURCES/
 
    msg \"creating the rpm packages ...\"
    pushd ~/rpmbuild/SPECS/ &>/dev/null
    rpmbuild \
-      --define=\"dist $rpm_dist\" \
+      --define=\"dist $pck_dist\" \
       --define=\"_topdir \$HOME/rpmbuild\" \
       -ba ${pckname}.spec
 
@@ -186,6 +189,17 @@ if [ \"'$specfile'\" ]; then
       cp -p ../SRPMS/*.src.rpm ../RPMS/*/*.rpm '$targetdir'
    fi
    popd &>/dev/null
+elif [ \"'$pck_format'\" = deb ]; then
+   mkdir -p ~/debian-build
+   cp $shared_disk_container/${pckname}-${usr_pckver}.tar.xz \
+      ~/debian-build/${pckname}_${usr_pckver}.orig.tar.xz
+
+   msg \"creating the deb package and build files ...\"
+   cd ~/debian-build
+   tar xf ${pckname}_${usr_pckver}.orig.tar.xz
+   cd ~/debian-build/${pckname}-${usr_pckver}
+   debuild -us -uc &&
+   cp -p ../*.{changes,deb,dsc,orig.tar.*} '$targetdir'
 fi
 '"
 
