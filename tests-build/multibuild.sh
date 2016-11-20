@@ -182,12 +182,11 @@ if [ \"'$pck_format'\" = rpm ] && [ \"'$specfile'\" ]; then
       --define=\"_topdir \$HOME/rpmbuild\" \
       -ba ${pckname}.spec
 
-   msg \"testing the rpm installation ...\"
-   rpm --test -hiv ../RPMS/*/*.rpm
+   msg \"testing the installation of the rpm packages ...\"
+   rpm --test -hiv ../RPMS/*/*.rpm || exit 1
 
    if [ \"'$targetdir'\" ]; then
       msg \"copying the rpm packages to the target folder ...\"
-      mkdir -p '$targetdir' &&
       cp -p ../SRPMS/*.src.rpm ../RPMS/*/*.rpm $targetdir
    fi
    popd &>/dev/null
@@ -200,8 +199,16 @@ elif [ \"'$pck_format'\" = deb ]; then
    cd ~/debian-build
    tar xf ${pckname}_${usr_pckver}.orig.tar.xz
    cd ~/debian-build/${pckname}-${usr_pckver}
-   debuild -us -uc &&
-   cp -p ../*.{changes,deb,dsc,orig.tar.*} $targetdir
+   debuild -us -uc || exit 1
+
+   msg \"testing the installation of the deb package(s) ...\"
+   export PATH=\$PATH:/sbin
+   dpkg --dry-run -i ../*.deb || exit 1
+
+   if [ \"'$targetdir'\" ]; then
+      msg \"copying the debian packages to the target folder ...\"
+      cp -p ../*.{changes,deb,dsc,orig.tar.*} $targetdir
+   fi
 fi
 '"
 
