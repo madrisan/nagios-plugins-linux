@@ -41,6 +41,10 @@ fedora-latest: fedora-25
 
 TARGETS_DEBIAN = debian-wheezy debian-jessie
 
+debian-7: debian-wheezy
+debian-8: debian-jessie
+debian-latest: debian-jessie
+
 $(TARGETS_REDHAT): $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT) specs/$(SPECFILE)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
