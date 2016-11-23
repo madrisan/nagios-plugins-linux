@@ -33,10 +33,10 @@ MULTIBUILD_OPTS = \
 	--pckver $(PACKAGE_VERSION)
 
 TARGETS_REDHAT = \
-	centos-centos5 centos-centos6 centos-centos7 \
+	centos-5 centos-6 centos-7 \
 	fedora-24 fedora-25 fedora-rawhide
 
-centos-latest: centos-centos7
+centos-latest: centos-7
 fedora-latest: fedora-25
 
 TARGETS_DEBIAN = debian-wheezy debian-jessie
