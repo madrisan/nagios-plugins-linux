@@ -19,8 +19,8 @@ multibuilddir = $(shell pwd)
 
 DOCKER = /usr/bin/docker
 SPECFILE = $(PACKAGE).spec
-SRC_BZ2 = $(top_srcdir)/$(PACKAGE_TARNAME).tar.bz2
-SRC_XZ = $(top_srcdir)/$(PACKAGE_TARNAME).tar.xz
+SRC_BZ2 = $(top_srcdir)/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2
+SRC_XZ = $(top_srcdir)/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.xz
 
 # GID and UID of the user 'developer'
 GID ?= "$(shell id -g)"
