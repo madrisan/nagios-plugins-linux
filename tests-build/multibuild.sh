@@ -209,14 +209,14 @@ elif [ \"'$pck_format'\" = deb ]; then
    cp $shared_disk_container/${pckname}-${usr_pckver}.tar.xz \
       ~/debian-build/${pckname}_${usr_pckver}.orig.tar.xz
 
+   export PATH=\$PATH:/usr/sbin:/sbin
+
    msg \"creating the deb package and build files ...\"
    cd ~/debian-build
    tar xf ${pckname}_${usr_pckver}.orig.tar.xz
    cd ~/debian-build/${pckname}-${usr_pckver}
    debuild -us -uc || exit 1
-
    msg \"testing the installation of the deb package(s) ...\"
-   export PATH=\$PATH:/sbin
    dpkg --dry-run -i ../*.deb || exit 1
 
    if [ \"'$targetdir'\" ]; then
