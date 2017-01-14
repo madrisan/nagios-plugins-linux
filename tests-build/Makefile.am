@@ -17,8 +17,10 @@
 
 multibuilddir = $(shell pwd)
 
-DOCKER_BINARY = /usr/bin/docker
+DOCKER = /usr/bin/docker
 SPECFILE = $(PACKAGE).spec
+SRC_BZ2 = $(top_srcdir)/$(PACKAGE_TARNAME).tar.bz2
+SRC_XZ = $(top_srcdir)/$(PACKAGE_TARNAME).tar.xz
 
 # GID and UID of the user 'developer'
 GID ?= "$(shell id -g)"
@@ -46,13 +48,13 @@ debian-7: debian-wheezy
 debian-8: debian-jessie
 debian-latest: debian-jessie
 
-$(TARGETS_REDHAT): $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT) specs/$(SPECFILE)
+$(TARGETS_REDHAT): $(SRC_BZ2) $(DOCKER) $(MULTIBUILD_SCRIPT) specs/$(SPECFILE)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --spec $(multibuilddir)/specs/$(SPECFILE) \
 	   --os $$distr --target pcks/$@
 
-$(TARGETS_DEBIAN): $(DOCKER_BINARY) $(MULTIBUILD_SCRIPT)
+$(TARGETS_DEBIAN): $(SRC_XZ) $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --os $$distr --target pcks/$@
