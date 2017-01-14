@@ -111,6 +111,9 @@ container_exec_command "$container_name" "\
    elif [ -r /etc/os-release ]; then
       . /etc/os-release
       echo \$ID \$VERSION_ID
+   elif [ -r /etc/debian_version ]; then
+      echo -n 'debian '
+      cat /etc/debian_version
    fi")"
           set -- $container_os
           if [ "$1" = "CentOS" ]; then
