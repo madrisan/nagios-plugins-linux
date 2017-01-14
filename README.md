@@ -571,13 +571,32 @@ This package is known to compile with:
 * gcc 4.1.2 (RHEL 5 / CentOS 5),
 * gcc 4.4 (RHEL6 / CentOS 6),
 * gcc 4.8.2 (RHEL7 / CentOS 7),
-* gcc 5.1.1 20150618, 5.3.1 20151207, clang 3.7.0 (Fedora 23 Cloud),
+* gcc 5.1.1, 5.3.1, 6.3.1, clang 3.7.0, 3.8.0 (Fedora 23 Cloud, Fedora 25),
 * gcc 4.9.0-4.9.2, 5.2.0, 5.3.0, 6.2.0, clang 3.1, 3.5.1, and 3.8.1 (openmamba GNU/Linux 2.90+).
 
 List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,
 * 3.10, 3.14, 3.18,
-* 4.2.5, 4.2.8, 4.4.20
+* 4.2, 4.4
+
+
+## CentOS/RHEL, Debian, and Fedora Packages
+
+The `.rpm` and `.deb` packages for CentOS/RHEL, Debian, and Fedora can be built using the following commands
+
+Command            | Distribution
+------------------ | ------------
+CentOS 5           | `make -C tests-build centos-5`
+CentOS 6           | `make -C tests-build centos-6`
+CentOS 7           | `make -C tests-build centos-7`
+Debian 6 (Squeeze) | `make -C tests-build debian-squeeze`
+Debian 7 (Wheezy)  | `make -C tests-build debian-wheezy`
+Debian 8 (Jessie)  | `make -C tests-build debian-jessie`
+Fedora 24          | `make -C tests-build fedora-24`
+Fedora 25          | `make -C tests-build fedora-25`
+
+in the root source folder.
+The building process requires the Docker software containerization platform running on your system, and an internet connection to download the Docker images of the operating systems you want to build the packages for.
 
 
 ## Bugs
