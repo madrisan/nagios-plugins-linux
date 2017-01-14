@@ -39,8 +39,9 @@ TARGETS_REDHAT = \
 centos-latest: centos-7
 fedora-latest: fedora-25
 
-TARGETS_DEBIAN = debian-wheezy debian-jessie
+TARGETS_DEBIAN = debian-squeeze debian-wheezy debian-jessie
 
+debian-6: debian-squeeze
 debian-7: debian-wheezy
 debian-8: debian-jessie
 debian-latest: debian-jessie

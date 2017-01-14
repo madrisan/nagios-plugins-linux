@@ -33,6 +33,7 @@ Where:
 
 Supported distributions:
    CentOS 5/6/7
+   Debian squeeze        (support level: alpha)
    Debian wheezy/jessie
    Fedora 24/rawhide
 
@@ -133,6 +134,13 @@ case "$os" in
       pck_install="yum install -y"
       pck_dist=".el${os:7:1}"
       pcks_dev="bzip2 make gcc xz rpm-build" ;;
+   debian-6.*)
+      pck_format="deb"
+      pck_install="\
+export DEBIAN_FRONTEND=noninteractive;
+apt-get -o Acquire::Check-Valid-Until=false update && apt-get -y install"
+      pcks_dev="bzip2 make gcc xz-utils build-essential devscripts"
+      ;;
    debian-*)
       pck_format="deb"
       pck_install="\
@@ -154,15 +162,21 @@ pckname="nagios-plugins-linux"
 echo "\
 Container \"$container\"  status:running  ipaddr:$ipaddr  os:$os
 "
-
 msg "testing the build process inside $container ..."
 container_exec_command "$container" "\
+# fixes for debian 6 (squeeze)
+[ -r /etc/debian_version ] &&
+case \"\$(cat /etc/debian_version 2>/dev/null)\" in
+   6.*) sed -i 's,httpredir,archive,g;
+                /squeeze-updates/d;' /etc/apt/sources.list ;;
+esac
+
 # install the build prereqs
 $pck_install $pcks_dev
 
 # create a non-root user for building the software (developer) ...
-useradd -m '${usr_gid:+-g $usr_gid}' '${usr_uid:+-u $usr_uid}' \
-   -c Developer developer -s /bin/bash
+useradd -m ${usr_gid:+-g $usr_gid} ${usr_uid:+-u $usr_uid} \
+   -c Developer -s /bin/bash developer
 
 # ... and switch to this user
 su - developer -c '
