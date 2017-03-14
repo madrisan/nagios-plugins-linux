@@ -109,6 +109,7 @@ Debian 7 (Wheezy)  | `make -C tests-build debian-wheezy`
 Debian 8 (Jessie)  | `make -C tests-build debian-jessie`
 Fedora 24          | `make -C tests-build fedora-24`
 Fedora 25          | `make -C tests-build fedora-25`
+Fedora Rawhide     | `make -C tests-build fedora-rawhide`
 
 in the root source folder.
 The building process requires the Docker software containerization platform running on your system, and an internet connection to download the Docker images of the operating systems you want to build the packages for.
@@ -117,4 +118,4 @@ The building process requires the Docker software containerization platform runn
 ## Bugs
 
 If you find a bug please create an issue in the project bug tracker at
-[github](https://github.com/madrisan/nagios-plugins-linux/issues)
+[GitHub](https://github.com/madrisan/nagios-plugins-linux/issues)
