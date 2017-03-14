@@ -1,3 +1,33 @@
+    Major changes between "nagios-plugins-linux" versions 19 and 20
+
+-- Security fixes
+
+* Some insecure data handling issues discovered by Coverity in the
+  new test framework have been fixed.
+
+-- Enhancements
+
+* The Clang Static Analyser can now be executed by running the command
+    make -C tests check-clang-checker
+  in the project root directory.
+  All the warnings spotted by this code analyser have been fixed.
+
+* A new Docker-based framework for packaging the Nagios Plugins for
+  Linux (rpm and deb packages) is now available.
+  The supported Linux distributions follow:
+
+   CentOS 5/6/7
+   Debian 6 (Squeeze), 7 (Wheezy), 8 (Jessie)
+   Fedora 24/25/rawhide
+   RHEL 5/6/7
+
+* Nagios Plugins for Linux has been Debianized.
+
+* The messages displayed in case of a too large "count" or "delay"
+  error have been improved.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 18 and 19
 
 -- Fixes
