@@ -41,12 +41,13 @@ TARGETS_REDHAT = \
 centos-latest: centos-7
 fedora-latest: fedora-25
 
-TARGETS_DEBIAN = debian-squeeze debian-wheezy debian-jessie
+TARGETS_DEBIAN = debian-squeeze debian-wheezy debian-jessie debian-stretch
 
 debian-6: debian-squeeze
 debian-7: debian-wheezy
 debian-8: debian-jessie
-debian-latest: debian-jessie
+debian-9: debian-stretch
+debian-latest: debian-stretch
 
 $(TARGETS_REDHAT): $(SRC_BZ2) $(DOCKER) $(MULTIBUILD_SCRIPT) specs/$(SPECFILE)
 	@distr=`echo $@ | sed s/-/:/`; \

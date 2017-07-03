@@ -34,7 +34,7 @@ Where:
 Supported distributions:
    CentOS 5/6/7
    Debian squeeze        (support level: alpha)
-   Debian wheezy/jessie
+   Debian wheezy/jessie/stretch
    Fedora 24/25/rawhide
 
 Example:
@@ -42,7 +42,7 @@ Example:
           --spec specs/nagios-plugins-linux.spec \\
           -t pcks -d mamba -g 100 -u 1000 -o centos:latest
        $0 -s $PROGPATH/../../nagios-plugins-linux:/shared:rw \\
-          -t pcks -d mamba -v 19 -o debian:jessie
+          -t pcks -d mamba -v 20 -o debian:jessie
 
 __EOF
 }
