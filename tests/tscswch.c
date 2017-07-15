@@ -2,8 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2016 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A Nagios plugin that returns the number of seconds elapsed between
- * local time and Nagios time.
+ * Unit test for check_cswch.c
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
