@@ -104,7 +104,7 @@ mymain (void)
   struct test_data data = { .w = "20", .c = "40" };
 
   TEST_DATA ("check clock for ok condition", test_clock_timedelta, 0);
-  TEST_DATA ("check clock for warning condition", test_clock_timedelta, 10);
+  TEST_DATA ("check clock for warning condition", test_clock_timedelta, 30);
   TEST_DATA ("check clock for critical condition", test_clock_timedelta, 50);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
