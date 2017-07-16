@@ -87,14 +87,51 @@ validate_input (int i, double w, double c)
     plugin_error (STATE_UNKNOWN, 0, "command line error: bad thresholds");
 }
 
+static void
+normalize_loadavg (double *loadavg, int numcpus)
+{
+  int i;
+
+  if (!numcpus)
+    numcpus = get_processor_number_online ();
+
+  for (i = 0; i < 3; i++)
+    {
+      if (numcpus > 1)
+	loadavg[i] /= numcpus;
+    }
+}
+
+static int
+loadavg_status (const double *loadavg, const double *wload, const double *cload,
+		const bool *required)
+{
+  int i, status = STATE_OK;
+
+  for (i = 0; i < 3; i++)
+    {
+      if (required[i] == false)
+	continue;
+      if (loadavg[i] > cload[i])
+	{
+	  status = STATE_CRITICAL;
+	  break;
+	}
+      else if (loadavg[i] > wload[i])
+	status = STATE_WARNING;
+    }
+
+  return status;
+}
+
+#ifndef NPL_TESTING
 int
 main (int argc, char **argv)
 {
-  int c, i;
-  int status = STATE_OK;
-  int numcpus = 1;
+  int c, i, status = STATE_OK;
   const unsigned int lamin[3] = { 1, 5, 15 };
   bool required[3] = { false, false, false };
+  bool normalize = false;
   double loadavg[3];
   double wload[3] = { 0.0, 0.0, 0.0 };
   double cload[3] = { 0.0, 0.0, 0.0 };
@@ -125,7 +162,7 @@ main (int argc, char **argv)
 	  required[2] = true;
 	  break;
 	case 'r':
-	  numcpus = get_processor_number_online ();
+	  normalize = true;
 	  break;
 
 	case_GETOPT_HELP_CHAR
@@ -137,31 +174,13 @@ main (int argc, char **argv)
   if (getloadavg (&loadavg[0], 3) != 3)
     plugin_error (STATE_UNKNOWN, 0,
 		  "the system load average was unobtainable");
-
-  for (i = 0; i < 3; i++)
-    {
-      if (numcpus > 1)
-	loadavg[i] /= numcpus;
-    }
-
-  for (i = 0; i < 3; i++)
-    {
-      if (required[i] == false)
-	continue;
-
-      if (loadavg[i] > cload[i])
-	{
-	  status = STATE_CRITICAL;
-	  break;
-	}
-      else if (loadavg[i] > wload[i])
-	status = STATE_WARNING;
-    }
+  if (normalize)
+    normalize_loadavg (loadavg, 0);
+  status = loadavg_status (loadavg, wload, cload, required);
 
   status_msg =
     xasprintf ("%s - average: %.2lf, %.2lf, %.2lf",
 	       state_text (status), loadavg[0], loadavg[1], loadavg[2]);
-
   /* performance data format:
    * 'label'=value[UOM];[warn];[crit];[min];[max] */
   perfdata_msg =
@@ -176,3 +195,4 @@ main (int argc, char **argv)
 
   return status;
 }
+#endif			/* NPL_TESTING */

@@ -44,8 +44,9 @@ test_programs = \
 	tsclock \
 	tscswch \
 	tsintr  \
-        tsmessages \
-        tskernelver
+	tsload \
+	tsmessages \
+	tskernelver
 
 test_libraries = tslib_uname.la
 
@@ -65,6 +66,9 @@ tscswch_LDADD   = $(LDADDS)
 
 tsintr_SOURCES  = $(test_utils) tsintr.c
 tsintr_LDADD    = $(LDADDS)
+
+tsload_SOURCES  = $(test_utils) tsload.c
+tsload_LDADD    = $(LDADDS)
 
 tsmessages_SOURCES = $(test_utils) tsmessages.c
 tsmessages_LDADD   = $(LDADDS)

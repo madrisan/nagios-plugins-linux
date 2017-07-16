@@ -31,7 +31,7 @@
 #define TEST_KERNEL_VERSION "2.6.27"
 
 #define TEST_ASSERT_EQUAL_NUMERIC(A, B) \
-  do { if (A != B) ret = -1; } while (0)
+  do { if ((A) != (B)) ret = -1; } while (0)
 
 #define TEST_ASSERT_EQUAL_STRING(A, B) \
   do { if (strcmp(A, B) != 0) ret = -1; } while (0)
