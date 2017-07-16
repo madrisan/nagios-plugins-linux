@@ -1,16 +1,16 @@
-# Object files
-*.o
-# Libraries
-*.a
+# Object and libray files
+**/*.[ao]
+**/*.l[ao]
 # Shared objects
 *.so
 *.so.*
 *.dylib
 # Files creared by autotools
 .deps
+.libs
+**/*.log
 aclocal.m4
 autom4te.cache
-autoscan.log
 compile
 compile.scan
 config.cache
@@ -19,10 +19,20 @@ config.h
 config.h.in
 config.hin
 config.hin~
-config.log
 config.status
 configure
 configure.scan
 stamp-h1
-Makefile.in
-Makefile
+**/Makefile.in
+**/Makefile
+# Build files
+*.spec
+*.tar.bz2
+*.tar.xz
+# Test-build files
+tests-build/pcks
+# Binary files created by make {,check}
+plugins/check_*
+!plugins/check_*.c
+tests/ts*
+!tests/ts*.c
