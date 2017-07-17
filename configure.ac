@@ -225,6 +225,11 @@ dnl Checks for functions and libraries
 
 AC_CHECK_FUNCS([asprintf])
 
+AC_CHECK_FUNCS([ \
+  __secure_getenv \
+  secure_getenv\
+])
+
 dnl Check for clock_gettime CLOCK_MONOTONIC
 dnl wanted by: plugins/check_uptime.c
 AC_CHECK_LIB([rt], [clock_gettime])
