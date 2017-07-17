@@ -36,6 +36,14 @@
 #define TEST_ASSERT_EQUAL_STRING(A, B) \
   do { if (strcmp(A, B) != 0) ret = -1; } while (0)
 
+#ifndef HAVE_SECURE_GETENV
+#  ifdef HAVE___SECURE_GETENV
+#    define secure_getenv __secure_getenv
+#  else
+#    error neither secure_getenv nor __secure_getenv is available
+#  endif
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -52,7 +60,7 @@ extern "C"
 # define TEST_PRELOAD(lib)                                          \
     do                                                              \
       {                                                             \
-	const char *preload = getenv ("LD_PRELOAD");                \
+	const char *preload = secure_getenv ("LD_PRELOAD");         \
 	if (preload == NULL || strstr (preload, lib) == NULL)       \
 	  {                                                         \
 	    char *newenv;                                           \
