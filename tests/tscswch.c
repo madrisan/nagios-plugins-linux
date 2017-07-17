@@ -87,9 +87,7 @@ mymain (void)
 
   if (test_run ("check cswch is monotonic", test_cswch_monotonic, NULL) < 0)
     ret = -1;
-
-  /* FIXME: the return code EXIT_AM_HARDFAIL is lost */
-  if (test_run ("check cswch proc parsing", test_cswch_proc_parsing, NULL) < 0)
+  if (test_run ("check cswch proc parsing", test_cswch_proc_parsing, NULL) != 0)
     ret = -1;
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

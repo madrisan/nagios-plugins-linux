@@ -83,6 +83,8 @@ test_run (const char *title, int (*body) (const void *data), const void *data)
     fprintf (stderr, "OK\n");
   else if (ret == EXIT_AM_SKIP)
     fprintf (stderr, "SKIP\n");
+  else if (ret == EXIT_AM_HARDFAIL)
+    fprintf (stderr, "HARDFAIL\n");
   else
     fprintf (stderr, "FAILED\n");
 
