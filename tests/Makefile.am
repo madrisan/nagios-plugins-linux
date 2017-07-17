@@ -88,3 +88,5 @@ check_LTLIBRARIES = $(test_libraries)
 endif ! WITH_TESTS
 
 TESTS = $(test_programs)
+
+EXTRA_DIST = ts_procstat.data
