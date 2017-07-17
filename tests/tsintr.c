@@ -91,8 +91,7 @@ mymain (void)
   if (test_run ("check intr is monotonic", test_intr_monotonic, NULL) < 0)
     ret = -1;
 
-  /* FIXME: the return code EXIT_AM_HARDFAIL is lost */
-  if (test_run ("check intr proc parsing", test_intr_proc_parsing, NULL) < 0)
+  if (test_run ("check intr proc parsing", test_intr_proc_parsing, NULL) != 0)
     ret = -1;
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
