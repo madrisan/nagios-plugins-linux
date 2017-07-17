@@ -60,6 +60,24 @@ test_cswch_monotonic (const void *tdata)
 }
 
 static int
+test_cswch_proc_parsing ()
+{
+  int retcode = 0;
+  const char *env_variable = "NPL_TESTING_PATH_PROC_STAT";
+
+  retcode = setenv (env_variable, NPL_TESTING_PATH_PROC_STAT, 1);
+  if (retcode < 0)
+    return EXIT_AM_HARDFAIL;
+
+  /* next function will parse the line "ctxt 13817032" */
+  if (cpu_stats_get_cswch () != 13817032)
+    retcode = -1;
+
+  unsetenv (env_variable);
+  return retcode;
+}
+
+static int
 mymain (void)
 {
   int ret = 0;
@@ -68,6 +86,10 @@ mymain (void)
     return EXIT_AM_SKIP;
 
   if (test_run ("check cswch is monotonic", test_cswch_monotonic, NULL) < 0)
+    ret = -1;
+
+  /* FIXME: the return code EXIT_AM_HARDFAIL is lost */
+  if (test_run ("check cswch proc parsing", test_cswch_proc_parsing, NULL) < 0)
     ret = -1;
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

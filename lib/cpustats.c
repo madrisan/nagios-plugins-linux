@@ -39,14 +39,14 @@
 #include "xalloc.h"
 #include "xasprintf.h"
 
-#ifndef PATH_PROC_STAT
-# define PATH_PROC_STAT		"/proc/stat"
-#endif
-
 const char *
 get_path_proc_stat ()
 {
-  return PATH_PROC_STAT;
+  const char *env_procstat = secure_getenv ("NPL_TESTING_PATH_PROC_STAT");
+  if (env_procstat)
+    return env_procstat;
+
+  return "/proc/stat";
 }
 
 /* Fill the cpu_stats structure pointed with the values found in the
@@ -60,9 +60,10 @@ cpu_stats_get_time (struct cpu_time * __restrict cputime, unsigned int lines)
   ssize_t chread;
   char *line = NULL;
   bool found;
+  const char *procpath = get_path_proc_stat ();
 
-  if ((fp = fopen (PATH_PROC_STAT,  "r")) == NULL)
-    plugin_error (STATE_UNKNOWN, errno, "error opening %s", PATH_PROC_STAT);
+  if ((fp = fopen (procpath, "r")) == NULL)
+    plugin_error (STATE_UNKNOWN, errno, "error opening %s", procpath);
 
   memset (cputime, '\0', lines * sizeof (struct cpu_time));
 
@@ -112,7 +113,7 @@ cpu_stats_get_time (struct cpu_time * __restrict cputime, unsigned int lines)
 
   if (!found)
     plugin_error (STATE_UNKNOWN, 0,
-		  "%s: pattern not found: 'cpu '", PATH_PROC_STAT);
+		  "%s: pattern not found: 'cpu '", procpath);
 }
 
 static unsigned long long
@@ -124,9 +125,10 @@ cpu_stats_get_value_with_pattern (const char *pattern, bool mandatory)
   char *line = NULL;
   bool found;
   unsigned long long value;
+  const char *procpath = get_path_proc_stat ();
 
-  if ((fp = fopen (PATH_PROC_STAT,  "r")) == NULL)
-    plugin_error (STATE_UNKNOWN, errno, "error opening %s", PATH_PROC_STAT);
+  if ((fp = fopen (procpath, "r")) == NULL)
+    plugin_error (STATE_UNKNOWN, errno, "error opening %s", procpath);
 
   value = 0;
   found = false;
@@ -147,7 +149,7 @@ cpu_stats_get_value_with_pattern (const char *pattern, bool mandatory)
 
   if (!found && mandatory)
     plugin_error (STATE_UNKNOWN, 0,
-		  "%s: pattern not found: '%s'", PATH_PROC_STAT, pattern);
+		  "%s: pattern not found: '%s'", procpath, pattern);
 
   return value;
 }
