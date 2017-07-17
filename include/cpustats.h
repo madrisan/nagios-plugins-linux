@@ -18,8 +18,6 @@
 
 #include <sys/sysinfo.h>
 
-#define PATH_PROC_STAT		"/proc/stat"
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -56,6 +54,10 @@ extern "C"
      * (since Linux 2.6.33) */
     jiff guestn;
   };
+
+  /* Return the PATH of the proc stat filesystem ("/proc/stat"), or the content
+     of the environment variable "NPL_TESTING_PATH_PROC_STAT" if set */
+  const char *get_path_proc_stat ();
 
   /* Get the cpu time statistics
    *  lines = 1 --> 'cpu' only
