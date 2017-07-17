@@ -36,3 +36,4 @@ plugins/check_*
 !plugins/check_*.c
 tests/ts*
 !tests/ts*.c
+!tests/ts*.data
