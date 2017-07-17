@@ -39,6 +39,16 @@
 #include "xalloc.h"
 #include "xasprintf.h"
 
+#ifndef PATH_PROC_STAT
+# define PATH_PROC_STAT		"/proc/stat"
+#endif
+
+const char *
+get_path_proc_stat ()
+{
+  return PATH_PROC_STAT;
+}
+
 /* Fill the cpu_stats structure pointed with the values found in the
  * proc filesystem */
 

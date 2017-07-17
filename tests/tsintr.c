@@ -41,7 +41,7 @@ test_intr_proc_stat_exists ()
 {
   FILE *fp;
 
-  if ((fp = fopen (PATH_PROC_STAT, "r")) == NULL)
+  if ((fp = fopen (get_path_proc_stat (), "r")) == NULL)
     return false;
 
   fclose (fp);
