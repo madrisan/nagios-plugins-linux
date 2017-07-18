@@ -27,7 +27,7 @@ extern "C"
     unsigned long *slot;	/* slot in return struct */
   } proc_table_struct;
 
-  void procparser (char *filename, const proc_table_struct * proc_table,
+  void procparser (const char *filename, const proc_table_struct * proc_table,
 		   int proc_table_count, char separator);
 
   /* Lookup a pattern and get the value from line 

@@ -17,6 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE /* activate extra prototypes for glibc */
+#endif
+
 #include <linux/version.h>
 #include <sys/types.h>
 #include <errno.h>
@@ -32,7 +36,6 @@
 
 #define MEMINFO_UNSET ~0UL
 
-//#define PROC_MEMINFO		"/proc/meminfo"
 #define PATH_PROC_SYS		"/proc/sys"
 #define PATH_VM_MIN_FREE_KB	PATH_PROC_SYS "/vm/min_free_kbytes"
 
@@ -90,6 +93,16 @@ typedef struct proc_sysmem
   int refcount;
   struct proc_sysmem_data *data;
 } proc_sysmem_t;
+
+const char *
+get_path_proc_meminfo ()
+{
+  const char *env_procmeminfo = secure_getenv ("NPL_TESTING_PATH_PROC_MEMINFO");
+  if (env_procmeminfo)
+    return env_procmeminfo;
+
+  return PROC_MEMINFO;
+}
 
 /* Allocates space for a new sysmem object.
  * Returns 0 if all went ok. Errors are returned as negative values. */
@@ -157,7 +170,7 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
   data->kb_low_total = MEMINFO_UNSET;
   data->kb_main_available = MEMINFO_UNSET;
 
-  procparser (PROC_MEMINFO, sysmem_table, sysmem_table_count, ':');
+  procparser (get_path_proc_meminfo (), sysmem_table, sysmem_table_count, ':');
 
   if (!data->kb_low_total)
     {			       /* low==main except with large-memory support */

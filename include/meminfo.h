@@ -32,6 +32,11 @@ extern "C"
 
   struct proc_sysmem;
 
+  /* Return the PATH of the proc stat filesystem ("/proc/meminfo"), or the
+     content of the environment variable "NPL_TESTING_PATH_PROC_MEMINFO"
+     if set */
+  const char *get_path_proc_meminfo ();
+
   /* Allocates space for a new sysmem object.
    * Returns 0 if all went ok. Errors are returned as negative values.  */
   int proc_sysmem_new (struct proc_sysmem **sysmem);

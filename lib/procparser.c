@@ -43,7 +43,7 @@ compare_proc_table_structs (const void *a, const void *b)
 }
 
 void
-procparser (char *filename, const proc_table_struct *proc_table,
+procparser (const char *filename, const proc_table_struct *proc_table,
 	    int proc_table_count, char separator)
 {
   char namebuf[32];		/* big enough to hold any row name */
