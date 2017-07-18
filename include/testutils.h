@@ -31,6 +31,7 @@
 #define TEST_KERNEL_VERSION "2.6.27"
 
 #define NPL_TESTING_PATH_PROC_STAT "ts_procstat.data"
+#define NPL_TESTING_PATH_PROC_MEMINFO "ts_procmeminfo.data"
 
 #define TEST_ASSERT_EQUAL_NUMERIC(A, B) \
   do { if ((A) != (B)) ret = -1; } while (0)

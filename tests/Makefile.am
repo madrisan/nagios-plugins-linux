@@ -93,4 +93,6 @@ endif ! WITH_TESTS
 
 TESTS = $(test_programs)
 
-EXTRA_DIST = ts_procstat.data
+EXTRA_DIST = \
+	ts_procmeminfo.data \
+	ts_procstat.data
