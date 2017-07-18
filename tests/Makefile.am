@@ -45,6 +45,7 @@ test_programs = \
 	tscswch \
 	tsintr  \
 	tsload \
+	tsuptime \
 	tsmessages \
 	tskernelver
 
@@ -59,22 +60,25 @@ TSLIBS_LDFLAGS = -module -avoid-version \
 	-rpath /evil/libtool/hack/to/force/shared/lib/creation
 
 tsclock_SOURCES = $(test_utils) tsclock.c
-tsclock_LDADD   = $(LDADDS)
+tsclock_LDADD = $(LDADDS)
 
 tscswch_SOURCES = $(test_utils) tscswch.c
-tscswch_LDADD   = $(LDADDS)
+tscswch_LDADD = $(LDADDS)
 
-tsintr_SOURCES  = $(test_utils) tsintr.c
-tsintr_LDADD    = $(LDADDS)
+tsintr_SOURCES = $(test_utils) tsintr.c
+tsintr_LDADD = $(LDADDS)
 
-tsload_SOURCES  = $(test_utils) tsload.c
-tsload_LDADD    = $(LDADDS)
+tsload_SOURCES = $(test_utils) tsload.c
+tsload_LDADD = $(LDADDS)
+
+tsuptime_SOURCES = $(test_utils) tsuptime.c
+tsuptime_LDADD = $(LDADDS)
 
 tsmessages_SOURCES = $(test_utils) tsmessages.c
-tsmessages_LDADD   = $(LDADDS)
+tsmessages_LDADD = $(LDADDS)
 
 tskernelver_SOURCES = $(test_utils) tskernelver.c
-tskernelver_LDADD   = $(LDADDS)
+tskernelver_LDADD = $(LDADDS)
 
 tslib_uname_la_SOURCES = tslib_uname.c
 tslib_uname_la_LDFLAGS = $(TSLIBS_LDFLAGS)
