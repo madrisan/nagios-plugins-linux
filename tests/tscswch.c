@@ -85,9 +85,11 @@ mymain (void)
   if (!test_cswch_proc_stat_exists ())
     return EXIT_AM_SKIP;
 
-  if (test_run ("check cswch is monotonic", test_cswch_monotonic, NULL) < 0)
+  if (test_run ("check if get_ctxtdelta() is monotonic",
+		test_cswch_monotonic, NULL) < 0)
     ret = -1;
-  if (test_run ("check cswch proc parsing", test_cswch_proc_parsing, NULL) != 0)
+  if (test_run ("check for parsing errors in cpu_stats_get_cswch()",
+		test_cswch_proc_parsing, NULL) != 0)
     ret = -1;
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
