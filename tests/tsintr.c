@@ -66,9 +66,9 @@ static int
 test_intr_proc_parsing ()
 {
   int ret = 0;
-  const char *env_variable = "NPL_TESTING_PATH_PROC_STAT";
+  const char *env_variable = "NPL_TEST_PATH_PROCSTAT";
 
-  ret = setenv (env_variable, NPL_TESTING_PATH_PROC_STAT, 1);
+  ret = setenv (env_variable, NPL_TEST_PATH_PROCSTAT, 1);
   if (ret < 0)
     return EXIT_AM_HARDFAIL;
 
