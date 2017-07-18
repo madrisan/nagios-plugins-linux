@@ -141,6 +141,7 @@ sprint_uptime (double uptime_secs)
   return buf;
 }
 
+#ifndef NPL_TESTING
 int
 main (int argc, char **argv)
 {
@@ -196,3 +197,4 @@ main (int argc, char **argv)
 
   return status;
 }
+#endif			/* NPL_TESTING */
