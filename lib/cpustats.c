@@ -42,7 +42,7 @@
 const char *
 get_path_proc_stat ()
 {
-  const char *env_procstat = secure_getenv ("NPL_TESTING_PATH_PROC_STAT");
+  const char *env_procstat = secure_getenv ("NPL_TEST_PATH_PROCSTAT");
   if (env_procstat)
     return env_procstat;
 

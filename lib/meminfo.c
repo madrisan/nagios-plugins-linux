@@ -97,7 +97,7 @@ typedef struct proc_sysmem
 const char *
 get_path_proc_meminfo ()
 {
-  const char *env_procmeminfo = secure_getenv ("NPL_TESTING_PATH_PROC_MEMINFO");
+  const char *env_procmeminfo = secure_getenv ("NPL_TEST_PATH_PROCMEMINFO");
   if (env_procmeminfo)
     return env_procmeminfo;
 
