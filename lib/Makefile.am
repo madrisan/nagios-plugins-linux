@@ -28,7 +28,6 @@ libutils_a_SOURCES =  \
 	cputopology.c \
 	kernelver.c   \
 	interrupts.c  \
-	meminfo.c     \
 	messages.c    \
 	mountlist.c   \
 	netinfo.c     \
@@ -43,3 +42,7 @@ libutils_a_SOURCES =  \
 	xmalloc.c     \
 	xstrtol.c
 
+if HAVE_PROC_MEMINFO
+libutils_a_SOURCES += \
+	meminfo.c
+endif

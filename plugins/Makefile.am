@@ -32,19 +32,23 @@ libexec_PROGRAMS =        \
 	check_fc          \
 	check_ifmountfs   \
 	check_intr        \
-	check_memory      \
 	check_multipath   \
 	check_nbprocs     \
 	check_network     \
 	check_paging      \
 	check_readonlyfs  \
-	check_swap        \
 	check_temperature \
 	check_tcpcount    \
 	check_uptime      \
 	check_users
 if HAVE_GETLOADAVG
-libexec_PROGRAMS += check_load
+libexec_PROGRAMS += \
+	check_load
+endif
+if HAVE_PROC_MEMINFO
+libexec_PROGRAMS += \
+	check_memory      \
+	check_swap
 endif
 
 check_clock_SOURCES      = check_clock.c
@@ -57,13 +61,17 @@ check_intr_SOURCES       = check_intr.c
 if HAVE_GETLOADAVG
 check_load_SOURCES       = check_load.c
 endif
+if HAVE_PROC_MEMINFO
 check_memory_SOURCES     = check_memory.c
+endif
 check_multipath_SOURCES  = check_multipath.c
 check_nbprocs_SOURCES    = check_nbprocs.c
 check_network_SOURCES    = check_network.c
 check_paging_SOURCES     = check_paging.c
 check_readonlyfs_SOURCES = check_readonlyfs.c
+if HAVE_PROC_MEMINFO
 check_swap_SOURCES       = check_swap.c
+endif
 check_tcpcount_SOURCES   = check_tcpcount.c
 check_temperature_SOURCES = check_temperature.c
 check_uptime_SOURCES     = check_uptime.c
@@ -81,13 +89,17 @@ check_intr_LDADD         = $(LDADD)
 if HAVE_GETLOADAVG
 check_load_LDADD         = $(LDADD)
 endif
+if HAVE_PROC_MEMINFO
 check_memory_LDADD       = $(LDADD)
+endif
 check_nbprocs_LDADD      = $(LDADD)
 check_network_LDADD      = $(LDADD)
 check_multipath_LDADD    = $(LDADD)
 check_paging_LDADD       = $(LDADD)
 check_readonlyfs_LDADD   = $(LDADD)
+if HAVE_PROC_MEMINFO
 check_swap_LDADD         = $(LDADD)
+endif
 check_tcpcount_LDADD     = $(LDADD)
 check_temperature_LDADD  = $(LDADD)
 check_uptime_LDADD       = $(LDADD)
