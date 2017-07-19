@@ -30,9 +30,12 @@
 #define TEST_KERNEL_VERSION_PATCH 27
 #define TEST_KERNEL_VERSION "2.6.27"
 
-/* environment variables to allow testing via static proc files */
-#define NPL_TEST_PATH_PROCSTAT "ts_procstat.data"
-#define NPL_TEST_PATH_PROCMEMINFO "ts_procmeminfo.data"
+/* environment variables to allow testing via static proc files;
+   note that 'abs_srcdir' seems the only way to make 'make distcheck' happy
+   (we cannot use 'abs_builddir' because the *.data files are not copied to
+   <pckrootdir>/nagios-plugins-linux-<version>/_build/sub/tests/) */
+#define NPL_TEST_PATH_PROCSTAT abs_srcdir "/ts_procstat.data"
+#define NPL_TEST_PATH_PROCMEMINFO abs_srcdir "/ts_procmeminfo.data"
 
 #define TEST_ASSERT_EQUAL_NUMERIC(A, B) \
   do { if ((A) != (B)) ret = -1; } while (0)

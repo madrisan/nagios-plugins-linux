@@ -15,7 +15,7 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-abs_builddir = $(shell pwd)
+#abs_builddir = $(shell pwd)
 
 SCAN_BUILD_BINARY = /usr/bin/scan-build
 SCAN_BUILD_COMMAND = make clean all
@@ -36,7 +36,8 @@ check-clang-checker:
 	  $(SCAN_BUILD_OPTS) $(SCAN_BUILD_COMMAND)
 
 AM_CPPFLAGS = \
-        -Dabs_builddir="\"$(abs_builddir)\"" \
+	-Dabs_builddir="\"$(abs_builddir)\"" \
+	-Dabs_srcdir="\"$(abs_srcdir)\"" \
 	-include $(top_builddir)/config.h \
 	-I$(top_srcdir)/include
 
@@ -93,6 +94,6 @@ endif ! WITH_TESTS
 
 TESTS = $(test_programs)
 
-EXTRA_DIST = \
+dist_noinst_DATA = \
 	ts_procmeminfo.data \
 	ts_procstat.data
