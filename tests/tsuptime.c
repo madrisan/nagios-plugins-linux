@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2016 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2017 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * Unit test for check_uptime.c
  *
