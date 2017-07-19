@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2017 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * Unit test for check_memory.c
+ * Unit test for check_memory.c and check_swap.c
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,6 +100,10 @@ test_memory_label (main_free, 11918208UL);
 test_memory_label (main_shared, 387476UL);
 test_memory_label (main_total, 16384256UL);
 
+test_memory_label (swap_cached, 1024UL);
+test_memory_label (swap_free, 8387580UL);
+test_memory_label (swap_total, 8388604UL);
+
 static int
 mymain (void)
 {
@@ -108,6 +112,9 @@ mymain (void)
   if ((err = test_memory_init ()) != 0)
     return err;
 
+  /* data from (a static copy of) /proc/meminfo */
+
+  /* system memory */
   TEST_DATA("check active memory", test_memory_active);
   TEST_DATA("check anon_pages memory", test_memory_anon_pages);
   TEST_DATA("check committed_as memory", test_memory_committed_as);
@@ -118,6 +125,11 @@ mymain (void)
   TEST_DATA("check main_free memory", test_memory_main_free);
   TEST_DATA("check main_shared memory", test_memory_main_shared);
   TEST_DATA("check main_total memory", test_memory_main_total);
+
+  /* system swap */
+  TEST_DATA("check swap_cached memory", test_memory_swap_cached);
+  TEST_DATA("check swap_free memory", test_memory_swap_free);
+  TEST_DATA("check swap_total memory", test_memory_swap_total);
 
   test_memory_release ();
 
