@@ -101,6 +101,7 @@ print_version (void)
   exit (STATE_OK);
 }
 
+#ifndef NPL_TESTING
 int
 main (int argc, char **argv)
 {
@@ -276,3 +277,4 @@ main (int argc, char **argv)
 
   return status;
 }
+#endif			/* NPL_TESTING */

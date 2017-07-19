@@ -49,6 +49,10 @@ test_programs = \
 	tsuptime \
 	tsmessages \
 	tskernelver
+if HAVE_PROC_MEMINFO
+test_programs += \
+	tsmemory
+endif
 
 test_libraries = tslib_uname.la
 
@@ -71,6 +75,11 @@ tsintr_LDADD = $(LDADDS)
 
 tsload_SOURCES = $(test_utils) tsload.c
 tsload_LDADD = $(LDADDS)
+
+if HAVE_PROC_MEMINFO
+tsmemory_SOURCES = $(test_utils) tsmemory.c
+tsmemory_LDADD = $(LDADDS)
+endif
 
 tsuptime_SOURCES = $(test_utils) tsuptime.c
 tsuptime_LDADD = $(LDADDS)
