@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014,2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2015,2017 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that tests the current system load average.
  *
