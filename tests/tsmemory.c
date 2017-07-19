@@ -48,7 +48,7 @@ test_memory_init ()
       ret = proc_sysmem_new (&sysmem);
       if (ret < 0)
 	return EXIT_AM_HARDFAIL;
-  
+
       ret = setenv (env_variable, NPL_TEST_PATH_PROCMEMINFO, 1);
       if (ret < 0)
 	return EXIT_AM_HARDFAIL;
@@ -106,7 +106,7 @@ mymain (void)
   int err, ret = 0;
 
   if ((err = test_memory_init ()) != 0)
-    return err; 
+    return err;
 
   TEST_DATA("check active memory", test_memory_active);
   TEST_DATA("check anon_pages memory", test_memory_anon_pages);
