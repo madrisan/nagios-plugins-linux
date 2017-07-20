@@ -187,13 +187,14 @@ main (int argc, char **argv)
   free (my_threshold);
 
   status_msg = xasprintf ("%s: %.2f%% (%Lu %s) used", state_text (status),
-			  percent_used, SU (kb_swap_used));
+			  percent_used, UNIT_STR (kb_swap_used));
 
   perfdata_swap_msg =
     xasprintf ("swap_total=%Lu%s swap_used=%Lu%s swap_free=%Lu%s "
 	       /* The amount of swap, in kB, used as cache memory */
-	       "swap_cached=%Lu%s", SU (kb_swap_total), SU (kb_swap_used),
-	       SU (kb_swap_free), SU (kb_swap_cached));
+	       "swap_cached=%Lu%s",
+	       UNIT_STR (kb_swap_total), UNIT_STR (kb_swap_used),
+	       UNIT_STR (kb_swap_free), UNIT_STR (kb_swap_cached));
 
   printf ("%s %s | %s%s\n", program_name_short, status_msg, perfdata_swap_msg,
 	  vmem_perfdata ? perfdata_vmem_msg : "");

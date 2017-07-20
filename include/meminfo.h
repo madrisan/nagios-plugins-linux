@@ -28,7 +28,8 @@ extern "C"
     b_shift = 0, k_shift = 10, m_shift = 20, g_shift = 30
   };
 
-#define SU(X) ( ((unsigned long long)(X) << k_shift) >> shift ), units
+#define UNIT_CONVERT(X, shift) (((unsigned long long)(X) << k_shift) >> shift)
+#define UNIT_STR(X) UNIT_CONVERT(X, shift), units
 
   struct proc_sysmem;
 
