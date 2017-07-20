@@ -46,18 +46,18 @@
     {                                                               \
       int ret_save = ret;                                           \
       ret = 0;                                                      \
-      TEST_ASSERT_EQUAL_NUMERIC (A, B);                             \
+      TEST_ASSERT_EQUAL_NUMERIC ((A), (B));                         \
       if (ret < 0)                                                  \
         printf ("ASSERTION FAILED: %lu != %lu\n",                   \
-                (unsigned long)A,                                   \
-                (unsigned long)B);                                  \
+                (unsigned long)(A),                                 \
+                (unsigned long)(B));                                \
       else                                                          \
         ret = ret_save;                                             \
     }                                                               \
   while (0)
 
 #define TEST_ASSERT_EQUAL_STRING(A, B) \
-  do { if (strcmp(A, B) != 0) ret = -1; } while (0)
+  do { if (strcmp (A, B) != 0) ret = -1; } while (0)
 
 #ifndef HAVE_SECURE_GETENV
 #  ifdef HAVE___SECURE_GETENV
