@@ -113,4 +113,5 @@ TESTS = $(test_programs)
 
 dist_noinst_DATA = \
 	ts_procmeminfo.data \
-	ts_procstat.data
+	ts_procstat.data \
+	ts_procvmstat.data
