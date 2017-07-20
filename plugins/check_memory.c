@@ -241,11 +241,11 @@ main (int argc, char **argv)
   status = get_status (mem_percent, my_threshold);
 
   perfdata_memavailable_msg =
-    xasprintf ("mem_available=%Lu%s ", SU (kb_mem_main_available));
+    xasprintf ("mem_available=%Lu%s ", UNIT_STR (kb_mem_main_available));
 
   status_msg =
     xasprintf ("%s: %.2f%% (%Lu %s) %s",
-	       state_text (status), mem_percent, SU (*kb_mem_monitored),
+	       state_text (status), mem_percent, UNIT_STR (*kb_mem_monitored),
 	       (kb_mem_monitored == &kb_mem_main_available) ?
 		 "available" : "used");
 
@@ -256,18 +256,18 @@ main (int argc, char **argv)
 	       "mem_shared=%Lu%s mem_buffers=%Lu%s mem_cached=%Lu%s %s"
 	       "mem_active=%Lu%s mem_anonpages=%Lu%s mem_committed=%Lu%s "
 	       "mem_dirty=%Lu%s mem_inactive=%Lu%s"
-	       , SU (kb_mem_main_total)
-	       , SU (kb_mem_main_used)
-	       , SU (kb_mem_main_free)
-	       , SU (kb_mem_main_shared)
-	       , SU (kb_mem_main_buffers)
-	       , SU (kb_mem_main_cached)
+	       , UNIT_STR (kb_mem_main_total)
+	       , UNIT_STR (kb_mem_main_used)
+	       , UNIT_STR (kb_mem_main_free)
+	       , UNIT_STR (kb_mem_main_shared)
+	       , UNIT_STR (kb_mem_main_buffers)
+	       , UNIT_STR (kb_mem_main_cached)
 	       , perfdata_memavailable_msg
-	       , SU (kb_mem_active)
-	       , SU (kb_mem_anon_pages)
-	       , SU (kb_mem_committed_as)
-	       , SU (kb_mem_dirty)
-	       , SU (kb_mem_inactive));
+	       , UNIT_STR (kb_mem_active)
+	       , UNIT_STR (kb_mem_anon_pages)
+	       , UNIT_STR (kb_mem_committed_as)
+	       , UNIT_STR (kb_mem_dirty)
+	       , UNIT_STR (kb_mem_inactive));
 
   printf ("%s %s | %s%s\n", program_name_short, status_msg,
 	  perfdata_mem_msg, perfdata_vmem_msg);

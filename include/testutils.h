@@ -41,6 +41,21 @@
 #define TEST_ASSERT_EQUAL_NUMERIC(A, B) \
   do { if ((A) != (B)) ret = -1; } while (0)
 
+#define TEST_ASSERT_EQUAL_NUMERIC_VERBOSE(A, B)                     \
+  do                                                                \
+    {                                                               \
+      int ret_save = ret;                                           \
+      ret = 0;                                                      \
+      TEST_ASSERT_EQUAL_NUMERIC (A, B);                             \
+      if (ret < 0)                                                  \
+        printf ("ASSERTION FAILED: %lu != %lu\n",                   \
+                (unsigned long)A,                                   \
+                (unsigned long)B);                                  \
+      else                                                          \
+        ret = ret_save;                                             \
+    }                                                               \
+  while (0)
+
 #define TEST_ASSERT_EQUAL_STRING(A, B) \
   do { if (strcmp(A, B) != 0) ret = -1; } while (0)
 

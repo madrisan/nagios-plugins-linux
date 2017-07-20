@@ -131,6 +131,15 @@ mymain (void)
   TEST_DATA("check swap_free memory", test_memory_swap_free);
   TEST_DATA("check swap_total memory", test_memory_swap_total);
 
+  /* unit conversion */
+  #define KILO 1024UL
+  #define MEGA KILO*KILO
+  TEST_ASSERT_EQUAL_NUMERIC_VERBOSE(UNIT_CONVERT(KILO, k_shift), KILO);
+  TEST_ASSERT_EQUAL_NUMERIC_VERBOSE(UNIT_CONVERT(2*KILO, m_shift), 2UL);
+  TEST_ASSERT_EQUAL_NUMERIC_VERBOSE(UNIT_CONVERT(4*MEGA, g_shift), 4UL);
+  #undef MEGA
+  #undef KILO
+
   test_memory_release ();
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
