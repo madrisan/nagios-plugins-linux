@@ -49,6 +49,7 @@ test_programs = \
 	tsuptime \
 	tsmessages \
 	tsmemory_vmstat \
+	tstemperature \
 	tskernelver
 if HAVE_PROC_MEMINFO
 test_programs += \
@@ -90,6 +91,9 @@ tsuptime_LDADD = $(LDADDS)
 
 tsmessages_SOURCES = $(test_utils) tsmessages.c
 tsmessages_LDADD = $(LDADDS)
+
+tstemperature_SOURCES = $(test_utils) tstemperature.c
+tstemperature_LDADD = $(LDADDS)
 
 tskernelver_SOURCES = $(test_utils) tskernelver.c
 tskernelver_LDADD = $(LDADDS)

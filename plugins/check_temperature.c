@@ -119,6 +119,7 @@ get_real_temp (unsigned long temperature, char **scale, int temp_units)
   return (real_temp);
 }
 
+#ifndef NPL_TESTING
 int
 main (int argc, char **argv)
 {
@@ -193,3 +194,4 @@ main (int argc, char **argv)
 
   return status;
 }
+#endif			/* NPL_TESTING */
