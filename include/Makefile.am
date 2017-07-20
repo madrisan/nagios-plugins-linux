@@ -23,6 +23,7 @@ noinst_HEADERS = \
   cpufreq.h     \
   cpustats.h    \
   cputopology.h \
+  getenv.h      \
   kernelver.h   \
   interrupts.h  \
   logging.h     \

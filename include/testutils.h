@@ -22,6 +22,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "getenv.h"
+
 #define EXIT_AM_SKIP 77		/* tell Automake we're skipping a test */
 #define EXIT_AM_HARDFAIL 99	/* tell Automake that the framework is broken */
 
@@ -58,14 +60,6 @@
 
 #define TEST_ASSERT_EQUAL_STRING(A, B) \
   do { if (strcmp (A, B) != 0) ret = -1; } while (0)
-
-#ifndef HAVE_SECURE_GETENV
-#  ifdef HAVE___SECURE_GETENV
-#    define secure_getenv __secure_getenv
-#  else
-#    error neither secure_getenv nor __secure_getenv is available
-#  endif
-#endif
 
 #ifdef __cplusplus
 extern "C"

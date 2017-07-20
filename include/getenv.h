@@ -1,4 +1,4 @@
-/* interrupts.h -- a library for checking the system interrupts
+/* getenv.h -- this header file just provides an alias for getenv_secure ()
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,22 +13,17 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef _INTERRUPTS_H
-#define _INTERRUPTS_H
+#ifndef _GETENV_H
+#define _GETENV_H
 
-#ifdef __cplusplus
-extern "C"
-{
+#include "common.h"
+
+#ifndef HAVE_SECURE_GETENV
+#  ifdef HAVE___SECURE_GETENV
+#    define secure_getenv __secure_getenv
+#  else
+#    error neither secure_getenv nor __secure_getenv is available
+#  endif
 #endif
 
-  /* Return an array containing the number of interrupts per cpu per IO device
-   * Since Linux 2.6.24, for the i386 and x86_64 architectures, at least, this
-   * also includes interrupts internal to the system (that is, not associated
-   * with a device as such).  */
-  unsigned long *proc_interrupts_get_nintr_per_cpu (unsigned int *ncpus);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif		/* _INTERRUPTS_H */
+#endif		/* _GETENV_H */

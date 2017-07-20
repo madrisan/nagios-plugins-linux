@@ -32,6 +32,7 @@
 
 #include "common.h"
 #include "cpustats.h"
+#include "getenv.h"
 #include "logging.h"
 #include "messages.h"
 #include "procparser.h"

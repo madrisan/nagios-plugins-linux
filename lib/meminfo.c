@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include "getenv.h"
 #include "kernelver.h"
 #include "logging.h"
 #include "messages.h"
