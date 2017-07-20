@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include "system.h"
+#include "getenv.h"
 #include "messages.h"
 #include "meminfo.h"
 #include "procparser.h"
