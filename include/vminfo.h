@@ -23,6 +23,11 @@ extern "C"
 
   struct proc_vmem;
 
+  /* Return the PATH of the proc vmstat filesystem ("/proc/vmstat"), or the
+     content of the environment variable "NPL_TESTING_PATH_PROC_VMSTAT"
+     if set */
+  const char *get_path_proc_vmstat ();
+
   /* Allocates space for a new vmem object.
    * Returns 0 if all went ok. Errors are returned as negative values.  */
   int proc_vmem_new (struct proc_vmem **vmem);

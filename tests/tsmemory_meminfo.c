@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2017 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * Unit test for check_memory.c and check_swap.c
+ * Unit test for check_memory.c and check_swap.c (/proc/meminfo)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,15 +76,15 @@ test_memory_release ()
 static int test_memory_ ## arg (const void *tdata)           \
 {                                                            \
   int err, ret = 0;                                          \
-  unsigned long kb_meminfo;                                  \
+  unsigned long kb_value;                                    \
   const char *env_variable = "NPL_TEST_PATH_PROCMEMINFO";    \
                                                              \
   err = setenv (env_variable, NPL_TEST_PATH_PROCMEMINFO, 1); \
   if (err < 0)                                               \
     return EXIT_AM_HARDFAIL;                                 \
                                                              \
-  kb_meminfo = proc_sysmem_get_ ## arg (sysmem);             \
-  TEST_ASSERT_EQUAL_NUMERIC(kb_meminfo, value);              \
+  kb_value = proc_sysmem_get_ ## arg (sysmem);               \
+  TEST_ASSERT_EQUAL_NUMERIC(kb_value, value);                \
                                                              \
   return ret;                                                \
 }
