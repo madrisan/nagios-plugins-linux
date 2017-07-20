@@ -36,7 +36,16 @@
 #include "procparser.h"
 
 #define PROC_STAT     "/proc/stat"
-#define PROC_VMSTAT   "/proc/vmstat"
+
+const char *
+get_path_proc_vmstat ()
+{
+  const char *env_procvmstat = secure_getenv ("NPL_TEST_PATH_PROCVMSTAT");
+  if (env_procvmstat)
+    return env_procvmstat;
+
+  return "/proc/vmstat";
+}
 
 /* get_vmem_pagesize - get memory page size */
 
@@ -201,7 +210,7 @@ proc_vmem_read (struct proc_vmem *vmem)
   data->vm_pgpgin = data->vm_pgpgout = ~0UL;
   data->vm_pswpin = data->vm_pswpout = ~0UL;
 
-  procparser (PROC_VMSTAT, vmem_table, vmem_table_count, ' ');
+  procparser (get_path_proc_vmstat (), vmem_table, vmem_table_count, ' ');
 
   if (!data->vm_pgalloc)
     data->vm_pgalloc =

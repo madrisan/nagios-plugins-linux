@@ -32,7 +32,7 @@ extern "C"
 
   struct proc_sysmem;
 
-  /* Return the PATH of the proc stat filesystem ("/proc/meminfo"), or the
+  /* Return the PATH of the proc meminfo filesystem ("/proc/meminfo"), or the
      content of the environment variable "NPL_TESTING_PATH_PROC_MEMINFO"
      if set */
   const char *get_path_proc_meminfo ();

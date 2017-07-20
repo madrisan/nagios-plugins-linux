@@ -36,6 +36,7 @@
    <pckrootdir>/nagios-plugins-linux-<version>/_build/sub/tests/) */
 #define NPL_TEST_PATH_PROCSTAT abs_srcdir "/ts_procstat.data"
 #define NPL_TEST_PATH_PROCMEMINFO abs_srcdir "/ts_procmeminfo.data"
+#define NPL_TEST_PATH_PROCVMSTAT abs_srcdir "/ts_procvmstat.data"
 
 #define TEST_ASSERT_EQUAL_NUMERIC(A, B) \
   do { if ((A) != (B)) ret = -1; } while (0)
