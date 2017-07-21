@@ -95,7 +95,11 @@ extern "C"
 		perror ("asprintf");                                \
 		return EXIT_FAILURE;                                \
 	      }                                                     \
-	    setenv ("LD_PRELOAD", newenv, 1);                       \
+	    if (setenv ("LD_PRELOAD", newenv, 1) < 0)               \
+	      {                                                     \
+		perror ("setenv");                                  \
+		return EXIT_FAILURE;                                \
+	      }                                                     \
 	    char *argv0 = realpath (argv[0], NULL);                 \
 	    if (!argv0)                                             \
 	      {                                                     \
