@@ -58,7 +58,7 @@ extern "C"
 
   bool sysfsparser_thermal_kernel_support (void);
   int sysfsparser_thermal_get_temperature (unsigned int selected_zone,
-						  unsigned int *zone, char **type);
+					   unsigned int *zone, char **type);
   int sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone);
 
 #ifdef __cplusplus
