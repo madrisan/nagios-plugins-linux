@@ -113,6 +113,7 @@ Debian 8 (Jessie)  | `make -C tests-build debian-jessie`
 Debian 9 (Stretch) | `make -C tests-build debian-stretch`
 Fedora 24          | `make -C tests-build fedora-24`
 Fedora 25          | `make -C tests-build fedora-25`
+Fedora 26          | `make -C tests-build fedora-26`
 Fedora Rawhide     | `make -C tests-build fedora-rawhide`
 
 in the root source folder.
