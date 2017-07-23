@@ -23,10 +23,10 @@ extern "C"
 {
 #endif
 
-  enum unit_shift
+  typedef enum unit_shift
   {
     b_shift = 0, k_shift = 10, m_shift = 20, g_shift = 30
-  };
+  } unit_shift;
 
 #define UNIT_CONVERT(X, shift) (((unsigned long long)(X) << k_shift) >> shift)
 #define UNIT_STR(X) UNIT_CONVERT(X, shift), units

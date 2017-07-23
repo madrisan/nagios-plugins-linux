@@ -77,16 +77,10 @@ test_run (const char *title, int (*body) (const void *data), const void *data)
   int ret = body (data);
   test_counter++;
 
-  fprintf (stderr, "%2zu) %-65s ... ", test_counter, title);
-
-  if (ret == 0)
-    fprintf (stderr, "OK\n");
-  else if (ret == EXIT_AM_SKIP)
-    fprintf (stderr, "SKIP\n");
-  else if (ret == EXIT_AM_HARDFAIL)
-    fprintf (stderr, "HARDFAIL\n");
-  else
-    fprintf (stderr, "FAILED\n");
+  fprintf (stderr, "%2zu) %-65s ... %s\n", test_counter, title,
+	   (ret == 0) ? "OK" :
+	   (ret == EXIT_AM_SKIP) ? "SKIP" :
+	   (ret == EXIT_AM_HARDFAIL) ? "HARDFAIL" : "FAILED");
 
   return ret;
 }

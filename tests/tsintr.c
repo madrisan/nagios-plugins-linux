@@ -88,13 +88,10 @@ mymain (void)
   if (!test_intr_proc_stat_exists ())
     return EXIT_AM_SKIP;
 
-  if (test_run ("check if get_intrdelta() is monotonic",
-		test_intr_monotonic, NULL) < 0)
-    ret = -1;
-
-  if (test_run ("check for parsing errors in cpu_stats_get_intr()",
-		test_intr_proc_parsing, NULL) != 0)
-    ret = -1;
+  TEST_DATA ("check if get_intrdelta() is monotonic",
+	     test_intr_monotonic, NULL);
+  TEST_DATA ("check for parsing errors in cpu_stats_get_intr()",
+	     test_intr_proc_parsing, NULL);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
