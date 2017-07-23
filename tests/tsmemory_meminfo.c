@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "meminfo.h"
 #include "memory.h"
 #include "testutils.h"
 
@@ -66,12 +67,6 @@ test_memory_release ()
   proc_sysmem_unref (sysmem);
 }
 
-#define TEST_DATA(MSG, FUNC)                                 \
-  do {                                                       \
-    if (test_run (MSG, FUNC, NULL) < 0)                      \
-      ret = -1;                                              \
-  } while (0)
-
 #define test_memory_label(arg, value) \
 static int test_memory_ ## arg (const void *tdata)           \
 {                                                            \
@@ -104,10 +99,29 @@ test_memory_label (swap_cached, 1024UL);
 test_memory_label (swap_free, 8387580UL);
 test_memory_label (swap_total, 8388604UL);
 
+struct test_data
+{
+  unsigned long long memsize;
+  unsigned long long shouldbe;
+  unit_shift shift;
+};
+
+static int
+test_memory_unit_conversion (const void *tdata)
+{
+  const struct test_data *data = tdata;
+  int ret = 0;
+
+  TEST_ASSERT_EQUAL_NUMERIC (
+    UNIT_CONVERT (data->memsize, data->shift), data->shouldbe);
+  return ret;
+}
+
 static int
 mymain (void)
 {
   int err, ret = 0;
+  struct test_data data;
 
   if ((err = test_memory_init ()) != 0)
     return err;
@@ -115,28 +129,44 @@ mymain (void)
   /* data from (a static copy of) /proc/meminfo */
 
   /* system memory */
-  TEST_DATA("check active memory", test_memory_active);
-  TEST_DATA("check anon_pages memory", test_memory_anon_pages);
-  TEST_DATA("check committed_as memory", test_memory_committed_as);
-  TEST_DATA("check dirty memory", test_memory_dirty);
-  TEST_DATA("check inactive memory", test_memory_inactive);
-  TEST_DATA("check main_available memory", test_memory_main_available);
-  TEST_DATA("check main_buffers memory", test_memory_main_buffers);
-  TEST_DATA("check main_free memory", test_memory_main_free);
-  TEST_DATA("check main_shared memory", test_memory_main_shared);
-  TEST_DATA("check main_total memory", test_memory_main_total);
+  TEST_DATA ("check active memory", test_memory_active, NULL);
+  TEST_DATA ("check anon_pages memory", test_memory_anon_pages, NULL);
+  TEST_DATA ("check committed_as memory", test_memory_committed_as, NULL);
+  TEST_DATA ("check dirty memory", test_memory_dirty, NULL);
+  TEST_DATA ("check inactive memory", test_memory_inactive, NULL);
+  TEST_DATA ("check main_available memory", test_memory_main_available, NULL);
+  TEST_DATA ("check main_buffers memory", test_memory_main_buffers, NULL);
+  TEST_DATA ("check main_free memory", test_memory_main_free, NULL);
+  TEST_DATA ("check main_shared memory", test_memory_main_shared, NULL);
+  TEST_DATA ("check main_total memory", test_memory_main_total, NULL);
 
   /* system swap */
-  TEST_DATA("check swap_cached memory", test_memory_swap_cached);
-  TEST_DATA("check swap_free memory", test_memory_swap_free);
-  TEST_DATA("check swap_total memory", test_memory_swap_total);
+  TEST_DATA ("check swap_cached memory", test_memory_swap_cached, NULL);
+  TEST_DATA ("check swap_free memory", test_memory_swap_free, NULL);
+  TEST_DATA ("check swap_total memory", test_memory_swap_total, NULL);
 
-  /* unit conversion */
   #define KILO 1024UL
   #define MEGA KILO*KILO
-  TEST_ASSERT_EQUAL_NUMERIC_VERBOSE(UNIT_CONVERT(KILO, k_shift), KILO);
-  TEST_ASSERT_EQUAL_NUMERIC_VERBOSE(UNIT_CONVERT(2*KILO, m_shift), 2UL);
-  TEST_ASSERT_EQUAL_NUMERIC_VERBOSE(UNIT_CONVERT(4*MEGA, g_shift), 4UL);
+
+  /* unit conversion */
+  data.memsize = KILO;
+  data.shift = k_shift;
+  data.shouldbe = KILO;
+  TEST_DATA ("check memory size conversion into kbytes",
+	     test_memory_unit_conversion, &data);
+
+  data.memsize = 2*KILO;
+  data.shift = m_shift;
+  data.shouldbe = 2UL;
+  TEST_DATA ("check memory size conversion into mbytes",
+	     test_memory_unit_conversion, &data);
+
+  data.memsize = 4*MEGA;
+  data.shift = g_shift;
+  data.shouldbe = 4UL;
+  TEST_DATA ("check memory size conversion into gbytes",
+	     test_memory_unit_conversion, &data);
+
   #undef MEGA
   #undef KILO
 

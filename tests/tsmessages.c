@@ -26,27 +26,51 @@
 #include "messages.h"
 #include "testutils.h"
 
-#define TEST_MSG_STRING(type) \
-	TEST_ASSERT_EQUAL_STRING(state_text (STATE_##type), #type)
+struct test_data
+{
+  char *state;
+  nagstatus value;
+  nagstatus shouldbe;
+};
+
+static int
+test_nagios_state_string (const void *tdata)
+{
+  const struct test_data *data = tdata;
+  int ret = 0;
+
+  TEST_ASSERT_EQUAL_STRING (state_text (data->value), data->state);
+  TEST_ASSERT_EQUAL_NUMERIC (data->value, data->shouldbe);
+  return ret;
+}
+
+#define STR(S) #S
+#define TEST_NAGIOS_STATUS(FUNC, TYPE, SHOULD_BE)               \
+  do                                                            \
+    {                                                           \
+      data.state = STR(TYPE);                                   \
+      data.value = STATE_##TYPE;                                \
+      data.shouldbe = SHOULD_BE;                                \
+      TEST_DATA ("check nagios state " STR(TYPE), FUNC, &data); \
+    }                                                           \
+  while (0)
 
 static int
 mymain (void)
 {
   int ret = 0;
+  struct test_data data;
 
-  TEST_ASSERT_EQUAL_NUMERIC(STATE_OK, 0);
-  TEST_ASSERT_EQUAL_NUMERIC(STATE_WARNING, 1);
-  TEST_ASSERT_EQUAL_NUMERIC(STATE_CRITICAL, 2);
-  TEST_ASSERT_EQUAL_NUMERIC(STATE_UNKNOWN, 3);
-  TEST_ASSERT_EQUAL_NUMERIC(STATE_DEPENDENT, 4);
-
-  TEST_MSG_STRING(OK);
-  TEST_MSG_STRING(WARNING);
-  TEST_MSG_STRING(CRITICAL);
-  TEST_MSG_STRING(UNKNOWN);
-  TEST_MSG_STRING(DEPENDENT);
+  TEST_NAGIOS_STATUS (test_nagios_state_string, OK, 0);
+  TEST_NAGIOS_STATUS (test_nagios_state_string, WARNING, 1);
+  TEST_NAGIOS_STATUS (test_nagios_state_string, CRITICAL, 2);
+  TEST_NAGIOS_STATUS (test_nagios_state_string, UNKNOWN, 3);
+  TEST_NAGIOS_STATUS (test_nagios_state_string, DEPENDENT, 4);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-TEST_MAIN(mymain);
+#undef TEST_NAGIOS_STATUS
+#undef STR
+
+TEST_MAIN (mymain);

@@ -66,12 +66,6 @@ test_memory_release ()
   proc_vmem_unref (vmem);
 }
 
-#define TEST_DATA(MSG, FUNC)                                 \
-  do {                                                       \
-    if (test_run (MSG, FUNC, NULL) < 0)                      \
-      ret = -1;                                              \
-  } while (0)
-
 #define test_memory_label(arg, value) \
 static int test_memory_ ## arg (const void *tdata)           \
 {                                                            \
@@ -104,10 +98,10 @@ mymain (void)
 
   /* data from (a static copy of) /proc/vmstat */
 
-  TEST_DATA("check pgpgin virtual memory stat", test_memory_pgpgin);
-  TEST_DATA("check pgpgout virtual memory stat", test_memory_pgpgout);
-  TEST_DATA("check pswpin virtual memory stat", test_memory_pswpin);
-  TEST_DATA("check pswpin virtual memory stat", test_memory_pswpout);
+  TEST_DATA ("check pgpgin virtual memory stat", test_memory_pgpgin, NULL);
+  TEST_DATA ("check pgpgout virtual memory stat", test_memory_pgpgout, NULL);
+  TEST_DATA ("check pswpin virtual memory stat", test_memory_pswpin, NULL);
+  TEST_DATA ("check pswpin virtual memory stat", test_memory_pswpout, NULL);
 
   test_memory_release ();
 

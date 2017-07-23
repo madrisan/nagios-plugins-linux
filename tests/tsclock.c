@@ -89,12 +89,14 @@ test_clock_timedelta (const void *tdata)
   return -1;
 }
 
-#define TEST_DATA(MSG, FUNC, DELTA)          \
-  do {                                       \
-    data.delta = DELTA;                      \
-    if (test_run (MSG, FUNC, &data) < 0)     \
-      ret = -1;                              \
-  } while (0)
+#define TEST_DATA2(MSG, FUNC, DELTA)       \
+  do                                       \
+    {                                      \
+      data.delta = DELTA;                  \
+      if (test_run (MSG, FUNC, &data) < 0) \
+        ret = -1;                          \
+    }                                      \
+  while (0)
 
 static int
 mymain (void)
@@ -103,13 +105,13 @@ mymain (void)
   /* set the warning and critical thresholds */
   struct test_data data = { .w = "20", .c = "40" };
 
-  TEST_DATA ("check clock for ok condition", test_clock_timedelta, 0);
-  TEST_DATA ("check clock for warning condition", test_clock_timedelta, 30);
-  TEST_DATA ("check clock for critical condition", test_clock_timedelta, 50);
+  TEST_DATA2 ("check clock for ok condition", test_clock_timedelta, 0);
+  TEST_DATA2 ("check clock for warning condition", test_clock_timedelta, 30);
+  TEST_DATA2 ("check clock for critical condition", test_clock_timedelta, 50);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-#undef TEST_DATA
+#undef TEST_DATA2
 
 TEST_MAIN (mymain)

@@ -60,12 +60,6 @@ test_loadavg_exit_status (const void *tdata)
   return -1;
 }
 
-#define TEST_DATA(MSG, FUNC, DATA)         \
-  do {                                     \
-    if (test_run (MSG, FUNC, DATA) < 0)    \
-      ret = -1;                            \
-  } while (0)
-
 static int
 mymain (void)
 {
