@@ -106,6 +106,8 @@ extern "C"
       return test_main (argc, argv, func, __VA_ARGS__, NULL);       \
     }
 
+  /* Runs test.
+     returns: -1 = error, 0 = success  */
   int test_run (const char *title,
 		int (*body) (const void *data), const void *data);
 

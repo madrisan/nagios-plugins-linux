@@ -28,6 +28,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "common.h"
 #include "progname.h"
@@ -38,7 +39,7 @@ static size_t test_counter;
 
 /* Check that a file is regular and has executable bits.
  * If false is returned, errno is valid. */
-bool
+static bool
 test_file_is_executable (const char *file)
 {
   struct stat sb;
@@ -51,6 +52,12 @@ test_file_is_executable (const char *file)
 
   errno = S_ISDIR (sb.st_mode) ? EISDIR : EACCES;
   return false;
+}
+
+static int
+test_use_terminal_colors (void)
+{
+  return isatty (STDIN_FILENO);
 }
 
 int
@@ -77,10 +84,19 @@ test_run (const char *title, int (*body) (const void *data), const void *data)
   int ret = body (data);
   test_counter++;
 
-  fprintf (stderr, "%2zu) %-65s ... %s\n", test_counter, title,
-	   (ret == 0) ? "OK" :
-	   (ret == EXIT_AM_SKIP) ? "SKIP" :
-	   (ret == EXIT_AM_HARDFAIL) ? "HARDFAIL" : "FAILED");
+  fprintf (stderr, "%2zu) %-65s ... ", test_counter, title);
+
+  if (test_use_terminal_colors ())
+    fprintf (stderr, "%s\n",
+	     (ret == 0) ? "\e[32mOK\e[0m" :			/* green */
+	     (ret == EXIT_AM_SKIP) ? "\e[34m\e[1mSKIP\e[0m" :	/* bold blue */
+	     (ret == EXIT_AM_HARDFAIL) ?			/* bold red */
+	      "\e[31m\e[1mHARDFAIL\e[0m" : "\e[31m\e[1mFAILED\e[0m");
+  else
+    fprintf (stderr, "%s\n",
+	     (ret == 0) ? "OK" :
+	     (ret == EXIT_AM_SKIP) ? "SKIP" :
+	     (ret == EXIT_AM_HARDFAIL) ? "HARDFAIL" : "FAILED");
 
   return ret;
 }
