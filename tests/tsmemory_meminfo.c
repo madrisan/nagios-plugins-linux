@@ -99,12 +99,12 @@ test_memory_label (swap_cached, 1024UL);
 test_memory_label (swap_free, 8387580UL);
 test_memory_label (swap_total, 8388604UL);
 
-struct test_data
+typedef struct test_data
 {
   unsigned long long memsize;
-  unsigned long long shouldbe;
+  unsigned long long expect_value;
   unit_shift shift;
-};
+} test_data;
 
 static int
 test_memory_unit_conversion (const void *tdata)
@@ -113,7 +113,7 @@ test_memory_unit_conversion (const void *tdata)
   int ret = 0;
 
   TEST_ASSERT_EQUAL_NUMERIC (
-    UNIT_CONVERT (data->memsize, data->shift), data->shouldbe);
+    UNIT_CONVERT (data->memsize, data->shift), data->expect_value);
   return ret;
 }
 
@@ -121,54 +121,55 @@ static int
 mymain (void)
 {
   int err, ret = 0;
-  struct test_data data;
 
   if ((err = test_memory_init ()) != 0)
     return err;
 
+#define DO_TEST(MSG, FUNC, DATA) \
+  do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
+
   /* data from (a static copy of) /proc/meminfo */
 
   /* system memory */
-  TEST_DATA ("check active memory", test_memory_active, NULL);
-  TEST_DATA ("check anon_pages memory", test_memory_anon_pages, NULL);
-  TEST_DATA ("check committed_as memory", test_memory_committed_as, NULL);
-  TEST_DATA ("check dirty memory", test_memory_dirty, NULL);
-  TEST_DATA ("check inactive memory", test_memory_inactive, NULL);
-  TEST_DATA ("check main_available memory", test_memory_main_available, NULL);
-  TEST_DATA ("check main_buffers memory", test_memory_main_buffers, NULL);
-  TEST_DATA ("check main_free memory", test_memory_main_free, NULL);
-  TEST_DATA ("check main_shared memory", test_memory_main_shared, NULL);
-  TEST_DATA ("check main_total memory", test_memory_main_total, NULL);
+  DO_TEST ("check active memory", test_memory_active, NULL);
+  DO_TEST ("check anon_pages memory", test_memory_anon_pages, NULL);
+  DO_TEST ("check committed_as memory", test_memory_committed_as, NULL);
+  DO_TEST ("check dirty memory", test_memory_dirty, NULL);
+  DO_TEST ("check inactive memory", test_memory_inactive, NULL);
+  DO_TEST ("check main_available memory", test_memory_main_available, NULL);
+  DO_TEST ("check main_buffers memory", test_memory_main_buffers, NULL);
+  DO_TEST ("check main_free memory", test_memory_main_free, NULL);
+  DO_TEST ("check main_shared memory", test_memory_main_shared, NULL);
+  DO_TEST ("check main_total memory", test_memory_main_total, NULL);
 
   /* system swap */
-  TEST_DATA ("check swap_cached memory", test_memory_swap_cached, NULL);
-  TEST_DATA ("check swap_free memory", test_memory_swap_free, NULL);
-  TEST_DATA ("check swap_total memory", test_memory_swap_total, NULL);
+  DO_TEST ("check swap_cached memory", test_memory_swap_cached, NULL);
+  DO_TEST ("check swap_free memory", test_memory_swap_free, NULL);
+  DO_TEST ("check swap_total memory", test_memory_swap_total, NULL);
 
   #define KILO 1024UL
   #define MEGA KILO*KILO
 
+#define DO_TEST_UC(MSG, MEMSIZE, SHIFT, EXPECT_VALUE)             \
+  do                                                              \
+    {                                                             \
+      test_data data = {                                          \
+	.memsize = MEMSIZE,                                       \
+	.shift = SHIFT,                                           \
+	.expect_value = EXPECT_VALUE,                             \
+      };                                                          \
+      if (test_run(MSG, test_memory_unit_conversion, &data) < 0)  \
+        ret = -1;                                                 \
+    }                                                             \
+  while (0)
+
   /* unit conversion */
-  data.memsize = KILO;
-  data.shift = k_shift;
-  data.shouldbe = KILO;
-  TEST_DATA ("check memory size conversion into kbytes",
-	     test_memory_unit_conversion, &data);
-
-  data.memsize = 2*KILO;
-  data.shift = m_shift;
-  data.shouldbe = 2UL;
-  TEST_DATA ("check memory size conversion into mbytes",
-	     test_memory_unit_conversion, &data);
-
-  data.memsize = 4*MEGA;
-  data.shift = g_shift;
-  data.shouldbe = 4UL;
-  TEST_DATA ("check memory size conversion into gbytes",
-	     test_memory_unit_conversion, &data);
-
-  #undef MEGA
-  #undef KILO
+  DO_TEST_UC ("check memory size conversion into kbytes",
+	      KILO, k_shift, KILO);
+  DO_TEST_UC ("check memory size conversion into mbytes",
+	      2*KILO, m_shift, 2UL);
+  DO_TEST_UC ("check memory size conversion into gbytes",
+	      4*MEGA, g_shift, 4UL);
 
   test_memory_release ();
 

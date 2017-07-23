@@ -88,10 +88,13 @@ mymain (void)
   if (!test_intr_proc_stat_exists ())
     return EXIT_AM_SKIP;
 
-  TEST_DATA ("check if get_intrdelta() is monotonic",
-	     test_intr_monotonic, NULL);
-  TEST_DATA ("check for parsing errors in cpu_stats_get_intr()",
-	     test_intr_proc_parsing, NULL);
+#define DO_TEST(MSG, FUNC, DATA) \
+  do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
+
+  DO_TEST ("check if get_intrdelta() is monotonic",
+	    test_intr_monotonic, NULL);
+  DO_TEST ("check for parsing errors in cpu_stats_get_intr()",
+	    test_intr_proc_parsing, NULL);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -32,12 +32,13 @@ static _Noreturn void usage (FILE * out) __attribute__ ((unused));
 
 #define NPL_TESTING
 #include "../plugins/check_temperature.c"
+#undef NPL_TESTING
 
-struct test_data
+typedef struct test_data
 {
   int unit;
-  double shouldbe;
-};
+  double expect_value;
+} test_data;
 
 static int
 test_temperature_unit_conversion (const void *tdata)
@@ -47,7 +48,7 @@ test_temperature_unit_conversion (const void *tdata)
   const unsigned long chk_temp = 1000*25;  /* 25C */
   int ret = 0;
 
-  TEST_ASSERT_EQUAL_NUMERIC (data->shouldbe,
+  TEST_ASSERT_EQUAL_NUMERIC (data->expect_value,
 			     get_real_temp (chk_temp, &scale, data->unit));
   return ret;
 }
@@ -56,22 +57,25 @@ static int
 mymain (void)
 {
   int ret = 0;
-  struct test_data data;
 
-  data.unit = TEMP_CELSIUS;
-  data.shouldbe = 25;
-  TEST_DATA ("get_real_temp with temp_units eq TEMP_CELSIUS",
-	     test_temperature_unit_conversion, &data);
+#define DO_TEST(MSG, UNIT, EXPECT_VALUE)                               \
+  do                                                                   \
+    {                                                                  \
+      test_data data = {                                               \
+	.unit = UNIT,                                                  \
+	.expect_value = EXPECT_VALUE,                                  \
+      };                                                               \
+      if (test_run(MSG, test_temperature_unit_conversion, &data) < 0)  \
+	ret = -1;                                                      \
+    }                                                                  \
+  while (0)
 
-  data.unit = TEMP_FAHRENHEIT;
-  data.shouldbe = 77;
-  TEST_DATA ("get_real_temp with temp_units eq TEMP_FAHRENHEIT",
-             test_temperature_unit_conversion, &data);
-
-  data.unit = TEMP_KELVIN;
-  data.shouldbe = 298.1;
-  TEST_DATA ("get_real_temp with temp_units eq TEMP_KELVIN",
-             test_temperature_unit_conversion, &data);
+  DO_TEST ("check get_real_temp with temp_units eq TEMP_CELSIUS",
+	   TEMP_CELSIUS, 25);
+  DO_TEST ("check get_real_temp with temp_units eq TEMP_FAHRENHEIT",
+           TEMP_FAHRENHEIT, 77);
+  DO_TEST ("check get_real_temp with temp_units eq TEMP_KELVIN",
+           TEMP_KELVIN, 298.1);
 
   /* FIXME: we should test here /sys/class/thermal/ related stuff
             /sys/class/thermal/thermal_zone[0-*]/{type,temp,trip_point_*}
@@ -81,5 +85,3 @@ mymain (void)
 }
 
 TEST_MAIN (mymain)
-
-#undef NPL_TESTING

@@ -26,12 +26,12 @@
 #include "messages.h"
 #include "testutils.h"
 
-struct test_data
+typedef struct test_data
 {
   char *state;
   nagstatus value;
-  nagstatus shouldbe;
-};
+  nagstatus expect_value;
+} test_data;
 
 static int
 test_nagios_state_string (const void *tdata)
@@ -40,37 +40,37 @@ test_nagios_state_string (const void *tdata)
   int ret = 0;
 
   TEST_ASSERT_EQUAL_STRING (state_text (data->value), data->state);
-  TEST_ASSERT_EQUAL_NUMERIC (data->value, data->shouldbe);
+  TEST_ASSERT_EQUAL_NUMERIC (data->value, data->expect_value);
   return ret;
 }
-
-#define STR(S) #S
-#define TEST_NAGIOS_STATUS(FUNC, TYPE, SHOULD_BE)               \
-  do                                                            \
-    {                                                           \
-      data.state = STR(TYPE);                                   \
-      data.value = STATE_##TYPE;                                \
-      data.shouldbe = SHOULD_BE;                                \
-      TEST_DATA ("check nagios state " STR(TYPE), FUNC, &data); \
-    }                                                           \
-  while (0)
 
 static int
 mymain (void)
 {
   int ret = 0;
-  struct test_data data;
 
-  TEST_NAGIOS_STATUS (test_nagios_state_string, OK, 0);
-  TEST_NAGIOS_STATUS (test_nagios_state_string, WARNING, 1);
-  TEST_NAGIOS_STATUS (test_nagios_state_string, CRITICAL, 2);
-  TEST_NAGIOS_STATUS (test_nagios_state_string, UNKNOWN, 3);
-  TEST_NAGIOS_STATUS (test_nagios_state_string, DEPENDENT, 4);
+#define STR(S) #S
+#define DO_TEST(TYPE, EXPECT_VALUE)                         \
+  do                                                        \
+    {                                                       \
+      test_data data = {                                    \
+	.state = STR(TYPE),                                 \
+	.value = STATE_##TYPE,                              \
+	.expect_value = EXPECT_VALUE,                       \
+      };                                                    \
+      if (test_run("check nagios state " STR(TYPE),         \
+		   test_nagios_state_string, (&data)) < 0)  \
+	ret = -1;                                           \
+    }                                                       \
+  while (0)
+
+  DO_TEST (OK, 0);
+  DO_TEST (WARNING, 1);
+  DO_TEST (CRITICAL, 2);
+  DO_TEST (UNKNOWN, 3);
+  DO_TEST (DEPENDENT, 4);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
-#undef TEST_NAGIOS_STATUS
-#undef STR
 
 TEST_MAIN (mymain);

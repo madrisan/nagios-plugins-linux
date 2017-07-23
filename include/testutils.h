@@ -46,9 +46,6 @@
 #define TEST_ASSERT_EQUAL_STRING(A, B) \
   do { if (strcmp (A, B) != 0) ret = -1; } while (0)
 
-#define TEST_DATA(MSG, FUNC, DATA) \
-  do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
-
 #ifdef __cplusplus
 extern "C"
 {

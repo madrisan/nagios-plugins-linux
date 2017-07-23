@@ -34,13 +34,6 @@ static _Noreturn void usage (FILE * out) __attribute__((unused));
 # include "../plugins/check_clock.c"
 #undef NPL_TESTING
 
-struct test_data
-{
-  char *w;
-  char *c;
-  long delta;
-};
-
 static long
 get_current_datetime ()
 {
@@ -56,6 +49,13 @@ get_current_datetime ()
 
   return strtol (outstr, &end, 10);
 }
+
+struct test_data
+{
+  char *w;
+  char *c;
+  long delta;
+};
 
 static int
 test_clock_timedelta (const void *tdata)
@@ -89,15 +89,6 @@ test_clock_timedelta (const void *tdata)
   return -1;
 }
 
-#define TEST_DATA2(MSG, FUNC, DELTA)       \
-  do                                       \
-    {                                      \
-      data.delta = DELTA;                  \
-      if (test_run (MSG, FUNC, &data) < 0) \
-        ret = -1;                          \
-    }                                      \
-  while (0)
-
 static int
 mymain (void)
 {
@@ -105,13 +96,20 @@ mymain (void)
   /* set the warning and critical thresholds */
   struct test_data data = { .w = "20", .c = "40" };
 
-  TEST_DATA2 ("check clock for ok condition", test_clock_timedelta, 0);
-  TEST_DATA2 ("check clock for warning condition", test_clock_timedelta, 30);
-  TEST_DATA2 ("check clock for critical condition", test_clock_timedelta, 50);
+#define DO_TEST(MSG, FUNC, DELTA)           \
+  do                                        \
+    {                                       \
+      data.delta = DELTA;                   \
+      if (test_run (MSG, FUNC, &data) < 0)  \
+        ret = -1;                           \
+    }                                       \
+  while (0)
+
+  DO_TEST ("check clock for ok condition", test_clock_timedelta, 0);
+  DO_TEST ("check clock for warning condition", test_clock_timedelta, 30);
+  DO_TEST ("check clock for critical condition", test_clock_timedelta, 50);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
-#undef TEST_DATA2
 
 TEST_MAIN (mymain)
