@@ -73,10 +73,10 @@ Example (RHEL5 and RHEL6 and other old distributions):
 After `./configure` has completed successfully run `make install` and
 you're done!
 
-You can also run the (still incomplete) set of bundled tests by entering the
-command `make check` and, if the llvm tool `scan-build` is installed on your
-system, a `make -C tests check-clang-checker` to get a static code analysis
-report (for developers only).
+You can also run the (still incomplete) set of bundled unit tests by entering
+the command `make check` (or `VERBOSE=1 make check`) and, if the llvm tool
+`scan-build` is installed on your system, a `make -C tests check-clang-checker`
+to get a static code analysis report (for developers only).
 
 
 ## Supported Platforms
