@@ -98,10 +98,13 @@ mymain (void)
 
   /* data from (a static copy of) /proc/vmstat */
 
-  TEST_DATA ("check pgpgin virtual memory stat", test_memory_pgpgin, NULL);
-  TEST_DATA ("check pgpgout virtual memory stat", test_memory_pgpgout, NULL);
-  TEST_DATA ("check pswpin virtual memory stat", test_memory_pswpin, NULL);
-  TEST_DATA ("check pswpin virtual memory stat", test_memory_pswpout, NULL);
+#define DO_TEST(MSG, FUNC, DATA) \
+  do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
+
+  DO_TEST ("check pgpgin virtual memory stat", test_memory_pgpgin, NULL);
+  DO_TEST ("check pgpgout virtual memory stat", test_memory_pgpgout, NULL);
+  DO_TEST ("check pswpin virtual memory stat", test_memory_pswpin, NULL);
+  DO_TEST ("check pswpin virtual memory stat", test_memory_pswpout, NULL);
 
   test_memory_release ();
 

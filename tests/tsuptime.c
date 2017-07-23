@@ -54,16 +54,6 @@ test_uptime_output (const void *tdata)
   return ret;
 }
 
-#define TEST_STR_UPTIME(SECS, UPTIME_STR)              \
-  do                                                   \
-    {                                                  \
-      data.secs = SECS;                                \
-      data.output = UPTIME_STR;                        \
-      TEST_DATA ("check uptime ouput of "#SECS" secs", \
-		 test_uptime_output, &data);           \
-    }                                                  \
-  while (0)
-
 #define ONE_MINUTE 60
 #define ONE_HOUR (60*ONE_MINUTE)
 #define ONE_DAY (24*ONE_HOUR)
@@ -75,11 +65,21 @@ mymain (void)
   int ret = 0;
   struct test_data data;
 
-  TEST_STR_UPTIME (59, "0 min");
-  TEST_STR_UPTIME (3*ONE_HOUR+2*ONE_MINUTE, "3 hours 2 min");
-  TEST_STR_UPTIME (1*ONE_DAY+1*ONE_HOUR+25*ONE_MINUTE, "1 day 1 hour 25 min");
-  TEST_STR_UPTIME (9*ONE_MONTH+4*ONE_HOUR+10*ONE_MINUTE,
-		   "270 days 4 hours 10 min");
+#define DO_TEST(SECS, UPTIME_STR)                          \
+  do                                                       \
+    {                                                      \
+      data.secs = SECS;                                    \
+      data.output = UPTIME_STR;                            \
+      if (test_run ("check uptime ouput of "#SECS" secs",  \
+		    test_uptime_output, &data) < 0)        \
+	ret = -1;                                          \
+    }                                                      \
+  while (0)
+
+  DO_TEST (59, "0 min");
+  DO_TEST (3*ONE_HOUR+2*ONE_MINUTE, "3 hours 2 min");
+  DO_TEST (1*ONE_DAY+1*ONE_HOUR+25*ONE_MINUTE, "1 day 1 hour 25 min");
+  DO_TEST (9*ONE_MONTH+4*ONE_HOUR+10*ONE_MINUTE, "270 days 4 hours 10 min");
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

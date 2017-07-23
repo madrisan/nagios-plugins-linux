@@ -36,15 +36,28 @@ static _Noreturn void validate_input (int i, double w, double c)
 #include "../plugins/check_load.c"
 #undef NPL_TESTING
 
-struct test_data
+typedef struct test_data
 {
   nagstatus status;
   double loadavg[3];
   double wload[3];
   double cload[3];
-  bool required[3];
-  bool normalize;
-};
+} test_data;
+
+static int
+test_loadavg_normalize (const void *tdata)
+{
+  const struct test_data *data = tdata;
+  int ret = 0;
+
+  normalize_loadavg ((double *) data->loadavg, 2);
+
+  TEST_ASSERT_EQUAL_NUMERIC (data->loadavg[0], 2);
+  TEST_ASSERT_EQUAL_NUMERIC (data->loadavg[1], 1);
+  TEST_ASSERT_EQUAL_NUMERIC (2*data->loadavg[2], 1);
+
+  return ret;
+}
 
 static int
 test_loadavg_exit_status (const void *tdata)
@@ -64,43 +77,44 @@ static int
 mymain (void)
 {
   int ret = 0;
-  double test_loadavg[] = { 4.0, 2.0, 1.0 };
 
-  normalize_loadavg (test_loadavg, 2);
-  TEST_ASSERT_EQUAL_NUMERIC ((int) test_loadavg[0], 2);
-  TEST_ASSERT_EQUAL_NUMERIC ((int) test_loadavg[1], 1);
-  TEST_ASSERT_EQUAL_NUMERIC ((int) (test_loadavg[2] * 2), 1);
+#define DO_TEST(MSG, FUNC, DATA) \
+  do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
 
-  struct test_data tdata_ok = {
+  test_data tdata_normalize = {
+    .loadavg = { 4.0, 2.0, 1.0 }
+  };
+  DO_TEST ("check normalize_loadavg", test_loadavg_normalize,
+	   &tdata_normalize);
+
+  test_data tdata_ok = {
     .status = STATE_OK,
     .loadavg = { 2.8, 1.9, 1.3 },
     .wload = { 3.0, 3.0, 3.0 },
     .cload = { 4.0, 4.0, 4.0 }
   };
-  TEST_DATA ("check loadavg for ok condition",
-	     test_loadavg_exit_status, &tdata_ok);
+  DO_TEST ("check loadavg for ok condition",
+	   test_loadavg_exit_status, &tdata_ok);
 
-  struct test_data tdata_warning = {
+  test_data tdata_warning = {
     .status = STATE_WARNING,
     .loadavg = { 2.8, 1.9, 1.3 },
     .wload = { 3.0, 1.5, 1.5 },
     .cload = { 4.0, 4.0, 4.0 }
   };
-  TEST_DATA ("check loadavg for warning condition",
-	     test_loadavg_exit_status, &tdata_warning);
+  DO_TEST ("check loadavg for warning condition",
+	   test_loadavg_exit_status, &tdata_warning);
 
-  struct test_data tdata_critical = {
+  test_data tdata_critical = {
     .status = STATE_CRITICAL,
     .loadavg = { 2.8, 1.9, 5.5 },
     .wload = { 1.0, 2.0, 2.0 },
     .cload = { 3.0, 3.0, 4.0 }
   };
-  TEST_DATA ("check loadavg for critical condition",
-	     test_loadavg_exit_status, &tdata_critical);
+  DO_TEST ("check loadavg for critical condition",
+	   test_loadavg_exit_status, &tdata_critical);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
-#undef TEST_DATA
 
 TEST_MAIN (mymain)
