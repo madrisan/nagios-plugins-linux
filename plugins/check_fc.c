@@ -30,6 +30,7 @@
 
 #include "common.h"
 #include "logging.h"
+#include "string-macros.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
@@ -198,7 +199,7 @@ fc_host_status (int *n_ports, int *n_online, fc_host_statistics *stats,
 		PATH_SYS_FC_HOST, dp->d_name);
 
       line = sysfsparser_getline ("%s", path);
-      if (!strcmp (line, "Online"))
+      if (STREQ (line, "Online"))
 	(*n_online)++;
 
       free (line);

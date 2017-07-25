@@ -18,29 +18,30 @@
 AM_CPPFLAGS = -include $(top_builddir)/config.h
 
 noinst_HEADERS = \
-  common.h      \
-  cpudesc.h     \
-  cpufreq.h     \
-  cpustats.h    \
-  cputopology.h \
-  getenv.h      \
-  kernelver.h   \
-  interrupts.h  \
-  logging.h     \
-  meminfo.h     \
-  mountlist.h   \
-  messages.h    \
-  netinfo.h     \
-  processes.h   \
-  procparser.h  \
-  progname.h    \
-  progversion.h \
-  sysfsparser.h \
-  system.h      \
-  tcpinfo.h     \
-  testutils.h   \
-  thresholds.h  \
-  vminfo.h      \
-  xalloc.h      \
-  xasprintf.h   \
-  xstrtol.h
+	common.h \
+	cpudesc.h \
+	cpufreq.h \
+	cpustats.h \
+	cputopology.h \
+	getenv.h \
+	kernelver.h \
+	interrupts.h \
+	logging.h \
+	meminfo.h \
+	mountlist.h \
+	messages.h \
+	netinfo.h \
+	processes.h \
+	procparser.h \
+	progname.h \
+	progversion.h \
+	string-macros.h \
+	sysfsparser.h \
+	system.h \
+	tcpinfo.h \
+	testutils.h \
+	thresholds.h \
+	vminfo.h \
+	xalloc.h \
+	xasprintf.h \
+	xstrtol.h

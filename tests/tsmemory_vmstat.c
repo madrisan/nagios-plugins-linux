@@ -78,7 +78,7 @@ static int test_memory_ ## arg (const void *tdata)           \
     return EXIT_AM_HARDFAIL;                                 \
                                                              \
   kb_value = proc_vmem_get_ ## arg (vmem);                   \
-  TEST_ASSERT_EQUAL_NUMERIC(kb_value, value);                \
+  TEST_ASSERT_EQUAL_NUMERIC (kb_value, value);               \
                                                              \
   return ret;                                                \
 }

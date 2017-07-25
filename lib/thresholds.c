@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "string-macros.h"
 #include "system.h"
 #include "thresholds.h"
 #include "xalloc.h"
@@ -146,7 +147,7 @@ parse_range_string (char *str)
       end_str = str;
     }
   end = strtod (end_str, NULL);
-  if (strcmp (end_str, "") != 0)
+  if (STRNEQ (end_str, ""))
     set_range_end (temp_range, end);
 
   if (temp_range->start_infinity == true ||

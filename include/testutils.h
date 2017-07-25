@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include "getenv.h"
+#include "string-macros.h"
 
 #define EXIT_AM_SKIP 77		/* tell Automake we're skipping a test */
 #define EXIT_AM_HARDFAIL 99	/* tell Automake that the framework is broken */
@@ -44,7 +45,7 @@
   do { if ((A) != (B)) ret = -1; } while (0)
 
 #define TEST_ASSERT_EQUAL_STRING(A, B) \
-  do { if (strcmp (A, B) != 0) ret = -1; } while (0)
+  do { if (STRNEQ (A, B)) ret = -1; } while (0)
 
 #ifdef __cplusplus
 extern "C"

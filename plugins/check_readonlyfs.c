@@ -29,13 +29,12 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "string-macros.h"
 #include "messages.h"
 #include "mountlist.h"
 #include "xalloc.h"
 #include "progname.h"
 #include "progversion.h"
-
-#define STREQ(a, b) (strcmp (a, b) == 0)
 
 static const char *program_copyright =
   "Copyright (C) 2013-2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";

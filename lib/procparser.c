@@ -31,6 +31,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "string-macros.h"
 #include "messages.h"
 #include "procparser.h"
 #include "xalloc.h"

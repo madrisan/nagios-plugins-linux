@@ -29,6 +29,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "string-macros.h"
 #include "mountlist.h"
 #include "xalloc.h"
 
@@ -44,35 +45,35 @@
 #endif
 
 #ifndef ME_DUMMY
-# define ME_DUMMY(Fs_name, Fs_type)             \
-    (strcmp (Fs_type, "autofs") == 0            \
-     || strcmp (Fs_type, "proc") == 0           \
-   /* for Linux 2.6/3.x */                      \
-     || strcmp (Fs_type, "cgroup") == 0         \
-     || strcmp (Fs_type, "debugfs") == 0        \
-     || strcmp (Fs_type, "devpts") == 0         \
-     || strcmp (Fs_type, "fusectl") == 0        \
-     || strcmp (Fs_type, "hugetlbfs") == 0      \
-     || strcmp (Fs_type, "mqueue") == 0         \
-     || strcmp (Fs_type, "pstore") == 0         \
-     || strcmp (Fs_type, "rpc_pipefs") == 0     \
-     || strcmp (Fs_type, "securityfs") == 0     \
-     || strcmp (Fs_type, "sysfs") == 0          \
-   /* Linux 2.4 */                              \
-     || strcmp (Fs_type, "devfs") == 0          \
-     || strcmp (Fs_type, "binfmt_misc") == 0    \
-     || strcmp (Fs_type, "none") == 0)
+# define ME_DUMMY(Fs_name, Fs_type)     \
+    (STREQ (Fs_type, "autofs")          \
+     || STREQ (Fs_type, "proc")         \
+   /* for Linux 2.6/3.x */              \
+     || STREQ (Fs_type, "cgroup")       \
+     || STREQ (Fs_type, "debugfs")      \
+     || STREQ (Fs_type, "devpts")       \
+     || STREQ (Fs_type, "fusectl")      \
+     || STREQ (Fs_type, "hugetlbfs")    \
+     || STREQ (Fs_type, "mqueue")       \
+     || STREQ (Fs_type, "pstore")       \
+     || STREQ (Fs_type, "rpc_pipefs")   \
+     || STREQ (Fs_type, "securityfs")   \
+     || STREQ (Fs_type, "sysfs")        \
+   /* Linux 2.4 */                      \
+     || STREQ (Fs_type, "devfs")        \
+     || STREQ (Fs_type, "binfmt_misc")  \
+     || STREQ (Fs_type, "none"))
 #endif
 
 #ifndef ME_REMOTE
 /* A file system is "remote" if its Fs_name contains a ':'
  *    or if (it is of type (smbfs or cifs) and its Fs_name starts with '//').  */
-# define ME_REMOTE(Fs_name, Fs_type)            \
-    (strchr (Fs_name, ':') != NULL              \
-     || ((Fs_name)[0] == '/'                    \
-         && (Fs_name)[1] == '/'                 \
-         && (strcmp (Fs_type, "smbfs") == 0     \
-             || strcmp (Fs_type, "cifs") == 0)))
+# define ME_REMOTE(Fs_name, Fs_type)      \
+    (strchr (Fs_name, ':') != NULL        \
+     || ((Fs_name)[0] == '/'              \
+         && (Fs_name)[1] == '/'           \
+         && (STREQ (Fs_type, "smbfs")     \
+             || STREQ (Fs_type, "cifs"))))
 #endif
 
 /* Check for the "ro" pattern in the MOUNT_OPTIONS.
@@ -98,7 +99,7 @@ fs_check_if_readonly (char *mount_options)
       token = strtok_r (str1, ",", &saveptr1);
       if (token == NULL)
 	break;
-      if (strcmp (token, readonly_pattern) == 0)
+      if (STREQ (token, readonly_pattern))
 	return true;
     }
 
