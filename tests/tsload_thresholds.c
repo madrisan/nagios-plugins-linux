@@ -31,6 +31,8 @@ static _Noreturn void print_version (void) __attribute__ ((unused));
 static _Noreturn void usage (FILE * out) __attribute__ ((unused));
 static _Noreturn void validate_input (int i, double w, double c)
   __attribute__ ((unused));
+static void normalize_loadavg (double *loadavg, int numcpus)
+  __attribute__ ((unused));
 
 #define NPL_TESTING
 #include "../plugins/check_load.c"
@@ -43,21 +45,6 @@ typedef struct test_data
   double wload[3];
   double cload[3];
 } test_data;
-
-static int
-test_loadavg_normalize (const void *tdata)
-{
-  const struct test_data *data = tdata;
-  int ret = 0;
-
-  normalize_loadavg ((double *) data->loadavg, 2);
-
-  TEST_ASSERT_EQUAL_NUMERIC (data->loadavg[0], 2);
-  TEST_ASSERT_EQUAL_NUMERIC (data->loadavg[1], 1);
-  TEST_ASSERT_EQUAL_NUMERIC (2*data->loadavg[2], 1);
-
-  return ret;
-}
 
 static int
 test_loadavg_exit_status (const void *tdata)
@@ -80,12 +67,6 @@ mymain (void)
 
 #define DO_TEST(MSG, FUNC, DATA) \
   do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
-
-  test_data tdata_normalize = {
-    .loadavg = { 4.0, 2.0, 1.0 }
-  };
-  DO_TEST ("check normalize_loadavg", test_loadavg_normalize,
-	   &tdata_normalize);
 
   test_data tdata_ok = {
     .status = STATE_OK,
