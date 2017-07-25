@@ -75,4 +75,6 @@ typedef enum nagstatus
   STATE_DEPENDENT
 } nagstatus;
 
+#define ARRAY_CARDINALITY(ARRAY) (sizeof(ARRAY) / sizeof(*(ARRAY)))
+
 #endif	/* _COMMON_H_ */
