@@ -25,7 +25,6 @@
 
 #include "common.h"
 #include "meminfo.h"
-#include "memory.h"
 #include "testutils.h"
 
 /* silence the compiler's warning 'function defined but not used' */
