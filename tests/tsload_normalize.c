@@ -42,6 +42,8 @@ static int loadavg_status (const double *loadavg, const double *wload,
 typedef struct test_data
 {
   double loadavg[3];
+  double expect_value[3];
+  unsigned int active_cpu;
 } test_data;
 
 static int
@@ -49,12 +51,12 @@ test_loadavg_normalize (const void *tdata)
 {
   const struct test_data *data = tdata;
   int ret = 0;
+  size_t i;
 
-  normalize_loadavg ((double *) data->loadavg, 2);
+  normalize_loadavg ((double *) data->loadavg, data->active_cpu);
 
-  TEST_ASSERT_EQUAL_NUMERIC (data->loadavg[0], 2);
-  TEST_ASSERT_EQUAL_NUMERIC (data->loadavg[1], 1);
-  TEST_ASSERT_EQUAL_NUMERIC (2*data->loadavg[2], 1);
+  for (i = 0; i < ARRAY_CARDINALITY (data->loadavg); ++i)
+    TEST_ASSERT_EQUAL_NUMERIC (data->loadavg[i], data->expect_value[i]);
 
   return ret;
 }
@@ -64,14 +66,23 @@ mymain (void)
 {
   int ret = 0;
 
-#define DO_TEST(MSG, FUNC, DATA) \
-  do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
+#define DO_TEST(L1, L2, L3, E1, E2, E3, NCPU)                         \
+  do                                                                  \
+    {                                                                 \
+      test_data data = {                                              \
+        .loadavg = { L1, L2, L3 },                                    \
+        .expect_value = { E1, E2, E3 },                               \
+        .active_cpu = NCPU                                            \
+      };                                                              \
+      if (test_run("check load normalization with " #NCPU " cpu(s)",  \
+                   test_loadavg_normalize, (&data)) < 0)              \
+        ret = -1;                                                     \
+    }                                                                 \
+  while (0)
 
-  test_data tdata_normalize = {
-    .loadavg = { 4.0, 2.0, 1.0 }
-  };
-  DO_TEST ("check normalize_loadavg", test_loadavg_normalize,
-	   &tdata_normalize);
+  DO_TEST (4.0, 2.0, 1.0, 4.0, 2.0, 1.0, 1);
+  DO_TEST (4.0, 2.0, 1.0, 2.0, 1.0, 0.5, 2);
+  DO_TEST (4.0, 2.0, 6.0, 0.5, .25, .7, 8);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
