@@ -26,6 +26,8 @@
 #include "testutils.h"
 #include "system.h"
 
+#define ARRAY_CARDINALITY(ARRAY) (sizeof(ARRAY) / sizeof(*(ARRAY)))
+
 /* silence the compiler's warning 'function defined but not used' */
 static _Noreturn void print_version (void) __attribute__ ((unused));
 static _Noreturn void usage (FILE * out) __attribute__ ((unused));
@@ -82,7 +84,7 @@ mymain (void)
 
   DO_TEST (4.0, 2.0, 1.0, 4.0, 2.0, 1.0, 1);
   DO_TEST (4.0, 2.0, 1.0, 2.0, 1.0, 0.5, 2);
-  DO_TEST (4.0, 2.0, 6.0, 0.5, .25, .7, 8);
+  DO_TEST (4.0, 2.0, 6.0, 0.5, .25, .75, 8);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

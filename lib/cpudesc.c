@@ -30,6 +30,7 @@
 
 #include "common.h"
 #include "cputopology.h"
+#include "string-macros.h"
 #include "messages.h"
 #include "procparser.h"
 #include "sysfsparser.h"
@@ -224,9 +225,9 @@ cpu_desc_get_virtualization_flag (struct cpu_desc *cpudesc)
   if (cpudesc->virtflag == NULL)
     return NULL;
 
-  if (!strcmp (cpudesc->virtflag, "svm"))
+  if (STREQ (cpudesc->virtflag, "svm"))
     return "AMD-V";
-  else if (!strcmp (cpudesc->virtflag, "vmx"))
+  else if (STREQ (cpudesc->virtflag, "vmx"))
     return "VT-x";
   /* should never been reached */
   else

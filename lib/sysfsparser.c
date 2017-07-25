@@ -32,6 +32,7 @@
 
 #include "common.h"
 #include "logging.h"
+#include "string-macros.h"
 #include "messages.h"
 #include "sysfsparser.h"
 #include "xasprintf.h"
@@ -130,7 +131,7 @@ sysfsparser_readfilename(DIR *dirp, unsigned int flags)
 	}
 
       /* ignore directory entries */
-      if (!strcmp (dp->d_name, ".") || !strcmp (dp->d_name, ".."))
+      if (STREQ (dp->d_name, ".") || STREQ (dp->d_name, ".."))
 	continue;
 
      if (dp->d_type & flags)
@@ -344,7 +345,7 @@ sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone)
        *  98000
        * cat /sys/class/thermal/thermal_zone0/trip_point_0_type
        *  critical   */
-      if (strncmp (type, "critical", strlen ("critical")))
+      if (!STRPREFIX (type, "critical"))
 	continue;
 
       crit_temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL
@@ -382,17 +383,17 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
   while ((de = readdir (d)))
     {
       /* ignore directory entries */
-      if (!strcmp (de->d_name, ".") || !strcmp (de->d_name, ".."))
+      if (STREQ (de->d_name, ".") || STREQ (de->d_name, ".."))
 	continue;
       /* ignore all files but 'thermal_zone[0-*]' ones */
-      if (strncmp (de->d_name, "thermal_zone", 12))
+      if (!STRPREFIX (de->d_name, "thermal_zone"))
 	continue;
 
       if ((selected_zone != ALL_THERMAL_ZONES) &&
 	  (selected_zone != strtoul (de->d_name + 12, NULL, 10)))
 	continue;
 
-      if (!strncmp (de->d_name, "thermal_zone", 12))
+      if (STRPREFIX (de->d_name, "thermal_zone"))
 	{
 	  /* temperatures are stored in the files
 	   *  /sys/class/thermal/thermal_zone[0-9}/temp	  */

@@ -34,6 +34,7 @@
 
 #include "common.h"
 #include "logging.h"
+#include "string-macros.h"
 #include "messages.h"
 #include "netinfo.h"
 #include "xalloc.h"
@@ -97,9 +98,9 @@ struct iflist* netinfo (unsigned int seconds)
 	   ifl = ifl->next, ifl2 = ifl2->next)
 	{
 	  dbg ("network interface '%s'\n", ifl->ifname);
-	  if (strcmp (ifl->ifname, ifl2->ifname) != 0)
+	  if (STRNEQ (ifl->ifname, ifl2->ifname))
 	    plugin_error (STATE_UNKNOWN, 0,
-			  "bug in netinfo(), please contact the developer");
+			  "bug in netinfo(), please contact the developers");
 
 	  dbg ("\ttx_packets : %u %u\n", ifl->tx_packets, ifl2->tx_packets);
 	  ifl->tx_packets = (ifl2->tx_packets - ifl->tx_packets) / seconds;
