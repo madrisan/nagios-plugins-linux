@@ -107,17 +107,6 @@ typedef struct test_data
 } test_data;
 
 static int
-test_memory_unit_conversion (const void *tdata)
-{
-  const struct test_data *data = tdata;
-  int ret = 0;
-
-  TEST_ASSERT_EQUAL_NUMERIC (
-    UNIT_CONVERT (data->memsize, data->shift), data->expect_value);
-  return ret;
-}
-
-static int
 mymain (void)
 {
   int err, ret = 0;
@@ -146,30 +135,6 @@ mymain (void)
   DO_TEST ("check swap_cached memory", test_memory_swap_cached, NULL);
   DO_TEST ("check swap_free memory", test_memory_swap_free, NULL);
   DO_TEST ("check swap_total memory", test_memory_swap_total, NULL);
-
-  #define KILO 1024UL
-  #define MEGA KILO*KILO
-
-#define DO_TEST_UC(MSG, MEMSIZE, SHIFT, EXPECT_VALUE)             \
-  do                                                              \
-    {                                                             \
-      test_data data = {                                          \
-	.memsize = MEMSIZE,                                       \
-	.shift = SHIFT,                                           \
-	.expect_value = EXPECT_VALUE,                             \
-      };                                                          \
-      if (test_run(MSG, test_memory_unit_conversion, &data) < 0)  \
-        ret = -1;                                                 \
-    }                                                             \
-  while (0)
-
-  /* unit conversion */
-  DO_TEST_UC ("check memory size conversion into kbytes",
-	      KILO, k_shift, KILO);
-  DO_TEST_UC ("check memory size conversion into mbytes",
-	      2*KILO, m_shift, 2UL);
-  DO_TEST_UC ("check memory size conversion into gbytes",
-	      4*MEGA, g_shift, 4UL);
 
   test_memory_release ();
 

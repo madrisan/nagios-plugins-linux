@@ -48,6 +48,7 @@ test_programs = \
 	tsload \
 	tsuptime \
 	tsmessages \
+	tsmemory_conversions \
 	tsmemory_vmstat \
 	tstemperature \
 	tskernelver
@@ -77,6 +78,9 @@ tsintr_LDADD = $(LDADDS)
 
 tsload_SOURCES = $(test_utils) tsload.c
 tsload_LDADD = $(LDADDS)
+
+tsmemory_conversions_SOURCES = $(test_utils) tsmemory_conversions.c
+tsmemory_conversions_LDADD = $(LDADDS)
 
 if HAVE_PROC_MEMINFO
 tsmemory_meminfo_SOURCES = $(test_utils) tsmemory_meminfo.c
