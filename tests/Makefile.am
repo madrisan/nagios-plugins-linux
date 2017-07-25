@@ -45,7 +45,8 @@ test_programs = \
 	tsclock \
 	tscswch \
 	tsintr  \
-	tsload \
+	tsload_normalize \
+	tsload_thresholds \
 	tsuptime \
 	tsmessages \
 	tsmemory_conversions \
@@ -76,8 +77,11 @@ tscswch_LDADD = $(LDADDS)
 tsintr_SOURCES = $(test_utils) tsintr.c
 tsintr_LDADD = $(LDADDS)
 
-tsload_SOURCES = $(test_utils) tsload.c
-tsload_LDADD = $(LDADDS)
+tsload_normalize_SOURCES = $(test_utils) tsload_normalize.c
+tsload_normalize_LDADD = $(LDADDS)
+
+tsload_thresholds_SOURCES = $(test_utils) tsload_thresholds.c
+tsload_thresholds_LDADD = $(LDADDS)
 
 tsmemory_conversions_SOURCES = $(test_utils) tsmemory_conversions.c
 tsmemory_conversions_LDADD = $(LDADDS)
