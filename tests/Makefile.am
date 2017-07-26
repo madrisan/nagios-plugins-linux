@@ -42,7 +42,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include
 
 test_programs = \
-	tsclock \
+	tsclock_thresholds \
 	tscswch \
 	tsintr  \
 	tsload_normalize \
@@ -65,8 +65,8 @@ LDADDS = $(top_builddir)/lib/libutils.a
 TSLIBS_LDFLAGS = -module -avoid-version \
 	-rpath /evil/libtool/hack/to/force/shared/lib/creation
 
-tsclock_SOURCES = $(test_utils) tsclock.c
-tsclock_LDADD = $(LDADDS)
+tsclock_thresholds_SOURCES = $(test_utils) tsclock_thresholds.c
+tsclock_thresholds_LDADD = $(LDADDS)
 
 tscswch_SOURCES = $(test_utils) tscswch.c
 tscswch_LDADD = $(LDADDS)
