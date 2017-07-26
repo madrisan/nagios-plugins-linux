@@ -50,13 +50,10 @@ test_programs = \
 	tsuptime \
 	tsmessages \
 	tsmemory_conversions \
+	tsmemory_meminfo \
 	tsmemory_vmstat \
 	tstemperature \
 	tskernelver
-if HAVE_PROC_MEMINFO
-test_programs += \
-	tsmemory_meminfo
-endif
 
 test_libraries = tslib_uname.la
 
@@ -86,10 +83,8 @@ tsload_thresholds_LDADD = $(LDADDS)
 tsmemory_conversions_SOURCES = $(test_utils) tsmemory_conversions.c
 tsmemory_conversions_LDADD = $(LDADDS)
 
-if HAVE_PROC_MEMINFO
 tsmemory_meminfo_SOURCES = $(test_utils) tsmemory_meminfo.c
 tsmemory_meminfo_LDADD = $(LDADDS)
-endif
 
 tsmemory_vmstat_SOURCES = $(test_utils) tsmemory_vmstat.c
 tsmemory_vmstat_LDADD = $(LDADDS)

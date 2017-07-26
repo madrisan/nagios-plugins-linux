@@ -24,17 +24,20 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "meminfo.h"
-#include "memory.h"
 #include "testutils.h"
+
+#ifdef PROC_MEMINFO
+
+# include "meminfo.h"
+# include "memory.h"
 
 /* silence the compiler's warning 'function defined but not used' */
 static _Noreturn void print_version (void) __attribute__((unused));
 static _Noreturn void usage (FILE * out) __attribute__((unused));
 
-#define NPL_TESTING
-# include "../plugins/check_memory.c"
-#undef NPL_TESTING
+# define NPL_TESTING
+#  include "../plugins/check_memory.c"
+# undef NPL_TESTING
 
 static struct proc_sysmem *sysmem = NULL;
 
@@ -67,7 +70,7 @@ test_memory_release ()
   proc_sysmem_unref (sysmem);
 }
 
-#define test_memory_label(arg, value) \
+# define test_memory_label(arg, value)                       \
 static int test_memory_ ## arg (const void *tdata)           \
 {                                                            \
   int err, ret = 0;                                          \
@@ -114,7 +117,7 @@ mymain (void)
   if ((err = test_memory_init ()) != 0)
     return err;
 
-#define DO_TEST(MSG, FUNC, DATA) \
+# define DO_TEST(MSG, FUNC, DATA) \
   do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
 
   /* data from (a static copy of) /proc/meminfo */
@@ -142,3 +145,13 @@ mymain (void)
 }
 
 TEST_MAIN (mymain)
+
+#else
+
+int
+main (void)
+{
+  return EXIT_AM_SKIP;
+}
+
+#endif		/* PROC_MEMINFO */
