@@ -40,24 +40,24 @@ static void normalize_loadavg (double *loadavg, int numcpus)
 
 typedef struct test_data
 {
-  nagstatus status;
   double loadavg[3];
   double wload[3];
   double cload[3];
+  bool required[3];
+  nagstatus expect_status;
 } test_data;
 
 static int
 test_loadavg_exit_status (const void *tdata)
 {
   const struct test_data *data = tdata;
-  bool required[] = { true, true, true };
   nagstatus status;
+  int ret = 0;
 
-  status = loadavg_status (data->loadavg, data->wload, data->cload, required);
-  if (status == data->status)
-    return 0;
+  status = loadavg_status (data->loadavg, data->wload, data->cload, data->required);
 
-  return -1;
+  TEST_ASSERT_EQUAL_NUMERIC (status, data->expect_status);
+  return ret;
 }
 
 static int
@@ -65,35 +65,62 @@ mymain (void)
 {
   int ret = 0;
 
-#define DO_TEST(MSG, FUNC, DATA) \
-  do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
+#define DO_TEST(L1,L2,L3, W1,W2,W3, C1,C2,C3, R1,R2,R3, EXPECT)  \
+  do                                                             \
+    {                                                            \
+      test_data data = {                                         \
+	.loadavg = { L1, L2, L3 },                               \
+	.wload = { W1, W2, W3 },                                 \
+	.cload = { C1, C2, C3 },                                 \
+	.required = { R1, R2, R3 },                              \
+	.expect_status = EXPECT                                  \
+      };                                                         \
+      if (test_run("check load exit status, expected: " #EXPECT, \
+		   test_loadavg_exit_status, &data) < 0)         \
+	ret = -1;                                                \
+    }                                                            \
+  while (0)
 
-  test_data tdata_ok = {
-    .status = STATE_OK,
-    .loadavg = { 2.8, 1.9, 1.3 },
-    .wload = { 3.0, 3.0, 3.0 },
-    .cload = { 4.0, 4.0, 4.0 }
-  };
-  DO_TEST ("check loadavg for ok condition",
-	   test_loadavg_exit_status, &tdata_ok);
-
-  test_data tdata_warning = {
-    .status = STATE_WARNING,
-    .loadavg = { 2.8, 1.9, 1.3 },
-    .wload = { 3.0, 1.5, 1.5 },
-    .cload = { 4.0, 4.0, 4.0 }
-  };
-  DO_TEST ("check loadavg for warning condition",
-	   test_loadavg_exit_status, &tdata_warning);
-
-  test_data tdata_critical = {
-    .status = STATE_CRITICAL,
-    .loadavg = { 2.8, 1.9, 5.5 },
-    .wload = { 1.0, 2.0, 2.0 },
-    .cload = { 3.0, 3.0, 4.0 }
-  };
-  DO_TEST ("check loadavg for critical condition",
-	   test_loadavg_exit_status, &tdata_critical);
+  DO_TEST (/* loadavg */ 2.8, 1.9, 1.3,
+	   /* wload */ 3.0, 3.0, 3.0, /* cload */ 4.0, 4.0, 4.0,
+	   /* required */ true, true, true,
+	   /* expect_status */ STATE_OK);
+  DO_TEST (/* loadavg */ 2.8, 1.9, 1.3,
+	   /* wload */ 3.0, 1.5, 1.5, /* cload */ 4.0, 4.0, 4.0,
+	   /* required */ true, true, true,
+	   /* expect_status */ STATE_WARNING);
+  DO_TEST (/* loadavg */ 2.8, 1.9, 1.3,
+	   /* wload */ 3.0, 1.5, 1.5, /* cload */ 4.0, 4.0, 4.0,
+	   /* required */ true, false, false,
+	   /* expect_status */ STATE_OK);
+  DO_TEST (/* loadavg */ 2.8, 1.9, 1.3,
+	   /* wload */ 3.0, 1.5, 1.5, /* cload */ 4.0, 4.0, 4.0,
+	   /* required */ false, true, false,
+	   /* expect_status */ STATE_WARNING);
+  DO_TEST (/* loadavg */ 2.8, 1.9, 1.3,
+	   /* wload */ 3.0, 1.5, 1.5, /* cload */ 4.0, 4.0, 4.0,
+	   /* required */ false, false, true,
+	   /* expect_status */ STATE_OK);
+  DO_TEST (/* loadavg */ 2.8, 1.9, 1.3,
+	   /* wload */ 3.0, 1.5, 1.5, /* cload */ 4.0, 4.0, 4.0,
+	   /* required */ false, true, true,
+	   /* expect_status */ STATE_WARNING);
+  DO_TEST (/* loadavg */ 2.8, 1.9, 5.5,
+	   /* wload */ 1.0, 2.0, 2.0, /* cload */ 3.0, 3.0, 4.0,
+	   /* required */ true, true, true,
+	   /* expect_status */ STATE_CRITICAL);
+  DO_TEST (/* loadavg */ 2.8, 1.9, 5.5,
+	   /* wload */ 1.0, 2.0, 2.0, /* cload */ 3.0, 3.0, 4.0,
+	   /* required */ true, false, false,
+	   /* expect_status */ STATE_WARNING);
+  DO_TEST (/* loadavg */ 2.8, 1.9, 5.5,
+	   /* wload */ 1.0, 2.0, 3.0, /* cload */ 3.0, 3.0, 6.0,
+	   /* required */ false, true, false,
+	   /* expect_status */ STATE_OK);
+  DO_TEST (/* loadavg */ 2.8, 1.9, 5.5,
+	   /* wload */ 1.0, 2.0, 3.0, /* cload */ 3.0, 3.0, 6.0,
+	   /* required */ false, false, true,
+	   /* expect_status */ STATE_WARNING);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
