@@ -42,6 +42,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include
 
 test_programs = \
+	tslibmeminfo \
 	tsclock_thresholds \
 	tscswch \
 	tsintr  \
@@ -64,6 +65,9 @@ test_utils = \
 LDADDS = $(top_builddir)/lib/libutils.a
 TSLIBS_LDFLAGS = -module -avoid-version \
 	-rpath /evil/libtool/hack/to/force/shared/lib/creation
+
+tslibmeminfo_SOURCES = $(test_utils) tslibmeminfo.c
+tslibmeminfo_LDADD = $(LDADDS)
 
 tsclock_thresholds_SOURCES = $(test_utils) tsclock_thresholds.c
 tsclock_thresholds_LDADD = $(LDADDS)
