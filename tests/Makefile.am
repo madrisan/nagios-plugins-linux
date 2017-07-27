@@ -42,6 +42,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include
 
 test_programs = \
+	tslibkernelver \
 	tslibmeminfo \
 	tslibmessages \
 	tsclock_thresholds \
@@ -53,8 +54,7 @@ test_programs = \
 	tsmemory_conversions \
 	tsmemory_meminfo \
 	tsmemory_vmstat \
-	tstemperature \
-	tskernelver
+	tstemperature
 
 test_libraries = tslib_uname.la
 
@@ -65,6 +65,9 @@ test_utils = \
 LDADDS = $(top_builddir)/lib/libutils.a
 TSLIBS_LDFLAGS = -module -avoid-version \
 	-rpath /evil/libtool/hack/to/force/shared/lib/creation
+
+tslibkernelver_SOURCES = $(test_utils) tslibkernelver.c
+tslibkernelver_LDADD = $(LDADDS)
 
 tslibmeminfo_SOURCES = $(test_utils) tslibmeminfo.c
 tslibmeminfo_LDADD = $(LDADDS)
@@ -101,9 +104,6 @@ tsuptime_LDADD = $(LDADDS)
 
 tstemperature_SOURCES = $(test_utils) tstemperature.c
 tstemperature_LDADD = $(LDADDS)
-
-tskernelver_SOURCES = $(test_utils) tskernelver.c
-tskernelver_LDADD = $(LDADDS)
 
 tslib_uname_la_SOURCES = tslib_uname.c
 tslib_uname_la_LDFLAGS = $(TSLIBS_LDFLAGS)
