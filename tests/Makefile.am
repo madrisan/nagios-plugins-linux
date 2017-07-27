@@ -43,13 +43,13 @@ AM_CPPFLAGS = \
 
 test_programs = \
 	tslibmeminfo \
+	tslibmessages \
 	tsclock_thresholds \
 	tscswch \
 	tsintr  \
 	tsload_normalize \
 	tsload_thresholds \
 	tsuptime \
-	tsmessages \
 	tsmemory_conversions \
 	tsmemory_meminfo \
 	tsmemory_vmstat \
@@ -68,6 +68,9 @@ TSLIBS_LDFLAGS = -module -avoid-version \
 
 tslibmeminfo_SOURCES = $(test_utils) tslibmeminfo.c
 tslibmeminfo_LDADD = $(LDADDS)
+
+tslibmessages_SOURCES = $(test_utils) tslibmessages.c
+tslibmessages_LDADD = $(LDADDS)
 
 tsclock_thresholds_SOURCES = $(test_utils) tsclock_thresholds.c
 tsclock_thresholds_LDADD = $(LDADDS)
@@ -95,9 +98,6 @@ tsmemory_vmstat_LDADD = $(LDADDS)
 
 tsuptime_SOURCES = $(test_utils) tsuptime.c
 tsuptime_LDADD = $(LDADDS)
-
-tsmessages_SOURCES = $(test_utils) tsmessages.c
-tsmessages_LDADD = $(LDADDS)
 
 tstemperature_SOURCES = $(test_utils) tstemperature.c
 tstemperature_LDADD = $(LDADDS)
