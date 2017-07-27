@@ -95,6 +95,8 @@ typedef struct proc_sysmem
   struct proc_sysmem_data *data;
 } proc_sysmem_t;
 
+#ifndef NPL_TESTING
+
 const char *
 get_path_proc_meminfo ()
 {
@@ -159,7 +161,7 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
     { "MemFree", &data->kb_main_free },	    /* important */
     { "MemTotal", &data->kb_main_total },    /* important */
     { "SReclaimable", &data->kb_slab_reclaimable }, /* dentry and inode structures */
-    { "Shmem", &data->kb_main_shared},        /* kernel 2.6.32 and later */
+    { "Shmem", &data->kb_main_shared },       /* kernel 2.6.32 and later */
     { "Slab", &data->kb_slab },               /* kB version of vmstat nr_slab */
     { "SwapCached", &data->kb_swap_cached },  /* late 2.4 and 2.6+ only */
     { "SwapFree", &data->kb_swap_free },      /* important */
@@ -284,3 +286,5 @@ proc_sysmem_get_swap_used (struct proc_sysmem *sysmem)
   return (sysmem == NULL) ? 0 :
     sysmem->data->kb_swap_total - sysmem->data->kb_swap_free;
 }
+
+#endif			/* NPL_TESTING */
