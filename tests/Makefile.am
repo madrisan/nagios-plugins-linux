@@ -54,7 +54,6 @@ test_programs = \
 	tsuptime \
 	tsmemory_conversions \
 	tsmemory_meminfo \
-	tsmemory_vmstat \
 	tstemperature
 
 test_libraries = tslib_uname.la
@@ -99,9 +98,6 @@ tsmemory_conversions_LDADD = $(LDADDS)
 
 tsmemory_meminfo_SOURCES = $(test_utils) tsmemory_meminfo.c
 tsmemory_meminfo_LDADD = $(LDADDS)
-
-tsmemory_vmstat_SOURCES = $(test_utils) tsmemory_vmstat.c
-tsmemory_vmstat_LDADD = $(LDADDS)
 
 tsuptime_SOURCES = $(test_utils) tsuptime.c
 tsuptime_LDADD = $(LDADDS)
