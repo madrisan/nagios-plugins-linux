@@ -43,7 +43,9 @@ AM_CPPFLAGS = \
 
 test_programs = \
 	tslibkernelver \
-	tslibmeminfo \
+	tslibmeminfo_conversions \
+	tslibmeminfo_interface \
+	tslibmeminfo_procparser \
 	tslibmessages \
 	tslibvminfo \
 	tsclock_thresholds \
@@ -52,8 +54,6 @@ test_programs = \
 	tsload_normalize \
 	tsload_thresholds \
 	tsuptime \
-	tsmemory_conversions \
-	tsmemory_meminfo \
 	tstemperature
 
 test_libraries = tslib_uname.la
@@ -69,8 +69,14 @@ TSLIBS_LDFLAGS = -module -avoid-version \
 tslibkernelver_SOURCES = $(test_utils) tslibkernelver.c
 tslibkernelver_LDADD = $(LDADDS)
 
-tslibmeminfo_SOURCES = $(test_utils) tslibmeminfo.c
-tslibmeminfo_LDADD = $(LDADDS)
+tslibmeminfo_conversions_SOURCES = $(test_utils) tslibmeminfo_conversions.c
+tslibmeminfo_conversions_LDADD = $(LDADDS)
+
+tslibmeminfo_interface_SOURCES = $(test_utils) tslibmeminfo_interface.c
+tslibmeminfo_interface_LDADD = $(LDADDS)
+
+tslibmeminfo_procparser_SOURCES = $(test_utils) tslibmeminfo_procparser.c
+tslibmeminfo_procparser_LDADD = $(LDADDS)
 
 tslibmessages_SOURCES = $(test_utils) tslibmessages.c
 tslibmessages_LDADD = $(LDADDS)
@@ -92,12 +98,6 @@ tsload_normalize_LDADD = $(LDADDS)
 
 tsload_thresholds_SOURCES = $(test_utils) tsload_thresholds.c
 tsload_thresholds_LDADD = $(LDADDS)
-
-tsmemory_conversions_SOURCES = $(test_utils) tsmemory_conversions.c
-tsmemory_conversions_LDADD = $(LDADDS)
-
-tsmemory_meminfo_SOURCES = $(test_utils) tsmemory_meminfo.c
-tsmemory_meminfo_LDADD = $(LDADDS)
 
 tsuptime_SOURCES = $(test_utils) tsuptime.c
 tsuptime_LDADD = $(LDADDS)

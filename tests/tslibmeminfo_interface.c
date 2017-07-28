@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2017 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * Unit test for check_memory.c and check_swap.c (/proc/meminfo)
+ * Unit test for lib/meminfo.c
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,18 +28,11 @@
 
 #ifdef PROC_MEMINFO
 
-# include "meminfo.h"
-# include "memory.h"
-
-/* silence the compiler's warning 'function defined but not used' */
-static _Noreturn void print_version (void) __attribute__((unused));
-static _Noreturn void usage (FILE * out) __attribute__((unused));
-
 # define NPL_TESTING
-#  include "../plugins/check_memory.c"
+#  include "../lib/meminfo.c"
 # undef NPL_TESTING
 
-static struct proc_sysmem *sysmem = NULL;
+proc_sysmem_t *sysmem = NULL;
 
 static int
 test_memory_init ()
@@ -47,19 +40,16 @@ test_memory_init ()
   int ret = 0;
   const char *env_variable = "NPL_TEST_PATH_PROCMEMINFO";
 
-  if (sysmem == NULL)
-    {
-      ret = proc_sysmem_new (&sysmem);
-      if (ret < 0)
-	return EXIT_AM_HARDFAIL;
+  ret = proc_sysmem_new (&sysmem);
+  if (ret < 0)
+    return EXIT_AM_HARDFAIL;
 
-      ret = setenv (env_variable, NPL_TEST_PATH_PROCMEMINFO, 1);
-      if (ret < 0)
-	return EXIT_AM_HARDFAIL;
+  ret = setenv (env_variable, NPL_TEST_PATH_PROCMEMINFO, 1);
+  if (ret < 0)
+    return EXIT_AM_HARDFAIL;
 
-      proc_sysmem_read (sysmem);
-      unsetenv (env_variable);
-    }
+  proc_sysmem_read (sysmem);
+  unsetenv (env_variable);
 
   return 0;
 }
@@ -77,6 +67,7 @@ static int test_memory_ ## arg (const void *tdata)           \
   unsigned long kb_value;                                    \
   const char *env_variable = "NPL_TEST_PATH_PROCMEMINFO";    \
                                                              \
+  /* read the data from (a static copy of) /proc/meminfo */  \
   err = setenv (env_variable, NPL_TEST_PATH_PROCMEMINFO, 1); \
   if (err < 0)                                               \
     return EXIT_AM_HARDFAIL;                                 \
@@ -87,6 +78,7 @@ static int test_memory_ ## arg (const void *tdata)           \
   return ret;                                                \
 }
 
+/* function used by check_memory */
 test_memory_label (active, 3090692UL);
 test_memory_label (anon_pages, 1008780UL);
 test_memory_label (committed_as, 3678828UL);
@@ -98,16 +90,10 @@ test_memory_label (main_free, 11918208UL);
 test_memory_label (main_shared, 387476UL);
 test_memory_label (main_total, 16384256UL);
 
+/* function used by check_swap */
 test_memory_label (swap_cached, 1024UL);
 test_memory_label (swap_free, 8387580UL);
 test_memory_label (swap_total, 8388604UL);
-
-typedef struct test_data
-{
-  unsigned long long memsize;
-  unsigned long long expect_value;
-  unit_shift shift;
-} test_data;
 
 static int
 mymain (void)
@@ -117,10 +103,10 @@ mymain (void)
   if ((err = test_memory_init ()) != 0)
     return err;
 
+  /* test the public interface of the library */
+
 # define DO_TEST(MSG, FUNC, DATA) \
   do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
-
-  /* data from (a static copy of) /proc/meminfo */
 
   /* system memory */
   DO_TEST ("check active memory", test_memory_active, NULL);
