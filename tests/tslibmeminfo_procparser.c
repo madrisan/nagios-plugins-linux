@@ -33,7 +33,7 @@
 # undef NPL_TESTING
 
 static int
-test_memory_init (struct proc_sysmem **sysmem)
+test_memory_init (proc_sysmem_t **sysmem)
 {
   int ret = 0;
   const char *env_variable = "NPL_TEST_PATH_PROCMEMINFO";
@@ -53,7 +53,7 @@ test_memory_init (struct proc_sysmem **sysmem)
 }
 
 static void
-test_memory_release (struct proc_sysmem *sysmem)
+test_memory_release (proc_sysmem_t *sysmem)
 {
   proc_sysmem_unref (sysmem);
 }
@@ -97,6 +97,8 @@ mymain (void)
 	ret = -1;                                                           \
     }                                                                       \
   while (0)
+
+  /* test the proc parser */
 
   DO_TEST ("Active", procdata->kb_active, 3090692UL);
   DO_TEST ("Active(file)", procdata->kb_active_file, 2021912UL);
