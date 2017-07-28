@@ -33,28 +33,10 @@
 #include "system.h"
 #include "getenv.h"
 #include "messages.h"
-#include "meminfo.h"
 #include "procparser.h"
+#include "vminfo.h"
 
 #define PROC_STAT     "/proc/stat"
-
-const char *
-get_path_proc_vmstat ()
-{
-  const char *env_procvmstat = secure_getenv ("NPL_TEST_PATH_PROCVMSTAT");
-  if (env_procvmstat)
-    return env_procvmstat;
-
-  return "/proc/vmstat";
-}
-
-/* get_vmem_pagesize - get memory page size */
-
-inline long
-get_vmem_pagesize (void)
-{
-  return sysconf (_SC_PAGESIZE);
-}
 
 typedef struct proc_vmem_data
 {
@@ -114,6 +96,26 @@ typedef struct proc_vmem
   struct proc_vmem_data *data;
 } proc_vmem_t;
 
+#ifndef NPL_TESTING
+
+const char *
+get_path_proc_vmstat ()
+{
+  const char *env_procvmstat = secure_getenv ("NPL_TEST_PATH_PROCVMSTAT");
+  if (env_procvmstat)
+    return env_procvmstat;
+
+  return "/proc/vmstat";
+}
+
+/* get_vmem_pagesize - get memory page size */
+
+inline long
+get_vmem_pagesize (void)
+{
+  return sysconf (_SC_PAGESIZE);
+}
+
 /* Allocates space for a new vmem object.
  * Returns 0 if all went ok. Errors are returned as negative values. */
 
@@ -156,49 +158,49 @@ proc_vmem_read (struct proc_vmem *vmem)
   struct proc_vmem_data *data = vmem->data;
 
   const proc_table_struct vmem_table[] = {
-    {"allocstall", &data->vm_allocstall},
-    {"kswapd_inodesteal", &data->vm_kswapd_inodesteal},
-    {"kswapd_steal", &data->vm_kswapd_steal},
-    {"nr_dirty", &data->vm_nr_dirty},	/* page version of meminfo Dirty */
-    {"nr_mapped", &data->vm_nr_mapped},	/* page version of meminfo Mapped */
-    {"nr_page_table_pages", &data->vm_nr_page_table_pages},	/* same as meminfo PageTables */
-    {"nr_pagecache", &data->vm_nr_pagecache},	/* gone in 2.5.66+ kernels */
-    {"nr_reverse_maps", &data->vm_nr_reverse_maps},	/* page version of meminfo ReverseMaps GONE */
-    {"nr_slab", &data->vm_nr_slab},	/* page version of meminfo Slab */
-    {"nr_unstable", &data->vm_nr_unstable},
-    {"nr_writeback", &data->vm_nr_writeback},	/* page version of meminfo Writeback */
-    {"pageoutrun", &data->vm_pageoutrun},
-    {"pgactivate", &data->vm_pgactivate},
-    {"pgalloc", &data->vm_pgalloc},	/* GONE (now separate dma,high,normal) */
-    {"pgalloc_dma", &data->vm_pgalloc_dma},
-    {"pgalloc_high", &data->vm_pgalloc_high},
-    {"pgalloc_normal", &data->vm_pgalloc_normal},
-    {"pgdeactivate", &data->vm_pgdeactivate},
-    {"pgfault", &data->vm_pgfault},
-    {"pgfree", &data->vm_pgfree},
-    {"pginodesteal", &data->vm_pginodesteal},
-    {"pgmajfault", &data->vm_pgmajfault},
-    {"pgpgin", &data->vm_pgpgin},	/* important */
-    {"pgpgout", &data->vm_pgpgout},	/* important */
-    {"pgrefill", &data->vm_pgrefill},	/* GONE (now separate dma,high,normal) */
-    {"pgrefill_dma", &data->vm_pgrefill_dma},
-    {"pgrefill_high", &data->vm_pgrefill_high},
-    {"pgrefill_normal", &data->vm_pgrefill_normal},
-    {"pgrotated", &data->vm_pgrotated},
-    {"pgscan", &data->vm_pgscan},	/* GONE (now separate direct,kswapd and dma,high,normal) */
-    {"pgscan_direct_dma", &data->vm_pgscan_direct_dma},
-    {"pgscan_direct_high", &data->vm_pgscan_direct_high},
-    {"pgscan_direct_normal", &data->vm_pgscan_direct_normal},
-    {"pgscan_kswapd_dma", &data->vm_pgscan_kswapd_dma},
-    {"pgscan_kswapd_high", &data->vm_pgscan_kswapd_high},
-    {"pgscan_kswapd_normal", &data->vm_pgscan_kswapd_normal},
-    {"pgsteal", &data->vm_pgsteal},	/* GONE (now separate dma,high,normal) */
-    {"pgsteal_dma", &data->vm_pgsteal_dma},
-    {"pgsteal_high", &data->vm_pgsteal_high},
-    {"pgsteal_normal", &data->vm_pgsteal_normal},
-    {"pswpin", &data->vm_pswpin},	/* important */
-    {"pswpout", &data->vm_pswpout},	/* important */
-    {"slabs_scanned", &data->vm_slabs_scanned},
+    { "allocstall", &data->vm_allocstall },
+    { "kswapd_inodesteal", &data->vm_kswapd_inodesteal },
+    { "kswapd_steal", &data->vm_kswapd_steal },
+    { "nr_dirty", &data->vm_nr_dirty },	/* page version of meminfo Dirty */
+    { "nr_mapped", &data->vm_nr_mapped },	/* page version of meminfo Mapped */
+    { "nr_page_table_pages", &data->vm_nr_page_table_pages },	/* same as meminfo PageTables */
+    { "nr_pagecache", &data->vm_nr_pagecache },	/* gone in 2.5.66+ kernels */
+    { "nr_reverse_maps", &data->vm_nr_reverse_maps },	/* page version of meminfo ReverseMaps GONE */
+    { "nr_slab", &data->vm_nr_slab },	/* page version of meminfo Slab */
+    { "nr_unstable", &data->vm_nr_unstable },
+    { "nr_writeback", &data->vm_nr_writeback },	/* page version of meminfo Writeback */
+    { "pageoutrun", &data->vm_pageoutrun },
+    { "pgactivate", &data->vm_pgactivate },
+    { "pgalloc", &data->vm_pgalloc },	/* GONE (now separate dma,high,normal) */
+    { "pgalloc_dma", &data->vm_pgalloc_dma },
+    { "pgalloc_high", &data->vm_pgalloc_high },
+    { "pgalloc_normal", &data->vm_pgalloc_normal },
+    { "pgdeactivate", &data->vm_pgdeactivate },
+    { "pgfault", &data->vm_pgfault },
+    { "pgfree", &data->vm_pgfree },
+    { "pginodesteal", &data->vm_pginodesteal },
+    { "pgmajfault", &data->vm_pgmajfault },
+    { "pgpgin", &data->vm_pgpgin },	/* important */
+    { "pgpgout", &data->vm_pgpgout },	/* important */
+    { "pgrefill", &data->vm_pgrefill },	/* GONE (now separate dma,high,normal) */
+    { "pgrefill_dma", &data->vm_pgrefill_dma },
+    { "pgrefill_high", &data->vm_pgrefill_high },
+    { "pgrefill_normal", &data->vm_pgrefill_normal },
+    { "pgrotated", &data->vm_pgrotated },
+    { "pgscan", &data->vm_pgscan },	/* GONE (now separate direct,kswapd and dma,high,normal) */
+    { "pgscan_direct_dma", &data->vm_pgscan_direct_dma },
+    { "pgscan_direct_high", &data->vm_pgscan_direct_high },
+    { "pgscan_direct_normal", &data->vm_pgscan_direct_normal },
+    { "pgscan_kswapd_dma", &data->vm_pgscan_kswapd_dma },
+    { "pgscan_kswapd_high", &data->vm_pgscan_kswapd_high },
+    { "pgscan_kswapd_normal", &data->vm_pgscan_kswapd_normal },
+    { "pgsteal", &data->vm_pgsteal },	/* GONE (now separate dma,high,normal) */
+    { "pgsteal_dma", &data->vm_pgsteal_dma },
+    { "pgsteal_high", &data->vm_pgsteal_high },
+    { "pgsteal_normal", &data->vm_pgsteal_normal },
+    { "pswpin", &data->vm_pswpin },	/* important */
+    { "pswpout", &data->vm_pswpout },	/* important */
+    { "slabs_scanned", &data->vm_slabs_scanned },
   };
   const int vmem_table_count =
     sizeof (vmem_table) / sizeof (proc_table_struct);
@@ -316,3 +318,5 @@ proc_vmem_get_pgscank (struct proc_vmem *vmem)
 	  NULL) ? 0 : vmem->data->vm_pgscan_kswapd_dma +
     vmem->data->vm_pgscan_kswapd_high + vmem->data->vm_pgscan_kswapd_normal;
 }
+
+#endif			/* NPL_TESTING */

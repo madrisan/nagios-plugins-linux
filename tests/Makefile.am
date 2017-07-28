@@ -45,6 +45,7 @@ test_programs = \
 	tslibkernelver \
 	tslibmeminfo \
 	tslibmessages \
+	tslibvminfo \
 	tsclock_thresholds \
 	tscswch \
 	tsintr  \
@@ -74,6 +75,9 @@ tslibmeminfo_LDADD = $(LDADDS)
 
 tslibmessages_SOURCES = $(test_utils) tslibmessages.c
 tslibmessages_LDADD = $(LDADDS)
+
+tslibvminfo_SOURCES = $(test_utils) tslibvminfo.c
+tslibvminfo_LDADD = $(LDADDS)
 
 tsclock_thresholds_SOURCES = $(test_utils) tsclock_thresholds.c
 tsclock_thresholds_LDADD = $(LDADDS)
