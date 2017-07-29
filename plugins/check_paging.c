@@ -42,10 +42,6 @@ static struct option const longopts[] = {
   {(char *) "swapping", no_argument, NULL, 's'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
-  {(char *) "byte", no_argument, NULL, 'b'},
-  {(char *) "kilobyte", no_argument, NULL, 'k'},
-  {(char *) "megabyte", no_argument, NULL, 'm'},
-  {(char *) "gigabyte", no_argument, NULL, 'g'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
