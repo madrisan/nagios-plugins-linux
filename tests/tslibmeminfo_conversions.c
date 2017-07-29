@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2017 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * Unit test for check_memory.c
+ * Unit test for lib/meminfo.c
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,21 +19,8 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-#include "common.h"
 #include "meminfo.h"
 #include "testutils.h"
-
-/* silence the compiler's warning 'function defined but not used' */
-static _Noreturn void print_version (void) __attribute__((unused));
-static _Noreturn void usage (FILE * out) __attribute__((unused));
-
-#define NPL_TESTING
-# include "../plugins/check_memory.c"
-#undef NPL_TESTING
 
 typedef struct test_data
 {

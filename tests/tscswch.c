@@ -19,13 +19,6 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-#include "common.h"
-#include "cpustats.h"
-#include "system.h"
 #include "testutils.h"
 
 /* silence the compiler's warning 'function defined but not used' */
@@ -89,9 +82,9 @@ mymain (void)
   do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
 
   DO_TEST ("check if get_ctxtdelta() is monotonic",
-	    test_cswch_monotonic, NULL);
+	   test_cswch_monotonic, NULL);
   DO_TEST ("check for parsing errors in cpu_stats_get_cswch()",
-	    test_cswch_proc_parsing, NULL);
+	   test_cswch_proc_parsing, NULL);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

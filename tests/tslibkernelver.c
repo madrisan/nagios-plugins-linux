@@ -19,7 +19,6 @@
  *
  */
 
-#include <stdio.h>
 #include <linux/version.h>
 
 #include "common.h"

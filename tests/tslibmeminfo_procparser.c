@@ -19,11 +19,6 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-#include "common.h"
 #include "testutils.h"
 
 #ifdef PROC_MEMINFO
