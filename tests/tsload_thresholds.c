@@ -19,10 +19,6 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "common.h"
 #include "testutils.h"
 #include "thresholds.h"
 

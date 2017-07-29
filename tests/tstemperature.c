@@ -19,11 +19,6 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "common.h"
-#include "sysfsparser.h"
 #include "testutils.h"
 
 /* silence the compiler's warning 'function defined but not used' */
@@ -45,7 +40,7 @@ test_temperature_unit_conversion (const void *tdata)
 {
   char *scale;
   const struct test_data *data = tdata;
-  const unsigned long chk_temp = 1000*25;  /* 25C */
+  const unsigned long chk_temp = 1000*25;	/* 25C */
   int ret = 0;
 
   TEST_ASSERT_EQUAL_NUMERIC (data->expect_value,
@@ -73,9 +68,9 @@ mymain (void)
   DO_TEST ("check get_real_temp with temp_units eq TEMP_CELSIUS",
 	   TEMP_CELSIUS, 25);
   DO_TEST ("check get_real_temp with temp_units eq TEMP_FAHRENHEIT",
-           TEMP_FAHRENHEIT, 77);
+	   TEMP_FAHRENHEIT, 77);
   DO_TEST ("check get_real_temp with temp_units eq TEMP_KELVIN",
-           TEMP_KELVIN, 298.1);
+	   TEMP_KELVIN, 298.1);
 
   /* FIXME: we should test here /sys/class/thermal/ related stuff
             /sys/class/thermal/thermal_zone[0-*]/{type,temp,trip_point_*}

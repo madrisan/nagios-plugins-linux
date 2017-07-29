@@ -19,13 +19,9 @@
  *
  */
 
-#include <stdio.h>
 #include <string.h>
-#include <linux/version.h>
 #include <sys/utsname.h>
 
-#include "common.h"
-#include "kernelver.h"
 #include "testutils.h"
 
 int
