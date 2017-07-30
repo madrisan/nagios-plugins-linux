@@ -27,13 +27,15 @@
 #  include "../lib/meminfo.c"
 # undef NPL_TESTING
 
+proc_sysmem_t *sysmem = NULL;
+
 static int
-test_memory_init (proc_sysmem_t **sysmem)
+test_memory_init ()
 {
   int ret = 0;
   const char *env_variable = "NPL_TEST_PATH_PROCMEMINFO";
 
-  ret = proc_sysmem_new (sysmem);
+  ret = proc_sysmem_new (&sysmem);
   if (ret < 0)
     return EXIT_AM_HARDFAIL;
 
@@ -41,14 +43,14 @@ test_memory_init (proc_sysmem_t **sysmem)
   if (ret < 0)
     return EXIT_AM_HARDFAIL;
 
-  proc_sysmem_read (*sysmem);
+  proc_sysmem_read (sysmem);
   unsetenv (env_variable);
 
   return 0;
 }
 
 static void
-test_memory_release (proc_sysmem_t *sysmem)
+test_memory_release ()
 {
   proc_sysmem_unref (sysmem);
 }
@@ -72,7 +74,6 @@ test_procmeminfo (const void *tdata)
 static int
 mymain (void)
 {
-  proc_sysmem_t *sysmem = NULL;
   int err, ret = 0;
 
   if ((err = test_memory_init (&sysmem)) != 0)
