@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014,2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2015,2017 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check memory and swap paging on Linux.
  *
@@ -16,8 +16,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * This software takes some ideas and code from procps-3.2.8 (free).
  */
 
 #include <getopt.h>
@@ -35,11 +33,12 @@
 #include "xasprintf.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014,2015,2017 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "paging", no_argument, NULL, 'p'},
   {(char *) "swapping", no_argument, NULL, 's'},
+  {(char *) "swapping-only", no_argument, NULL, 'S'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
@@ -54,15 +53,19 @@ usage (FILE * out)
   fputs ("This plugin checks the memory and swap paging.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-p] [-s] -w PERC -c PERC\n",
-	   program_name);
+  fprintf (out, "  %s [-s] [-S] [-w PAGES] [-c PAGES]\n", program_name);
   fputs (USAGE_OPTIONS, out);
-  fputs ("  -p, --paging    display the page reads and writes\n", out);
-  fputs ("  -s, --swapping  display the swap reads amd writes\n", out);
+  fputs ("  -s, --swapping  display also the swap reads and writes\n", out);
+  fputs ("  -S, --swapping-only  only display the swap reads and writes\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
+  fprintf (out, "  PAGES is the sum of `pswpin' and `pswpout' per second,\n"
+		"\tif the command-line option `--swapping-only' "
+		"has been specified,\n"
+		"\tor the number of `majfault/s' otherwise.\n");
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s --paging --swapping -w 10 -c 25\n", program_name);
+  fprintf (out, "  %s --swapping -w 10 -c 25\n", program_name);
+  fprintf (out, "  %s --swapping-only -w 40 -c 60\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -81,10 +84,11 @@ int
 main (int argc, char **argv)
 {
   bool show_swapping = false;
+  bool swapping_only = false;
   int c, status, err;
   char *critical = NULL, *warning = NULL;
   char *status_msg;
-  char *perfdata_paging_msg, *perfdata_swapping_msg = NULL;
+  char *perfdata_paging_msg = NULL, *perfdata_swapping_msg = NULL;
   unsigned int i, tog = 0, sleep_time = 1;
   thresholds *my_threshold = NULL;
 
@@ -100,11 +104,11 @@ main (int argc, char **argv)
   unsigned long nr_vmem_pgscank[2];
   unsigned long dpswpin, dpswpout;
   unsigned long nr_vmem_dpswpin[2], nr_vmem_dpswpout[2];
-  unsigned long *tracked_value = &dpgmajfault;
+  unsigned long summary;
 
   set_program_name (argv[0]);
 
-  while ((c = getopt_long (argc, argv, "psc:w:bkmg" GETOPT_HELP_VERSION_STRING,
+  while ((c = getopt_long (argc, argv, "psSc:w:" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -112,11 +116,13 @@ main (int argc, char **argv)
 	default:
 	  usage (stderr);
 	case 'p':
-	  /* show_paging = true; */
+	  /* show_paging = true; left for backward compatibility */
 	  break;
 	case 's':
 	  show_swapping = true;
 	  break;
+	case 'S':
+	  swapping_only = true;
 	case 'c':
 	  critical = optarg;
 	  break;
@@ -148,13 +154,8 @@ main (int argc, char **argv)
       nr_vmem_pgmajfault[tog] = proc_vmem_get_pgmajfault (vmem);
       nr_vmem_pgfree[tog] = proc_vmem_get_pgfree (vmem);
       nr_vmem_pgsteal[tog] = proc_vmem_get_pgsteal (vmem);
-
-      if (show_swapping)
-	{
-	  nr_vmem_dpswpin[tog] = proc_vmem_get_pswpin (vmem);
-	  nr_vmem_dpswpout[tog] = proc_vmem_get_pswpout (vmem);
-	}
-
+      nr_vmem_dpswpin[tog] = proc_vmem_get_pswpin (vmem);
+      nr_vmem_dpswpout[tog] = proc_vmem_get_pswpout (vmem);
       nr_vmem_pgscand[tog] = proc_vmem_get_pgscand (vmem);
       nr_vmem_pgscank[tog] = proc_vmem_get_pgscank (vmem);
 
@@ -171,31 +172,34 @@ main (int argc, char **argv)
   dpgscand = nr_vmem_pgscand[1] - nr_vmem_pgscand[0];
   dpgscank = nr_vmem_pgscank[1] - nr_vmem_pgscank[0];
 
-  if (show_swapping)
-    {
-      dpswpin = nr_vmem_dpswpin[1] - nr_vmem_dpswpin[0];
-      dpswpout = nr_vmem_dpswpout[1] - nr_vmem_dpswpout[0];
+  dpswpin = nr_vmem_dpswpin[1] - nr_vmem_dpswpin[0];
+  dpswpout = nr_vmem_dpswpout[1] - nr_vmem_dpswpout[0];
 
-      perfdata_swapping_msg =
-	xasprintf (", vmem_pswpin/s=%lu, vmem_pswpout/s=%lu", dpswpin,
-		   dpswpout);
-    }
+  summary = swapping_only ? (dpswpin + dpswpout) : dpgmajfault;
 
   proc_vmem_unref (vmem);
 
-  status = get_status (*tracked_value, my_threshold);
+  status = get_status (summary, my_threshold);
   free (my_threshold);
 
   status_msg =
-    xasprintf ("%s: %lu majfault/s", state_text (status), *tracked_value);
-  perfdata_paging_msg =
-    xasprintf ("vmem_pgpgin/s=%lu vmem_pgpgout/s=%lu vmem_pgfault/s=%lu "
-	       "vmem_pgmajfault/s=%lu vmem_pgfree/s=%lu vmem_pgsteal/s=%lu "
-	       "vmem_pgscand/s=%lu vmem_pgscank/s=%lu",
-	       dpgpgin, dpgpgout, dpgfault, dpgmajfault, dpgfree, dpgsteal,
-	       dpgscand, dpgscank);
+    xasprintf ("%s: %lu %s/s", state_text (status), summary,
+	       swapping_only ? "pswp" : "majfault");
+  if (!swapping_only)
+    perfdata_paging_msg =
+      xasprintf ("vmem_pgpgin/s=%lu vmem_pgpgout/s=%lu vmem_pgfault/s=%lu "
+		 "vmem_pgmajfault/s=%lu vmem_pgfree/s=%lu vmem_pgsteal/s=%lu "
+		 "vmem_pgscand/s=%lu vmem_pgscank/s=%lu ",
+		 dpgpgin, dpgpgout, dpgfault,
+		 dpgmajfault, dpgfree, dpgsteal,
+		 dpgscand, dpgscank);
+  if (show_swapping || swapping_only)
+    perfdata_swapping_msg =
+      xasprintf ("vmem_pswpin/s=%lu vmem_pswpout/s=%lu",
+		 dpswpin, dpswpout);
 
-  printf ("%s %s | %s%s\n", program_name_short, status_msg, perfdata_paging_msg,
+  printf ("%s %s | %s%s\n", program_name_short, status_msg,
+	  perfdata_paging_msg ? perfdata_paging_msg : "",
 	  perfdata_swapping_msg ? perfdata_swapping_msg : "");
 
   return status;
