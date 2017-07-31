@@ -182,6 +182,7 @@ main (int argc, char **argv)
 	  break;
 	case 'S':
 	  swapping_only = true;
+	  break;
 	case 'c':
 	  critical = optarg;
 	  break;
