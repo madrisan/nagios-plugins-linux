@@ -80,21 +80,26 @@ print_version (void)
   exit (STATE_OK);
 }
 
-int
-main (int argc, char **argv)
+typedef struct paging_data
 {
-  bool show_swapping = false;
-  bool swapping_only = false;
-  int c, status, err;
-  char *critical = NULL, *warning = NULL;
-  char *status_msg;
-  char *perfdata_paging_msg = NULL, *perfdata_swapping_msg = NULL;
-  unsigned int i, tog = 0, sleep_time = 1;
-  thresholds *my_threshold = NULL;
+  unsigned long dpgpgin;
+  unsigned long dpgpgout;
+  unsigned long dpgfault;
+  unsigned long dpgfree;
+  unsigned long dpgmajfault;
+  unsigned long dpgscand;
+  unsigned long dpgscank;
+  unsigned long dpgsteal;
+  unsigned long dpswpin;
+  unsigned long dpswpout;
+  unsigned long summary;
+} paging_data_t;
 
+static void
+get_paging_status (bool show_swapping, bool swapping_only,
+		   paging_data_t *paging)
+{
   struct proc_vmem *vmem = NULL;
-  unsigned long dpgpgin, dpgpgout, dpgfault, dpgfree, dpgmajfault,
-    dpgscand, dpgscank, dpgsteal;
   unsigned long nr_vmem_pgpgin[2], nr_vmem_pgpgout[2];
   unsigned long nr_vmem_pgfault[2];
   unsigned long nr_vmem_pgfree[2];
@@ -102,11 +107,65 @@ main (int argc, char **argv)
   unsigned long nr_vmem_pgsteal[2];
   unsigned long nr_vmem_pgscand[2];
   unsigned long nr_vmem_pgscank[2];
-  unsigned long dpswpin, dpswpout;
   unsigned long nr_vmem_dpswpin[2], nr_vmem_dpswpout[2];
-  unsigned long summary;
+  unsigned int i, tog = 0, sleep_time = 1;
+  int err;
 
+  err = proc_vmem_new (&vmem);
+  if (err < 0)
+    plugin_error (STATE_UNKNOWN, err, "memory exhausted");
+
+  for (i = 0; i < 2; i++)
+    {
+      proc_vmem_read (vmem);
+
+      nr_vmem_pgpgin[tog] = proc_vmem_get_pgpgin (vmem);
+      nr_vmem_pgpgout[tog] = proc_vmem_get_pgpgout (vmem);
+      nr_vmem_pgfault[tog] = proc_vmem_get_pgfault (vmem);
+      nr_vmem_pgmajfault[tog] = proc_vmem_get_pgmajfault (vmem);
+      nr_vmem_pgfree[tog] = proc_vmem_get_pgfree (vmem);
+      nr_vmem_pgsteal[tog] = proc_vmem_get_pgsteal (vmem);
+      nr_vmem_pgscand[tog] = proc_vmem_get_pgscand (vmem);
+      nr_vmem_pgscank[tog] = proc_vmem_get_pgscank (vmem);
+
+      nr_vmem_dpswpin[tog] = proc_vmem_get_pswpin (vmem);
+      nr_vmem_dpswpout[tog] = proc_vmem_get_pswpout (vmem);
+
+      sleep (sleep_time);
+      tog = !tog;
+    }
+
+  paging->dpgpgin = nr_vmem_pgpgin[1] - nr_vmem_pgpgin[0];
+  paging->dpgpgout = nr_vmem_pgpgout[1] - nr_vmem_pgpgout[0];
+  paging->dpgfault = nr_vmem_pgfault[1] - nr_vmem_pgfault[0];
+  paging->dpgmajfault = nr_vmem_pgmajfault[1] - nr_vmem_pgmajfault[0];
+  paging->dpgfree = nr_vmem_pgfree[1] - nr_vmem_pgfree[0];
+  paging->dpgsteal = nr_vmem_pgsteal[1] - nr_vmem_pgsteal[0];
+  paging->dpgscand = nr_vmem_pgscand[1] - nr_vmem_pgscand[0];
+  paging->dpgscank = nr_vmem_pgscank[1] - nr_vmem_pgscank[0];
+
+  paging->dpswpin = nr_vmem_dpswpin[1] - nr_vmem_dpswpin[0];
+  paging->dpswpout = nr_vmem_dpswpout[1] - nr_vmem_dpswpout[0];
+
+  paging->summary =
+    swapping_only ? (paging->dpswpin +
+		     paging->dpswpout) : paging->dpgmajfault;
+
+  proc_vmem_unref (vmem);
+}
+
+int
+main (int argc, char **argv)
+{
+  bool show_swapping = false;
+  bool swapping_only = false;
+  int c, status;
+  char *critical = NULL, *warning = NULL;
+  char *status_msg;
+  char *perfdata_paging_msg = NULL, *perfdata_swapping_msg = NULL;
   set_program_name (argv[0]);
+  thresholds *my_threshold = NULL;
+  paging_data_t paging;
 
   while ((c = getopt_long (argc, argv, "psSc:w:" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
@@ -140,63 +199,26 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  err = proc_vmem_new (&vmem);
-  if (err < 0)
-    plugin_error (STATE_UNKNOWN, err, "memory exhausted");
+  get_paging_status (show_swapping, swapping_only, &paging);
 
-  for (i = 0; i < 2; i++)
-    {
-      proc_vmem_read (vmem);
-
-      nr_vmem_pgpgin[tog] = proc_vmem_get_pgpgin (vmem);
-      nr_vmem_pgpgout[tog] = proc_vmem_get_pgpgout (vmem);
-      nr_vmem_pgfault[tog] = proc_vmem_get_pgfault (vmem);
-      nr_vmem_pgmajfault[tog] = proc_vmem_get_pgmajfault (vmem);
-      nr_vmem_pgfree[tog] = proc_vmem_get_pgfree (vmem);
-      nr_vmem_pgsteal[tog] = proc_vmem_get_pgsteal (vmem);
-      nr_vmem_dpswpin[tog] = proc_vmem_get_pswpin (vmem);
-      nr_vmem_dpswpout[tog] = proc_vmem_get_pswpout (vmem);
-      nr_vmem_pgscand[tog] = proc_vmem_get_pgscand (vmem);
-      nr_vmem_pgscank[tog] = proc_vmem_get_pgscank (vmem);
-
-      sleep (sleep_time);
-      tog = !tog;
-    }
-
-  dpgpgin = nr_vmem_pgpgin[1] - nr_vmem_pgpgin[0];
-  dpgpgout = nr_vmem_pgpgout[1] - nr_vmem_pgpgout[0];
-  dpgfault = nr_vmem_pgfault[1] - nr_vmem_pgfault[0];
-  dpgmajfault = nr_vmem_pgmajfault[1] - nr_vmem_pgmajfault[0];
-  dpgfree = nr_vmem_pgfree[1] - nr_vmem_pgfree[0];
-  dpgsteal = nr_vmem_pgsteal[1] - nr_vmem_pgsteal[0];
-  dpgscand = nr_vmem_pgscand[1] - nr_vmem_pgscand[0];
-  dpgscank = nr_vmem_pgscank[1] - nr_vmem_pgscank[0];
-
-  dpswpin = nr_vmem_dpswpin[1] - nr_vmem_dpswpin[0];
-  dpswpout = nr_vmem_dpswpout[1] - nr_vmem_dpswpout[0];
-
-  summary = swapping_only ? (dpswpin + dpswpout) : dpgmajfault;
-
-  proc_vmem_unref (vmem);
-
-  status = get_status (summary, my_threshold);
+  status = get_status (paging.summary, my_threshold);
   free (my_threshold);
 
   status_msg =
-    xasprintf ("%s: %lu %s/s", state_text (status), summary,
+    xasprintf ("%s: %lu %s/s", state_text (status), paging.summary,
 	       swapping_only ? "pswp" : "majfault");
   if (!swapping_only)
     perfdata_paging_msg =
       xasprintf ("vmem_pgpgin/s=%lu vmem_pgpgout/s=%lu vmem_pgfault/s=%lu "
 		 "vmem_pgmajfault/s=%lu vmem_pgfree/s=%lu vmem_pgsteal/s=%lu "
 		 "vmem_pgscand/s=%lu vmem_pgscank/s=%lu ",
-		 dpgpgin, dpgpgout, dpgfault,
-		 dpgmajfault, dpgfree, dpgsteal,
-		 dpgscand, dpgscank);
+		 paging.dpgpgin, paging.dpgpgout, paging.dpgfault,
+		 paging.dpgmajfault, paging.dpgfree, paging.dpgsteal,
+		 paging.dpgscand, paging.dpgscank);
   if (show_swapping || swapping_only)
     perfdata_swapping_msg =
       xasprintf ("vmem_pswpin/s=%lu vmem_pswpout/s=%lu",
-		 dpswpin, dpswpout);
+		 paging.dpswpin, paging.dpswpout);
 
   printf ("%s %s | %s%s\n", program_name_short, status_msg,
 	  perfdata_paging_msg ? perfdata_paging_msg : "",
