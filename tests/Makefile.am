@@ -53,6 +53,7 @@ test_programs = \
 	tsintr  \
 	tsload_normalize \
 	tsload_thresholds \
+	tspaging \
 	tsuptime \
 	tstemperature
 
@@ -98,6 +99,9 @@ tsload_normalize_LDADD = $(LDADDS)
 
 tsload_thresholds_SOURCES = $(test_utils) tsload_thresholds.c
 tsload_thresholds_LDADD = $(LDADDS)
+
+tspaging_SOURCES = $(test_utils) tspaging.c
+tspaging_LDADD = $(LDADDS)
 
 tsuptime_SOURCES = $(test_utils) tsuptime.c
 tsuptime_LDADD = $(LDADDS)
