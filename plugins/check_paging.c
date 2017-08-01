@@ -154,6 +154,7 @@ get_paging_status (bool show_swapping, bool swapping_only,
   proc_vmem_unref (vmem);
 }
 
+#ifndef NPL_TESTING
 int
 main (int argc, char **argv)
 {
@@ -227,3 +228,4 @@ main (int argc, char **argv)
 
   return status;
 }
+#endif			/* NPL_TESTING */

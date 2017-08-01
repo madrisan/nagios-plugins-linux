@@ -92,6 +92,12 @@ test_memory_label (pgpgin, 2581510UL);
 test_memory_label (pgpgout, 34298109UL);
 test_memory_label (pswpin, 10402UL);
 test_memory_label (pswpout, 12250UL);
+test_memory_label (pgfault, 91270548UL);
+test_memory_label (pgmajfault, 9363UL);
+test_memory_label (pgfree, 91315814UL);
+/*test_memory_label (pgsteal, 0UL);*/
+/*test_memory_label (pgscand, 0UL);*/
+/*test_memory_label (pgscank, 0UL);*/
 
 static int
 mymain (void)
@@ -170,8 +176,18 @@ mymain (void)
 
   DO_TEST ("check pgpgin virtual memory stat", test_memory_pgpgin, NULL);
   DO_TEST ("check pgpgout virtual memory stat", test_memory_pgpgout, NULL);
+
+  /* used by check_swap, check_paging */
   DO_TEST ("check pswpin virtual memory stat", test_memory_pswpin, NULL);
-  DO_TEST ("check pswpin virtual memory stat", test_memory_pswpout, NULL);
+  DO_TEST ("check pswpout virtual memory stat", test_memory_pswpout, NULL);
+
+  /* used by check_paging */
+  DO_TEST ("check pgfault virtual memory stat", test_memory_pgfault, NULL);
+  DO_TEST ("check pgmajfault virtual memory stat", test_memory_pgmajfault, NULL);
+  DO_TEST ("check pgfree virtual memory stat", test_memory_pgfree, NULL);
+  /*DO_TEST ("check pgsteal virtual memory stat", test_memory_pgsteal, NULL);*/
+  /*DO_TEST ("check pgscand virtual memory stat", test_memory_pgscand, NULL);*/
+  /*DO_TEST ("check pgscank virtual memory stat", test_memory_pgscank, NULL);*/
 
   test_memory_release (vmem);
 
