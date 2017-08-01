@@ -40,7 +40,7 @@ test_paging_monotonic (const void *tdata)
   get_paging_status (show_swapping, swapping_only, &paging);
 
 #define CHECK_IF_POSITIVE(struct_member) \
- { if (struct_member < 0) ret = -1; } while (0)
+  if (struct_member < 0) ret = -1;
   CHECK_IF_POSITIVE (paging.dpgpgin);
   CHECK_IF_POSITIVE (paging.dpgpgout);
   CHECK_IF_POSITIVE (paging.dpgfault);
