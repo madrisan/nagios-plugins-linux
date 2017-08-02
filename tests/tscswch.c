@@ -42,17 +42,6 @@ test_cswch_proc_stat_exists ()
 }
 
 static int
-test_cswch_monotonic (const void *tdata)
-{
-  long delta = get_ctxtdelta (1, 1, false);
-
-  if (delta <= 0)
-    return -1;
-
-  return 0;
-}
-
-static int
 test_cswch_proc_parsing ()
 {
   int ret = 0;
@@ -81,8 +70,6 @@ mymain (void)
 #define DO_TEST(MSG, FUNC, DATA) \
   do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
 
-  DO_TEST ("check if get_ctxtdelta() is monotonic",
-	   test_cswch_monotonic, NULL);
   DO_TEST ("check for parsing errors in cpu_stats_get_cswch()",
 	   test_cswch_proc_parsing, NULL);
 
