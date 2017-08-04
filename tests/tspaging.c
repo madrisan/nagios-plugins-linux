@@ -30,27 +30,29 @@ static _Noreturn void usage (FILE * out) __attribute__((unused));
 #undef NPL_TESTING
 
 static int
-test_paging_monotonic (const void *tdata)
+test_paging_summary (const void *tdata)
 {
-  bool show_swapping = false;
-  bool swapping_only = false;
-  paging_data_t paging;
   int ret = 0;
+  const char *env_variable = "NPL_TEST_PATH_PROCVMSTAT";
+  paging_data_t paging;
 
-  get_paging_status (show_swapping, swapping_only, &paging);
+  if (setenv (env_variable, NPL_TEST_PATH_PROCVMSTAT, 1) < 0)
+    return EXIT_AM_HARDFAIL;
 
-#define CHECK_IF_POSITIVE(struct_member) \
-  if (struct_member < 0) ret = -1;
-  CHECK_IF_POSITIVE (paging.dpgpgin);
-  CHECK_IF_POSITIVE (paging.dpgpgout);
-  CHECK_IF_POSITIVE (paging.dpgfault);
-  CHECK_IF_POSITIVE (paging.dpgfree);
-  CHECK_IF_POSITIVE (paging.dpgmajfault);
-  CHECK_IF_POSITIVE (paging.dpgscand);
-  CHECK_IF_POSITIVE (paging.dpgscank);
-  CHECK_IF_POSITIVE (paging.dpgsteal);
-  CHECK_IF_POSITIVE (paging.dpswpin);
-  CHECK_IF_POSITIVE (paging.dpswpout);
+#define CHECK_SUMMARY(SWAPPING_ONLY)                             \
+  do                                                             \
+    {                                                            \
+      get_paging_status (true, SWAPPING_ONLY, &paging);          \
+      unsigned long summary =                                    \
+	SWAPPING_ONLY ? (paging.dpswpin +                        \
+			 paging.dpswpout) : paging.dpgmajfault;  \
+      if (summary != paging.summary)                             \
+	ret = -1;                                                \
+    }                                                            \
+  while (0)
+
+  CHECK_SUMMARY (true);
+  CHECK_SUMMARY (false);
 
   return ret;
 }
@@ -63,8 +65,8 @@ mymain (void)
 #define DO_TEST(MSG, FUNC, DATA) \
   do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
 
-  DO_TEST ("check if get_paging_status() is monotonic",
-           test_paging_monotonic, NULL);
+  DO_TEST ("check for get_paging_status() paging.summary",
+           test_paging_summary, NULL);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
