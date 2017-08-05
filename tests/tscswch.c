@@ -19,11 +19,14 @@
  *
  */
 
+#include "system.h"
 #include "testutils.h"
 
 /* silence the compiler's warning 'function defined but not used' */
 static _Noreturn void print_version (void) __attribute__((unused));
 static _Noreturn void usage (FILE * out) __attribute__((unused));
+static unsigned long long get_ctxtdelta (unsigned int, unsigned int, bool)
+  __attribute__((unused));
 
 #define NPL_TESTING
 # include "../plugins/check_cswch.c"
