@@ -32,5 +32,5 @@ EXTRA_DIST = $(INFILES)
 
 all: $(OUTFILES)
 
-clean:
+clean-local:
 	rm -f $(OUTFILES)
