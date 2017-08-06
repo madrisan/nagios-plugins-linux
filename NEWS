@@ -1,3 +1,47 @@
+    Major changes between "nagios-plugins-linux" versions 20 and 21
+
+-- Enhancements
+
+* check_paging: the command-line option `--swapping-only' has been
+  added for displaying only the swap reads and writes. The help
+  message has been updated and improved by added some lines that
+  explain which kernel variable(s) are selected when a user specify
+  the warning and/or critical thresholds.
+
+* The Docker-based framework for packaging the Nagios Plugins for
+  Linux (test-build) supports two new extra distributions:
+
+    Debian 9 (Stretch)
+    Fedora 26
+
+* The test framework (make check) has been reworked and enriched in
+  new modules:
+
+    tests/tsclock_thresholds
+    tests/tscswch
+    tests/tsintr
+    tests/tslibmeminfo_conversions
+    tests/tslibmeminfo_interface
+    tests/tslibmeminfo_procparser
+    tests/tslibmessages
+    tests/tslibvminfo
+    tests/tsload_normalize
+    tests/tsload_thresholds
+    tests/tspaging
+    tests/tstemperature
+    tests/tsuptime
+
+  The result of each text execution is now diplayed with colors.
+
+* The code of several plugins has been polished and modularized to
+  allow testing.
+
+* The glibc function `secure_getenv()' (or `__secure_getenv()' on
+  Ubuntu, and maybe other distributions) is now used, instead of
+  `getenv()', in the test code to improve security.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 19 and 20
 
 -- Security fixes
