@@ -65,7 +65,7 @@ mymain (void)
     {                                                      \
       data.secs = SECS;                                    \
       data.output = UPTIME_STR;                            \
-      if (test_run ("check uptime ouput of "#SECS" secs",  \
+      if (test_run ("check uptime output of "#SECS" secs", \
 		    test_uptime_output, &data) < 0)        \
 	ret = -1;                                          \
     }                                                      \
