@@ -5,7 +5,7 @@
 ![Release Status](https://img.shields.io/badge/status-stable-brightgreen.svg)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/3779/badge.svg)](https://scan.coverity.com/projects/3779)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://spdx.org/licenses/GPL-3.0.html)
-[![Download Latest Release](https://img.shields.io/badge/download-latest--tarball-blue.svg)](https://github.com/madrisan/nagios-plugins-linux/releases/download/v20/nagios-plugins-linux-20.tar.xz)
+[![Download Latest Release](https://img.shields.io/badge/download-latest--tarball-blue.svg)](https://github.com/madrisan/nagios-plugins-linux/releases/download/v21/nagios-plugins-linux-21.tar.xz)
 
 ![alt tag](https://madrisan.files.wordpress.com/2015/11/nagios-plugins-linux-logo-256.png)
 
