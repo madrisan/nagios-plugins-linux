@@ -4,10 +4,14 @@ compiler:
   - gcc
   - clang
 
-# Don't use Clang for Coverity Scan
+# Coverity Scan should only run once and it might fail,
+# because the number of times its runs is limited per week.
+# We only check when compiled with gcc.
 matrix:
   exclude:
     - compiler: clang
+    - env: COVERITY_SCAN_BRANCH=1
+  allow_failures:
     - env: COVERITY_SCAN_BRANCH=1
 
 env:
