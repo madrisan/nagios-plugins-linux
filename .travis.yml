@@ -32,7 +32,7 @@ addons:
     # This command will be added as an argument to "cov-build" to compile
     # the project for analisys
     build_command: "make clean all"
-    branch_pattern: coverity_scan
+    branch_pattern: master
 
 script:
   - |
