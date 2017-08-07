@@ -22,18 +22,20 @@ addons:
   coverity_scan:
     project:
       name: "madrisan/nagios-plugins-linux"
-      description: "Nagios Plugins for Linux"
     notification_email: davide.madrisan@gmail.com
     # Commands to prepare for build_command
     build_command_prepend: "autoreconf -v -Wall -i -Im4 && ./configure"
     # This command will be added as an argument to "cov-build" to compile
     # the project for analisys
     build_command: "make clean all"
-    branch_pattern: master
-
-#before_script:
-#  - autoreconf -v -Wall -i -Im4
-#  - ./configure || { cat config.log; false; }
+    branch_pattern: coverity_scan
 
 script:
-  - if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then make clean all; fi
+  - |
+    if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then
+      [ -f ./Makefile ] || autoreconf -v -Wall -i -Im4 && ./configure
+      make clean all
+      VERBOSE=1 make check
+    fi
+
+install: make && sudo make install
