@@ -106,7 +106,7 @@ cpu_desc_new (struct cpu_desc **cpudesc)
 void
 cpu_desc_read (struct cpu_desc *cpudesc)
 {
-  char *line = NULL, *buf;
+  char *line = NULL;
   FILE *fp;
   size_t len = 0;
   ssize_t chread;
@@ -153,7 +153,7 @@ cpu_desc_read (struct cpu_desc *cpudesc)
   if (cpudesc->flags)
     {
       size_t buflen = strlen (cpudesc->flags) + 2;
-      buf = xmalloc (buflen);
+      char *buf = xmalloc (buflen);
 
       snprintf (buf, buflen, " %s ", cpudesc->flags);
       if (strstr (buf, " svm "))

@@ -327,7 +327,6 @@ sysfsparser_thermal_kernel_support ()
 int
 sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone)
 {
-  char *type;
   int i, crit_temp = -1;
 
   /* as far as I can see, the only possible trip points are:
@@ -335,6 +334,7 @@ sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone)
    * Four (optional) entries max.   */
   for (i = 0; i < 4; i++)
     {
+      char *type;
       type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL
 				  "/thermal_zone%u/trip_point_%d_type",
 				  thermal_zone, i);

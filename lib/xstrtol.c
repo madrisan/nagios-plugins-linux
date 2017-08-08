@@ -23,13 +23,12 @@
 long
 strtol_or_err (const char *str, const char *errmesg)
 {
-  long num;
   char *end = NULL;
 
   if (str != NULL && *str != '\0')
     {
       errno = 0;
-      num = strtol (str, &end, 10);
+      long num = strtol (str, &end, 10);
       if (errno == 0 && str != end && end != NULL && *end == '\0')
         return num;
     }

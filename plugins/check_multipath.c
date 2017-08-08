@@ -199,7 +199,7 @@ multipathd_query (const char *query, char *buf, size_t bufsize)
 static int
 check_for_faulty_paths (char *buf, size_t bufsize)
 {
-  char *str1, *token, *saveptr1;
+  char *str1, *saveptr1;
   char *dm_st_ok_pattern = "[ \t]+\\[?active\\]?[ \t]*\\[?ready\\]?[ \t]+";
   int rc, row, faulty_paths = 0;
   regex_t regex;
@@ -219,7 +219,7 @@ check_for_faulty_paths (char *buf, size_t bufsize)
 
   for (row = 1, str1 = buf;; row++, str1 = NULL)
     {
-      token = strtok_r (str1, "\n", &saveptr1);
+      char *token = strtok_r (str1, "\n", &saveptr1);
       if (token == NULL)
 	break;
       if (verbose)

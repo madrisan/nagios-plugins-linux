@@ -170,8 +170,6 @@ procs_list_getall (unsigned int flags)
   DIR *dirp;
   FILE *fp;
   size_t len = 0;
-  ssize_t chread;
-  struct dirent *dp;
   bool gotname, gotuid, gotthreads,
        threads = (flags & NBPROCS_THREADS) ? true : false,
        verbose = (flags & NBPROCS_VERBOSE) ? true : false;
@@ -191,7 +189,10 @@ procs_list_getall (unsigned int flags)
   /* Scan entries under /proc directory */
   for (;;)
     {
+      struct dirent *dp;
+      ssize_t chread;
       errno = 0;
+
       if ((dp = readdir (dirp)) == NULL)
 	{
 	  if (errno != 0)

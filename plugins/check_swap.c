@@ -104,7 +104,6 @@ main (int argc, char **argv)
   unsigned long kb_swap_used;
 
   struct proc_vmem *vmem = NULL;
-  unsigned long dpswpin, dpswpout;
   unsigned long kb_swap_pageins[2];
   unsigned long kb_swap_pageouts[2];
 
@@ -158,6 +157,8 @@ main (int argc, char **argv)
 
   if (vmem_perfdata)
     {
+      unsigned long dpswpin, dpswpout;
+
       err = proc_vmem_new (&vmem);
       if (err < 0)
         plugin_error (STATE_UNKNOWN, err, "memory exhausted");

@@ -185,7 +185,7 @@ fc_host_status (int *n_ports, int *n_online, fc_host_statistics *stats,
 {
   DIR *dirp;
   struct dirent *dp;
-  char *line, path[PATH_MAX];
+  char path[PATH_MAX];
   uint64_t drx_frames_tot = 0, dtx_frames_tot = 0;
 
   *n_ports = *n_online = 0;
@@ -198,7 +198,7 @@ fc_host_status (int *n_ports, int *n_online, fc_host_statistics *stats,
       snprintf (path, PATH_MAX, "%s/%s/port_state",
 		PATH_SYS_FC_HOST, dp->d_name);
 
-      line = sysfsparser_getline ("%s", path);
+      char *line = sysfsparser_getline ("%s", path);
       if (STREQ (line, "Online"))
 	(*n_online)++;
 

@@ -91,12 +91,12 @@ fs_check_if_readonly (char *mount_options)
 {
   static char const readonly_pattern[] = "ro";
 
-  char *str1, *token, *saveptr1;
+  char *str1, saveptr1;
   int j;
 
   for (j = 1, str1 = mount_options;; j++, str1 = NULL)
     {
-      token = strtok_r (str1, ",", &saveptr1);
+      char *token = strtok_r (str1, ",", &saveptr1);
       if (token == NULL)
 	break;
       if (STREQ (token, readonly_pattern))
