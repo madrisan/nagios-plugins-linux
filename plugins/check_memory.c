@@ -130,7 +130,6 @@ main (int argc, char **argv)
   unsigned long kb_mem_inactive;
 
   struct proc_vmem *vmem = NULL;
-  unsigned long dpgpgin, dpgpgout, dpgmajfault;
   unsigned long nr_vmem_pgpgin[2];
   unsigned long nr_vmem_pgpgout[2];
   unsigned long nr_vmem_pgmajfault[2];
@@ -203,6 +202,8 @@ main (int argc, char **argv)
 
   if (vmem_perfdata)
     {
+      unsigned long dpgpgin, dpgpgout, dpgmajfault;
+
       err = proc_vmem_new (&vmem);
       if (err < 0)
 	plugin_error (STATE_UNKNOWN, err, "memory exhausted");

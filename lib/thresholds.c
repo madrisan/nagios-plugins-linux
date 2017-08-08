@@ -109,7 +109,6 @@ range *
 parse_range_string (char *str)
 {
   range *temp_range;
-  double start;
   double end;
   char *end_str;
 
@@ -137,7 +136,7 @@ parse_range_string (char *str)
 	temp_range->start_infinity = true;
       else
 	{
-	  start = strtod (str, NULL);	/* Will stop at the ':' */
+	  double start = strtod (str, NULL);	/* Will stop at the ':' */
 	  set_range_start (temp_range, start);
 	}
       end_str++;		/* Move past the ':' */

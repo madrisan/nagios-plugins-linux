@@ -50,11 +50,11 @@ cpufreq_get_available_freqs (unsigned int cpu)
     return NULL;
 
   struct cpufreq_available_frequencies *first = NULL, *curr = NULL;
-  char *token, *str, *saveptr;
+  char *str, *saveptr;
 
   for (str = freqs; ; str = NULL)
     {
-      token = strtok_r (str, " ", &saveptr);
+      char *token = strtok_r (str, " ", &saveptr);
       if (token == NULL)
 	break;
 
@@ -90,10 +90,10 @@ cpufreq_get_available_freqs_value (struct cpufreq_available_frequencies *curr)
 void
 cpufreq_available_frequencies_unref(struct cpufreq_available_frequencies *first)
 {
-  struct cpufreq_available_frequencies *tmp, *curr = first;
+  struct cpufreq_available_frequencies *curr = first;
   while (curr)
     {
-      tmp = curr;
+      struct cpufreq_available_frequencies *tmp = curr;
       curr = curr->next;
       free(tmp);
     }

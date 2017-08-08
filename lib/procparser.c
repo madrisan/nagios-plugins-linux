@@ -50,7 +50,7 @@ procparser (const char *filename, const proc_table_struct *proc_table,
   char namebuf[32];		/* big enough to hold any row name */
   proc_table_struct findme = { namebuf, NULL };
   proc_table_struct *found;
-  char *line = NULL, *head, *tail;
+  char *line = NULL;
   FILE *fp;
   size_t len = 0;
   ssize_t chread;
@@ -64,8 +64,8 @@ procparser (const char *filename, const proc_table_struct *proc_table,
 
   while ((chread = getline (&line, &len, fp)) != -1)
     {
-      head = line;
-      tail = strchr (line, separator);
+      char *head = line;
+      char *tail = strchr (line, separator);
       if (!tail)
 	continue;
       *tail = '\0';
