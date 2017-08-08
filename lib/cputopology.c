@@ -214,7 +214,7 @@ get_cputopology_read (unsigned int *nsockets, unsigned int *ncores,
 
       /* threads within one core */
       *nthreads = cpumask_parse (thread_siblings, set, setsize);
-      if (*nthreads <= 0)
+      if (*nthreads == 0)
 	*nthreads = 1;
 
       /* core_siblings: internal kernel map of cpu#'s hardware threads
@@ -224,7 +224,7 @@ get_cputopology_read (unsigned int *nsockets, unsigned int *ncores,
 			     (unsigned long)cpu);
       /* cores within one socket */
       *ncores = cpumask_parse (core_siblings, set, setsize) / *nthreads;
-      if (*ncores <= 0)
+      if (*ncores == 0)
 	*ncores = 1;
 
       int ncpus = get_processor_number_online ();
