@@ -40,7 +40,7 @@ test_temperature_unit_conversion (const void *tdata)
 {
   char *scale;
   const struct test_data *data = tdata;
-  const unsigned long chk_temp = 1000*25;	/* 25C */
+  const unsigned long chk_temp = 1000UL*25;	/* 25C */
   int ret = 0;
 
   TEST_ASSERT_EQUAL_NUMERIC (data->expect_value,

@@ -58,14 +58,13 @@ test_clock_timedelta (const void *tdata)
 {
   unsigned long refclock;
   long timedelta;
-  nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
   const struct test_data *data = tdata;
   long w_threshold = strtol (data->w, NULL, 10),
     c_threshold = strtol (data->c, NULL, 10);
 
-  status = set_thresholds (&my_threshold, data->w, data->c);
+  nagstatus status = set_thresholds (&my_threshold, data->w, data->c);
   if (status == NP_RANGE_UNPARSEABLE)
     return EXIT_AM_HARDFAIL;
 
