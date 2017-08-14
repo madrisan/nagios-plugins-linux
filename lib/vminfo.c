@@ -67,22 +67,30 @@ typedef struct proc_vmem_data
   unsigned long vm_pageoutrun;	/* times kswapd ran page reclaim */
   unsigned long vm_allocstall;	/* times a page allocator ran direct reclaim */
   unsigned long vm_pgrotated;	/* pages rotated to the tail of the LRU for immediate reclaim */
-  /* seen on a 2.6.8-rc1 kernel, apparently replacing old fields */
   unsigned long vm_pgalloc_dma;
+  unsigned long vm_pgalloc_dma32;
   unsigned long vm_pgalloc_high;
   unsigned long vm_pgalloc_normal;
   unsigned long vm_pgrefill_dma;
+  unsigned long vm_pgrefill_dma32;
   unsigned long vm_pgrefill_high;
   unsigned long vm_pgrefill_normal;
   unsigned long vm_pgscan_direct_dma;
+  unsigned long vm_pgscan_direct_dma32;
   unsigned long vm_pgscan_direct_high;
   unsigned long vm_pgscan_direct_normal;
   unsigned long vm_pgscan_kswapd_dma;
+  unsigned long vm_pgscan_kswapd_dma32;
   unsigned long vm_pgscan_kswapd_high;
   unsigned long vm_pgscan_kswapd_normal;
   unsigned long vm_pgsteal_dma;
+  unsigned long vm_pgsteal_dma32;
   unsigned long vm_pgsteal_high;
   unsigned long vm_pgsteal_normal;
+  unsigned long vm_pgsteal_direct_dma;
+  unsigned long vm_pgsteal_direct_dma32;
+  unsigned long vm_pgsteal_direct_high;
+  unsigned long vm_pgsteal_direct_normal;
   /* seen on a 2.6.8-rc1 kernel */
   unsigned long vm_kswapd_inodesteal;
   unsigned long vm_nr_unstable;
@@ -172,6 +180,7 @@ proc_vmem_read (struct proc_vmem *vmem)
     { "pgactivate", &data->vm_pgactivate },
     { "pgalloc", &data->vm_pgalloc },	/* GONE (now separate dma,high,normal) */
     { "pgalloc_dma", &data->vm_pgalloc_dma },
+    { "pgalloc_dma32", &data->vm_pgalloc_dma32 },
     { "pgalloc_high", &data->vm_pgalloc_high },
     { "pgalloc_normal", &data->vm_pgalloc_normal },
     { "pgdeactivate", &data->vm_pgdeactivate },
@@ -183,20 +192,28 @@ proc_vmem_read (struct proc_vmem *vmem)
     { "pgpgout", &data->vm_pgpgout },	/* important */
     { "pgrefill", &data->vm_pgrefill },	/* GONE (now separate dma,high,normal) */
     { "pgrefill_dma", &data->vm_pgrefill_dma },
+    { "pgrefill_dma32", &data->vm_pgrefill_dma32 },
     { "pgrefill_high", &data->vm_pgrefill_high },
     { "pgrefill_normal", &data->vm_pgrefill_normal },
     { "pgrotated", &data->vm_pgrotated },
     { "pgscan", &data->vm_pgscan },	/* GONE (now separate direct,kswapd and dma,high,normal) */
     { "pgscan_direct_dma", &data->vm_pgscan_direct_dma },
+    { "pgscan_direct_dma32", &data->vm_pgscan_direct_dma32 },
     { "pgscan_direct_high", &data->vm_pgscan_direct_high },
     { "pgscan_direct_normal", &data->vm_pgscan_direct_normal },
     { "pgscan_kswapd_dma", &data->vm_pgscan_kswapd_dma },
+    { "pgscan_kswapd_dma32", &data->vm_pgscan_kswapd_dma32 },
     { "pgscan_kswapd_high", &data->vm_pgscan_kswapd_high },
     { "pgscan_kswapd_normal", &data->vm_pgscan_kswapd_normal },
     { "pgsteal", &data->vm_pgsteal },	/* GONE (now separate dma,high,normal) */
     { "pgsteal_dma", &data->vm_pgsteal_dma },
+    { "pgsteal_dma32", &data->vm_pgsteal_dma32 },
     { "pgsteal_high", &data->vm_pgsteal_high },
     { "pgsteal_normal", &data->vm_pgsteal_normal },
+    { "pgsteal_direct_dma", &data->vm_pgsteal_direct_dma },
+    { "pgsteal_direct_dma32", &data->vm_pgsteal_direct_dma32 },
+    { "pgsteal_direct_high", &data->vm_pgsteal_direct_high },
+    { "pgsteal_direct_normal", &data->vm_pgsteal_direct_normal },
     { "pswpin", &data->vm_pswpin },	/* important */
     { "pswpout", &data->vm_pswpout },	/* important */
     { "slabs_scanned", &data->vm_slabs_scanned },
@@ -214,23 +231,20 @@ proc_vmem_read (struct proc_vmem *vmem)
 
   procparser (get_path_proc_vmstat (), vmem_table, vmem_table_count, ' ');
 
+#define FOR_ALL_ZONES(x) x##_dma + x##_dma32 + x##_normal + x##_high
   if (!data->vm_pgalloc)
-    data->vm_pgalloc =
-      data->vm_pgalloc_dma + data->vm_pgalloc_high + data->vm_pgalloc_normal;
+    data->vm_pgalloc = FOR_ALL_ZONES (data->vm_pgalloc);
 
   if (!data->vm_pgrefill)
-    data->vm_pgrefill =
-      data->vm_pgrefill_dma + data->vm_pgrefill_high +
-      data->vm_pgrefill_normal;
+    data->vm_pgrefill = FOR_ALL_ZONES (data->vm_pgrefill);
 
   if (!data->vm_pgscan)
-    data->vm_pgscan = data->vm_pgscan_direct_dma + data->vm_pgscan_direct_high
-      + data->vm_pgscan_direct_normal + data->vm_pgscan_kswapd_dma
-      + data->vm_pgscan_kswapd_high + data->vm_pgscan_kswapd_normal;
+    data->vm_pgscan = FOR_ALL_ZONES (data->vm_pgscan_direct)
+      + FOR_ALL_ZONES (data->vm_pgscan_kswapd);
 
   if (!data->vm_pgsteal)
-    data->vm_pgsteal =
-      data->vm_pgsteal_dma + data->vm_pgsteal_high + data->vm_pgsteal_normal;
+    data->vm_pgsteal = FOR_ALL_ZONES (data->vm_pgsteal);
+#undef FOR_ALL_ZONES
 
   if (data->vm_pgpgin != ~0UL && data->vm_pswpin != ~0UL)
     return;
