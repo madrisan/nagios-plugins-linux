@@ -1,18 +1,7 @@
 language: c
-
 compiler:
   - gcc
   - clang
-
-# Coverity Scan should only run once and it might fail,
-# because the number of times its runs is limited per week.
-# We only check when compiled with gcc.
-matrix:
-  exclude:
-    - compiler: clang
-    - env: COVERITY_SCAN_BRANCH=1
-  allow_failures:
-    - env: COVERITY_SCAN_BRANCH=1
 
 env:
   global:
@@ -21,6 +10,16 @@ env:
    - secure: "WqpTr19IWav//MQEQ7RcerdTVhbYt9faBh2QoEZmRLDPm+0RBidw1kvP73Di9pozURqisdB1P5LJ5eVFuocaD2eM+pO4399hHD48QsupDoLxgcJfmeP5YfT7Kmq97vyOs5dV01uopRMTJ9SDD1rt2oia+Ez6B/AeTCEpENb/76Y="
 
 sudo: false
+
+matrix:
+  exclude:
+    - compiler: clang
+      env: COVERITY_SCAN_BRANCH=1
+  # Coverity Scan should only run once and it might fail,
+  # because the number of times its runs is limited per week.
+  # We only check when compiled with gcc.
+  allow_failures:
+    - env: COVERITY_SCAN_BRANCH=1
 
 addons:
   coverity_scan:
@@ -32,7 +31,7 @@ addons:
     # This command will be added as an argument to "cov-build" to compile
     # the project for analisys
     build_command: "make clean all"
-    branch_pattern: master
+    branch_pattern: coverity_scan
 
 script:
   - |
