@@ -76,7 +76,7 @@ mymain (void)
 {
   int err, ret = 0;
 
-  if ((err = test_memory_init (&sysmem)) != 0)
+  if ((err = test_memory_init ()) != 0)
     return err;
 
   proc_sysmem_data_t *procdata = sysmem->data;
@@ -121,7 +121,7 @@ mymain (void)
   DO_TEST ("SwapFree", procdata->kb_swap_free, 8387580UL);
   DO_TEST ("SwapTotal", procdata->kb_swap_total, 8388604UL);
 
-  test_memory_release (sysmem);
+  test_memory_release ();
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

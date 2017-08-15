@@ -104,7 +104,7 @@ mymain (void)
 {
   int err, ret = 0;
 
-  if ((err = test_memory_init (&vmem)) != 0)
+  if ((err = test_memory_init ()) != 0)
     return err;
 
   proc_vmem_data_t *procdata = vmem->data;
@@ -189,7 +189,7 @@ mymain (void)
   /*DO_TEST ("check pgscand virtual memory stat", test_memory_pgscand, NULL);*/
   /*DO_TEST ("check pgscank virtual memory stat", test_memory_pgscank, NULL);*/
 
-  test_memory_release (vmem);
+  test_memory_release ();
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
