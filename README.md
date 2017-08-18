@@ -95,7 +95,7 @@ This package is known to compile with:
 List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,
 * 3.10, 3.14, 3.18,
-* 4.2, 4.4
+* 4.2, 4.4, 4,9
 
 
 ## CentOS/RHEL, Debian, and Fedora Packages
