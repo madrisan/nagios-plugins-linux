@@ -27,8 +27,7 @@
 /* silence the compiler's warning 'function defined but not used' */
 static _Noreturn void print_version (void) __attribute__ ((unused));
 static _Noreturn void usage (FILE * out) __attribute__ ((unused));
-static _Noreturn void validate_input (int i, double w, double c)
-  __attribute__ ((unused));
+static void validate_input (int i, double w, double c) __attribute__ ((unused));
 static int loadavg_status (const double *loadavg, const double *wload,
 			   const double *cload, const bool *required)
   __attribute__ ((unused));
