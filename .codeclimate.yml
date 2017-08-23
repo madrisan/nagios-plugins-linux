@@ -1,0 +1,6 @@
+exclude_paths:
+- config.sub 
+- depcomp
+- libtool
+- ltmain.sh
+- m4/
