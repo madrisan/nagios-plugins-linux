@@ -2,7 +2,11 @@ engines:
   fixme:
     enabled: false
 ratings:
-  paths: []
+  paths:
+  - include/
+  - lib/
+  - plugins/
+  - tests/
 exclude_paths:
 - config.sub 
 - depcomp
