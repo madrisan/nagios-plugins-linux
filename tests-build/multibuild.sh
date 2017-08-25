@@ -94,7 +94,7 @@ done
 # parse the shared disk string
 IFS_save="$IFS"
 IFS=":"; set -- $usr_disk
-shared_disk_host="$(readlink -f $1)"
+shared_disk_host="$(readlink -f "$1")"
 shared_disk_container="$2"
 IFS="$IFS_save"
 
@@ -102,7 +102,7 @@ IFS="$IFS_save"
    die "bad syntax for --shared"
 
 if [ "$usr_specfile" ]; then
-   specfile="$(readlink -f $usr_specfile)"
+   specfile="$(readlink -f "$usr_specfile")"
    case "$specfile" in
       ${shared_disk_host}*)
           specfile="./${specfile#$shared_disk_host}" ;;
@@ -110,7 +110,7 @@ if [ "$usr_specfile" ]; then
    esac
 fi
 if [ "$usr_targetdir" ]; then
-   targetdir="$(readlink -m $usr_targetdir)"
+   targetdir="$(readlink -m "$usr_targetdir")"
    case "$targetdir" in
       ${shared_disk_host}*)
          targetdir="$shared_disk_container/${targetdir#$shared_disk_host}" ;;
@@ -153,7 +153,7 @@ apt-get update && apt-get -y install"
       pck_install="dnf install -y"
       pck_dist=".fc${os:7:2}"
       pcks_dev="bzip2 make gcc xz rpm-build" ;;
-   *) die "FIXME: unsupported os: $os" ;;
+   *) die "unsupported os: $os" ;;
 esac
 pck_dist="${pck_dist}${usr_distro:+.$usr_distro}"
 
