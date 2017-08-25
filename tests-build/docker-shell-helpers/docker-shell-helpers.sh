@@ -1,6 +1,6 @@
 #!/bin/bash
 # Helper functions for using Docker in shell scripts
-# Copyright (C) 2016 Davide Madrisan <davide.madrisan@gmail.com>
+# Copyright (C) 2016,2017 Davide Madrisan <davide.madrisan@gmail.com>
 
 # Here's is a simple example of how the library functions can be used!
 #
@@ -28,7 +28,7 @@ container_id() {
    # doc.desc: return the _Docker Id_ of a container
    # doc.args: container name
    __validate_input "$FUNCNAME" "$1"
-   echo "$(sudo docker inspect --format='{{.Id}}' "$1" 2>/dev/null)"
+   sudo docker inspect --format='{{.Id}}' "$1" 2>/dev/null
 }
 
 container_exists() {
@@ -93,12 +93,11 @@ container_property() {
 
    case "$property" in
       "id")
-          echo "$(container_id "$container_name")" ;;
+          container_id "$container_name" ;;
       "ipaddr")
-          echo "$(\
-sudo docker inspect \
-   --format '{{ .NetworkSettings.IPAddress }}' \
-   "$container_name" 2>/dev/null)" ;;
+          sudo docker inspect \
+             --format '{{ .NetworkSettings.IPAddress }}' \
+             "$container_name" 2>/dev/null ;;
       "os")
           local os="unknown-os"
           # CentOS release 6.8 (Final)
@@ -177,7 +176,8 @@ container_start() {
 container_status_table() {
    # doc.desc: return the status of a container
    # doc.args: container name of no args to list all the containers
-   [ "$1" ] && sudo docker ps --filter "name=$1" || sudo docker ps -a
+   [ "$1" ] && { sudo docker ps --filter "name=$1"; return; }
+   sudo docker ps -a
 }
 
 container_list() {
