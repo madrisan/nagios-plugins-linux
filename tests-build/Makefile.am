@@ -20,7 +20,6 @@ multibuilddir = $(shell pwd)
 DOCKER = /usr/bin/docker
 SPECFILE = $(PACKAGE).spec
 SRC_BZ2 = $(top_srcdir)/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2
-SRC_XZ = $(top_srcdir)/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.xz
 
 # GID and UID of the user 'developer'
 GID ?= "$(shell id -g)"
@@ -49,7 +48,13 @@ debian-8: debian-jessie
 debian-9: debian-stretch
 debian-latest: debian-stretch
 
-$(TARGETS_REDHAT): $(SRC_BZ2) $(DOCKER) $(MULTIBUILD_SCRIPT) specs/$(SPECFILE)
+$(SPECFILE):
+	@cd $(builddir)/specs && $(MAKE) $(AM_MAKEFLAGS) all
+
+$(SRC_BZ2):
+	@cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) dist
+
+$(TARGETS_REDHAT): $(SPECFILE) $(SRC_BZ2) $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --spec $(multibuilddir)/specs/$(SPECFILE) \
