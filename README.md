@@ -105,17 +105,17 @@ The `.rpm` and `.deb` packages for CentOS/RHEL, Debian, and Fedora can be built 
 
 Command            | Distribution
 ------------------ | ------------
-CentOS 5           | `make -C tests-build centos-5`
-CentOS 6           | `make -C tests-build centos-6`
-CentOS 7           | `make -C tests-build centos-7`
-Debian 6 (Squeeze) | `make -C tests-build debian-squeeze`
-Debian 7 (Wheezy)  | `make -C tests-build debian-wheezy`
-Debian 8 (Jessie)  | `make -C tests-build debian-jessie`
-Debian 9 (Stretch) | `make -C tests-build debian-stretch`
-Fedora 24          | `make -C tests-build fedora-24`
-Fedora 25          | `make -C tests-build fedora-25`
-Fedora 26          | `make -C tests-build fedora-26`
-Fedora Rawhide     | `make -C tests-build fedora-rawhide`
+CentOS 5           | `make -C packages centos-5`
+CentOS 6           | `make -C packages centos-6`
+CentOS 7           | `make -C packages centos-7`
+Debian 6 (Squeeze) | `make -C packages debian-squeeze`
+Debian 7 (Wheezy)  | `make -C packages debian-wheezy`
+Debian 8 (Jessie)  | `make -C packages debian-jessie`
+Debian 9 (Stretch) | `make -C packages debian-stretch`
+Fedora 24          | `make -C packages fedora-24`
+Fedora 25          | `make -C packages fedora-25`
+Fedora 26          | `make -C packages fedora-26`
+Fedora Rawhide     | `make -C packages fedora-rawhide`
 
 in the root source folder.
 The building process requires the Docker software containerization platform running on your system, and an internet connection to download the Docker images of the operating systems you want to build the packages for.
