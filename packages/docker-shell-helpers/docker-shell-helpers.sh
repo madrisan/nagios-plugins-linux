@@ -27,21 +27,21 @@ __validate_input() {
 container_id() {
    # doc.desc: return the _Docker Id_ of a container
    # doc.args: container name
-   __validate_input "$FUNCNAME" "$1"
+   __validate_input "${FUNCNAME[0]}" "$1"
    sudo docker inspect --format='{{.Id}}' "$1" 2>/dev/null
 }
 
 container_exists() {
    # doc.desc: return true if the container exists, and false otherwise
    # doc.args: container name
-   __validate_input "$FUNCNAME" "$1"
+   __validate_input "${FUNCNAME[0]}" "$1"
    __isnotempty "$(container_id "$1")"
 }
 
 container_is_running() {
    # doc.desc: return true if the container is running, and false otherwise
    # doc.args: container name
-   __validate_input "$FUNCNAME" "$1"
+   __validate_input "${FUNCNAME[0]}" "$1"
    __isnotempty "$(\
 sudo docker ps -q --filter "name=$1" --filter 'status=running' 2>/dev/null)"
 }
@@ -49,14 +49,14 @@ sudo docker ps -q --filter "name=$1" --filter 'status=running' 2>/dev/null)"
 container_stop() {
    # doc.desc: stop a container, if it's running
    # doc.args: container name
-   __validate_input "$FUNCNAME" "$1"
+   __validate_input "${FUNCNAME[0]}" "$1"
    container_is_running "$1" && sudo docker stop "$1"
 }
 
 container_remove() {
    # doc.desc: stop and remove a container from the host node
    # doc.args: container name
-   __validate_input "$FUNCNAME" "$1"
+   __validate_input "${FUNCNAME[0]}" "$1"
    container_stop "$1" >/dev/null &&
       sudo docker rm -f "$1" >/dev/null
 }
@@ -64,7 +64,7 @@ container_remove() {
 container_exec_command() {
    # doc.desc: run a command (or a sequence of commands) inside a container
    # doc.args: container name
-   __validate_input "$FUNCNAME" "$1"
+   __validate_input "${FUNCNAME[0]}" "$1"
    sudo docker exec -it "$1" /bin/bash -c "$2"
 }
 
@@ -79,13 +79,13 @@ container_property() {
          --id) property="id" ;;
          --ipaddr) property="ipaddr" ;;
          --os) property="os" ;;
-         --*|-*) __die "$FUNCNAME: unknown switch \"$1\"" ;;
+         --*|-*) __die "${FUNCNAME[0]}: unknown switch \"$1\"" ;;
          *) container_name="$1" ;;
       esac
       shift
    done
 
-   __validate_input "$FUNCNAME" "$container_name"
+   __validate_input "${FUNCNAME[0]}" "$container_name"
    container_exists "$container_name" || {
       echo "unknown-no_such_container"; return; }
    container_is_running "$container_name" || {
@@ -124,7 +124,7 @@ container_exec_command "$container_name" "\
           fi
           echo "$os"
       ;;
-      *) __die "$FUNCNAME: unknown property \"$property\"" ;;
+      *) __die "${FUNCNAME[0]}: unknown property \"$property\"" ;;
    esac
 }
 
@@ -145,25 +145,25 @@ container_create() {
          --name) name="$2"; shift ;;
          --random-name) random_name=1 ;;
          --os) os="$2"; shift ;;
-         --*|-*) __die "$FUNCNAME: unknown switch \"$1\"" ;;
-         *) __die "$FUNCNAME: unknown option(s): $*" ;;
+         --*|-*) __die "${FUNCNAME[0]}: unknown switch \"$1\"" ;;
+         *) __die "${FUNCNAME[0]}: unknown option(s): $*" ;;
       esac
       shift
    done
 
-   [ "$os" ] || __die "$FUNCNAME: --os has not been set"
+   [ "$os" ] || __die "${FUNCNAME[0]}: --os has not been set"
    [ "$disk" ] && disk_opt="-v $disk"
    if [ "$random_name" = 1 ]; then
       name="${os/:/.}_$(</dev/urandom tr -dc _A-Z-a-z-0-9 | head -c8)"
    elif [ -z "$name" ]; then
-      __die "$FUNCNAME: --name has not been set"
+      __die "${FUNCNAME[0]}: --name has not been set"
    fi
 
    container_exists "$name" ||
       sudo docker run -itd --name="$name" $disk_opt "$os" "/bin/bash" \
          >/dev/null
    [ $? -eq 0 ] ||
-      __die "ERROR: $FUNCNAME: cannot instantiate the container $name"
+      __die "ERROR: ${FUNCNAME[0]}: cannot instantiate the container $name"
    echo "$name"
 }
 
