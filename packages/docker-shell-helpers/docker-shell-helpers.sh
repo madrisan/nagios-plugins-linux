@@ -103,7 +103,7 @@ container_property() {
           # CentOS release 6.8 (Final)
           # CentOS Linux release 7.2.1511 (Core)
           # Fedora release 24 (Twenty Four)
-          local container_os="$(\
+          local -r container_os="$(\
 container_exec_command "$container_name" "\
    if [ -r /etc/redhat-release ]; then
       cat /etc/redhat-release
@@ -146,7 +146,7 @@ container_create() {
          --random-name) random_name=1 ;;
          --os) os="$2"; shift ;;
          --*|-*) __die "$FUNCNAME: unknown switch \"$1\"" ;;
-         *) __die "$FUNCNAME: unknown option(s): $@" ;;
+         *) __die "$FUNCNAME: unknown option(s): $*" ;;
       esac
       shift
    done

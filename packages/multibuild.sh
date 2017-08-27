@@ -12,6 +12,7 @@ msg () { echo "*** info: $1"; }
 docker_helpers="$PROGPATH/docker-shell-helpers/docker-shell-helpers.sh"
 
 [ -r "$docker_helpers" ] || die "no such file: $docker_helpers"
+# shellcheck source=/dev/null
 . "$docker_helpers"
 
 usage () {

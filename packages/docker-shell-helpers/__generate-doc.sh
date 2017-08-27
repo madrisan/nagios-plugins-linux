@@ -7,7 +7,7 @@ helpers_lib="docker-shell-helpers.sh"
 
 [ -r "$helpers_lib" ] || exit 1
 
-while read line; do
+while read -r line; do
    set -- $line
    case "$1" in
       "function")
@@ -19,7 +19,7 @@ while read line; do
          shift
          label="${1/doc./}"
          shift
-         echo "  * _${label}_ $@" ;;
+         echo "  * _${label}_ $*" ;;
       "}")
          unset fncname ;;
    esac
