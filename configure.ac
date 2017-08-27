@@ -392,9 +392,9 @@ AC_CONFIG_FILES([\
   debian/Makefile \
   include/Makefile \
   lib/Makefile \
+  packages/Makefile \
+  packages/specs/Makefile \
   plugins/Makefile \
-  tests/Makefile \
-  tests-build/Makefile \
-  tests-build/specs/Makefile])
+  tests/Makefile])
 
 AC_OUTPUT

@@ -18,7 +18,7 @@
 AM_MAKEFLAGS = --no-print-directory
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = debian include lib plugins tests tests-build
+SUBDIRS = debian include lib packages plugins tests
 EXTRA_DIST = check_skel.c.sample
 
 check-local: all tests
