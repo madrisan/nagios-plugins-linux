@@ -396,7 +396,7 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
       if (STRPREFIX (de->d_name, "thermal_zone"))
 	{
 	  /* temperatures are stored in the files
-	   *  /sys/class/thermal/thermal_zone[0-9}/temp	  */
+	   *  /sys/class/thermal/thermal_zone[0-9]/temp	  */
 	  temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL "/%s/temp",
 				       de->d_name);
 	  *type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
