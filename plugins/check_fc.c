@@ -149,9 +149,6 @@ fc_host_get_statistic (const char *which, const char *host)
   dbg (PATH_SYS_FC_HOST "/%s/statistics/%s = %Lu\n",
        host, which, (unsigned long long)value);
 
-  if (value == ~0UL)		/* FIXME: unknown/unsupported counter */
-    return 0;
-
   return value;
 }
 
