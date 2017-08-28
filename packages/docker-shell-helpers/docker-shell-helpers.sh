@@ -152,18 +152,17 @@ container_create() {
    done
 
    [ "$os" ] || __die "${FUNCNAME[0]}: --os has not been set"
-   [ "$disk" ] && disk_opt="-v $disk"
    if [ "$random_name" = 1 ]; then
       name="${os/:/.}_$(</dev/urandom tr -dc _A-Z-a-z-0-9 | head -c8)"
    elif [ -z "$name" ]; then
       __die "${FUNCNAME[0]}: --name has not been set"
    fi
 
-   container_exists "$name" ||
-      sudo docker run -itd --name="$name" $disk_opt "$os" "/bin/bash" \
-         >/dev/null
-   [ $? -eq 0 ] ||
+   if ! container_exists "$name" ||
+      sudo docker run -itd --name="$name" ${disk:+"-v $disk"} "$os" \
+         "/bin/bash" >/dev/null; then
       __die "ERROR: ${FUNCNAME[0]}: cannot instantiate the container $name"
+   fi
    echo "$name"
 }
 
