@@ -133,7 +133,6 @@ container_create() {
    # doc.args: --name (or --random-name), --os and a host folder (--disk) to map
    # doc.example: container_create --random-name --os "centos:latest" --disk ~/docker-datadisk:/shared:rw
    local disk=
-   local disk_opt=
    local name=
    local os=
 
