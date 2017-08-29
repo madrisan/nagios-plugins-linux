@@ -1,0 +1,8 @@
+configure linguist-generated=true
+config.* linguist-vendored
+depcomp linguist-vendored
+install-sh linguist-vendored
+missing linguist-vendored
+test-driver linguist-vendored
+ltmain.sh linguist-vendored
+libtool linguist-vendored
