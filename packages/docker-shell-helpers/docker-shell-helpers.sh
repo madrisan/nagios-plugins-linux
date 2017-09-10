@@ -16,7 +16,7 @@ docker_bash_helpers_revision="3"
 # 'private' definitions and functions
 
 __PROGNAME="${0##*/}"
-__die() { echo "${__PROGNAME}: ERROR: $1" 1>&2; exit 1; }
+__die() { echo "${__PROGNAME}: error: $1" 1>&2; exit 1; }
 __isnotempty() { [ "$1" ] && return 0 || return 1; }
 __validate_input() {
    [ "$2" ] || __die "$1 requires an argument (container name)"
@@ -160,7 +160,7 @@ container_create() {
    if ! container_exists "$name" ||
       sudo docker run -itd --name="$name" ${disk:+"-v $disk"} "$os" \
          "/bin/bash" >/dev/null; then
-      __die "ERROR: ${FUNCNAME[0]}: cannot instantiate the container $name"
+      __die "${FUNCNAME[0]}: cannot instantiate the container $name"
    fi
    echo "$name"
 }
