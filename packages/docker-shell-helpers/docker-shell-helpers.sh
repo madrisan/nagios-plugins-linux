@@ -157,9 +157,9 @@ container_create() {
       __die "${FUNCNAME[0]}: --name has not been set"
    fi
 
-   if ! container_exists "$name" ||
-      sudo docker run -itd --name="$name" ${disk:+"-v $disk"} "$os" \
-         "/bin/bash" >/dev/null; then
+   if ! (container_exists "$name" ||
+      sudo docker run -itd --name="$name" ${disk:+-v $disk} "$os" \
+         "/bin/bash" >/dev/null); then
       __die "${FUNCNAME[0]}: cannot instantiate the container $name"
    fi
    echo "$name"
