@@ -1,3 +1,26 @@
+    Major changes between "nagios-plugins-linux" versions 21 and 22
+
+-- Fixes
+
+* vminfo lib: add the following items to the /proc/vmstat parser:
+   - vm_pgalloc_dma32
+   - vm_pgrefill_dma32
+   - vm_pgscan_direct_dma32
+   - vm_pgscan_kswapd_dma32
+   - vm_pgsteal_dma32
+   - vm_pgsteal_direct_dma
+   - vm_pgsteal_direct_dma32
+
+  The DMA32 memory zone is only available on 64-bit linux
+  (low ~4GBytes of memory).  This patch can slightly modify the value
+  of the memory counters reported by check_memory.
+
+-- Enhancements
+
+* Fix several warnings reported by Codacy and Codeclimate.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 20 and 21
 
 -- Enhancements
