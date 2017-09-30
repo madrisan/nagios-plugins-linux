@@ -275,6 +275,23 @@ AC_CHECK_DECLS([CPU_ALLOC], [], [],
   [[#define _GNU_SOURCE
     #include <sched.h>]])
 
+dnl Check for the procps newlib
+have_libprocps=no
+AC_ARG_ENABLE([libprocps],
+  AS_HELP_STRING([--enable-libprocps], [Enable optional LIBPROCPS support]))
+AS_IF([test "x$enable_libprocps" = "xyes"], [
+  PKG_CHECK_EXISTS([libprocps],
+    [PKG_CHECK_MODULES(LIBPROCPS, [libprocps = UNKNOWN],
+      [AC_DEFINE(HAVE_LIBPROCPS, 1, [Define if libprocps is available])
+       have_libprocps=yes],
+      AC_MSG_ERROR([*** libprocps version UNKNOWN not found]))])
+  AC_SUBST(LIBPROCPS_LIBS)
+  AC_SUBST(LIBPROCPS_CFLAGS)
+  AS_IF([test "x$have_libprocps" = "xno" -a "x$enable_libprocps" = "xyes"],
+        [AC_MSG_ERROR([*** LIBPROCPS support requested, but libraries not found])])
+])
+AM_CONDITIONAL(HAVE_LIBPROCPS, [test "$have_libprocps" = "yes"])
+
 dnl Add the option '--with-proc-meminfo=PATH'
 AC_ARG_WITH(proc-meminfo,
   AS_HELP_STRING([--with-proc-meminfo=PATH],

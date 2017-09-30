@@ -22,6 +22,8 @@
 #include "common.h"
 #include "testutils.h"
 
+#ifndef HAVE_LIBPROCPS
+
 # define NPL_TESTING
 #  include "../lib/vminfo.c"
 # undef NPL_TESTING
@@ -70,23 +72,23 @@ test_procvminfo (const void *tdata)
   return ret;
 }
 
-#define test_memory_label(arg, value) \
-static int test_memory_ ## arg (const void *tdata)           \
-{                                                            \
-  int err, ret = 0;                                          \
-  unsigned long kb_value;                                    \
-  const char *env_variable = "NPL_TEST_PATH_PROCVMSTAT";     \
-                                                             \
-  /* read the data from (a static copy of) /proc/vmstat */   \
-  err = setenv (env_variable, NPL_TEST_PATH_PROCVMSTAT, 1);  \
-  if (err < 0)                                               \
-    return EXIT_AM_HARDFAIL;                                 \
-                                                             \
-  kb_value = proc_vmem_get_ ## arg (vmem);                   \
-  TEST_ASSERT_EQUAL_NUMERIC (kb_value, value);               \
-                                                             \
-  return ret;                                                \
-}
+# define test_memory_label(arg, value) \
+  static int test_memory_ ## arg (const void *tdata)           \
+  {                                                            \
+    int err, ret = 0;                                          \
+    unsigned long kb_value;                                    \
+    const char *env_variable = "NPL_TEST_PATH_PROCVMSTAT";     \
+                                                               \
+    /* read the data from (a static copy of) /proc/vmstat */   \
+    err = setenv (env_variable, NPL_TEST_PATH_PROCVMSTAT, 1);  \
+    if (err < 0)                                               \
+      return EXIT_AM_HARDFAIL;                                 \
+                                                               \
+    kb_value = proc_vmem_get_ ## arg (vmem);                   \
+    TEST_ASSERT_EQUAL_NUMERIC (kb_value, value);               \
+                                                               \
+    return ret;                                                \
+  }
 
 test_memory_label (pgpgin, 2581510UL);
 test_memory_label (pgpgout, 34298109UL);
@@ -109,7 +111,7 @@ mymain (void)
 
   proc_vmem_data_t *procdata = vmem->data;
 
-#define DO_TEST_PROC(MEMTYPE, VALUE, EXPECT_VALUE)                       \
+# define DO_TEST_PROC(MEMTYPE, VALUE, EXPECT_VALUE)                      \
   do                                                                     \
     {                                                                    \
       test_data data = {                                                 \
@@ -171,7 +173,7 @@ mymain (void)
 
   /* test the public interface of the library */
 
-#define DO_TEST(MSG, FUNC, DATA) \
+# define DO_TEST(MSG, FUNC, DATA) \
   do { if (test_run (MSG, FUNC, DATA) < 0) ret = -1; } while (0)
 
   DO_TEST ("check pgpgin virtual memory stat", test_memory_pgpgin, NULL);
@@ -195,3 +197,13 @@ mymain (void)
 }
 
 TEST_MAIN (mymain)
+
+#else
+
+int
+main (void)
+{
+  return EXIT_AM_SKIP;
+}
+
+#endif			/* HAVE_LIBPROCPS */
