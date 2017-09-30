@@ -37,12 +37,22 @@ libutils_a_SOURCES =  \
 	sysfsparser.c \
 	thresholds.c  \
 	tcpinfo.c     \
-	vminfo.c      \
 	xasprintf.c   \
 	xmalloc.c     \
 	xstrtol.c
 
+if HAVE_LIBPROCPS
+
+  libutils_a_SOURCES += \
+	meminfo_procps.c \
+	vminfo_procps.c
+
+else
+
 if HAVE_PROC_MEMINFO
-libutils_a_SOURCES += \
-	meminfo.c
+  libutils_a_SOURCES += meminfo.c
+endif
+
+  libutils_a_SOURCES += vminfo.c
+
 endif

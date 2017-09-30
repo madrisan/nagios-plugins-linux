@@ -41,13 +41,20 @@ AM_CPPFLAGS = \
 	-include $(top_builddir)/config.h \
 	-I$(top_srcdir)/include
 
+AM_CFLAGS = $(LIBPROCPS_CFLAGS)
+AM_LDFLAGS = $(LIBPROCPS_LIBS)
+
 test_programs = \
 	tslibkernelver \
 	tslibmeminfo_conversions \
 	tslibmeminfo_interface \
 	tslibmeminfo_procparser \
-	tslibmessages \
-	tslibvminfo \
+	tslibmessages
+if !HAVE_LIBPROCPS
+test_programs += \
+	tslibvminfo
+endif
+test_programs += \
 	tsclock_thresholds \
 	tscswch \
 	tsintr  \

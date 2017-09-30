@@ -21,7 +21,7 @@
 
 #include "testutils.h"
 
-#ifdef PROC_MEMINFO
+#if defined (PROC_MEMINFO) && !defined (HAVE_LIBPROCPS)
 
 # define NPL_TESTING
 #  include "../lib/meminfo.c"
@@ -136,4 +136,4 @@ main (void)
   return EXIT_AM_SKIP;
 }
 
-#endif		/* PROC_MEMINFO */
+#endif

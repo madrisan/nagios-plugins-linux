@@ -20,6 +20,9 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-DMULTIPATHD_SOCKET=\"$(MULTIPATHD_SOCKET)\"
 
+AM_CFLAGS = $(LIBPROCPS_CFLAGS)
+AM_LDFLAGS = $(LIBPROCPS_LIBS)
+
 LN_S=@LN_S@
 
 check_cpu_programs = check_iowait
