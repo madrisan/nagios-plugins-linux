@@ -108,42 +108,48 @@ proc_vmem_get (pswpout, VMSTAT_PSWPOUT)
 unsigned long
 proc_vmem_get_pgsteal (struct proc_vmem *vmem)
 {
+  if (vmem == NULL)
+    return 0;
+
   unsigned long vm_pgsteal_direct_dma = GET_DATA (VMSTAT_PGSTEAL_DIRECT_DMA);
   unsigned long vm_pgsteal_direct_dma32 =
     GET_DATA (VMSTAT_PGSTEAL_DIRECT_DMA32);
   unsigned long vm_pgsteal_direct_normal =
     GET_DATA (VMSTAT_PGSTEAL_DIRECT_NORMAL);
 
-  return (vmem ==
-	  NULL) ? 0 : vm_pgsteal_direct_dma +
+  return vm_pgsteal_direct_dma +
     vm_pgsteal_direct_dma32 + vm_pgsteal_direct_normal;
 }
 
 unsigned long
 proc_vmem_get_pgscand (struct proc_vmem *vmem)
 {
+  if (vmem == NULL)
+    return 0;
+
   unsigned long vm_pgscan_direct_dma = GET_DATA (VMSTAT_PGSCAN_DIRECT_DMA);
   unsigned long vm_pgscan_direct_dma32 =
     GET_DATA (VMSTAT_PGSCAN_DIRECT_DMA32);
   unsigned long vm_pgscan_direct_normal =
     GET_DATA (VMSTAT_PGSCAN_DIRECT_NORMAL);
 
-  return (vmem ==
-	  NULL) ? 0 : vm_pgscan_direct_dma +
+  return vm_pgscan_direct_dma +
     vm_pgscan_direct_dma32 + vm_pgscan_direct_normal;
 }
 
 unsigned long
 proc_vmem_get_pgscank (struct proc_vmem *vmem)
 {
+  if (vmem == NULL)
+    return 0;
+
   unsigned long vm_pgscan_kswapd_dma = GET_DATA (VMSTAT_PGSCAN_KSWAPD_DMA);
   unsigned long vm_pgscan_kswapd_dma32 =
     GET_DATA (VMSTAT_PGSCAN_KSWAPD_DMA32);
   unsigned long vm_pgscan_kswapd_normal =
     GET_DATA (VMSTAT_PGSCAN_KSWAPD_NORMAL);
 
-  return (vmem ==
-	  NULL) ? 0 : vm_pgscan_kswapd_dma +
+  return vm_pgscan_kswapd_dma +
     vm_pgscan_kswapd_dma32 + vm_pgscan_kswapd_normal;
 }
 
