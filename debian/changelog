@@ -1,11 +1,47 @@
-nagios-plugins-linux (20-1) UNRELEASED; urgency=low
+nagios-plugins-linux (22-1) stable; urgency=low
 
-  * Initial release.
+  * Release "Commit #600":
+    - Add the items /proc/vmstat/vm_*dma32 to the vminfo library parser.
+    - Fix several warnings reported by Codacy and Codeclimate.
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Tue, 20 Sep 2017 22:38:56 +0000
+
+nagios-plugins-linux (21-1) stable; urgency=low
+
+  * Update from upstream stable branch:
+    - The command-line option --swapping-only has been added to check_paging.
+    - The Docker-based framework for packaging the Nagios Plugins for Linux
+      (test-build) now supports also Debian 9 (Stretch) and Fedora 26.
+    - The test framework has been reworked and enriched in new modules.
+    - Use secure_getenv() (or __secure_getenv()) instead of getenv() to
+      improve security.
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Tue,  6 Aug 2017 22:18:30 +0000
+
+nagios-plugins-linux (20-1) stable; urgency=low
+
+  * Release "Commit #500":
+    - Some insecure data handling issues discovered by Coverity in the new test
+      framework have been fixed.
+    - A new Docker-based framework for packaging the Nagios Plugins for Linux
+      (rpm and deb packages) is now available. Supported Linux distributions:
+      CentOS 5/6/7, Debian 6/7/8, Fedora 24/25/rawhide, and RHEL 5/6/7
+    - The messages displayed in case of a too large "count" or "delay" error
+      have been improved.
 
  -- Davide Madrisan <davide.madrisan@gmail.com>  Tue, 14 Mar 2017 18:41:42 +0000
 
-nagios-plugins-linux (19-1) UNRELEASED; urgency=low
+nagios-plugins-linux (19-1) stable; urgency=low
 
-  * Initial release.
+  * Initial Debian release:
+    - check_multipath: recent versions of multipath no longer open a multipathd
+      socket file in the file system, but instead use an abstract namespace
+      socket (@/org/kernel/linux/storage/multipathd).
+      Thanks to Chris Procter "chr15p" for reporting the issue and creating a
+      pull request.
+    - check_multipath: use a larger buffer for queries to make this plugin
+      working with systems that have lots of mapped disks.
+    - A framework for testing the code (make check) has been added and some
+      tests are now available.
 
  -- Davide Madrisan <davide.madrisan@gmail.com>  Sat, 19 Nov 2016 21:44:49 +0000
