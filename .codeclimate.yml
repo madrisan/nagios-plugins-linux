@@ -1,4 +1,5 @@
-engines:
+version: "2"
+plugins:
   duplication:
     enabled: true
     config:
@@ -15,13 +16,7 @@ engines:
       threshold: 20
   shellcheck:
     enabled: true
-ratings:
-  paths:
-  - include/
-  - lib/
-  - plugins/
-  - tests/
-exclude_paths:
+exclude_patterns:
 - "**.sample"
 - compile
 - config.sub 
@@ -30,3 +25,4 @@ exclude_paths:
 - libtool
 - ltmain.sh
 - m4/
+- packages/
