@@ -1,10 +1,10 @@
 #!/bin/bash
 # Multi-platform build system
-# Copyright (C) 2016 Davide Madrisan <davide.madrisan@gmail.com>
+# Copyright (C) 2016-2018 Davide Madrisan <davide.madrisan@gmail.com>
 
 PROGNAME="${0##*/}"
 PROGPATH="${0%/*}"
-REVISION=2
+REVISION=3
 
 die () { echo -e "$PROGNAME: error: $1" 1>&2; exit 1; }
 msg () { echo "*** info: $1"; }
@@ -36,7 +36,7 @@ Supported distributions:
    CentOS 5/6/7
    Debian squeeze        (support level: alpha)
    Debian wheezy/jessie/stretch
-   Fedora 24/25/rawhide
+   Fedora 24/25/26/27/rawhide
 
 Example:
        $0 -s $PROGPATH/../../nagios-plugins-linux:/shared:rw \\
@@ -51,7 +51,7 @@ __EOF
 help () {
    cat <<__EOF
 $PROGNAME v$REVISION - containerized software build checker
-Copyright (C) 2016 Davide Madrisan <davide.madrisan@gmail.com>
+Copyright (C) 2016-2018 Davide Madrisan <davide.madrisan@gmail.com>
 
 __EOF
 
@@ -176,8 +176,8 @@ esac
 $pck_install $pcks_dev
 
 # create a non-root user for building the software (developer) ...
-useradd -m ${usr_gid:+-g $usr_gid} ${usr_uid:+-u $usr_uid} \
-   -c Developer -s /bin/bash developer
+groupadd -g $usr_gid developers
+useradd -m -g $usr_gid -u $usr_uid -c Developer -s /bin/bash developer
 
 # ... and switch to this user
 su - developer -c '
