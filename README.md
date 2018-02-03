@@ -1,3 +1,4 @@
+<a href='https://ko-fi.com/K3K57TH3' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi2.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 # Nagios Plugins for Linux
 
@@ -133,5 +134,3 @@ The building process requires the Docker software containerization platform runn
 
 If you find a bug please create an issue in the project bug tracker at
 [GitHub](https://github.com/madrisan/nagios-plugins-linux/issues)
-
-<a href='https://ko-fi.com/K3K57TH3' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi2.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
