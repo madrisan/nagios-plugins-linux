@@ -4,10 +4,11 @@
 
 [![Build Status](https://travis-ci.org/madrisan/nagios-plugins-linux.svg?branch=master)](https://travis-ci.org/madrisan/nagios-plugins-linux)
 ![Release Status](https://img.shields.io/badge/status-stable-brightgreen.svg)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/3779/badge.svg)](https://scan.coverity.com/projects/3779)
-[![Code Climate](https://codeclimate.com/github/madrisan/nagios-plugins-linux/badges/gpa.svg)](https://codeclimate.com/github/madrisan/nagios-plugins-linux)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://spdx.org/licenses/GPL-3.0.html)
 [![Download Latest Release](https://img.shields.io/badge/download-latest--tarball-blue.svg)](https://github.com/madrisan/nagios-plugins-linux/releases/download/v22/nagios-plugins-linux-22.tar.xz)
+[![SayThanks](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/madrisan)
+
+---------------
 
 ![alt tag](https://madrisan.files.wordpress.com/2015/11/nagios-plugins-linux-logo-256.png)
 
