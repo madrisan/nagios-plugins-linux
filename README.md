@@ -86,8 +86,6 @@ the API of the library `libprocps.so.5`
 ([procps newlib](https://gitlab.com/procps-ng/procps/tree/newlib)).
 This library is still under active development and no stable version has
 been released yet. 
-This [patch](https://gitlab.com/procps-ng/procps/merge_requests/51)
-is also required for the build to complete successfully.
 
 ## Supported Platforms
 
