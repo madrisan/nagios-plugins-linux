@@ -99,13 +99,13 @@ This package is known to compile with:
 * gcc 4.1.2 (RHEL 5 / CentOS 5),
 * gcc 4.4 (RHEL6 / CentOS 6),
 * gcc 4.8.2 (RHEL7 / CentOS 7),
-* gcc 5.1.1, 5.3.1, 6.3.1, 7.2.1, clang 3.7.0, 3.8.0 (Fedora 23 Cloud, Fedora 25),
-* gcc 4.9.0-4.9.2, 5.2.0, 5.3.0, 6.2.0, clang 3.1, 3.5.1, and 3.8.1 (openmamba GNU/Linux 2.90+).
+* gcc 5.1.1, 5.3.1, 6.3.1, 7.2.1, 7.3.1; clang 3.7.0, 3.8.0, 5.0.1 (Fedora 23 Cloud, Fedora 25/27),
+* gcc 4.9.0-4.9.2, 5.2.0, 5.3.0, 6.2.0; clang 3.1, 3.5.1, and 3.8.1 (openmamba GNU/Linux 2.90+).
 
 List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,
 * 3.10, 3.14, 3.18,
-* 4.2, 4.4, 4,9, 4.14
+* 4.2, 4.4, 4,9, 4.14, 4.15
 
 
 ## CentOS/RHEL, Debian, and Fedora Packages
