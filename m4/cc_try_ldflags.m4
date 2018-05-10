@@ -1,5 +1,5 @@
 dnl This file is part of `nagios-plugins-linux'.
-dnl Copyright (C) 2014 by Davide Madrisan <davide.madrisan@gmail.com>
+dnl Copyright (C) 2018 by Davide Madrisan <davide.madrisan@gmail.com>
 
 dnl This program is free software: you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -16,19 +16,19 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Process this file with autoconf to produce a configure script.
 
-dnl cc_TRY_CFLAGS (CFLAGS)
+dnl cc_TRY_LDFLAGS (LDFLAGS)
 dnl ------------------------------------------------------------
-dnl Checks if $CC supports a given set of CFLAGS.
-dnl If supported, the current CFLAGS is appended to SUPPORTED_CFLAGS
-AC_DEFUN([cc_TRY_CFLAGS],
+dnl Checks if $CC supports a given set of LDFLAGS.
+dnl If supported, the current LDFLAGS is appended to SUPPORTED_LDFLAGS
+AC_DEFUN([cc_TRY_LDFLAGS],
    [AC_MSG_CHECKING([whether compiler accepts $1])
-   ac_save_CFLAGS="$CFLAGS"
-   CFLAGS="$CFLAGS $1"
-   AC_COMPILE_IFELSE(
+   ac_save_LDFLAGS="$LDFLAGS"
+   LDFLAGS="$LDFLAGS $1"
+   AC_LINK_IFELSE(
      [AC_LANG_PROGRAM([[]],[[int x;]])],
      [AC_MSG_RESULT([yes])
-      SUPPORTED_CFLAGS="$SUPPORTED_CFLAGS $1"],
+      SUPPORTED_LDFLAGS="$SUPPORTED_LDFLAGS $1"],
      [AC_MSG_RESULT([no])]
    )
-   CFLAGS="$ac_save_CFLAGS"
+   LDFLAGS="$ac_save_LDFLAGS"
 ])

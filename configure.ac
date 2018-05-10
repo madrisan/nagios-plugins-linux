@@ -78,6 +78,13 @@ AC_COMPILE_IFELSE(
    AC_MSG_ERROR([The compiler does not support variable-length arrays])
   ])
 
+dnl Add the option '--disable-hardening'
+AC_ARG_ENABLE([hardening],
+  [AS_HELP_STRING([--disable-hardening],
+    [Do not attempt to harden the resulting executables (default is to harden)])],
+    [use_hardening=$enableval],
+    [use_hardening=yes])
+
 dnl Checks for some compiler warning flags
 
 cc_TRY_CFLAGS([-Wall])
@@ -93,28 +100,20 @@ cc_TRY_CFLAGS([-Wunused])
 # The gcc compiler shipped by RHEL5 (gcc-4.1.2) does not recognize it
 #cc_TRY_CFLAGS([-Warray-bounds])
 
-AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
-
-dnl Checks whether the compiler supports the
-dnl    __attribute__((__alloc_size__ args)) feature
-ac_save_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -Werror"
-AC_CACHE_CHECK(
-  [whether compiler supports __attribute__((__alloc_size__ args))],
-  [cc_cv_attribute_alloc_size],
-  [AC_COMPILE_IFELSE(
-    [AC_LANG_PROGRAM([[]],[[
-      void *fooalloc(int n, int s) __attribute__((__alloc_size__(1, 2)));]])],
-    [cc_cv_attribute_alloc_size=yes],
-    [cc_cv_attribute_alloc_size=no])
-  ])
-CFLAGS="$ac_save_CFLAGS"
-if test "x$cc_cv_attribute_alloc_size" = "xyes"; then
-  ac_cc_attribute_alloc_size='__attribute__((__alloc_size__ args))'
+if test x$use_hardening != xno; then
+  cc_TRY_CFLAGS([-D_FORTIFY_SOURCE=2])
+  cc_TRY_CFLAGS([-fstack-protector-strong])
+  cc_TRY_CFLAGS([-fpie -fPIE])
+  cc_TRY_CFLAGS([-Wstack-protector])
+  case "$SUPPORTED_CFLAGS" in
+    *-fstack-protector-strong*) ;;
+    *)
+      cc_TRY_CFLAGS([-fstack-protector-all])
+      ;;
+  esac
+  cc_TRY_LDFLAGS([-Wl,-z,relro])
+  cc_TRY_LDFLAGS([-Wl,-z,now])
 fi
-AC_DEFINE_UNQUOTED(
-  [_attribute_alloc_size_(args)], [$ac_cc_attribute_alloc_size],
-  [Define this if the compiler supports the alloc_size attribute])
 
 dnl Checks whether the compiler supports the
 dnl    __attribute__((__malloc__)) feature
@@ -403,6 +402,30 @@ AC_PROG_LN_S
 
 dnl Set the default --prefix
 AC_PREFIX_DEFAULT(/usr/local/nagios)
+
+dnl Checks whether the compiler supports the
+dnl    __attribute__((__alloc_size__ args)) feature
+ac_save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Werror"
+AC_CACHE_CHECK(
+  [whether compiler supports __attribute__((__alloc_size__ args))],
+  [cc_cv_attribute_alloc_size],
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([[]],[[
+      void *fooalloc(int n, int s) __attribute__((__alloc_size__(1, 2)));]])],
+    [cc_cv_attribute_alloc_size=yes],
+    [cc_cv_attribute_alloc_size=no])
+  ])
+CFLAGS="$ac_save_CFLAGS"
+if test "x$cc_cv_attribute_alloc_size" = "xyes"; then
+  ac_cc_attribute_alloc_size='__attribute__((__alloc_size__ args))'
+fi
+AC_DEFINE_UNQUOTED(
+  [_attribute_alloc_size_(args)], [$ac_cc_attribute_alloc_size],
+  [Define this if the compiler supports the alloc_size attribute])
+
+AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
+AC_SUBST([LDFLAGS], ["$SUPPORTED_LDFLAGS $LDFLAGS"])
 
 AC_CONFIG_FILES([\
   Makefile \
