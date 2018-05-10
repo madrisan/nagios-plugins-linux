@@ -165,7 +165,7 @@ lock_old_archive_extraction=no
 LTCC="gcc -std=gnu99"
 
 # LTCC compiler flags.
-LTCFLAGS=" -Wall -Wformat -Wformat-security -Wmissing-noreturn -Wmissing-format-attribute -Wredundant-decls -Wshadow -Wsign-compare -Wstrict-aliasing=2 -Wunused -g -O2 -Wall -Wformat -Wformat-security -Wmissing-noreturn -Wmissing-format-attribute -Wredundant-decls -Wshadow -Wsign-compare -Wstrict-aliasing=2 -Wunused"
+LTCFLAGS=" -Wall -Wformat -Wformat-security -Wmissing-noreturn -Wmissing-format-attribute -Wredundant-decls -Wshadow -Wsign-compare -Wstrict-aliasing=2 -Wunused -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fpie -fPIE -Wstack-protector -g -O2"
 
 # Take the output of nm and produce a listing of raw symbols and C names.
 global_symbol_pipe="sed -n -e 's/^.*[	 ]\\([ABCDGIRSTW][ABCDGIRSTW]*\\)[	 ][	 ]*\\([_A-Za-z][_A-Za-z0-9]*\\)\$/\\1 \\2 \\2/p' | sed '/ __gnu_lto/d'"
