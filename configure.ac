@@ -277,7 +277,8 @@ AC_CHECK_DECLS([CPU_ALLOC], [], [],
 dnl Check for the procps newlib
 have_libprocps=no
 AC_ARG_ENABLE([libprocps],
-  AS_HELP_STRING([--enable-libprocps], [Enable optional LIBPROCPS support]))
+  AS_HELP_STRING([--enable-libprocps], [Enable optional LIBPROCPS support]),
+    [enable_libprocps=$enableval],[enable_libprocps=no])
 AS_IF([test "x$enable_libprocps" = "xyes"], [
   PKG_CHECK_EXISTS([libprocps],
     [PKG_CHECK_MODULES(LIBPROCPS, [libprocps = UNKNOWN],
@@ -336,21 +337,21 @@ AC_ARG_WITH(
   [AS_HELP_STRING(
     [--with-test-suite],
     [build test suite by default @<:@default=check@:>@])],
-  [case "${withval}" in
+  [case "${with_test_suite}" in
     yes|no|check) ;;
-    *) AC_MSG_ERROR([bad value ${withval} for tests option]) ;;
+    *) AC_MSG_ERROR([bad value ${with_test_suite} for tests option]) ;;
    esac],
-  [withval=check])
+  [with_test_suite=check])
 AC_MSG_CHECKING([Whether to build test suite by default])
-if test "$withval" = "check" ; then
+if test "$with_test_suite" = "check" ; then
   if test -d $srcdir/.git ; then
-    withval=yes
+    with_test_suite=yes
   else
-    withval=no
+    with_test_suite=no
   fi
 fi
-AC_MSG_RESULT([$withval])
-AM_CONDITIONAL([WITH_TESTS], [test "$withval" = "yes"])
+AC_MSG_RESULT([$with_test_suite])
+AM_CONDITIONAL([WITH_TESTS], [test "$with_test_suite" = "yes"])
 
 dnl Check whether we can get the number of CPU
 AC_CHECK_FUNCS([get_nprocs_conf get_nprocs], [],
@@ -438,3 +439,18 @@ AC_CONFIG_FILES([\
   tests/Makefile])
 
 AC_OUTPUT
+
+echo
+echo "Options used to compile and link:"
+echo "  debug enabled   = $enable_debug"
+echo "  with libprocps  = $enable_libprocps"
+echo "  with socketfile = $MULTIPATHD_SOCKET"
+echo "  with test suite = $with_test_suite"
+echo
+echo "  target os       = $target_os"
+echo "  build os        = $build_os"
+echo
+echo "  CC              = $CC"
+echo "  CFLAGS          = $CFLAGS"
+echo "  LDFLAGS         = $LDFLAGS"
+echo
