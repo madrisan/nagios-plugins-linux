@@ -320,6 +320,22 @@ AC_ARG_ENABLE([debug],
 AS_IF([test "x$enable_debug" = "xyes"], [
    AC_DEFINE(ENABLE_DEBUG, [1], [Debug messages.])])
 
+dnl Turn warnings into errors: '--enable-werror'
+AC_ARG_ENABLE([werror],
+  AS_HELP_STRING([--enable-werror],
+    [make all warnings as errors (default is no)]),
+    [enable_werror=$enableval],
+    [enable_werror=no])
+AS_IF([test "x$enable_werror" = "xyes"], [
+  cc_TRY_CFLAGS([-Werror])
+  case "$SUPPORTED_CFLAGS" in
+    *-Werror*) ;;
+    *)
+      AC_MSG_ERROR([enable-werror set but -Werror is not usable])
+      ;;
+  esac
+  ])
+
 dnl Add the option: '--with-socketfile'
 MULTIPATHD_SOCKET="@/org/kernel/linux/storage/multipathd"
 AC_ARG_WITH(
@@ -443,6 +459,7 @@ AC_OUTPUT
 echo
 echo "Options used to compile and link:"
 echo "  debug enabled   = $enable_debug"
+echo "  werror enabled  = $enable_werror"
 echo "  with libprocps  = $enable_libprocps"
 echo "  with socketfile = $MULTIPATHD_SOCKET"
 echo "  with test suite = $with_test_suite"
