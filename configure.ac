@@ -81,7 +81,7 @@ AC_COMPILE_IFELSE(
 dnl Add the option '--disable-hardening'
 AC_ARG_ENABLE([hardening],
   [AS_HELP_STRING([--disable-hardening],
-    [Do not attempt to harden the resulting executables (default is to harden)])],
+    [do not attempt to harden the resulting executables (default is to harden)])],
     [use_hardening=$enableval],
     [use_hardening=yes])
 
@@ -277,7 +277,7 @@ AC_CHECK_DECLS([CPU_ALLOC], [], [],
 dnl Check for the procps newlib
 have_libprocps=no
 AC_ARG_ENABLE([libprocps],
-  AS_HELP_STRING([--enable-libprocps], [Enable optional LIBPROCPS support]),
+  AS_HELP_STRING([--enable-libprocps], [enable optional LIBPROCPS support]),
     [enable_libprocps=$enableval],[enable_libprocps=no])
 AS_IF([test "x$enable_libprocps" = "xyes"], [
   PKG_CHECK_EXISTS([libprocps],
