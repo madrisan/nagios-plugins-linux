@@ -32,6 +32,7 @@ libexec_PROGRAMS =        \
 	check_cpu         \
 	check_cpufreq     \
 	check_cswch       \
+	check_docker      \
 	check_fc          \
 	check_ifmountfs   \
 	check_intr        \
@@ -58,6 +59,7 @@ check_clock_SOURCES      = check_clock.c
 check_cpu_SOURCES        = check_cpu.c
 check_cpufreq_SOURCES    = check_cpufreq.c
 check_cswch_SOURCES      = check_cswch.c
+check_docker_SOURCES     = check_docker.c
 check_fc_SOURCES         = check_fc.c
 check_ifmountfs_SOURCES  = check_ifmountfs.c
 check_intr_SOURCES       = check_intr.c
@@ -86,6 +88,7 @@ check_clock_LDADD        = $(LDADD)
 check_cpu_LDADD          = $(LDADD)
 check_cpufreq_LDADD      = $(LDADD)
 check_cswch_LDADD        = $(LDADD)
+check_docker_LDADD       = $(LDADD)
 check_fc_LDADD           = $(LDADD)
 check_ifmountfs_LDADD    = $(LDADD)
 check_intr_LDADD         = $(LDADD)
