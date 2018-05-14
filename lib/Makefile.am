@@ -17,12 +17,13 @@
 
 AM_CPPFLAGS = \
 	-include $(top_builddir)/config.h \
-	-I$(top_srcdir)/include
+	-I$(top_srcdir)/include \
+	-DDOCKER_SOCKET=\"$(DOCKER_SOCKET)\" \
+	$(LIBCURL_CPPFLAGS)
 
 noinst_LIBRARIES = libutils.a
 
 libutils_a_SOURCES =  \
-	container.c   \
 	cpudesc.c     \
 	cpufreq.c     \
 	cpustats.c    \
@@ -41,6 +42,11 @@ libutils_a_SOURCES =  \
 	xasprintf.c   \
 	xmalloc.c     \
 	xstrtol.c
+
+if HAVE_LIBCURL
+  libutils_a_SOURCES += \
+	container.c
+endif
 
 if HAVE_LIBPROCPS
 

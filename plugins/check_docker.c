@@ -53,8 +53,7 @@ usage (FILE * out)
   fputs ("This plugin returns some runtime metrics exposed by Docker\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-w COUNTER] [-c COUNTER] ...\n",
-	   program_name);
+  fprintf (out, "  %s [-w COUNTER] [-c COUNTER] ...\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -w, --warning COUNTER    warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
@@ -63,8 +62,7 @@ usage (FILE * out)
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s -w 60 -c 120 ...\n",
-	   program_name);
+  fprintf (out, "  %s -w 60 -c 120 ...\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -124,17 +122,15 @@ main (int argc, char **argv)
   containers = docker_running_containers_number (verbose);
 
   status = get_status (containers, my_threshold);
-  status_msg =
-    xasprintf ("%s: %d", state_text (status), containers);
+  status_msg = xasprintf ("%s: %d", state_text (status), containers);
 
   free (my_threshold);
 
-  perfdata_containers_msg =
-    xasprintf ("containers_total=%u", containers);
+  perfdata_containers_msg = xasprintf ("containers_total=%u", containers);
 
   printf ("%s %s | %s\n", program_name_short, status_msg,
-          perfdata_containers_msg);
+	  perfdata_containers_msg);
 
   return status;
 }
-#endif			/* NPL_TESTING */
+#endif /* NPL_TESTING */
