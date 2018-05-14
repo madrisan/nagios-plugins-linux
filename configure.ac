@@ -289,6 +289,13 @@ AC_CHECK_DECLS([CPU_ALLOC], [], [],
   [[#define _GNU_SOURCE
     #include <sched.h>]])
 
+dnl Check for libcurl
+LIBCURL_CHECK_CONFIG([], 7.40.0, [],
+  [AC_MSG_WARN([Missing required libcurl >= 7.40.0])])
+AC_SUBST([LIBCURL_CPPFLAGS])
+AC_SUBST([LIBCURL])
+AM_CONDITIONAL(HAVE_LIBCURL, [test "$libcurl_cv_lib_curl_usable" = "yes"])
+
 dnl Check for the procps newlib
 have_libprocps=no
 AC_ARG_ENABLE([libprocps],
@@ -334,6 +341,17 @@ AC_ARG_ENABLE([debug],
       [], [enable_debug=no])
 AS_IF([test "x$enable_debug" = "xyes"], [
    AC_DEFINE(ENABLE_DEBUG, [1], [Debug messages.])])
+
+dnl Add the option: '--with-docker-socket'
+DOCKER_SOCKET="/var/run/docker.sock"
+AC_ARG_WITH(
+  [dockersocket],
+  [AS_HELP_STRING(
+    [--with-docker-socket],
+    [use a different socket file for docker
+     (default is /var/run/docker.sock)])],
+  [DOCKER_SOCKET="$with_dockersocket"])
+AC_SUBST(DOCKER_SOCKET)
 
 dnl Add the option: '--with-socketfile'
 MULTIPATHD_SOCKET="@/org/kernel/linux/storage/multipathd"
@@ -457,17 +475,24 @@ AC_OUTPUT
 
 echo
 echo "Options used to compile and link:"
-echo "  debug enabled     = $enable_debug"
-echo "  hardening enabled = $use_hardening"
-echo "  werror enabled    = $enable_werror"
-echo "  with libprocps    = $enable_libprocps"
-echo "  with socketfile   = $MULTIPATHD_SOCKET"
-echo "  with test suite   = $with_test_suite"
+echo "  debug enabled      = $enable_debug"
+echo "  hardening enabled  = $use_hardening"
+echo "  werror enabled     = $enable_werror"
+echo "  with docker socket = $DOCKER_SOCKET"
+echo "  with libprocps     = $enable_libprocps"
+echo "  with socketfile    = $MULTIPATHD_SOCKET"
+echo "  with test suite    = $with_test_suite"
 echo
-echo "  target os         = $target_os"
-echo "  build os          = $build_os"
+echo "  target os          = $target_os"
+echo "  build os           = $build_os"
 echo
-echo "  CC                = $CC"
-echo "  CFLAGS            = $CFLAGS"
-echo "  LDFLAGS           = $LDFLAGS"
+echo "  CC                 = $CC"
+echo "  CFLAGS             = $CFLAGS"
+echo "  LDFLAGS            = $LDFLAGS"
 echo
+
+if test "$libcurl_cv_lib_curl_usable" = "yes"; then
+  echo "  LIBCURL_CPPFLAGS = $LIBCURL_CPPFLAGS"
+  echo "  LIBCURL          = $LIBCURL"
+  echo
+fi

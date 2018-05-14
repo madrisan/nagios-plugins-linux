@@ -32,7 +32,6 @@ libexec_PROGRAMS =        \
 	check_cpu         \
 	check_cpufreq     \
 	check_cswch       \
-	check_docker      \
 	check_fc          \
 	check_ifmountfs   \
 	check_intr        \
@@ -45,9 +44,14 @@ libexec_PROGRAMS =        \
 	check_tcpcount    \
 	check_uptime      \
 	check_users
+
 if HAVE_GETLOADAVG
 libexec_PROGRAMS += \
 	check_load
+endif
+if HAVE_LIBCURL
+libexec_PROGRAMS += \
+	check_docker
 endif
 if HAVE_PROC_MEMINFO
 libexec_PROGRAMS += \
@@ -59,12 +63,14 @@ check_clock_SOURCES      = check_clock.c
 check_cpu_SOURCES        = check_cpu.c
 check_cpufreq_SOURCES    = check_cpufreq.c
 check_cswch_SOURCES      = check_cswch.c
-check_docker_SOURCES     = check_docker.c
 check_fc_SOURCES         = check_fc.c
 check_ifmountfs_SOURCES  = check_ifmountfs.c
 check_intr_SOURCES       = check_intr.c
 if HAVE_GETLOADAVG
 check_load_SOURCES       = check_load.c
+endif
+if HAVE_LIBCURL
+check_docker_SOURCES     = check_docker.c
 endif
 if HAVE_PROC_MEMINFO
 check_memory_SOURCES     = check_memory.c
@@ -88,12 +94,14 @@ check_clock_LDADD        = $(LDADD)
 check_cpu_LDADD          = $(LDADD)
 check_cpufreq_LDADD      = $(LDADD)
 check_cswch_LDADD        = $(LDADD)
-check_docker_LDADD       = $(LDADD)
 check_fc_LDADD           = $(LDADD)
 check_ifmountfs_LDADD    = $(LDADD)
 check_intr_LDADD         = $(LDADD)
 if HAVE_GETLOADAVG
 check_load_LDADD         = $(LDADD)
+endif
+if HAVE_LIBCURL
+check_docker_LDADD       = $(LDADD) $(LIBCURL)
 endif
 if HAVE_PROC_MEMINFO
 check_memory_LDADD       = $(LDADD)
