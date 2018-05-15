@@ -101,7 +101,7 @@ if HAVE_GETLOADAVG
 check_load_LDADD         = $(LDADD)
 endif
 if HAVE_LIBCURL
-check_docker_LDADD       = $(LDADD) $(LIBCURL)
+check_docker_LDADD       = $(LDADD) $(LIBCURL) -lm
 endif
 if HAVE_PROC_MEMINFO
 check_memory_LDADD       = $(LDADD)

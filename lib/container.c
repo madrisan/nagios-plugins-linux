@@ -33,7 +33,12 @@ static const char *docker_socket = DOCKER_SOCKET;
 #include "common.h"
 #include "logging.h"
 #include "messages.h"
+#include "string-macros.h"
 #include "system.h"
+
+#include "json.h"
+
+static unsigned int containers;
 
 typedef struct chunk
 {
@@ -89,7 +94,7 @@ docker_init (CURL ** curl_handle, chunk_t * chunk)
 }
 
 static CURLcode
-docker_get (CURL * curl_handle, char * url)
+docker_get (CURL * curl_handle, char *url)
 {
   CURLcode res;
 
@@ -111,20 +116,75 @@ docker_close (CURL * curl_handle, chunk_t * chunk)
   curl_global_cleanup ();
 }
 
+static void process_json_value (json_value * value, int depth);
+
+static void
+process_json_object (json_value * value, int depth)
+{
+  int length, x;
+  if (NULL == value)
+    return;
+
+  length = value->u.object.length;
+  for (x = 0; x < length; x++)
+    {
+      if (json_string == (value->u.object.values[x].value)->type)
+	{
+	  /* FIXME: check also for "State" == "running" */
+	  if (STREQ ("Id", value->u.object.values[x].name))
+	    {
+	      dbg ("container id \"%s\"\n",
+		   (value->u.object.values[x].value)->u.string.ptr);
+	      containers++;
+	    }
+	}
+
+      process_json_value (value->u.object.values[x].value, depth + 1);
+    }
+}
+
+static void
+process_json_array (json_value * value, int depth)
+{
+  int length, x;
+  if (NULL == value)
+    return;
+
+  length = value->u.array.length;
+  for (x = 0; x < length; x++)
+    process_json_value (value->u.array.values[x], depth);
+}
+
+static void
+process_json_value (json_value * value, int depth)
+{
+  if (NULL == value)
+    return;
+
+  switch (value->type)
+    {
+    default:
+      break;
+    case json_object:
+      process_json_object (value, depth + 1);
+      break;
+    case json_array:
+      process_json_array (value, depth + 1);
+      break;
+    }
+}
+
 /* Returns the number of running Docker containers  */
 int
 docker_running_containers_number (bool verbose)
 {
   CURL *curl_handle = NULL;
   CURLcode res;
-
   chunk_t chunk;
-
-  int containers = 0;
 
   docker_init (&curl_handle, &chunk);
 
-  res = docker_get (curl_handle, "http://v1.25/images/json");
+  res = docker_get (curl_handle, "http://v1.24/containers/json");
   if (CURLE_OK != res)
     {
       docker_close (curl_handle, &chunk);
@@ -135,6 +195,25 @@ docker_running_containers_number (bool verbose)
       dbg ("%lu bytes retrieved\n", chunk.size);
       dbg ("json output: %s", chunk.memory);
     }
+
+  /* parse the json stream returned by Docker */
+  {
+    json_char *json = chunk.memory;
+    json_value *value;
+    containers = 0;
+
+    value = json_parse (json, chunk.size);
+    if (NULL == value)
+      {
+	docker_close (curl_handle, &chunk);
+	plugin_error (STATE_UNKNOWN, 0,
+		      "unable to parse the json data returned by docker");
+      }
+
+    process_json_value (value, 0);
+
+    json_value_free (value);
+  }
 
   docker_close (curl_handle, &chunk);
   return containers;
