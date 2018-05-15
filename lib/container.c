@@ -130,7 +130,6 @@ process_json_object (json_value * value, int depth)
     {
       if (json_string == (value->u.object.values[x].value)->type)
 	{
-	  /* FIXME: check also for "State" == "running" */
 	  if (STREQ ("Id", value->u.object.values[x].name))
 	    {
 	      dbg ("container id \"%s\"\n",
@@ -184,7 +183,9 @@ docker_running_containers_number (bool verbose)
 
   docker_init (&curl_handle, &chunk);
 
-  res = docker_get (curl_handle, "http://v1.24/containers/json");
+  res =
+    docker_get (curl_handle,
+		"http://v1.24/containers/json?filters=%7B%22status%22%3A%7B%22running%22%3Atrue%7D%7D");
   if (CURLE_OK != res)
     {
       docker_close (curl_handle, &chunk);
