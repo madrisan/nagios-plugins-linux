@@ -19,6 +19,7 @@ AM_CPPFLAGS = -include $(top_builddir)/config.h
 
 noinst_HEADERS = \
 	common.h \
+	container.h \
 	cpudesc.h \
 	cpufreq.h \
 	cpustats.h \
@@ -26,6 +27,7 @@ noinst_HEADERS = \
 	getenv.h \
 	kernelver.h \
 	interrupts.h \
+	json.h \
 	logging.h \
 	meminfo.h \
 	mountlist.h \
@@ -41,6 +43,7 @@ noinst_HEADERS = \
 	tcpinfo.h \
 	testutils.h \
 	thresholds.h \
+	url_encode.h \
 	vminfo.h \
 	xalloc.h \
 	xasprintf.h \
