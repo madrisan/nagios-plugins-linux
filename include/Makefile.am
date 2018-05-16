@@ -43,6 +43,7 @@ noinst_HEADERS = \
 	tcpinfo.h \
 	testutils.h \
 	thresholds.h \
+	url_encode.h \
 	vminfo.h \
 	xalloc.h \
 	xasprintf.h \

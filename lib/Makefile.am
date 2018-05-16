@@ -46,7 +46,8 @@ libutils_a_SOURCES =  \
 
 if HAVE_LIBCURL
   libutils_a_SOURCES += \
-	container.c
+	container.c \
+	url_encode.c
 endif
 
 if HAVE_LIBPROCPS
