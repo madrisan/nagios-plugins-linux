@@ -35,6 +35,8 @@ static const char *docker_socket = DOCKER_SOCKET;
 #include "messages.h"
 #include "string-macros.h"
 #include "system.h"
+#include "url_encode.h"
+#include "xasprintf.h"
 
 #include "json.h"
 
@@ -53,11 +55,8 @@ write_memory_callback (void *contents, size_t size, size_t nmemb, void *userp)
   chunk_t *mem = (chunk_t *) userp;
 
   mem->memory = realloc (mem->memory, mem->size + realsize + 1);
-  if (mem->memory == NULL)
-    {
-      /* out of memory! */
-      plugin_error (STATE_UNKNOWN, errno, "memory exhausted");
-    }
+  if (NULL == mem->memory)
+    plugin_error (STATE_UNKNOWN, errno, "memory exhausted");
 
   memcpy (&(mem->memory[mem->size]), contents, realsize);
   mem->size += realsize;
@@ -181,11 +180,18 @@ docker_running_containers_number (bool verbose)
   CURLcode res;
   chunk_t chunk;
 
+  char *api_version = "1.18";
+  char *encoded_filter = url_encode ("{\"status\":{\"running\":true}}");
+  char *rest_url =
+    xasprintf ("http://v%s/containers/json?filters=%s", api_version, encoded_filter);
+  dbg ("rest encoded url: %s\n", rest_url);
+  free (encoded_filter);
+
   docker_init (&curl_handle, &chunk);
 
-  res =
-    docker_get (curl_handle,
-		"http://v1.24/containers/json?filters=%7B%22status%22%3A%7B%22running%22%3Atrue%7D%7D");
+  res = docker_get (curl_handle, rest_url);
+  free (rest_url);
+
   if (CURLE_OK != res)
     {
       docker_close (curl_handle, &chunk);
