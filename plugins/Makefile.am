@@ -44,9 +44,14 @@ libexec_PROGRAMS =        \
 	check_tcpcount    \
 	check_uptime      \
 	check_users
+
 if HAVE_GETLOADAVG
 libexec_PROGRAMS += \
 	check_load
+endif
+if HAVE_LIBCURL
+libexec_PROGRAMS += \
+	check_docker
 endif
 if HAVE_PROC_MEMINFO
 libexec_PROGRAMS += \
@@ -63,6 +68,9 @@ check_ifmountfs_SOURCES  = check_ifmountfs.c
 check_intr_SOURCES       = check_intr.c
 if HAVE_GETLOADAVG
 check_load_SOURCES       = check_load.c
+endif
+if HAVE_LIBCURL
+check_docker_SOURCES     = check_docker.c
 endif
 if HAVE_PROC_MEMINFO
 check_memory_SOURCES     = check_memory.c
@@ -91,6 +99,9 @@ check_ifmountfs_LDADD    = $(LDADD)
 check_intr_LDADD         = $(LDADD)
 if HAVE_GETLOADAVG
 check_load_LDADD         = $(LDADD)
+endif
+if HAVE_LIBCURL
+check_docker_LDADD       = $(LDADD) $(LIBCURL) -lm
 endif
 if HAVE_PROC_MEMINFO
 check_memory_LDADD       = $(LDADD)
