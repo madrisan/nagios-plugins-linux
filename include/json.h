@@ -1,283 +1,101 @@
+/* json.h -- a library for parsing json objects
+  
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
 
-/* vim: set et ts=3 sw=3 sts=3 ft=c:
- *
- * Copyright (C) 2012, 2013, 2014 James McLaughlin et al.  All rights reserved.
- * https://github.com/udp/json-parser
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *   notice, this list of conditions and the following disclaimer in the
- *   documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- */
+   The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
 
-#ifndef _JSON_H
-#define _JSON_H
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+   THE SOFTWARE.  */
 
-#ifndef json_char
-   #define json_char char
-#endif
+#ifndef __JSMN_H_
+#define __JSMN_H_
 
-#ifndef json_int_t
-   #ifndef _MSC_VER
-      #include <inttypes.h>
-      #define json_int_t int64_t
-   #else
-      #define json_int_t __int64
-   #endif
-#endif
-
-#include <stdlib.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
-
-   #include <string.h>
-
-   extern "C"
-   {
-
+extern "C"
+{
 #endif
 
-typedef struct
-{
-   unsigned long max_memory;
-   int settings;
-
-   /* Custom allocator support (leave null to use malloc/free)
-    */
-
-   void * (* mem_alloc) (size_t, int zero, void * user_data);
-   void (* mem_free) (void *, void * user_data);
-
-   void * user_data;  /* will be passed to mem_alloc and mem_free */
-
-   size_t value_extra;  /* how much extra space to allocate for values? */
-
-} json_settings;
-
-#define json_enable_comments  0x01
-
-typedef enum
-{
-   json_none,
-   json_object,
-   json_array,
-   json_integer,
-   json_double,
-   json_string,
-   json_boolean,
-   json_null
-
-} json_type;
-
-extern const struct _json_value json_value_none;
-       
-typedef struct _json_object_entry
-{
-    json_char * name;
-    unsigned int name_length;
-    
-    struct _json_value * value;
-    
-} json_object_entry;
-
-typedef struct _json_value
-{
-   struct _json_value * parent;
-
-   json_type type;
-
-   union
-   {
-      int boolean;
-      json_int_t integer;
-      double dbl;
-
-      struct
-      {
-         unsigned int length;
-         json_char * ptr; /* null terminated */
-
-      } string;
-
-      struct
-      {
-         unsigned int length;
-
-         json_object_entry * values;
-
-         #if defined(__cplusplus) && __cplusplus >= 201103L
-         decltype(values) begin () const
-         {  return values;
-         }
-         decltype(values) end () const
-         {  return values + length;
-         }
-         #endif
-
-      } object;
-
-      struct
-      {
-         unsigned int length;
-         struct _json_value ** values;
-
-         #if defined(__cplusplus) && __cplusplus >= 201103L
-         decltype(values) begin () const
-         {  return values;
-         }
-         decltype(values) end () const
-         {  return values + length;
-         }
-         #endif
-
-      } array;
-
-   } u;
-
-   union
-   {
-      struct _json_value * next_alloc;
-      void * object_mem;
-
-   } _reserved;
-
-   #ifdef JSON_TRACK_SOURCE
-
-      /* Location of the value in the source JSON
-       */
-      unsigned int line, col;
-
-   #endif
-
-
-   /* Some C++ operator sugar */
-
-   #ifdef __cplusplus
-
-      public:
-
-         inline _json_value ()
-         {  memset (this, 0, sizeof (_json_value));
-         }
-
-         inline const struct _json_value &operator [] (int index) const
-         {
-            if (type != json_array || index < 0
-                     || ((unsigned int) index) >= u.array.length)
-            {
-               return json_value_none;
-            }
-
-            return *u.array.values [index];
-         }
-
-         inline const struct _json_value &operator [] (const char * index) const
-         { 
-            if (type != json_object)
-               return json_value_none;
-
-            for (unsigned int i = 0; i < u.object.length; ++ i)
-               if (!strcmp (u.object.values [i].name, index))
-                  return *u.object.values [i].value;
-
-            return json_value_none;
-         }
-
-         inline operator const char * () const
-         {  
-            switch (type)
-            {
-               case json_string:
-                  return u.string.ptr;
-
-               default:
-                  return "";
-            };
-         }
-
-         inline operator json_int_t () const
-         {  
-            switch (type)
-            {
-               case json_integer:
-                  return u.integer;
-
-               case json_double:
-                  return (json_int_t) u.dbl;
-
-               default:
-                  return 0;
-            };
-         }
-
-         inline operator bool () const
-         {  
-            if (type != json_boolean)
-               return false;
-
-            return u.boolean != 0;
-         }
-
-         inline operator double () const
-         {  
-            switch (type)
-            {
-               case json_integer:
-                  return (double) u.integer;
-
-               case json_double:
-                  return u.dbl;
-
-               default:
-                  return 0;
-            };
-         }
-
-   #endif
-
-} json_value;
-       
-json_value * json_parse (const json_char * json,
-                         size_t length);
-
-#define json_error_max 128
-json_value * json_parse_ex (json_settings * settings,
-                            const json_char * json,
-                            size_t length,
-                            char * error);
-
-void json_value_free (json_value *);
-
-
-/* Not usually necessary, unless you used a custom mem_alloc and now want to
- * use a custom mem_free.
+/**
+ * JSON type identifier. Basic types are:
+ * 	o Object
+ * 	o Array
+ * 	o String
+ * 	o Other primitive: number, boolean (true/false) or null
  */
-void json_value_free_ex (json_settings * settings,
-                         json_value *);
+  typedef enum
+  {
+    JSMN_UNDEFINED = 0,
+    JSMN_OBJECT = 1,
+    JSMN_ARRAY = 2,
+    JSMN_STRING = 3,
+    JSMN_PRIMITIVE = 4
+  } jsmntype_t;
 
+  enum jsmnerr
+  {
+    /* Not enough tokens were provided */
+    JSMN_ERROR_NOMEM = -1,
+    /* Invalid character inside JSON string */
+    JSMN_ERROR_INVAL = -2,
+    /* The string is not a full JSON packet, more bytes expected */
+    JSMN_ERROR_PART = -3
+  };
+
+/**
+ * JSON token description.
+ * type		type (object, array, string etc.)
+ * start	start position in JSON data string
+ * end		end position in JSON data string
+ */
+  typedef struct
+  {
+    jsmntype_t type;
+    int start;
+    int end;
+    int size;
+#ifdef JSMN_PARENT_LINKS
+    int parent;
+#endif
+  } jsmntok_t;
+
+/**
+ * JSON parser. Contains an array of token blocks available. Also stores
+ * the string being parsed now and current position in that string
+ */
+  typedef struct
+  {
+    unsigned int pos;		/* offset in the JSON string */
+    unsigned int toknext;	/* next token to allocate */
+    int toksuper;		/* superior token node, e.g parent object or array */
+  } jsmn_parser;
+
+/**
+ * Create JSON parser over an array of tokens
+ */
+  void jsmn_init (jsmn_parser * parser);
+
+/**
+ * Run JSON parser. It parses a JSON data string into and array of tokens, each describing
+ * a single JSON object.
+ */
+  int jsmn_parse (jsmn_parser * parser, const char *js, size_t len,
+		  jsmntok_t * tokens, unsigned int num_tokens);
 
 #ifdef __cplusplus
-   } /* extern "C" */
+}
 #endif
 
-#endif
-
-
+#endif				/* __JSMN_H_ */
