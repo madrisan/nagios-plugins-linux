@@ -23,7 +23,7 @@ extern "C"
 {
 #endif
 
-  int docker_running_containers_number (bool verbose);
+  unsigned int docker_running_containers_number ();
 
 #ifdef __cplusplus
 }

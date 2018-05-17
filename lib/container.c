@@ -36,17 +36,26 @@ static const char *docker_socket = DOCKER_SOCKET;
 #include "string-macros.h"
 #include "system.h"
 #include "url_encode.h"
+#include "xalloc.h"
 #include "xasprintf.h"
 
 #include "json.h"
-
-static unsigned int containers;
 
 typedef struct chunk
 {
   char *memory;
   size_t size;
 } chunk_t;
+
+static int
+json_eq (const char *json, jsmntok_t * tok, const char *s)
+{
+  if (tok->type == JSMN_STRING && (int) strlen (s) == tok->end - tok->start &&
+      strncmp (json + tok->start, s, tok->end - tok->start) == 0)
+    return 0;
+
+  return -1;
+}
 
 static size_t
 write_memory_callback (void *contents, size_t size, size_t nmemb, void *userp)
@@ -115,75 +124,20 @@ docker_close (CURL * curl_handle, chunk_t * chunk)
   curl_global_cleanup ();
 }
 
-static void process_json_value (json_value * value, int depth);
-
-static void
-process_json_object (json_value * value, int depth)
-{
-  int length, x;
-  if (NULL == value)
-    return;
-
-  length = value->u.object.length;
-  for (x = 0; x < length; x++)
-    {
-      if (json_string == (value->u.object.values[x].value)->type)
-	{
-	  if (STREQ ("Id", value->u.object.values[x].name))
-	    {
-	      dbg ("container id \"%s\"\n",
-		   (value->u.object.values[x].value)->u.string.ptr);
-	      containers++;
-	    }
-	}
-
-      process_json_value (value->u.object.values[x].value, depth + 1);
-    }
-}
-
-static void
-process_json_array (json_value * value, int depth)
-{
-  int length, x;
-  if (NULL == value)
-    return;
-
-  length = value->u.array.length;
-  for (x = 0; x < length; x++)
-    process_json_value (value->u.array.values[x], depth);
-}
-
-static void
-process_json_value (json_value * value, int depth)
-{
-  if (NULL == value)
-    return;
-
-  switch (value->type)
-    {
-    default:
-      break;
-    case json_object:
-      process_json_object (value, depth + 1);
-      break;
-    case json_array:
-      process_json_array (value, depth + 1);
-      break;
-    }
-}
-
 /* Returns the number of running Docker containers  */
-int
-docker_running_containers_number (bool verbose)
+unsigned int
+docker_running_containers_number ()
 {
   CURL *curl_handle = NULL;
   CURLcode res;
   chunk_t chunk;
+  unsigned int containers = 0;
 
   char *api_version = "1.18";
   char *encoded_filter = url_encode ("{\"status\":{\"running\":true}}");
   char *rest_url =
-    xasprintf ("http://v%s/containers/json?filters=%s", api_version, encoded_filter);
+    xasprintf ("http://v%s/containers/json?filters=%s", api_version,
+	       encoded_filter);
   dbg ("rest encoded url: %s\n", rest_url);
   free (encoded_filter);
 
@@ -205,21 +159,35 @@ docker_running_containers_number (bool verbose)
 
   /* parse the json stream returned by Docker */
   {
-    json_char *json = chunk.memory;
-    json_value *value;
+    char *json = chunk.memory;
+    jsmn_parser parser;
     containers = 0;
+    int i, r;
 
-    value = json_parse (json, chunk.size);
-    if (NULL == value)
+    jsmn_init (&parser);
+    r = jsmn_parse (&parser, json, strlen (json), NULL, 0);
+    if (r < 0)
+      plugin_error (STATE_UNKNOWN, 0,
+		    "unable to parse the json data returned by docker");
+
+    jsmntok_t *buffer = xnmalloc (r, sizeof (jsmntok_t));
+    dbg ("number of json tokens: %d\n", r);
+
+    jsmn_init (&parser);
+    jsmn_parse (&parser, json, strlen (json), buffer, r);
+
+    for (i = 1; i < r; i++)
       {
-	docker_close (curl_handle, &chunk);
-	plugin_error (STATE_UNKNOWN, 0,
-		      "unable to parse the json data returned by docker");
+	if (json_eq (json, &buffer[i], "Id") == 0)
+	  {
+	    dbg ("found docker container with id \"%.*s\"\n",
+		 buffer[i + 1].end - buffer[i + 1].start,
+		 json + buffer[i + 1].start);
+	    containers++;
+	  }
       }
 
-    process_json_value (value, 0);
-
-    json_value_free (value);
+    free (buffer);
   }
 
   docker_close (curl_handle, &chunk);
