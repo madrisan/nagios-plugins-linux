@@ -31,6 +31,7 @@ static const char *docker_socket = DOCKER_SOCKET;
 #include <curl/curl.h>
 
 #include "common.h"
+#include "collection.h"
 #include "logging.h"
 #include "messages.h"
 #include "string-macros.h"
@@ -46,6 +47,12 @@ typedef struct chunk
   char *memory;
   size_t size;
 } chunk_t;
+
+typedef struct container
+{
+  char *image;		/* image name */
+  unsigned int count;	/* number of container images */
+} container_t;
 
 static int
 json_eq (const char *json, jsmntok_t * tok, const char *s)
@@ -131,7 +138,7 @@ docker_running_containers_number ()
   CURL *curl_handle = NULL;
   CURLcode res;
   chunk_t chunk;
-  unsigned int containers = 0;
+  size_t running_containers = 0;
 
   char *api_version = "1.18";
   char *encoded_filter = url_encode ("{\"status\":{\"running\":true}}");
@@ -161,7 +168,6 @@ docker_running_containers_number ()
   {
     char *json = chunk.memory;
     jsmn_parser parser;
-    containers = 0;
     int i, r;
 
     jsmn_init (&parser);
@@ -176,6 +182,9 @@ docker_running_containers_number ()
     jsmn_init (&parser);
     jsmn_parse (&parser, json, strlen (json), buffer, r);
 
+    hashable_t **hashtable;
+    counter_init (&hashtable);
+
     for (i = 1; i < r; i++)
       {
 	if (json_eq (json, &buffer[i], "Id") == 0)
@@ -183,13 +192,26 @@ docker_running_containers_number ()
 	    dbg ("found docker container with id \"%.*s\"\n",
 		 buffer[i + 1].end - buffer[i + 1].start,
 		 json + buffer[i + 1].start);
-	    containers++;
+	    running_containers++;
+	  }
+	else if (json_eq (json, &buffer[i], "Image") == 0)
+	  {
+	    size_t strsize = buffer[i + 1].end - buffer[i + 1].start;
+	    char *image = xmalloc (strsize + 1);
+            memcpy (image, json + buffer[i + 1].start, strsize);
+
+            dbg ("docker image \"%s\"\n", image);
+            counter_put (hashtable, image);
 	  }
       }
 
+    // TODO: hashtable now contains the occurrences of
+    //       docker images; return this data in some way...
+
+    counter_free (hashtable);
     free (buffer);
   }
 
   docker_close (curl_handle, &chunk);
-  return containers;
+  return running_containers;
 }

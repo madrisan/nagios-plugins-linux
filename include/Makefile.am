@@ -18,6 +18,7 @@
 AM_CPPFLAGS = -include $(top_builddir)/config.h
 
 noinst_HEADERS = \
+	collection.h \
 	common.h \
 	container.h \
 	cpudesc.h \
