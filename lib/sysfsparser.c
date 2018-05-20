@@ -117,10 +117,9 @@ void sysfsparser_closedir(DIR *dirp)
 struct dirent *
 sysfsparser_readfilename(DIR *dirp, unsigned int flags)
 {
-  struct dirent *dp;
-
   for (;;)
     {
+      struct dirent *dp;
       errno = 0;
       if ((dp = readdir (dirp)) == NULL)
 	{
@@ -134,7 +133,7 @@ sysfsparser_readfilename(DIR *dirp, unsigned int flags)
       if (STREQ (dp->d_name, ".") || STREQ (dp->d_name, ".."))
 	continue;
 
-     if (dp->d_type & flags)
+      if (dp->d_type & flags)
 	return dp;
     }
 }
