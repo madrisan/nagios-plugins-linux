@@ -138,7 +138,7 @@ docker_running_containers_number ()
   CURL *curl_handle = NULL;
   CURLcode res;
   chunk_t chunk;
-  size_t running_containers = 0;
+  unsigned int running_containers = 0;
 
   char *api_version = "1.18";
   char *encoded_filter = url_encode ("{\"status\":{\"running\":true}}");
@@ -182,8 +182,7 @@ docker_running_containers_number ()
     jsmn_init (&parser);
     jsmn_parse (&parser, json, strlen (json), buffer, r);
 
-    hashable_t **hashtable;
-    counter_init (&hashtable);
+    hashtable_t *hashtable = counter_create ();
 
     for (i = 1; i < r; i++)
       {
@@ -207,6 +206,8 @@ docker_running_containers_number ()
 
     // TODO: hashtable now contains the occurrences of
     //       docker images; return this data in some way...
+
+    running_containers = counter_get_elements (hashtable);
 
     counter_free (hashtable);
     free (buffer);
