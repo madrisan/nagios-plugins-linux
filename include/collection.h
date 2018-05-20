@@ -36,11 +36,11 @@ extern "C"
   } hashtable_t;
 
   hashtable_t *counter_create (void);
-  void counter_free (hashtable_t *hashtable);
+  void counter_free (hashtable_t * hashtable);
 
-  hashable_t *counter_lookup (const hashtable_t *hashtable, char *s);
-  hashable_t *counter_put (hashtable_t *hashtable, char *key);
-  unsigned int counter_get_elements (const hashtable_t *hashtable);
+  hashable_t *counter_lookup (const hashtable_t * hashtable, const char *s);
+  hashable_t *counter_put (hashtable_t * hashtable, const char *key);
+  unsigned int counter_get_elements (const hashtable_t * hashtable);
 
 #ifdef __cplusplus
 }

@@ -50,8 +50,8 @@ typedef struct chunk
 
 typedef struct container
 {
-  char *image;		/* image name */
-  unsigned int count;	/* number of container images */
+  char *image;			/* image name */
+  unsigned int count;		/* number of container images */
 } container_t;
 
 static int
@@ -133,7 +133,7 @@ docker_close (CURL * curl_handle, chunk_t * chunk)
 
 /* Returns the number of running Docker containers  */
 unsigned int
-docker_running_containers_number ()
+docker_running_containers_number (const char *image, bool verbose)
 {
   CURL *curl_handle = NULL;
   CURLcode res;
@@ -196,18 +196,24 @@ docker_running_containers_number ()
 	else if (json_eq (json, &buffer[i], "Image") == 0)
 	  {
 	    size_t strsize = buffer[i + 1].end - buffer[i + 1].start;
-	    char *image = xmalloc (strsize + 1);
-            memcpy (image, json + buffer[i + 1].start, strsize);
+	    char *current_image = xmalloc (strsize + 1);
+	    memcpy (current_image, json + buffer[i + 1].start, strsize);
 
-            dbg ("docker image \"%s\"\n", image);
-            counter_put (hashtable, image);
+	    dbg ("docker image \"%s\"\n", current_image);
+	    counter_put (hashtable, current_image);
 	  }
       }
 
     // TODO: hashtable now contains the occurrences of
     //       docker images; return this data in some way...
 
-    running_containers = counter_get_elements (hashtable);
+    if (image)
+      {
+	hashable_t *np = counter_lookup (hashtable, image);
+	running_containers = np ? np->count : 0;
+      }
+    else
+      running_containers = counter_get_elements (hashtable);
 
     counter_free (hashtable);
     free (buffer);

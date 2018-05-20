@@ -53,28 +53,28 @@ counter_create (void)
 
 /* lookup: look for s in hash table */
 hashable_t *
-counter_lookup (const hashtable_t *hashtable, char *s)
+counter_lookup (const hashtable_t * hashtable, const char *s)
 {
   hashable_t *np;
 
   for (np = hashtable->table[hash (s)]; np != NULL; np = np->next)
     if (strcmp (s, np->key) == 0)
-      return np;                /* found */
+      return np;		/* found */
 
-  return NULL;                  /* not found */
+  return NULL;			/* not found */
 }
 
 /* Insert the element 'key' into the hash table.
  * Set count to zero if 'key' was not present in the table or
  * increment the counter otherwise.  */
 hashable_t *
-counter_put (hashtable_t *hashtable, char *key)
+counter_put (hashtable_t * hashtable, const char *key)
 {
   hashable_t *np;
   unsigned hashval;
 
   if ((np = counter_lookup (hashtable, key)) == NULL)
-    {                           /* not found */
+    {				/* not found */
       np = xmalloc (sizeof (*np));
       if (NULL == (np->key = strdup (key)))
 	return NULL;
@@ -93,13 +93,13 @@ counter_put (hashtable_t *hashtable, char *key)
 }
 
 unsigned int
-counter_get_elements (const hashtable_t *hashtable)
+counter_get_elements (const hashtable_t * hashtable)
 {
   return hashtable->elements;
 }
 
 void
-counter_free (hashtable_t *hashtable)
+counter_free (hashtable_t * hashtable)
 {
   hashable_t *np, *np2;
   int i = 0;
@@ -114,7 +114,7 @@ counter_free (hashtable_t *hashtable)
 	  free (np2);
 	}
       free (hashtable->table[i]);
-    } 
+    }
   free (hashtable->table);
   free (hashtable);
 }
