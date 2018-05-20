@@ -28,10 +28,19 @@ extern "C"
     unsigned int count;
   } hashable_t;
 
-  hashable_t **counter_init (hashable_t **hashtable[]);
-  hashable_t *counter_lookup (hashable_t *hashtable[], char *s);
-  hashable_t *counter_put (hashable_t *hashtable[], char *key);
-  void counter_free (hashable_t *hashtable[]);
+  typedef struct hashtable
+  {
+    unsigned int capacity;	/* hashtable capacity (in terms of hashed keys) */
+    unsigned int elements;	/* number of elements stored in the hashtable */
+    hashable_t **table;
+  } hashtable_t;
+
+  hashtable_t *counter_create (void);
+  void counter_free (hashtable_t *hashtable);
+
+  hashable_t *counter_lookup (const hashtable_t *hashtable, char *s);
+  hashable_t *counter_put (hashtable_t *hashtable, char *key);
+  unsigned int counter_get_elements (const hashtable_t *hashtable);
 
 #ifdef __cplusplus
 }

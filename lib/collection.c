@@ -27,9 +27,10 @@
 
 /* hash: form hash value for string s */
 static unsigned
-hash (char *s)
+hash (const char *s)
 {
   unsigned hashval;
+
   for (hashval = 0; *s != '\0'; s++)
     hashval = *s + 31 * hashval;
 
@@ -37,19 +38,26 @@ hash (char *s)
 }
 
 /* initialize the hash pointer table */
-hashable_t **
-counter_init (hashable_t **hashtable[])
+hashtable_t *
+counter_create (void)
 {
-  *hashtable = xnmalloc (HASHSIZE, sizeof (hashable_t *));
-  return *hashtable;
+  hashtable_t *hashtable = xmalloc (sizeof (hashtable_t));
+  hashable_t **table = xnmalloc (HASHSIZE, sizeof (hashable_t *));
+
+  hashtable->capacity = HASHSIZE;
+  hashtable->elements = 0;
+  hashtable->table = table;
+
+  return hashtable;
 }
 
-/* lookup: look for s in hashtable */
+/* lookup: look for s in hash table */
 hashable_t *
-counter_lookup (hashable_t *hashtable[], char *s)
+counter_lookup (const hashtable_t *hashtable, char *s)
 {
   hashable_t *np;
-  for (np = hashtable[hash (s)]; np != NULL; np = np->next)
+
+  for (np = hashtable->table[hash (s)]; np != NULL; np = np->next)
     if (strcmp (s, np->key) == 0)
       return np;                /* found */
 
@@ -60,39 +68,53 @@ counter_lookup (hashable_t *hashtable[], char *s)
  * Set count to zero if 'key' was not present in the table or
  * increment the counter otherwise.  */
 hashable_t *
-counter_put (hashable_t *hashtable[], char *key)
+counter_put (hashtable_t *hashtable, char *key)
 {
   hashable_t *np;
   unsigned hashval;
 
   if ((np = counter_lookup (hashtable, key)) == NULL)
     {                           /* not found */
-      np = (hashable_t *) malloc (sizeof (*np));
-      /* FIXME: use npl-native allocation functions instead */
-      if (np == NULL || (np->key = strdup (key)) == NULL)
+      np = xmalloc (sizeof (*np));
+      if (NULL == (np->key = strdup (key)))
 	return NULL;
       np->count = 1;
       hashval = hash (key);
-      np->next = hashtable[hashval];
-      hashtable[hashval] = np;
+      np->next = hashtable->table[hashval];
+      hashtable->table[hashval] = np;
     }
   else
     /* already there */
     np->count++;
 
+  hashtable->elements++;
+
   return np;
 }
 
-void
-counter_free (hashable_t *hashtable[])
+unsigned int
+counter_get_elements (const hashtable_t *hashtable)
 {
-  hashable_t *np;
+  return hashtable->elements;
+}
+
+void
+counter_free (hashtable_t *hashtable)
+{
+  hashable_t *np, *np2;
   int i = 0;
 
   for (i = 0; i < HASHSIZE; i++)
     {
-      np = hashtable[i];
-      free (np);
+      np = hashtable->table[i];
+      while (np != NULL)
+	{
+	  np2 = np;
+	  np = np->next;
+	  free (np2);
+	}
+      free (hashtable->table[i]);
     } 
+  free (hashtable->table);
   free (hashtable);
 }
