@@ -55,7 +55,9 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [-w COUNTER] [-c COUNTER] ...\n", program_name);
   fputs (USAGE_OPTIONS, out);
-  fputs ("  -i, --image IMAGE   limit the investigation to the a docker image only\n", out);
+  fputs
+    ("  -i, --image IMAGE   limit the investigation to the a docker "
+     "image only\n", out);
   fputs ("  -w, --warning COUNTER    warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs ("  -v, --verbose   show details for command-line debugging "
@@ -128,7 +130,12 @@ main (int argc, char **argv)
   containers = docker_running_containers_number (image, verbose);
 
   status = get_status (containers, my_threshold);
-  status_msg = xasprintf ("%s: %d", state_text (status), containers);
+
+  status_msg = image ?
+    xasprintf ("%s: %d running container(s) of type \"%s\"",
+	       state_text (status), containers, image) :
+    xasprintf ("%s: %d running container(s)", state_text (status),
+	       containers);
 
   free (my_threshold);
 
