@@ -71,15 +71,15 @@ hashable_t *
 counter_put (hashtable_t * hashtable, const char *key)
 {
   hashable_t *np;
-  unsigned hashval;
 
   if ((np = counter_lookup (hashtable, key)) == NULL)
     {				/* not found */
       np = xmalloc (sizeof (*np));
       if (NULL == (np->key = strdup (key)))
 	return NULL;
+
+      unsigned int hashval = hash (key);
       np->count = 1;
-      hashval = hash (key);
       np->next = hashtable->table[hashval];
       hashtable->table[hashval] = np;
     }

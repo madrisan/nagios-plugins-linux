@@ -48,12 +48,6 @@ typedef struct chunk
   size_t size;
 } chunk_t;
 
-typedef struct container
-{
-  char *image;			/* image name */
-  unsigned int count;		/* number of container images */
-} container_t;
-
 static int
 json_eq (const char *json, jsmntok_t * tok, const char *s)
 {
