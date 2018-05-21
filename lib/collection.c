@@ -45,7 +45,7 @@ counter_create (void)
   hashable_t **table = xnmalloc (HASHSIZE, sizeof (hashable_t *));
 
   hashtable->capacity = HASHSIZE;
-  hashtable->elements = 0;
+  hashtable->elements = hashtable->uniq = 0;
   hashtable->table = table;
 
   return hashtable;
@@ -82,6 +82,7 @@ counter_put (hashtable_t * hashtable, const char *key)
       np->count = 1;
       np->next = hashtable->table[hashval];
       hashtable->table[hashval] = np;
+      hashtable->uniq++;
     }
   else
     /* already there */
@@ -92,10 +93,18 @@ counter_put (hashtable_t * hashtable, const char *key)
   return np;
 }
 
+/* Return the number of elements stored in the hash table */
 unsigned int
 counter_get_elements (const hashtable_t * hashtable)
 {
   return hashtable->elements;
+}
+
+/* Return the number if unique elements stored in the hash table */
+unsigned int
+counter_get_unique_elements (const hashtable_t * hashtable)
+{
+  return hashtable->uniq;
 }
 
 void
