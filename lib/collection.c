@@ -17,15 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "collection.h"
+#include "logging.h"
 #include "xalloc.h"
 
 #define HASHSIZE 101
 
 /* hash: form hash value for string s */
+
 static unsigned
 hash (const char *s)
 {
@@ -38,6 +41,7 @@ hash (const char *s)
 }
 
 /* initialize the hash pointer table */
+
 hashtable_t *
 counter_create (void)
 {
@@ -47,11 +51,13 @@ counter_create (void)
   hashtable->capacity = HASHSIZE;
   hashtable->elements = hashtable->uniq = 0;
   hashtable->table = table;
+  hashtable->keys = xmalloc (sizeof (*(hashtable->keys)));
 
   return hashtable;
 }
 
 /* lookup: look for s in hash table */
+
 hashable_t *
 counter_lookup (const hashtable_t * hashtable, const char *s)
 {
@@ -67,6 +73,7 @@ counter_lookup (const hashtable_t * hashtable, const char *s)
 /* Insert the element 'key' into the hash table.
  * Set count to zero if 'key' was not present in the table or
  * increment the counter otherwise.  */
+
 hashable_t *
 counter_put (hashtable_t * hashtable, const char *key)
 {
@@ -82,6 +89,13 @@ counter_put (hashtable_t * hashtable, const char *key)
       np->count = 1;
       np->next = hashtable->table[hashval];
       hashtable->table[hashval] = np;
+
+      hashtable->keys = xrealloc (hashtable->keys, hashtable->uniq + 1);
+
+      (hashtable->keys)[hashtable->uniq] = np->key;
+      dbg ("(hashtable->keys)[%u] = \"%s\"\n", hashtable->uniq,
+	   (hashtable->keys)[hashtable->uniq]);
+
       hashtable->uniq++;
     }
   else
@@ -94,6 +108,7 @@ counter_put (hashtable_t * hashtable, const char *key)
 }
 
 /* Return the number of elements stored in the hash table */
+
 unsigned int
 counter_get_elements (const hashtable_t * hashtable)
 {
@@ -101,10 +116,20 @@ counter_get_elements (const hashtable_t * hashtable)
 }
 
 /* Return the number if unique elements stored in the hash table */
+
 unsigned int
 counter_get_unique_elements (const hashtable_t * hashtable)
 {
   return hashtable->uniq;
+}
+
+/* Return an array containing the pointers to all the keys stored
+   in the hasg table */
+
+char **
+counter_keys (hashtable_t * hashtable)
+{
+  return (hashtable->uniq < 1) ? NULL : hashtable->keys;
 }
 
 void
@@ -125,5 +150,6 @@ counter_free (hashtable_t * hashtable)
       free (hashtable->table[i]);
     }
   free (hashtable->table);
+  free (hashtable->keys);
   free (hashtable);
 }
