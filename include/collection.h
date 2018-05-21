@@ -32,6 +32,7 @@ extern "C"
   {
     unsigned int capacity;	/* hashtable capacity (in terms of hashed keys) */
     unsigned int elements;	/* number of elements stored in the hashtable */
+    unsigned int uniq;		/* number of unique keys */
     hashable_t **table;
   } hashtable_t;
 
@@ -41,6 +42,7 @@ extern "C"
   hashable_t *counter_lookup (const hashtable_t * hashtable, const char *s);
   hashable_t *counter_put (hashtable_t * hashtable, const char *key);
   unsigned int counter_get_elements (const hashtable_t * hashtable);
+  unsigned int counter_get_unique_elements (const hashtable_t * hashtable);
 
 #ifdef __cplusplus
 }

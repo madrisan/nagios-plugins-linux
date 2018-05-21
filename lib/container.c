@@ -198,6 +198,9 @@ docker_running_containers_number (const char *image, bool verbose)
 	  }
       }
 
+    dbg ("number of docker unique images: %u\n",
+	 counter_get_unique_elements (hashtable));
+
     // TODO: hashtable now contains the occurrences of
     //       docker images; return this data in some way...
 
