@@ -30,10 +30,11 @@ extern "C"
 
   typedef struct hashtable
   {
-    unsigned int capacity;	/* hashtable capacity (in terms of hashed keys) */
-    unsigned int elements;	/* number of elements stored in the hashtable */
+    unsigned int capacity;	/* hashtable capacity */
+    unsigned int elements;	/* number of elements stored */
     unsigned int uniq;		/* number of unique keys */
     hashable_t **table;
+    char **keys;		/* array containing the ptrs to the keys */
   } hashtable_t;
 
   hashtable_t *counter_create (void);
@@ -43,6 +44,7 @@ extern "C"
   hashable_t *counter_put (hashtable_t * hashtable, const char *key);
   unsigned int counter_get_elements (const hashtable_t * hashtable);
   unsigned int counter_get_unique_elements (const hashtable_t * hashtable);
+  char **counter_keys (hashtable_t * hashtable);
 
 #ifdef __cplusplus
 }
