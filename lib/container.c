@@ -23,6 +23,7 @@
 
 static const char *docker_socket = DOCKER_SOCKET;
 
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -126,8 +127,9 @@ docker_close (CURL * curl_handle, chunk_t * chunk)
 }
 
 /* Returns the number of running Docker containers  */
+
 unsigned int
-docker_running_containers_number (const char *image, bool verbose)
+docker_running_containers (const char *image, char **perfdata, bool verbose)
 {
   CURL *curl_handle = NULL;
   CURLcode res;
@@ -152,11 +154,9 @@ docker_running_containers_number (const char *image, bool verbose)
       docker_close (curl_handle, &chunk);
       plugin_error (STATE_UNKNOWN, errno, "%s", curl_easy_strerror (res));
     }
-  else
-    {
-      dbg ("%lu bytes retrieved\n", chunk.size);
-      dbg ("json output: %s", chunk.memory);
-    }
+
+  dbg ("%lu bytes retrieved\n", chunk.size);
+  dbg ("json output: %s", chunk.memory);
 
   /* parse the json stream returned by Docker */
   {
@@ -201,16 +201,30 @@ docker_running_containers_number (const char *image, bool verbose)
     dbg ("number of docker unique images: %u\n",
 	 counter_get_unique_elements (hashtable));
 
-    // TODO: hashtable now contains the occurrences of
-    //       docker images; return this data in some way...
-
     if (image)
       {
 	hashable_t *np = counter_lookup (hashtable, image);
+	assert (NULL != np);
 	running_containers = np ? np->count : 0;
+	*perfdata = xasprintf ("containers_%s=%u", image, running_containers);
       }
     else
-      running_containers = counter_get_elements (hashtable);
+      {
+	running_containers = counter_get_elements (hashtable);
+
+	size_t size;
+	FILE *stream = open_memstream (perfdata, &size);
+	for (unsigned int j = 0; j < hashtable->uniq; j++)
+	  {
+	    hashable_t *np =
+	      counter_lookup (hashtable, hashtable->keys[j]);
+	    assert (NULL != np);
+	    fprintf (stream, "containers_%s=%u ",
+	      hashtable->keys[j], np->count);
+	  }
+	fprintf (stream, "containers_total=%u", hashtable->elements);
+	fclose (stream);
+      }
 
     counter_free (hashtable);
     free (buffer);

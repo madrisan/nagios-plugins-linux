@@ -23,8 +23,8 @@ extern "C"
 {
 #endif
 
-  unsigned int docker_running_containers_number (const char *image,
-						 bool verbose);
+  unsigned int docker_running_containers (const char *image,
+					  char **perfdata, bool verbose);
 
 #ifdef __cplusplus
 }

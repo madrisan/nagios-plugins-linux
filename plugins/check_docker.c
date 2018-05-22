@@ -127,7 +127,8 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  containers = docker_running_containers_number (image, verbose);
+  containers =
+    docker_running_containers (image, &perfdata_containers_msg, verbose);
 
   status = get_status (containers, my_threshold);
 
@@ -138,8 +139,6 @@ main (int argc, char **argv)
 	       containers);
 
   free (my_threshold);
-
-  perfdata_containers_msg = xasprintf ("containers_total=%u", containers);
 
   printf ("%s %s | %s\n", program_name_short, status_msg,
 	  perfdata_containers_msg);
