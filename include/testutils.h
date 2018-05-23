@@ -41,6 +41,9 @@
 #define NPL_TEST_PATH_PROCMEMINFO abs_srcdir "/ts_procmeminfo.data"
 #define NPL_TEST_PATH_PROCVMSTAT abs_srcdir "/ts_procvmstat.data"
 
+/* simulate the test of a query to the docker rest API */
+#define NPL_TEST_PATH_CONTAINER_JSON abs_srcdir "/ts_container.data"
+
 #define TEST_ASSERT_EQUAL_NUMERIC(A, B) \
   do { if ((A) != (B)) ret = -1; } while (0)
 
@@ -52,6 +55,7 @@ extern "C"
 {
 #endif
 
+  char * test_fstringify (const char * filename);
   int test_main (int argc, char **argv, int (*func) (void), ...);
 
 # define TEST_MAIN(func)                                            \

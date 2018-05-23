@@ -21,7 +21,9 @@
 #define _GNU_SOURCE		/* activate extra prototypes for glibc */
 #endif
 
+#ifndef NPL_TESTING
 static const char *docker_socket = DOCKER_SOCKET;
+#endif
 
 #include <assert.h>
 #include <ctype.h>
@@ -58,6 +60,8 @@ json_eq (const char *json, jsmntok_t * tok, const char *s)
 
   return -1;
 }
+
+#ifndef NPL_TESTING
 
 static size_t
 write_memory_callback (void *contents, size_t size, size_t nmemb, void *userp)
@@ -104,12 +108,13 @@ docker_init (CURL ** curl_handle, chunk_t * chunk)
 }
 
 static CURLcode
-docker_get (CURL * curl_handle, char *url)
+docker_get (CURL * curl_handle, char * url)
 {
   CURLcode res;
 
   curl_easy_setopt (curl_handle, CURLOPT_URL, url);
   res = curl_easy_perform (curl_handle);
+  res = CURLE_OK;
 
   return res;
 }
@@ -126,15 +131,31 @@ docker_close (CURL * curl_handle, chunk_t * chunk)
   curl_global_cleanup ();
 }
 
+#else
+
+static void
+docker_get (chunk_t * chunk)
+{
+  const char * filename = NPL_TEST_PATH_CONTAINER_JSON;
+
+  chunk->memory = test_fstringify (filename);
+  chunk->size = strlen (chunk->memory);
+}
+
+#endif				/* NPL_TESTING */
+
 /* Returns the number of running Docker containers  */
 
 unsigned int
 docker_running_containers (const char *image, char **perfdata, bool verbose)
 {
+  unsigned int running_containers = 0;
+  chunk_t chunk;
+
+#ifndef NPL_TESTING
+
   CURL *curl_handle = NULL;
   CURLcode res;
-  chunk_t chunk;
-  unsigned int running_containers = 0;
 
   char *api_version = "1.18";
   char *encoded_filter = url_encode ("{\"status\":{\"running\":true}}");
@@ -145,7 +166,6 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
   free (encoded_filter);
 
   docker_init (&curl_handle, &chunk);
-
   res = docker_get (curl_handle, rest_url);
   free (rest_url);
 
@@ -155,8 +175,14 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
       plugin_error (STATE_UNKNOWN, errno, "%s", curl_easy_strerror (res));
     }
 
+#else
+
+  docker_get (&chunk);
+
+#endif				/* NPL_TESTING */
+
   dbg ("%lu bytes retrieved\n", chunk.size);
-  dbg ("json output: %s", chunk.memory);
+  dbg ("json data: %s", chunk.memory);
 
   /* parse the json stream returned by Docker */
   {
@@ -230,6 +256,15 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
     free (buffer);
   }
 
+#ifndef NPL_TESTING
+
   docker_close (curl_handle, &chunk);
+
+#else
+
+  free (chunk.memory);
+
+#endif				/* NPL_TESTING */
+
   return running_containers;
 }
