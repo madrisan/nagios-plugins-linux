@@ -45,6 +45,7 @@ AM_CFLAGS = $(LIBPROCPS_CFLAGS)
 AM_LDFLAGS = $(LIBPROCPS_LIBS)
 
 test_programs = \
+	tslibcontainer \
 	tslibkernelver \
 	tslibmeminfo_conversions \
 	tslibmeminfo_interface \
@@ -73,6 +74,9 @@ test_utils = \
 LDADDS = $(top_builddir)/lib/libutils.a
 TSLIBS_LDFLAGS = -module -avoid-version \
 	-rpath /evil/libtool/hack/to/force/shared/lib/creation
+
+tslibcontainer_SOURCES = $(test_utils) tslibcontainer.c
+tslibcontainer_LDADD = $(LDADDS)
 
 tslibkernelver_SOURCES = $(test_utils) tslibkernelver.c
 tslibkernelver_LDADD = $(LDADDS)
@@ -130,6 +134,7 @@ endif ! WITH_TESTS
 TESTS = $(test_programs)
 
 dist_noinst_DATA = \
+	ts_container.data \
 	ts_procmeminfo.data \
 	ts_procstat.data \
 	ts_procvmstat.data

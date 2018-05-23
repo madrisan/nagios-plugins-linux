@@ -34,6 +34,7 @@
 #include "progname.h"
 #include "system.h"
 #include "testutils.h"
+#include "xalloc.h"
 
 static size_t test_counter;
 
@@ -58,6 +59,28 @@ static int
 test_use_terminal_colors (void)
 {
   return isatty (STDIN_FILENO);
+}
+
+char *
+test_fstringify (const char * filename)
+{
+  char * buffer = NULL;
+  size_t size, chars = 0;
+  FILE * stream = fopen (filename, "r");
+
+  if (NULL == stream)
+    return NULL;
+
+  fseek (stream, 0, SEEK_END);
+  size = ftell (stream);
+  rewind (stream);
+
+  buffer = xmalloc (size + 1);
+  if (buffer)
+    chars = fread (buffer, 1, size, stream);
+
+  fclose (stream);
+  return (chars < size) ? NULL : buffer;
 }
 
 int
