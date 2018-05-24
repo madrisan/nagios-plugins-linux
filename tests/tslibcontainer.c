@@ -23,42 +23,59 @@
 #include "testutils.h"
 
 #define NPL_TESTING
+#include "../lib/collection.c"
 #include "../lib/container.c"
 #undef NPL_TESTING
 
-struct tstitem {
+typedef struct test_data
+{
   char * image;
   char * perfdata;
-  int occurrences;
-} test[] = {
-  [0].image = "nginx",
-  [0].perfdata = "containers_nginx=3",
-  [0].occurrences = 3,
-  [1].image = "redis",
-  [1].perfdata = "containers_redis=1",
-  [1].occurrences = 1,
-  [2].image = NULL,
-  [2].perfdata = "containers_redis=1 containers_nginx=3 containers_total=4",
-  [2].occurrences = 4
-};
+  int expect_value;
+} test_data;
+
+static int
+test_docker_running_containers (const void *tdata)
+{
+  const struct test_data *data = tdata;
+  int ret = 0;
+  char * perfdata;
+
+  int containers =
+    docker_running_containers (data->image, &perfdata, false);
+
+  TEST_ASSERT_EQUAL_NUMERIC (containers, data->expect_value);
+  TEST_ASSERT_EQUAL_STRING (perfdata, data->perfdata);
+  free (perfdata);
+  return ret;
+}
 
 static int
 mymain (void)
 {
   int ret = 0;
 
-  char *perfdata;
-  int containers;
+#define DO_TEST(MSG, IMAGE, PERFDATA, EXPECT_VALUE)                  \
+  do                                                                 \
+    {                                                                \
+      test_data data = {                                             \
+        .image = IMAGE,                                              \
+        .perfdata = PERFDATA,                                        \
+        .expect_value = EXPECT_VALUE                                 \
+      };                                                             \
+      if (test_run(MSG, test_docker_running_containers, &data) < 0)  \
+        ret = -1;                                                    \
+    }                                                                \
+  while (0)
 
-  for (int i = 1; i < 3; i++)
-    {
-      containers = docker_running_containers (test[i].image, &perfdata, false);
-      TEST_ASSERT_EQUAL_NUMERIC (containers, test[i].occurrences);
-      TEST_ASSERT_EQUAL_STRING (perfdata, test[i].perfdata);
-      free (perfdata);
-    }
+  /*DO_TEST ("check running docker containers with image set", "nginx",
+	   "containers_nginx=3", 3);*/
+  DO_TEST ("check running docker containers with image set", "redis",
+	   "containers_redis=1", 1);
+  DO_TEST ("check running docker containers", NULL,
+	   "containers_redis=1 containers_nginx=3 containers_total=4", 4);
 
-  return ret;
+  return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 TEST_MAIN (mymain);
