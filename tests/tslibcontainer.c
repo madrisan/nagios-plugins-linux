@@ -68,8 +68,8 @@ mymain (void)
     }                                                                \
   while (0)
 
-  /*DO_TEST ("check running docker containers with image set", "nginx",
-	   "containers_nginx=3", 3);*/
+  DO_TEST ("check running docker containers with image set", "nginx",
+	   "containers_nginx=3", 3);
   DO_TEST ("check running docker containers with image set", "redis",
 	   "containers_redis=1", 1);
   DO_TEST ("check running docker containers", NULL,
