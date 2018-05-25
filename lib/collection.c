@@ -136,9 +136,8 @@ void
 counter_free (hashtable_t * hashtable)
 {
   hashable_t *np, *np2;
-  int i = 0;
 
-  for (i = 0; i < HASHSIZE; i++)
+  for (int i = 0; i < HASHSIZE; i++)
     {
       np = hashtable->table[i];
       while (np != NULL)
@@ -147,7 +146,6 @@ counter_free (hashtable_t * hashtable)
 	  np = np->next;
 	  free (np2);
 	}
-      free (hashtable->table[i]);
     }
   free (hashtable->table);
   free (hashtable->keys);
