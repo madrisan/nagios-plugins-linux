@@ -124,7 +124,7 @@ counter_get_unique_elements (const hashtable_t * hashtable)
 }
 
 /* Return an array containing the pointers to all the keys stored
-   in the hasg table */
+   in the hash table */
 
 char **
 counter_keys (hashtable_t * hashtable)
