@@ -114,7 +114,6 @@ docker_get (CURL * curl_handle, char * url)
 
   curl_easy_setopt (curl_handle, CURLOPT_URL, url);
   res = curl_easy_perform (curl_handle);
-  res = CURLE_OK;
 
   return res;
 }
