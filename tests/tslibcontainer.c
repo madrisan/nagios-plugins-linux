@@ -46,6 +46,7 @@ test_docker_running_containers (const void *tdata)
 
   TEST_ASSERT_EQUAL_NUMERIC (containers, data->expect_value);
   TEST_ASSERT_EQUAL_STRING (perfdata, data->perfdata);
+
   free (perfdata);
   return ret;
 }
