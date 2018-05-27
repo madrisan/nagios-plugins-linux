@@ -66,7 +66,7 @@ usage (FILE * out)
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -w 100 -c 120\n", program_name);
-  fprintf (out, "  %s --image nxing -c 5:\n", program_name);
+  fprintf (out, "  %s --image nginx -c 5:\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
