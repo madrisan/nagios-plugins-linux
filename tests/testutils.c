@@ -79,8 +79,14 @@ test_fstringify (const char * filename)
   if (buffer)
     chars = fread (buffer, 1, size, stream);
 
+  if (ferror (stream) || (chars < size))
+    {
+      free (buffer);
+      buffer = NULL;
+    }
+
   fclose (stream);
-  return (chars < size) ? NULL : buffer;
+  return buffer;
 }
 
 int
