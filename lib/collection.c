@@ -23,6 +23,7 @@
 
 #include "collection.h"
 #include "logging.h"
+#include "string-macros.h"
 #include "xalloc.h"
 
 #define HASHSIZE 101
@@ -64,7 +65,7 @@ counter_lookup (const hashtable_t * hashtable, const char *s)
   hashable_t *np;
 
   for (np = hashtable->table[hash (s)]; np != NULL; np = np->next)
-    if (strcmp (s, np->key) == 0)
+    if (STREQ (s, np->key))
       return np;		/* found */
 
   return NULL;			/* not found */
