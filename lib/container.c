@@ -141,6 +141,12 @@ docker_get (chunk_t * chunk)
   chunk->size = strlen (chunk->memory);
 }
 
+static void
+docker_close (chunk_t * chunk)
+{
+  free (chunk->memory);
+}
+
 #endif				/* NPL_TESTING */
 
 /* Returns the number of running Docker containers  */
@@ -182,6 +188,8 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
 
   dbg ("%lu bytes retrieved\n", chunk.size);
   dbg ("json data: %s", chunk.memory);
+
+  assert (chunk.memory);
 
   /* parse the json stream returned by Docker */
   {
@@ -255,15 +263,11 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
     free (buffer);
   }
 
+  docker_close (
 #ifndef NPL_TESTING
-
-  docker_close (curl_handle, &chunk);
-
-#else
-
-  free (chunk.memory);
-
-#endif				/* NPL_TESTING */
+		curl_handle,
+#endif
+		&chunk);
 
   return running_containers;
 }
