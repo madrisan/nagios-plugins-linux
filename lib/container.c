@@ -61,6 +61,47 @@ json_eq (const char *json, jsmntok_t * tok, const char *s)
   return -1;
 }
 
+/* parse the json stream returned by Docker and return a pointer to the
+   hashtable containing the values of the discovered 'tokens'.
+   return NULL if the data cannot be parsed.  */
+
+static hashtable_t *
+json_parser (const char *json, const char *token)
+{
+  int i, r;
+  jsmn_parser parser;
+  hashtable_t *hashtable = NULL;
+
+  jsmn_init (&parser);
+  r = jsmn_parse (&parser, json, strlen (json), NULL, 0);
+  if (r < 0)
+    return NULL;
+
+  jsmntok_t *buffer = xnmalloc (r, sizeof (jsmntok_t));
+  dbg ("number of json tokens: %d\n", r);
+
+  jsmn_init (&parser);
+  jsmn_parse (&parser, json, strlen (json), buffer, r);
+
+  hashtable = counter_create ();
+
+  for (i = 1; i < r; i++)
+    {
+      if (0 == json_eq (json, &buffer[i], token))
+	{
+	  size_t strsize = buffer[i + 1].end - buffer[i + 1].start;
+	  char *value = xmalloc (strsize + 1);
+	  memcpy (value, json + buffer[i + 1].start, strsize);
+
+	  dbg ("found token \"%s\" with value \"%s\" at position %d\n",
+	       token, value, buffer[i].start);
+	  counter_put (hashtable, value);
+	}
+    }
+
+  return hashtable;
+}
+
 #ifndef NPL_TESTING
 
 static size_t
@@ -108,12 +149,21 @@ docker_init (CURL ** curl_handle, chunk_t * chunk)
 }
 
 static CURLcode
-docker_get (CURL * curl_handle, char * url)
+docker_get (CURL * curl_handle, const char *api_version, const char *url,
+	    char *filter)
 {
   CURLcode res;
+  char *encoded_filter = filter ? url_encode (filter) : NULL;
+  char *rest_url = encoded_filter ?
+    xasprintf ("http://v%s/%s?filters=%s", api_version, url, encoded_filter) :
+    xasprintf ("http://v%s/%s", api_version, url);
+  dbg ("rest url: %s\n", rest_url);
 
-  curl_easy_setopt (curl_handle, CURLOPT_URL, url);
+  curl_easy_setopt (curl_handle, CURLOPT_URL, rest_url);
   res = curl_easy_perform (curl_handle);
+
+  free (encoded_filter);
+  free (rest_url);
 
   return res;
 }
@@ -135,7 +185,7 @@ docker_close (CURL * curl_handle, chunk_t * chunk)
 static void
 docker_get (chunk_t * chunk)
 {
-  const char * filename = NPL_TEST_PATH_CONTAINER_JSON;
+  const char *filename = NPL_TEST_PATH_CONTAINER_JSON;
 
   chunk->memory = test_fstringify (filename);
   chunk->size = strlen (chunk->memory);
@@ -147,33 +197,25 @@ docker_close (chunk_t * chunk)
   free (chunk->memory);
 }
 
-#endif				/* NPL_TESTING */
+#endif /* NPL_TESTING */
 
 /* Returns the number of running Docker containers  */
 
 unsigned int
 docker_running_containers (const char *image, char **perfdata, bool verbose)
 {
-  unsigned int running_containers = 0;
   chunk_t chunk;
+  hashtable_t *hashtable;
+  unsigned int running_containers = 0;
 
 #ifndef NPL_TESTING
 
   CURL *curl_handle = NULL;
   CURLcode res;
 
-  char *api_version = "1.18";
-  char *encoded_filter = url_encode ("{\"status\":{\"running\":true}}");
-  char *rest_url =
-    xasprintf ("http://v%s/containers/json?filters=%s", api_version,
-	       encoded_filter);
-  dbg ("rest encoded url: %s\n", rest_url);
-  free (encoded_filter);
-
   docker_init (&curl_handle, &chunk);
-  res = docker_get (curl_handle, rest_url);
-  free (rest_url);
-
+  res = docker_get (curl_handle, "1.18", "containers/json",
+		    "{\"status\":{\"running\":true}}");
   if (CURLE_OK != res)
     {
       docker_close (curl_handle, &chunk);
@@ -184,90 +226,49 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
 
   docker_get (&chunk);
 
-#endif				/* NPL_TESTING */
+#endif /* NPL_TESTING */
 
+  assert (chunk.memory);
   dbg ("%lu bytes retrieved\n", chunk.size);
   dbg ("json data: %s", chunk.memory);
 
-  assert (chunk.memory);
+  hashtable = json_parser (chunk.memory, "Image");
+  if (NULL == hashtable)
+    plugin_error (STATE_UNKNOWN, 0,
+		  "unable to parse the json data for \"Image\"s");
+  dbg ("number of docker unique images: %u\n",
+       counter_get_unique_elements (hashtable));
 
-  /* parse the json stream returned by Docker */
-  {
-    char *json = chunk.memory;
-    jsmn_parser parser;
-    int i, r;
+  if (image)
+    {
+      hashable_t *np = counter_lookup (hashtable, image);
+      assert (NULL != np);
+      running_containers = np ? np->count : 0;
+      *perfdata = xasprintf ("containers_%s=%u", image, running_containers);
+    }
+  else
+    {
+      running_containers = counter_get_elements (hashtable);
+      size_t size;
+      FILE *stream = open_memstream (perfdata, &size);
+      for (unsigned int j = 0; j < hashtable->uniq; j++)
+	{
+	  hashable_t *np = counter_lookup (hashtable, hashtable->keys[j]);
+	  assert (NULL != np);
+	  fprintf (stream, "containers_%s=%u ",
+		   hashtable->keys[j], np->count);
+	}
+      fprintf (stream, "containers_total=%u", hashtable->elements);
+      fclose (stream);
+    }
 
-    jsmn_init (&parser);
-    r = jsmn_parse (&parser, json, strlen (json), NULL, 0);
-    if (r < 0)
-      plugin_error (STATE_UNKNOWN, 0,
-		    "unable to parse the json data returned by docker");
-
-    jsmntok_t *buffer = xnmalloc (r, sizeof (jsmntok_t));
-    dbg ("number of json tokens: %d\n", r);
-
-    jsmn_init (&parser);
-    jsmn_parse (&parser, json, strlen (json), buffer, r);
-
-    hashtable_t *hashtable = counter_create ();
-
-    for (i = 1; i < r; i++)
-      {
-	if (json_eq (json, &buffer[i], "Id") == 0)
-	  {
-	    dbg ("found docker container with id \"%.*s\"\n",
-		 buffer[i + 1].end - buffer[i + 1].start,
-		 json + buffer[i + 1].start);
-	    running_containers++;
-	  }
-	else if (json_eq (json, &buffer[i], "Image") == 0)
-	  {
-	    size_t strsize = buffer[i + 1].end - buffer[i + 1].start;
-	    char *current_image = xmalloc (strsize + 1);
-	    memcpy (current_image, json + buffer[i + 1].start, strsize);
-
-	    dbg ("docker image \"%s\"\n", current_image);
-	    counter_put (hashtable, current_image);
-	  }
-      }
-
-    dbg ("number of docker unique images: %u\n",
-	 counter_get_unique_elements (hashtable));
-
-    if (image)
-      {
-	hashable_t *np = counter_lookup (hashtable, image);
-	assert (NULL != np);
-	running_containers = np ? np->count : 0;
-	*perfdata = xasprintf ("containers_%s=%u", image, running_containers);
-      }
-    else
-      {
-	running_containers = counter_get_elements (hashtable);
-
-	size_t size;
-	FILE *stream = open_memstream (perfdata, &size);
-	for (unsigned int j = 0; j < hashtable->uniq; j++)
-	  {
-	    hashable_t *np =
-	      counter_lookup (hashtable, hashtable->keys[j]);
-	    assert (NULL != np);
-	    fprintf (stream, "containers_%s=%u ",
-	      hashtable->keys[j], np->count);
-	  }
-	fprintf (stream, "containers_total=%u", hashtable->elements);
-	fclose (stream);
-      }
-
-    counter_free (hashtable);
-    free (buffer);
-  }
+  counter_free (hashtable);
 
   docker_close (
 #ifndef NPL_TESTING
-		curl_handle,
+		 curl_handle,
 #endif
-		&chunk);
+		 &chunk);
 
   return running_containers;
 }
