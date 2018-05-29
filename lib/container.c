@@ -45,6 +45,8 @@ static const char *docker_socket = DOCKER_SOCKET;
 
 #include "json.h"
 
+#define DOCKER_CONTAINERS_JSON  0x01
+
 typedef struct chunk
 {
   char *memory;
@@ -149,21 +151,32 @@ docker_init (CURL ** curl_handle, chunk_t * chunk)
 }
 
 static CURLcode
-docker_get (CURL * curl_handle, const char *api_version, const char *url,
-	    char *filter)
+docker_get (CURL * curl_handle, const int query)
 {
   CURLcode res;
-  char *encoded_filter = filter ? url_encode (filter) : NULL;
-  char *rest_url = encoded_filter ?
-    xasprintf ("http://v%s/%s?filters=%s", api_version, url, encoded_filter) :
-    xasprintf ("http://v%s/%s", api_version, url);
-  dbg ("rest url: %s\n", rest_url);
+  char *api_version, *class, *url, *filter = NULL;
 
-  curl_easy_setopt (curl_handle, CURLOPT_URL, rest_url);
+  switch (query)
+    {
+      default:
+	plugin_error (STATE_UNKNOWN, 0, "unknown docker query");
+      case DOCKER_CONTAINERS_JSON:
+	api_version = "1.18";
+	filter = url_encode ("{\"status\":{\"running\":true}}");
+	class = "containers/json";
+	url = filter ?
+	  xasprintf ("http://v%s/%s?filters=%s", api_version, class, filter) :
+	  xasprintf ("http://v%s/%s", api_version, class);
+	break;
+    }
+
+  dbg ("docker rest url: %s\n", url);
+
+  curl_easy_setopt (curl_handle, CURLOPT_URL, url);
   res = curl_easy_perform (curl_handle);
 
-  free (encoded_filter);
-  free (rest_url);
+  free (filter);
+  free (url);
 
   return res;
 }
@@ -183,9 +196,19 @@ docker_close (CURL * curl_handle, chunk_t * chunk)
 #else
 
 static void
-docker_get (chunk_t * chunk)
+docker_get (chunk_t * chunk, const int query)
 {
-  const char *filename = NPL_TEST_PATH_CONTAINER_JSON;
+  char *filename = NULL;
+
+  switch (query)
+    {
+      default:
+	/* FIXME: do signal something is broken */
+	break;
+      case DOCKER_CONTAINERS_JSON:
+	filename = NPL_TEST_PATH_CONTAINER_JSON;
+	break;
+    }
 
   chunk->memory = test_fstringify (filename);
   chunk->size = strlen (chunk->memory);
@@ -214,8 +237,7 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
   CURLcode res;
 
   docker_init (&curl_handle, &chunk);
-  res = docker_get (curl_handle, "1.18", "containers/json",
-		    "{\"status\":{\"running\":true}}");
+  res = docker_get (curl_handle, DOCKER_CONTAINERS_JSON);
   if (CURLE_OK != res)
     {
       docker_close (curl_handle, &chunk);
@@ -224,7 +246,7 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
 
 #else
 
-  docker_get (&chunk);
+  docker_get (&chunk, DOCKER_CONTAINERS_JSON);
 
 #endif /* NPL_TESTING */
 
