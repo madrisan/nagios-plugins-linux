@@ -53,11 +53,11 @@ usage (FILE * out)
   fputs ("This plugin returns some runtime metrics exposed by Docker\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-w COUNTER] [-c COUNTER] ...\n", program_name);
+  fprintf (out, "  %s [--image IMAGE] [-w COUNTER] [-c COUNTER]\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs
-    ("  -i, --image IMAGE   limit the investigation to the a docker "
-     "image only\n", out);
+    ("  -i, --image IMAGE   limit the investigation only to the containers "
+     "running IMAGE\n", out);
   fputs ("  -w, --warning COUNTER    warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs ("  -v, --verbose   show details for command-line debugging "
