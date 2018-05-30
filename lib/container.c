@@ -68,7 +68,7 @@ json_eq (const char *json, jsmntok_t * tok, const char *s)
    return NULL if the data cannot be parsed.  */
 
 static hashtable_t *
-json_parser (const char *json, const char *token)
+json_parser (const char *json, const char *token, unsigned long increment)
 {
   int i, r;
   jsmn_parser parser;
@@ -97,7 +97,7 @@ json_parser (const char *json, const char *token)
 
 	  dbg ("found token \"%s\" with value \"%s\" at position %d\n",
 	       token, value, buffer[i].start);
-	  counter_put (hashtable, value);
+	  counter_put (hashtable, value, increment);
 	}
     }
 
@@ -254,7 +254,7 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
   dbg ("%lu bytes retrieved\n", chunk.size);
   dbg ("json data: %s", chunk.memory);
 
-  hashtable = json_parser (chunk.memory, "Image");
+  hashtable = json_parser (chunk.memory, "Image", 1);
   if (NULL == hashtable)
     plugin_error (STATE_UNKNOWN, 0,
 		  "unable to parse the json data for \"Image\"s");
@@ -277,7 +277,7 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
 	{
 	  hashable_t *np = counter_lookup (hashtable, hashtable->keys[j]);
 	  assert (NULL != np);
-	  fprintf (stream, "containers_%s=%u ",
+	  fprintf (stream, "containers_%s=%lu ",
 		   hashtable->keys[j], np->count);
 	}
       fprintf (stream, "containers_total=%u", hashtable->elements);

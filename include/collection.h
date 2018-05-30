@@ -25,7 +25,7 @@ extern "C"
   {				/* table entry: */
     struct hashable *next;	/* next element in case of a collision */
     char *key;
-    unsigned int count;
+    unsigned long count;
   } hashable_t;
 
   typedef struct hashtable
@@ -41,7 +41,8 @@ extern "C"
   void counter_free (hashtable_t * hashtable);
 
   hashable_t *counter_lookup (const hashtable_t * hashtable, const char *s);
-  hashable_t *counter_put (hashtable_t * hashtable, const char *key);
+  hashable_t *counter_put (hashtable_t * hashtable, const char *key,
+			   unsigned long increment);
   unsigned int counter_get_elements (const hashtable_t * hashtable);
   unsigned int counter_get_unique_elements (const hashtable_t * hashtable);
   char **counter_keys (hashtable_t * hashtable);
