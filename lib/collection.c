@@ -71,11 +71,11 @@ counter_lookup (const hashtable_t * hashtable, const char *s)
 }
 
 /* Insert the element 'key' into the hash table.
- * Set count to zero if 'key' was not present in the table or
- * increment the counter otherwise.  */
+ * Set count to 'increment' if 'key' was not present in the table or
+ * increment the counter by 'increment' otherwise.  */
 
 hashable_t *
-counter_put (hashtable_t * hashtable, const char *key)
+counter_put (hashtable_t * hashtable, const char *key, unsigned long increment)
 {
   hashable_t *np;
 
@@ -86,7 +86,7 @@ counter_put (hashtable_t * hashtable, const char *key)
 	return NULL;
 
       unsigned int hashval = hash (key);
-      np->count = 1;
+      np->count = increment;
       np->next = hashtable->table[hashval];
       hashtable->table[hashval] = np;
 
@@ -100,7 +100,7 @@ counter_put (hashtable_t * hashtable, const char *key)
     }
   else
     /* already there */
-    np->count++;
+    np->count += increment;
 
   hashtable->elements++;
 
