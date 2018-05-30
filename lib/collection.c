@@ -82,15 +82,17 @@ counter_put (hashtable_t * hashtable, const char *key, unsigned long increment)
   if ((np = counter_lookup (hashtable, key)) == NULL)
     {				/* not found */
       np = xmalloc (sizeof (*np));
-      if (NULL == (np->key = strdup (key)))
-	return NULL;
+      np->key = xstrdup (key);
 
       unsigned int hashval = hash (key);
       np->count = increment;
       np->next = hashtable->table[hashval];
       hashtable->table[hashval] = np;
 
-      hashtable->keys = xrealloc (hashtable->keys, hashtable->uniq + 1);
+      unsigned long new_size =
+	sizeof (*(hashtable->keys)) * (hashtable->uniq + 1);
+      hashtable->keys = xrealloc (hashtable->keys, new_size);
+      dbg ("xrealloc'ed hashtable->keys to %lu bytes\n", new_size);
 
       (hashtable->keys)[hashtable->uniq] = np->key;
       dbg ("(hashtable->keys)[%u] = \"%s\"\n", hashtable->uniq,
