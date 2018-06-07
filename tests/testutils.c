@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2016,2017 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2016,2018 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * Basic test utilities for the Nagios Plugin Linux.
  *

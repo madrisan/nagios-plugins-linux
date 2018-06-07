@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-## Copyright (c) 2016,2017 Davide Madrisan <davide.madrisan@gmail.com>
+## Copyright (c) 2016,2018 Davide Madrisan <davide.madrisan@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -62,6 +62,7 @@ test_programs += \
 	tsload_normalize \
 	tsload_thresholds \
 	tspaging \
+	tstestutils \
 	tsuptime \
 	tstemperature
 
@@ -119,6 +120,9 @@ tsuptime_LDADD = $(LDADDS)
 
 tstemperature_SOURCES = $(test_utils) tstemperature.c
 tstemperature_LDADD = $(LDADDS)
+
+tstestutils_SOURCES = $(test_utils) tststestutils.c
+tstestutils_LDADD = $(LDADDS)
 
 tslib_uname_la_SOURCES = tslib_uname.c
 tslib_uname_la_LDFLAGS = $(TSLIBS_LDFLAGS)
