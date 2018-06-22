@@ -35,6 +35,7 @@ static const char *docker_socket = DOCKER_SOCKET;
 
 #include "common.h"
 #include "collection.h"
+#include "container.h"
 #include "logging.h"
 #include "messages.h"
 #include "string-macros.h"
@@ -46,12 +47,6 @@ static const char *docker_socket = DOCKER_SOCKET;
 #include "json.h"
 
 #define DOCKER_CONTAINERS_JSON  0x01
-
-typedef struct chunk
-{
-  char *memory;
-  size_t size;
-} chunk_t;
 
 static int
 json_eq (const char *json, jsmntok_t * tok, const char *s)
@@ -68,7 +63,7 @@ json_eq (const char *json, jsmntok_t * tok, const char *s)
    return NULL if the data cannot be parsed.  */
 
 static hashtable_t *
-json_parser (const char *json, const char *token, unsigned long increment)
+docker_json_parser (const char *json, const char *token, unsigned long increment)
 {
   int i, r;
   jsmn_parser parser;
@@ -193,33 +188,6 @@ docker_close (CURL * curl_handle, chunk_t * chunk)
   curl_global_cleanup ();
 }
 
-#else
-
-static void
-docker_get (chunk_t * chunk, const int query)
-{
-  char *filename = NULL;
-
-  switch (query)
-    {
-      default:
-	/* FIXME: do signal something is broken */
-	break;
-      case DOCKER_CONTAINERS_JSON:
-	filename = NPL_TEST_PATH_CONTAINER_JSON;
-	break;
-    }
-
-  chunk->memory = test_fstringify (filename);
-  chunk->size = strlen (chunk->memory);
-}
-
-static void
-docker_close (chunk_t * chunk)
-{
-  free (chunk->memory);
-}
-
 #endif /* NPL_TESTING */
 
 /* Returns the number of running Docker containers  */
@@ -254,7 +222,7 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
   dbg ("%lu bytes retrieved\n", chunk.size);
   dbg ("json data: %s", chunk.memory);
 
-  hashtable = json_parser (chunk.memory, "Image", 1);
+  hashtable = docker_json_parser (chunk.memory, "Image", 1);
   if (NULL == hashtable)
     plugin_error (STATE_UNKNOWN, 0,
 		  "unable to parse the json data for \"Image\"s");

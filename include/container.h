@@ -23,6 +23,12 @@ extern "C"
 {
 #endif
 
+  typedef struct chunk
+  {
+    char *memory;
+    size_t size;
+  } chunk_t;
+
   unsigned int docker_running_containers (const char *image,
 					  char **perfdata, bool verbose);
 
