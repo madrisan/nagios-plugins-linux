@@ -19,12 +19,43 @@
  *
  */
 
+#include <stdlib.h>
+
 #include "container.h"
 #include "testutils.h"
 
 #define NPL_TESTING
 #include "../lib/collection.c"
+
+static void docker_get (chunk_t * chunk, const int query);
+static void docker_close (chunk_t * chunk);
+
 #include "../lib/container.c"
+
+static void
+docker_get (chunk_t * chunk, const int query)
+{
+  char *filename = NULL;
+
+  switch (query)
+    {
+      default:
+	/* FIXME: do signal something is broken */
+	break;
+      case DOCKER_CONTAINERS_JSON:
+	filename = NPL_TEST_PATH_CONTAINER_JSON;
+	break;
+    }
+
+  chunk->memory = test_fstringify (filename);
+  chunk->size = strlen (chunk->memory);
+}
+
+static void
+docker_close (chunk_t * chunk)
+{
+  free (chunk->memory);
+}
 #undef NPL_TESTING
 
 typedef struct test_data
