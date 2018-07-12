@@ -29,6 +29,38 @@ extern "C"
     size_t size;
   } chunk_t;
 
+  struct docker_memory_desc;
+
+  /* Allocates space for a new docker_memory_desc object.
+   * Returns 0 if all went ok. Errors are returned as negative values.  */
+  int docker_memory_desc_new (struct docker_memory_desc **memdesc);
+
+  /* Fill the docker_memory_desc structure pointed with the values found in the
+   * sysfs filesystem */
+  void docker_memory_desc_read (struct docker_memory_desc *__restrict
+				memdesc);
+
+  /* Drop a reference of the docker_memory_desc library context. If the refcount
+   * of reaches zero, the resources of the context will be released.  */
+  struct docker_memory_desc
+    *docker_memory_desc_unref (struct docker_memory_desc *memdesc);
+
+  /* Accessing the values from docker_memory_desc */
+  long long docker_memory_desc_get_total_cache (struct docker_memory_desc
+						*memdesc);
+  long long docker_memory_desc_get_total_pgfault (struct docker_memory_desc
+						  *memdesc);
+  long long docker_memory_desc_get_total_pg_majfault (struct
+						      docker_memory_desc
+						      *memdesc);
+  long long docker_memory_desc_get_total_rss (struct docker_memory_desc
+					      *memdesc);
+  long long docker_memory_desc_get_total_swap (struct docker_memory_desc
+					       *memdesc);
+  long long docker_memory_desc_get_total_unevictable (struct
+						      docker_memory_desc
+						      *memdesc);
+
   unsigned int docker_running_containers (const char *image,
 					  char **perfdata, bool verbose);
 

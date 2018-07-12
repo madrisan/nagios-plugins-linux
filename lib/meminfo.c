@@ -34,6 +34,7 @@
 #include "procparser.h"
 #include "sysfsparser.h"
 #include "system.h"
+#include "units.h"
 
 #define MEMINFO_UNSET ~0UL
 

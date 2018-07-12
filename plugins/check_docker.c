@@ -31,6 +31,8 @@
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
+#include "units.h"
+#include "xalloc.h"
 #include "xasprintf.h"
 
 static const char *program_copyright =
@@ -38,8 +40,13 @@ static const char *program_copyright =
 
 static struct option const longopts[] = {
   {(char *) "image", required_argument, NULL, 'i'},
+  {(char *) "memory", no_argument, NULL, 'M'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
+  {(char *) "byte", no_argument, NULL, 'b'},
+  {(char *) "kilobyte", no_argument, NULL, 'k'},
+  {(char *) "megabyte", no_argument, NULL, 'm'},
+  {(char *) "gigabyte", no_argument, NULL, 'g'},
   {(char *) "verbose", no_argument, NULL, 'v'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
@@ -54,10 +61,14 @@ usage (FILE * out)
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [--image IMAGE] [-w COUNTER] [-c COUNTER]\n", program_name);
+  fprintf (out, "  %s --memory [-w COUNTER] [-c COUNTER]\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs
     ("  -i, --image IMAGE   limit the investigation only to the containers "
      "running IMAGE\n", out);
+  fputs ("  -M, --memory    return the runtime memory metrics\n", out);
+  fputs ("  -b,-k,-m,-g     "
+         "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs ("  -w, --warning COUNTER    warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs ("  -v, --verbose   show details for command-line debugging "
@@ -67,6 +78,7 @@ usage (FILE * out)
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -w 100 -c 120\n", program_name);
   fprintf (out, "  %s --image nginx -c 5:\n", program_name);
+  fprintf (out, "  %s --memory -m -w 512 -c 640\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -86,17 +98,20 @@ int
 main (int argc, char **argv)
 {
   int c, containers;
-  bool verbose = false;
+  int shift = k_shift;
+  bool check_memory = false,
+       verbose = false;
   char *image = NULL;
   char *critical = NULL, *warning = NULL;
-  char *status_msg, *perfdata_containers_msg;
+  char *status_msg, *perfdata_msg;
+  char *units = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "i:c:w:v" GETOPT_HELP_VERSION_STRING,
+			   "c:w:vi:Mbkmg" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -107,6 +122,13 @@ main (int argc, char **argv)
 	case 'i':
 	  image = optarg;
 	  break;
+	case 'M':
+	  check_memory = true;
+	  break;
+        case 'b': shift = b_shift; units = xstrdup ("B"); break;
+        case 'k': shift = k_shift; units = xstrdup ("kB"); break;
+        case 'm': shift = m_shift; units = xstrdup ("MB"); break;
+        case 'g': shift = g_shift; units = xstrdup ("GB"); break;
 	case 'c':
 	  critical = optarg;
 	  break;
@@ -123,26 +145,67 @@ main (int argc, char **argv)
 	}
     }
 
+  if (check_memory && image)
+    usage (stderr);
+
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  containers =
-    docker_running_containers (image, &perfdata_containers_msg, verbose);
+  if (check_memory)
+    {
+      int err;
+      struct docker_memory_desc *memdesc = NULL;
 
-  status = get_status (containers, my_threshold);
+      /* output in kilobytes by default */
+      if (units == NULL)
+	units = xstrdup ("kB");
 
-  status_msg = image ?
-    xasprintf ("%s: %d running container(s) of type \"%s\"",
-	       state_text (status), containers, image) :
-    xasprintf ("%s: %d running container(s)", state_text (status),
-	       containers);
+      err = docker_memory_desc_new (&memdesc);
+      if (err < 0)
+	plugin_error (STATE_UNKNOWN, err, "memory exhausted");
+
+      docker_memory_desc_read (memdesc);
+
+      long long kb_total_cache =
+	docker_memory_desc_get_total_cache (memdesc) / 1024;
+      long long kb_total_rss =
+	docker_memory_desc_get_total_rss (memdesc) / 1024;
+      long long kb_total_swap =
+	docker_memory_desc_get_total_swap (memdesc) / 1024;
+      long long kb_total_unevictable =
+	docker_memory_desc_get_total_unevictable (memdesc) / 1024;
+      long long kb_memory_used_total =
+	kb_total_cache + kb_total_rss + kb_total_swap;
+
+      status = get_status (kb_memory_used_total, my_threshold);
+      status_msg =
+	xasprintf ("%s: %Ld %s memory used by all containers",
+		   state_text (status), UNIT_STR (kb_memory_used_total));
+
+      perfdata_msg =
+	xasprintf ("cache=%Ld%s rss=%Ld%s swap=%Ld%s unevictable=%Ld%s"
+		   , UNIT_STR (kb_total_cache)
+		   , UNIT_STR (kb_total_rss)
+		   , UNIT_STR (kb_total_swap)
+		   , UNIT_STR (kb_total_unevictable));
+
+      docker_memory_desc_unref (memdesc);
+    }
+  else
+    {
+      containers = docker_running_containers (image, &perfdata_msg, verbose);
+      status = get_status (containers, my_threshold);
+      status_msg = image ?
+       xasprintf ("%s: %d running container(s) of type \"%s\"",
+                  state_text (status), containers, image) :
+       xasprintf ("%s: %d running container(s)", state_text (status),
+                  containers);
+    }
+
+  printf ("%s %s | %s\n", program_name_short, status_msg, perfdata_msg);
 
   free (my_threshold);
-
-  printf ("%s %s | %s\n", program_name_short, status_msg,
-	  perfdata_containers_msg);
-
   return status;
 }
 #endif /* NPL_TESTING */
