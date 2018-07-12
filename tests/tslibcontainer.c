@@ -25,12 +25,11 @@
 #include "testutils.h"
 
 #define NPL_TESTING
-#include "../lib/collection.c"
 
 static void docker_get (chunk_t * chunk, const int query);
 static void docker_close (chunk_t * chunk);
 
-#include "../lib/container.c"
+#include "../lib/container_count.c"
 
 static void
 docker_get (chunk_t * chunk, const int query)
