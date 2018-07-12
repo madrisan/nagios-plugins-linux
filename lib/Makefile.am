@@ -24,6 +24,7 @@ AM_CPPFLAGS = \
 noinst_LIBRARIES = libutils.a
 
 libutils_a_SOURCES =  \
+	collection.c  \
 	container_memory.c \
 	cpudesc.c     \
 	cpufreq.c     \
@@ -41,15 +42,14 @@ libutils_a_SOURCES =  \
 	sysfsparser.c \
 	thresholds.c  \
 	tcpinfo.c     \
+	url_encode.c  \
 	xasprintf.c   \
 	xmalloc.c     \
 	xstrtol.c
 
 if HAVE_LIBCURL
   libutils_a_SOURCES += \
-	collection.c \
-	container_count.c \
-	url_encode.c
+	container_count.c
 endif
 
 if HAVE_LIBPROCPS
