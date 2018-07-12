@@ -21,6 +21,7 @@
 
 #include "meminfo.h"
 #include "testutils.h"
+#include "units.h"
 
 typedef struct test_data
 {
