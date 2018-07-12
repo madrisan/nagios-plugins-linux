@@ -22,6 +22,7 @@
 #endif
 
 #include <sys/types.h>
+#include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -190,6 +191,23 @@ sysfsparser_getvalue (const char *format, ...)
 
   free (line);
   return value;
+}
+
+int
+sysfsparser_linelookup_numeric (char *line, char *pattern, long long *value)
+{
+  char *p;
+  size_t len = strlen (pattern);
+
+  if (!*line || (len + 1 > strlen (line)))
+    return 0;
+
+  p = line + len;
+  if (strncmp (line, pattern, len) || !isspace (*p))
+    return 0;
+
+  *value = strtoll (p, NULL, 10);
+  return 1;
 }
 
 static unsigned long

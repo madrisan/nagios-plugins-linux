@@ -32,6 +32,7 @@
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
+#include "units.h"
 #include "vminfo.h"
 #include "xalloc.h"
 #include "xasprintf.h"

@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2018 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A library for checking sysfs for Docker exposed metrics.
+ * A library for checking for Docker exposed metrics.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

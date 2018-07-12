@@ -39,6 +39,13 @@ extern "C"
   unsigned long long sysfsparser_getvalue (const char *filename, ...)
        _attribute_format_printf_(1, 2);
 
+  /* Lookup a pattern and get the value from line
+   * Format is:
+   *     "<pattern> <numeric-key>"
+   */
+  int sysfsparser_linelookup_numeric (char *line, char *pattern,
+				      long long *value);
+
   /* cpufreq */
 
   int sysfsparser_cpufreq_get_hardware_limits (unsigned int cpu,
