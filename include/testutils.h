@@ -33,13 +33,14 @@
 #define TEST_KERNEL_VERSION_PATCH 27
 #define TEST_KERNEL_VERSION "2.6.27"
 
-/* environment variables to allow testing via static proc files;
+/* environment variables to allow testing via static proc and sysfs files;
    note that 'abs_srcdir' seems the only way to make 'make distcheck' happy
    (we cannot use 'abs_builddir' because the *.data files are not copied to
    <pckrootdir>/nagios-plugins-linux-<version>/_build/sub/tests/) */
 #define NPL_TEST_PATH_PROCSTAT abs_srcdir "/ts_procstat.data"
 #define NPL_TEST_PATH_PROCMEMINFO abs_srcdir "/ts_procmeminfo.data"
 #define NPL_TEST_PATH_PROCVMSTAT abs_srcdir "/ts_procvmstat.data"
+#define NPL_TEST_PATH_SYSDOCKERMEMSTAT abs_srcdir "/ts_sysdockermemstat.data"
 
 /* simulate the test of a query to the docker rest API */
 #define NPL_TEST_PATH_CONTAINER_JSON abs_srcdir "/ts_container.data"

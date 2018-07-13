@@ -46,20 +46,18 @@ extern "C"
     *docker_memory_desc_unref (struct docker_memory_desc *memdesc);
 
   /* Accessing the values from docker_memory_desc */
-  long long docker_memory_desc_get_total_cache (struct docker_memory_desc
-						*memdesc);
-  long long docker_memory_desc_get_total_pgfault (struct docker_memory_desc
-						  *memdesc);
-  long long docker_memory_desc_get_total_pg_majfault (struct
-						      docker_memory_desc
-						      *memdesc);
-  long long docker_memory_desc_get_total_rss (struct docker_memory_desc
-					      *memdesc);
-  long long docker_memory_desc_get_total_swap (struct docker_memory_desc
-					       *memdesc);
-  long long docker_memory_desc_get_total_unevictable (struct
-						      docker_memory_desc
-						      *memdesc);
+  long long docker_memory_desc_get_total_cache (
+    struct docker_memory_desc *memdesc);
+  long long docker_memory_desc_get_total_pgfault (
+    struct docker_memory_desc *memdesc);
+  long long docker_memory_desc_get_total_pgmajfault (
+    struct docker_memory_desc *memdesc);
+  long long docker_memory_desc_get_total_rss (
+    struct docker_memory_desc *memdesc);
+  long long docker_memory_desc_get_total_swap (
+    struct docker_memory_desc *memdesc);
+  long long docker_memory_desc_get_total_unevictable (
+    struct docker_memory_desc *memdesc);
 
   unsigned int docker_running_containers (const char *image,
 					  char **perfdata, bool verbose);

@@ -27,6 +27,8 @@
 #include "messages.h"
 #include "xasprintf.h"
 
+#ifndef NPL_TESTING
+
 #define PATH_SYS_CGROUP "/sys/fs/cgroup"
 #define PATH_SYS_DOCKER_SRV_MEM PATH_SYS_CGROUP "/memory/system.slice/docker.service"
 
@@ -44,13 +46,15 @@ get_docker_memory_stat_path ()
   return syspath;
 }
 
+#endif		/* NPL_TESTING */
+
 struct docker_memory_desc
 {
   int refcount;
 
   long long b_total_cache;
   long long b_total_pgfault;
-  long long b_total_pg_majfault;
+  long long b_total_pgmajfault;
   long long b_total_rss;
   long long b_total_swap;
   long long b_total_unevictable;
@@ -100,7 +104,7 @@ docker_memory_desc_read (struct docker_memory_desc *__restrict memdesc)
 	    (line, "total_pgfault", &memdesc->b_total_pgfault));
       else
 	if (sysfsparser_linelookup_numeric
-	    (line, "total_pg_majfault", &memdesc->b_total_pg_majfault));
+	    (line, "total_pgmajfault", &memdesc->b_total_pgmajfault));
       else
 	if (sysfsparser_linelookup_numeric
 	    (line, "total_rss", &memdesc->b_total_rss));
@@ -123,7 +127,7 @@ long long docker_memory_desc_get_ ## arg (struct docker_memory_desc *p) \
 
 docker_memory_desc_get (total_cache);
 docker_memory_desc_get (total_pgfault);
-docker_memory_desc_get (total_pg_majfault);
+docker_memory_desc_get (total_pgmajfault);
 docker_memory_desc_get (total_rss);
 docker_memory_desc_get (total_swap);
 docker_memory_desc_get (total_unevictable);
