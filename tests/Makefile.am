@@ -50,7 +50,8 @@ test_programs = \
 	tslibmeminfo_conversions \
 	tslibmeminfo_interface \
 	tslibmeminfo_procparser \
-	tslibmessages
+	tslibmessages \
+	tsliburlencode
 if !HAVE_LIBPROCPS
 test_programs += \
 	tslibvminfo
@@ -93,6 +94,9 @@ tslibmeminfo_procparser_LDADD = $(LDADDS)
 
 tslibmessages_SOURCES = $(test_utils) tslibmessages.c
 tslibmessages_LDADD = $(LDADDS)
+
+tsliburlencode_SOURCES = $(test_utils) tsliburlencode.c
+tsliburlencode_LDADD = $(LDADDS)
 
 tslibvminfo_SOURCES = $(test_utils) tslibvminfo.c
 tslibvminfo_LDADD = $(LDADDS)
