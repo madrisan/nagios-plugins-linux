@@ -60,8 +60,10 @@ usage (FILE * out)
   fputs ("This plugin returns some runtime metrics exposed by Docker\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [--image IMAGE] [-w COUNTER] [-c COUNTER]\n", program_name);
-  fprintf (out, "  %s --memory [-w COUNTER] [-c COUNTER]\n", program_name);
+  fprintf (out, "  %s [--image IMAGE] [-w COUNTER] [-c COUNTER]\n",
+	   program_name);
+  fprintf (out, "  %s --memory [-b,-k,-m,-g] [-w COUNTER] [-c COUNTER]\n",
+	   program_name);
   fputs (USAGE_OPTIONS, out);
   fputs
     ("  -i, --image IMAGE   limit the investigation only to the containers "
@@ -178,10 +180,11 @@ main (int argc, char **argv)
       long long kb_memory_used_total =
 	kb_total_cache + kb_total_rss + kb_total_swap;
 
-      status = get_status (kb_memory_used_total, my_threshold);
+      status = get_status (UNIT_CONVERT (kb_memory_used_total, shift),
+			   my_threshold);
       status_msg =
-	xasprintf ("%s: %Ld %s memory used by all containers",
-		   state_text (status), UNIT_STR (kb_memory_used_total));
+	xasprintf ("%s: %Ld %s memory used", state_text (status),
+		   UNIT_STR (kb_memory_used_total));
 
       perfdata_msg =
 	xasprintf ("cache=%Ld%s rss=%Ld%s swap=%Ld%s unevictable=%Ld%s"
@@ -203,7 +206,8 @@ main (int argc, char **argv)
                   containers);
     }
 
-  printf ("%s %s | %s\n", program_name_short, status_msg, perfdata_msg);
+  printf ("%s%s %s | %s\n", program_name_short,
+	  check_memory ? " memory" : " containers", status_msg, perfdata_msg);
 
   free (my_threshold);
   return status;
