@@ -30,19 +30,17 @@
 #ifndef NPL_TESTING
 
 #define PATH_SYS_CGROUP "/sys/fs/cgroup"
-#define PATH_SYS_DOCKER_SRV_MEM PATH_SYS_CGROUP "/memory/system.slice/docker.service"
+#define PATH_SYS_DOCKER_MEM PATH_SYS_CGROUP "/memory/docker"
 
 static char *
 get_docker_memory_stat_path ()
 {
   char *syspath = NULL;
 
-  /* Debian 8.10 and 9.4 */
-  if (sysfsparser_path_exist (PATH_SYS_CGROUP "/memory/docker/memory.stat"))
-    syspath = xasprintf ("%s/memory.stat", PATH_SYS_DOCKER_SRV_MEM);
-  /* Fedora 28 */
-  else if (sysfsparser_path_exist (PATH_SYS_DOCKER_SRV_MEM "/memory.stat"))
-    syspath = xasprintf ("%s/memory.stat", PATH_SYS_DOCKER_SRV_MEM);
+  /* Debian 8.10 and 9.4, Fedora 28 */
+  if (sysfsparser_path_exist (PATH_SYS_DOCKER_MEM "/memory.stat"))
+    syspath = xasprintf ("%s/memory.stat", PATH_SYS_DOCKER_MEM);
+
   return syspath;
 }
 
