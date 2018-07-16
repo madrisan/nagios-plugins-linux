@@ -99,11 +99,13 @@ mymain (void)
   /* test the sysfs data parser */
 
   DO_TEST ("total_cache", sysdata->b_total_cache, 108507136L);
-  DO_TEST ("total_pgfault", sysdata->b_total_pgfault, 97485L);
-  DO_TEST ("total_pgmajfault", sysdata->b_total_pgmajfault, 424L);
   DO_TEST ("total_rss", sysdata->b_total_rss, 53219328L);
   DO_TEST ("total_swap", sysdata->b_total_swap, 0L);
   DO_TEST ("total_unevictable", sysdata->b_total_unevictable, 0L);
+  DO_TEST ("total_pgfault", sysdata->c_total_pgfault, 97485L);
+  DO_TEST ("total_pgmajfault", sysdata->c_total_pgmajfault, 424L);
+  DO_TEST ("total_pgpgin", sysdata->c_total_pgpgin, 111725L);
+  DO_TEST ("total_pgpgout", sysdata->c_total_pgpgout, 72238L);
 
   test_memory_release ();
 

@@ -24,9 +24,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "common.h"
 #include "container.h"
+#include "logging.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
@@ -34,6 +36,7 @@
 #include "units.h"
 #include "xalloc.h"
 #include "xasprintf.h"
+#include "xstrtol.h"
 
 static const char *program_copyright =
   "Copyright (C) 2018 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
@@ -62,7 +65,8 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [--image IMAGE] [-w COUNTER] [-c COUNTER]\n",
 	   program_name);
-  fprintf (out, "  %s --memory [-b,-k,-m,-g] [-w COUNTER] [-c COUNTER]\n",
+  fprintf (out,
+	   "  %s --memory [-b,-k,-m,-g] [-w COUNTER] [-c COUNTER] [delay]\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
   fputs
@@ -77,10 +81,12 @@ usage (FILE * out)
 	 "(Nagios may truncate output)\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
+  fprintf (out, "  delay is the delay between updates in seconds "
+           "(default: %dsec)\n", DELAY_DEFAULT);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -w 100 -c 120\n", program_name);
   fprintf (out, "  %s --image nginx -c 5:\n", program_name);
-  fprintf (out, "  %s --memory -m -w 512 -c 640\n", program_name);
+  fprintf (out, "  %s --memory -m -w 512 -c 640 5\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -109,6 +115,7 @@ main (int argc, char **argv)
   char *units = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
+  unsigned long delay = DELAY_DEFAULT;
 
   set_program_name (argv[0]);
 
@@ -147,6 +154,17 @@ main (int argc, char **argv)
 	}
     }
 
+  if (optind < argc)
+    {
+      delay = strtol_or_err (argv[optind++], "failed to parse argument");
+
+      if (delay < 1)
+        plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
+      else if (DELAY_MAX < delay)
+        plugin_error (STATE_UNKNOWN, 0,
+                      "too large delay value (greater than %d)", DELAY_MAX);
+    }
+
   if (check_memory && image)
     usage (stderr);
 
@@ -167,18 +185,45 @@ main (int argc, char **argv)
       if (err < 0)
 	plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
+      long long pgfault[2];
+      long long pgmajfault[2];
+      long long pgpgin[2];
+      long long pgpgout[2];
+
       docker_memory_desc_read (memdesc);
 
       long long kb_total_cache =
-	docker_memory_desc_get_total_cache (memdesc) / 1024;
+	docker_memory_get_total_cache (memdesc) / 1024;
       long long kb_total_rss =
-	docker_memory_desc_get_total_rss (memdesc) / 1024;
+	docker_memory_get_total_rss (memdesc) / 1024;
       long long kb_total_swap =
-	docker_memory_desc_get_total_swap (memdesc) / 1024;
+	docker_memory_get_total_swap (memdesc) / 1024;
       long long kb_total_unevictable =
-	docker_memory_desc_get_total_unevictable (memdesc) / 1024;
+	docker_memory_get_total_unevictable (memdesc) / 1024;
       long long kb_memory_used_total =
 	kb_total_cache + kb_total_rss + kb_total_swap;
+
+      pgfault[0] = docker_memory_get_total_pgfault (memdesc);
+      pgmajfault[0] = docker_memory_get_total_pgmajfault (memdesc);
+      pgpgin[0] = docker_memory_get_total_pgpgin (memdesc);
+      pgpgout[0] = docker_memory_get_total_pgpgout (memdesc);
+
+      sleep (delay);
+
+      docker_memory_desc_read (memdesc);
+      pgfault[1] = docker_memory_get_total_pgfault (memdesc);
+      pgmajfault[1] = docker_memory_get_total_pgmajfault (memdesc);
+      pgpgin[1] = docker_memory_get_total_pgpgin (memdesc);
+      pgpgout[1] = docker_memory_get_total_pgpgout (memdesc);
+
+      #define __dbg__(arg) \
+	dbg ("delta (%lu sec) for %s: %Ld == (%Ld-%Ld)\n", \
+	     delay, #arg, arg[1]-arg[0], arg[1], arg[0])
+      __dbg__ (pgfault);
+      __dbg__ (pgmajfault);
+      __dbg__ (pgpgin);
+      __dbg__ (pgpgout);
+      #undef dbg__
 
       status = get_status (UNIT_CONVERT (kb_memory_used_total, shift),
 			   my_threshold);
@@ -187,11 +232,17 @@ main (int argc, char **argv)
 		   UNIT_STR (kb_memory_used_total));
 
       perfdata_msg =
-	xasprintf ("cache=%Ld%s rss=%Ld%s swap=%Ld%s unevictable=%Ld%s"
+	xasprintf ("cache=%Ld%s rss=%Ld%s swap=%Ld%s unevictable=%Ld%s "
+		   "pgfault=%Ld pgmajfault=%Ld "
+		   "pgpgin=%Ld pgpgout=%Ld"
 		   , UNIT_STR (kb_total_cache)
 		   , UNIT_STR (kb_total_rss)
 		   , UNIT_STR (kb_total_swap)
-		   , UNIT_STR (kb_total_unevictable));
+		   , UNIT_STR (kb_total_unevictable)
+		   , pgfault[1] - pgfault[0]
+		   , pgmajfault[1] - pgmajfault[0]
+		   , pgpgin[1] - pgpgin[0]
+		   , pgpgout[1] - pgpgout[0]);
 
       docker_memory_desc_unref (memdesc);
     }

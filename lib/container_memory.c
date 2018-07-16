@@ -24,6 +24,7 @@
 
 #include "common.h"
 #include "container.h"
+#include "logging.h"
 #include "messages.h"
 #include "xasprintf.h"
 
@@ -51,11 +52,13 @@ struct docker_memory_desc
   int refcount;
 
   long long b_total_cache;
-  long long b_total_pgfault;
-  long long b_total_pgmajfault;
   long long b_total_rss;
   long long b_total_swap;
   long long b_total_unevictable;
+  long long c_total_pgfault;
+  long long c_total_pgmajfault;
+  long long c_total_pgpgin;
+  long long c_total_pgpgout;
 };
 
 /* Allocates space for a new docker_memory_desc object.
@@ -93,16 +96,13 @@ docker_memory_desc_read (struct docker_memory_desc *__restrict memdesc)
   if ((fp = fopen (syspath, "r")) == NULL)
     plugin_error (STATE_UNKNOWN, errno, "error opening %s", syspath);
 
+  dbg ("parsing the file \"%s\"...\n", syspath);
   while ((chread = getline (&line, &len, fp)) != -1)
     {
+      dbg ("line: %s", line);
+
       if (sysfsparser_linelookup_numeric
-	  (line, "total_cache", &memdesc->b_total_cache));
-      else
-	if (sysfsparser_linelookup_numeric
-	    (line, "total_pgfault", &memdesc->b_total_pgfault));
-      else
-	if (sysfsparser_linelookup_numeric
-	    (line, "total_pgmajfault", &memdesc->b_total_pgmajfault));
+	    (line, "total_cache", &memdesc->b_total_cache));
       else
 	if (sysfsparser_linelookup_numeric
 	    (line, "total_rss", &memdesc->b_total_rss));
@@ -113,22 +113,49 @@ docker_memory_desc_read (struct docker_memory_desc *__restrict memdesc)
 	if (sysfsparser_linelookup_numeric
 	    (line, "total_unevictable", &memdesc->b_total_unevictable));
       else
+	if (sysfsparser_linelookup_numeric
+	    (line, "total_pgfault", &memdesc->c_total_pgfault));
+      else
+	if (sysfsparser_linelookup_numeric
+	    (line, "total_pgmajfault", &memdesc->c_total_pgmajfault));
+      else
+	if (sysfsparser_linelookup_numeric
+	    (line, "total_pgpgin", &memdesc->c_total_pgpgin));
+      else
+	if (sysfsparser_linelookup_numeric
+	    (line, "total_pgpgout", &memdesc->c_total_pgpgout));
+      else
 	continue;
     }
+
+  fclose (fp);
 }
 
 /* Accessing the values from docker_memory_desc */
 
-#define docker_memory_desc_get(arg) \
-long long docker_memory_desc_get_ ## arg (struct docker_memory_desc *p) \
-  { return (p == NULL) ? 0 : p->b_ ## arg; }
+#define docker_memory_desc_get(arg, prefix) \
+  long long docker_memory_get_ ## arg (struct docker_memory_desc *p) \
+    {                                                                \
+      dbg(" -> %s: %Ld\n", #arg, p->prefix ## _ ## arg);             \
+      return (p == NULL) ? 0 : p->prefix ## _ ## arg;                \
+    }
+#define docker_memory_desc_get_bytes(arg) \
+   docker_memory_desc_get(arg, b)
+#define docker_memory_desc_get_count(arg) \
+   docker_memory_desc_get(arg, c)
 
-docker_memory_desc_get (total_cache);
-docker_memory_desc_get (total_pgfault);
-docker_memory_desc_get (total_pgmajfault);
-docker_memory_desc_get (total_rss);
-docker_memory_desc_get (total_swap);
-docker_memory_desc_get (total_unevictable);
+  docker_memory_desc_get_bytes (total_cache);
+  docker_memory_desc_get_bytes (total_rss);
+  docker_memory_desc_get_bytes (total_swap);
+  docker_memory_desc_get_bytes (total_unevictable);
+  docker_memory_desc_get_count (total_pgfault);
+  docker_memory_desc_get_count (total_pgmajfault);
+  docker_memory_desc_get_count (total_pgpgin);
+  docker_memory_desc_get_count (total_pgpgout);
+
+#undef docker_memory_desc_get_count
+#undef docker_memory_desc_get_bytes
+#undef docker_memory_desc_get
 
 /* Drop a reference of the docker_memory_desc library context. If the refcount
  * of reaches zero, the resources of the context will be released.  */
