@@ -48,30 +48,35 @@ extern "C"
   /* Accessing the values from docker_memory_desc */
 
   /* Return the number of bytes of page cache memory.  */
-  long long docker_memory_desc_get_total_cache (
+  long long docker_memory_get_total_cache (
     struct docker_memory_desc *memdesc);
 
   /* Return the number of bytes of anonymous and swap cache memory
    * (includes transparent hugepages).  */
-  long long docker_memory_desc_get_total_rss (
+  long long docker_memory_get_total_rss (
     struct docker_memory_desc *memdesc);
 
   /* Return the number of bytes of swap usage.  */
-  long long docker_memory_desc_get_total_swap (
+  long long docker_memory_get_total_swap (
     struct docker_memory_desc *memdesc);
 
   /* Return the number of bytes of bytes of memory that cannot be reclaimed
    * (mlocked etc).  */
-  long long docker_memory_desc_get_total_unevictable (
+  long long docker_memory_get_total_unevictable (
     struct docker_memory_desc *memdesc);
 
   /* Additional metrics that may be valuable in investigating performance or
    * stability issues include page faults, which can represent either
    * segmentation faults or fetching data from disk instead of memory
    * (pgfault and pgmajfault, respectively).  */
-  long long docker_memory_desc_get_total_pgfault (
+  long long docker_memory_get_total_pgfault (
     struct docker_memory_desc *memdesc);
-  long long docker_memory_desc_get_total_pgmajfault (
+  long long docker_memory_get_total_pgmajfault (
+    struct docker_memory_desc *memdesc);
+
+  long long docker_memory_get_total_pgpgin (
+    struct docker_memory_desc *memdesc);
+  long long docker_memory_get_total_pgpgout (
     struct docker_memory_desc *memdesc);
 
   unsigned int docker_running_containers (const char *image,
