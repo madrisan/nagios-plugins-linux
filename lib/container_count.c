@@ -93,6 +93,7 @@ docker_json_parser (const char *json, const char *token, unsigned long increment
 	  dbg ("found token \"%s\" with value \"%s\" at position %d\n",
 	       token, value, buffer[i].start);
 	  counter_put (hashtable, value, increment);
+	  free (value);
 	}
     }
 
