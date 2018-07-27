@@ -97,6 +97,7 @@ docker_json_parser (const char *json, const char *token, unsigned long increment
 	}
     }
 
+  free (buffer);
   return hashtable;
 }
 
