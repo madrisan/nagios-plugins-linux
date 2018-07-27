@@ -65,7 +65,8 @@ char *
 test_fstringify (const char * filename)
 {
   char * buffer = NULL;
-  size_t size, chars = 0;
+  long size;
+  size_t chars;
   FILE * stream = fopen (filename, "r");
 
   if (NULL == stream)
@@ -77,11 +78,11 @@ test_fstringify (const char * filename)
 
   rewind (stream);
 
-  buffer = xmalloc (size + 1);
+  buffer = xmalloc ((size_t)size + 1);
   if (buffer)
-    chars = fread (buffer, 1, size, stream);
+    chars = fread (buffer, 1, (size_t)size, stream);
 
-  if (ferror (stream) || (chars < size))
+  if (ferror (stream) || (chars < (size_t)size))
     {
       free (buffer);
       buffer = NULL;
