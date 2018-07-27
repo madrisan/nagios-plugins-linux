@@ -48,7 +48,11 @@ docker_get (chunk_t * chunk, const int query)
 
   if (NULL == filename)
     return EXIT_AM_HARDFAIL;
+
   chunk->memory = test_fstringify (filename);
+  if (NULL == chunk->memory)
+    return EXIT_AM_HARDFAIL;
+
   chunk->size = strlen (chunk->memory);
 
   return 0;
