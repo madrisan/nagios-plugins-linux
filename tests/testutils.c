@@ -65,21 +65,26 @@ char *
 test_fstringify (const char * filename)
 {
   char * buffer = NULL;
-  size_t size, chars = 0;
+  long size;
+  size_t chars;
   FILE * stream = fopen (filename, "r");
 
   if (NULL == stream)
     return NULL;
 
   fseek (stream, 0, SEEK_END);
-  size = ftell (stream);
+  if ((size = ftell (stream)) < 0)
+    {
+      fclose (stream);
+      return NULL;
+    }
+
   rewind (stream);
 
-  buffer = xmalloc (size + 1);
-  if (buffer)
-    chars = fread (buffer, 1, size, stream);
+  buffer = xmalloc ((size_t)size + 1);
+  chars = fread (buffer, 1, (size_t)size, stream);
 
-  if (ferror (stream) || (chars < size))
+  if (ferror (stream) || (chars < (size_t)size))
     {
       free (buffer);
       buffer = NULL;
@@ -97,7 +102,7 @@ test_main (int argc, char **argv, int (*func) (void), ...)
   int ret;
 
   va_start (ap, func);
-  while ((lib = va_arg(ap, const char *)))
+ while ((lib = va_arg(ap, const char *)))
     TEST_PRELOAD (lib);
   va_end(ap);
 

@@ -93,9 +93,11 @@ docker_json_parser (const char *json, const char *token, unsigned long increment
 	  dbg ("found token \"%s\" with value \"%s\" at position %d\n",
 	       token, value, buffer[i].start);
 	  counter_put (hashtable, value, increment);
+	  free (value);
 	}
     }
 
+  free (buffer);
   return hashtable;
 }
 
@@ -192,8 +194,9 @@ docker_close (CURL * curl_handle, chunk_t * chunk)
 
 /* Returns the number of running Docker containers  */
 
-unsigned int
-docker_running_containers (const char *image, char **perfdata, bool verbose)
+int
+docker_running_containers (unsigned int *count, const char *image,
+			   char **perfdata, bool verbose)
 {
   chunk_t chunk;
   hashtable_t *hashtable;
@@ -214,7 +217,9 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
 
 #else
 
-  docker_get (&chunk, DOCKER_CONTAINERS_JSON);
+  int err;
+  if ((err = docker_get (&chunk, DOCKER_CONTAINERS_JSON)) != 0)
+    return err;
 
 #endif /* NPL_TESTING */
 
@@ -252,13 +257,14 @@ docker_running_containers (const char *image, char **perfdata, bool verbose)
       fclose (stream);
     }
 
-  counter_free (hashtable);
+  *count = running_containers;
 
+  counter_free (hashtable);
   docker_close (
 #ifndef NPL_TESTING
 		 curl_handle,
 #endif
 		 &chunk);
 
-  return running_containers;
+  return 0;
 }

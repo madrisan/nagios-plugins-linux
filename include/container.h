@@ -79,8 +79,8 @@ extern "C"
   long long docker_memory_get_total_pgpgout (
     struct docker_memory_desc *memdesc);
 
-  unsigned int docker_running_containers (const char *image,
-					  char **perfdata, bool verbose);
+  int docker_running_containers (unsigned int *count, const char *image,
+				 char **perfdata, bool verbose);
 
 #ifdef __cplusplus
 }

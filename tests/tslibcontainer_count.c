@@ -26,12 +26,12 @@
 
 #define NPL_TESTING
 
-static void docker_get (chunk_t * chunk, const int query);
+static int docker_get (chunk_t * chunk, const int query);
 static void docker_close (chunk_t * chunk);
 
 #include "../lib/container_count.c"
 
-static void
+static int
 docker_get (chunk_t * chunk, const int query)
 {
   char *filename = NULL;
@@ -39,7 +39,7 @@ docker_get (chunk_t * chunk, const int query)
   switch (query)
     {
       default:
-	/* FIXME: do signal something is broken */
+	return EXIT_AM_HARDFAIL;
 	break;
       case DOCKER_CONTAINERS_JSON:
 	filename = NPL_TEST_PATH_CONTAINER_JSON;
@@ -47,7 +47,12 @@ docker_get (chunk_t * chunk, const int query)
     }
 
   chunk->memory = test_fstringify (filename);
+  if (NULL == chunk->memory)
+    return EXIT_AM_HARDFAIL;
+
   chunk->size = strlen (chunk->memory);
+
+  return 0;
 }
 
 static void
@@ -61,18 +66,23 @@ typedef struct test_data
 {
   char * image;
   char * perfdata;
-  int expect_value;
+  unsigned int expect_value;
 } test_data;
 
 static int
 test_docker_running_containers (const void *tdata)
 {
   const struct test_data *data = tdata;
-  int ret = 0;
+  int err, ret = 0;
   char * perfdata;
+  unsigned int containers;
 
-  int containers =
-    docker_running_containers (data->image, &perfdata, false);
+  err = docker_running_containers (&containers, data->image, &perfdata, false);
+  if (err != 0)
+    {
+      free (perfdata);
+      return err;
+    }
 
   TEST_ASSERT_EQUAL_NUMERIC (containers, data->expect_value);
   TEST_ASSERT_EQUAL_STRING (perfdata, data->perfdata);
