@@ -35,6 +35,8 @@ test_fstringify_bufsize (const void *tdata)
   const struct test_data *data = tdata;
 
   char * buffer = test_fstringify (data->filename);
+  if (NULL == buffer)
+    return -1;
 
   TEST_ASSERT_EQUAL_NUMERIC (data->expect_size, strlen (buffer));
 

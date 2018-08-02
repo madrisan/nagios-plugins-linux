@@ -105,7 +105,7 @@ print_version (void)
 int
 main (int argc, char **argv)
 {
-  int c, containers;
+  int c;
   int shift = k_shift;
   bool check_memory = false,
        verbose = false;
@@ -248,12 +248,13 @@ main (int argc, char **argv)
     }
   else
     {
-      containers = docker_running_containers (image, &perfdata_msg, verbose);
+      unsigned int containers;
+      docker_running_containers (&containers, image, &perfdata_msg, verbose);
       status = get_status (containers, my_threshold);
       status_msg = image ?
-       xasprintf ("%s: %d running container(s) of type \"%s\"",
+       xasprintf ("%s: %u running container(s) of type \"%s\"",
                   state_text (status), containers, image) :
-       xasprintf ("%s: %d running container(s)", state_text (status),
+       xasprintf ("%s: %u running container(s)", state_text (status),
                   containers);
     }
 

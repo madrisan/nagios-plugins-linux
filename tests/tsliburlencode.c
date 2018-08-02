@@ -39,8 +39,10 @@ test_url_encoding (const void *tdata)
 {
   const struct test_data *data = tdata;
   int ret = 0;
+  char *encoded_url = url_encode (data->url);
 
-  TEST_ASSERT_EQUAL_STRING (url_encode (data->url), data->expect_value);
+  TEST_ASSERT_EQUAL_STRING (encoded_url, data->expect_value);
+  free (encoded_url);
   return ret;
 }
 
