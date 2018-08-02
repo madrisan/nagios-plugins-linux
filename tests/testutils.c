@@ -74,13 +74,15 @@ test_fstringify (const char * filename)
 
   fseek (stream, 0, SEEK_END);
   if ((size = ftell (stream)) < 0)
-    return NULL;
+    {
+      fclose (stream);
+      return NULL;
+    }
 
   rewind (stream);
 
   buffer = xmalloc ((size_t)size + 1);
-  if (buffer)
-    chars = fread (buffer, 1, (size_t)size, stream);
+  chars = fread (buffer, 1, (size_t)size, stream);
 
   if (ferror (stream) || (chars < (size_t)size))
     {
