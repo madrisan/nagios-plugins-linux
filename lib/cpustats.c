@@ -93,11 +93,11 @@ cpu_stats_get_time (struct cpu_time * __restrict cputime, unsigned int lines)
 	  unsigned int cpunum = strtol (line + 3, &endptr, 10);
 	  if (lines <= cpunum + 1)
 	    plugin_error (STATE_UNKNOWN, 0,
-			  "BUG: %s(): lines(%d) <= cpunum(%d) + 1",
+			  "BUG: %s(): lines(%u) <= cpunum(%u) + 1",
 			  __FUNCTION__, lines, cpunum);
 
 	  unsigned int i = cpunum + 1;
-	  cputime[i].cpuname = xasprintf ("cpu%d", cpunum);
+	  cputime[i].cpuname = xasprintf ("cpu%u", cpunum);
 	  sscanf (endptr,
 		  "%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
 		  &cputime[i].user, &cputime[i].nice,

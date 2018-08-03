@@ -105,6 +105,7 @@ dnl Checks for some compiler warning flags
 cc_TRY_CFLAGS([-Wall])
 cc_TRY_CFLAGS([-Wformat])
 cc_TRY_CFLAGS([-Wformat-security])
+cc_TRY_CFLAGS([-Wformat-signedness])
 cc_TRY_CFLAGS([-Wmissing-noreturn])
 cc_TRY_CFLAGS([-Wmissing-format-attribute])
 cc_TRY_CFLAGS([-Wredundant-decls])

@@ -74,7 +74,7 @@ proc_interrupts_get_nintr_per_cpu (unsigned int *ncpus)
 	  if (*p == '\0' || *p == '\n')
 	    continue;
 	  value = strtoul (p + 1, &end, 10);
-	  dbg (" --> cpu%d = %lu\n", cpu, value);
+	  dbg (" --> cpu%u = %lu\n", cpu, value);
 	  vintr[cpu] += value;
 	  p = end + 1;
 	} 

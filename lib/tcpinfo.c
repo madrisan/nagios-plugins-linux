@@ -108,7 +108,8 @@ procparser_tcp (const char *procfile, struct proc_tcptable_data *data,
   ssize_t nread;
 
   char local_addr_buf[128], rem_addr_buf[128];
-  int slot, num, local_port, rem_port, state, timer_run, uid, timeout;
+  unsigned int slot, num, local_port, rem_port;
+  unsigned int state, timer_run, uid, timeout;
   unsigned long lnr = 0;
   unsigned long rxq, txq, time_len, retr, inode;
 #if HAVE_AFINET6
@@ -135,8 +136,8 @@ procparser_tcp (const char *procfile, struct proc_tcptable_data *data,
 
       num =
 	sscanf (line,
-		"%d: %64[0-9A-Fa-f]:%X %64[0-9A-Fa-f]:%X %X "
-		"%lX:%lX %X:%lX %lX %d %d %lu %*s\n",
+		"%u: %64[0-9A-Fa-f]:%X %64[0-9A-Fa-f]:%X %X "
+		"%lX:%lX %X:%lX %lX %u %u %lu %*s\n",
 		&slot, local_addr_buf, &local_port, rem_addr_buf, &rem_port,
 		&state, &txq, &rxq, &timer_run, &time_len, &retr, &uid,
 		&timeout, &inode);
@@ -197,7 +198,7 @@ procparser_tcp (const char *procfile, struct proc_tcptable_data *data,
 		  &in6.s6_addr32[2], &in6.s6_addr32[3]);
 	  inet_ntop (AF_INET6, &in6, rbuffer, sizeof (rbuffer));
 
-	  printf(" tcp6  %-11s %15s:%-6d %15s:%-6d\n", tcp_state[state],
+	  printf(" tcp6  %-11s %15s:%-6u %15s:%-6u\n", tcp_state[state],
 		 lbuffer, local_port, rbuffer, rem_port);
 #endif
 	}
@@ -209,7 +210,7 @@ procparser_tcp (const char *procfile, struct proc_tcptable_data *data,
 	  sscanf (rem_addr_buf, "%X", &in.sin_addr.s_addr);
 	  inet_ntop (AF_INET, &in.sin_addr, rbuffer, sizeof (rbuffer));
 
-	  printf(" tcp   %-11s %15s:%-6d %15s:%-6d\n", tcp_state[state],
+	  printf(" tcp   %-11s %15s:%-6u %15s:%-6u\n", tcp_state[state],
 		 lbuffer, local_port, rbuffer, rem_port);
 	}
     }

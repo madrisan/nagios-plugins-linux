@@ -111,7 +111,8 @@ print_version (void)
 }
 
 /* output formats "<key>:  <value>" */
-#define print_n(_key, _val)  printf ("%-30s%d\n", _key, _val)
+#define print_d(_key, _val)  printf ("%-30s%d\n", _key, _val)
+#define print_u(_key, _val)  printf ("%-30s%u\n", _key, _val)
 #define print_s(_key, _val)  printf ("%-30s%s\n", _key, _val)
 #define print_key_s(_key)    printf ("%-30s", _key)
 #define print_range_s(_key, _val1, _val2) \
@@ -150,14 +151,14 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 
   int cpu, ncpus = cpu_desc_get_ncpus (cpudesc);
 
-  print_n("CPU(s):", ncpus);
+  print_d("CPU(s):", ncpus);
 
   unsigned int nsockets, ncores, nthreads;
   get_cputopology_read (&nsockets, &ncores, &nthreads);
 
-  print_n("Thread(s) per core:", nthreads);
-  print_n("Core(s) per socket:", ncores);
-  print_n("Socket(s):", nsockets);
+  print_u("Thread(s) per core:", nthreads);
+  print_u("Core(s) per socket:", ncores);
+  print_u("Socket(s):", nsockets);
 
   print_s("Vendor ID:", cpu_desc_get_vendor (cpudesc));
   print_s("CPU Family:", cpu_desc_get_family (cpudesc));

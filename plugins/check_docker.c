@@ -228,11 +228,11 @@ main (int argc, char **argv)
       status = get_status (UNIT_CONVERT (kb_memory_used_total, shift),
 			   my_threshold);
       status_msg =
-	xasprintf ("%s: %lld %s memory used", state_text (status),
+	xasprintf ("%s: %llu %s memory used", state_text (status),
 		   UNIT_STR (kb_memory_used_total));
 
       perfdata_msg =
-	xasprintf ("cache=%lld%s rss=%lld%s swap=%lld%s unevictable=%lld%s "
+	xasprintf ("cache=%llu%s rss=%llu%s swap=%llu%s unevictable=%llu%s "
 		   "pgfault=%lld pgmajfault=%lld "
 		   "pgpgin=%lld pgpgout=%lld"
 		   , UNIT_STR (kb_total_cache)
