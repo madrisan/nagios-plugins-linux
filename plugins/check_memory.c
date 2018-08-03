@@ -243,10 +243,10 @@ main (int argc, char **argv)
   status = get_status (mem_percent, my_threshold);
 
   perfdata_memavailable_msg =
-    xasprintf ("mem_available=%Lu%s ", UNIT_STR (kb_mem_main_available));
+    xasprintf ("mem_available=%llu%s ", UNIT_STR (kb_mem_main_available));
 
   status_msg =
-    xasprintf ("%s: %.2f%% (%Lu %s) %s",
+    xasprintf ("%s: %.2f%% (%llu %s) %s",
 	       state_text (status), mem_percent, UNIT_STR (*kb_mem_monitored),
 	       (kb_mem_monitored == &kb_mem_main_available) ?
 		 "available" : "used");
@@ -254,10 +254,10 @@ main (int argc, char **argv)
   free (my_threshold);
 
   perfdata_mem_msg =
-    xasprintf ("mem_total=%Lu%s mem_used=%Lu%s mem_free=%Lu%s "
-	       "mem_shared=%Lu%s mem_buffers=%Lu%s mem_cached=%Lu%s %s"
-	       "mem_active=%Lu%s mem_anonpages=%Lu%s mem_committed=%Lu%s "
-	       "mem_dirty=%Lu%s mem_inactive=%Lu%s"
+    xasprintf ("mem_total=%llu%s mem_used=%llu%s mem_free=%llu%s "
+	       "mem_shared=%llu%s mem_buffers=%llu%s mem_cached=%llu%s %s"
+	       "mem_active=%llu%s mem_anonpages=%llu%s mem_committed=%llu%s "
+	       "mem_dirty=%llu%s mem_inactive=%llu%s"
 	       , UNIT_STR (kb_mem_main_total)
 	       , UNIT_STR (kb_mem_main_used)
 	       , UNIT_STR (kb_mem_main_free)

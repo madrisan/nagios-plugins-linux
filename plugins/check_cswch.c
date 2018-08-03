@@ -91,7 +91,7 @@ get_ctxtdelta (unsigned int count, unsigned int delay, bool verbose)
                      dnctxt = nctxt[0] = cpu_stats_get_cswch ();
 
   if (verbose)
-    printf ("ctxt = %Lu\n", dnctxt);
+    printf ("ctxt = %llu\n", dnctxt);
 
   for (i = 1; i < count; i++)
     {
@@ -102,7 +102,7 @@ get_ctxtdelta (unsigned int count, unsigned int delay, bool verbose)
       dnctxt = (nctxt[tog] - nctxt[!tog]) / delay;
 
       if (verbose)
-	printf ("ctxt = %Lu --> %Lu/s\n", nctxt[tog], dnctxt);
+	printf ("ctxt = %llu --> %llu/s\n", nctxt[tog], dnctxt);
     }
 
    return dnctxt;
@@ -177,7 +177,7 @@ main (int argc, char **argv)
   free (my_threshold);
 
   char *time_unit = (count > 1) ? "/s" : "";
-  printf ("%s %s - number of context switches%s %Lu | cswch%s=%Lu\n",
+  printf ("%s %s - number of context switches%s %llu | cswch%s=%llu\n",
 	  program_name_short, state_text (status),
 	  time_unit, dnctxt, time_unit, dnctxt);
 

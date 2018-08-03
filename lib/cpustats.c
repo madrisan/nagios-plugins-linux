@@ -74,13 +74,14 @@ cpu_stats_get_time (struct cpu_time * __restrict cputime, unsigned int lines)
       if (!strncmp (line, "cpu ", 4))
 	{
 	  cputime->cpuname = xstrdup ("cpu");
-	  sscanf (line, "cpu  %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
+	  sscanf (line,
+		  "cpu  %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
 		  &cputime->user, &cputime->nice, &cputime->system,
 		  &cputime->idle, &cputime->iowait, &cputime->irq,
 		  &cputime->softirq, &cputime->steal, &cputime->guest,
 		  &cputime->guestn);
 	  dbg ("line: %s", line);
-	  dbg (" \\ %s >> [1]user:%Lu ... [5]iowait:%Lu ...\n",
+	  dbg (" \\ %s >> [1]user:%llu ... [5]iowait:%llu ...\n",
 	       cputime->cpuname, cputime->user, cputime->iowait);
 	  found = true;
 	  if (lines == 1)
@@ -97,14 +98,15 @@ cpu_stats_get_time (struct cpu_time * __restrict cputime, unsigned int lines)
 
 	  unsigned int i = cpunum + 1;
 	  cputime[i].cpuname = xasprintf ("cpu%d", cpunum);
-	  sscanf (endptr, "%Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
+	  sscanf (endptr,
+		  "%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
 		  &cputime[i].user, &cputime[i].nice,
 		  &cputime[i].system, &cputime[i].idle,
 		  &cputime[i].iowait, &cputime[i].irq,
 		  &cputime[i].softirq, &cputime[i].steal,
 		  &cputime[i].guest, &cputime[i].guestn);
 	  dbg ("line: %s", line);
-	  dbg (" \\ %s >> [1]user:%Lu ... [5]iowait:%Lu ...\n",
+	  dbg (" \\ %s >> [1]user:%llu ... [5]iowait:%llu ...\n",
 	       cputime[i].cpuname, cputime[i].user, cputime[i].iowait);
 	}
     }
@@ -138,8 +140,8 @@ cpu_stats_get_value_with_pattern (const char *pattern, bool mandatory)
     {
       if (!strncmp (line, pattern, strlen (pattern)))
 	{
-	  sscanf (line + strlen (pattern), "%Lu", &value);
-	  dbg ("line: %s \\ value for '%s': %Lu\n", line, pattern, value);
+	  sscanf (line + strlen (pattern), "%llu", &value);
+	  dbg ("line: %s \\ value for '%s': %llu\n", line, pattern, value);
 	  found = true;
 	  break;
 	}

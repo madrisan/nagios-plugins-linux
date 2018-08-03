@@ -217,7 +217,7 @@ main (int argc, char **argv)
       pgpgout[1] = docker_memory_get_total_pgpgout (memdesc);
 
       #define __dbg__(arg) \
-	dbg ("delta (%lu sec) for %s: %Ld == (%Ld-%Ld)\n", \
+	dbg ("delta (%lu sec) for %s: %lld == (%lld-%lld)\n", \
 	     delay, #arg, arg[1]-arg[0], arg[1], arg[0])
       __dbg__ (pgfault);
       __dbg__ (pgmajfault);
@@ -228,13 +228,13 @@ main (int argc, char **argv)
       status = get_status (UNIT_CONVERT (kb_memory_used_total, shift),
 			   my_threshold);
       status_msg =
-	xasprintf ("%s: %Ld %s memory used", state_text (status),
+	xasprintf ("%s: %lld %s memory used", state_text (status),
 		   UNIT_STR (kb_memory_used_total));
 
       perfdata_msg =
-	xasprintf ("cache=%Ld%s rss=%Ld%s swap=%Ld%s unevictable=%Ld%s "
-		   "pgfault=%Ld pgmajfault=%Ld "
-		   "pgpgin=%Ld pgpgout=%Ld"
+	xasprintf ("cache=%lld%s rss=%lld%s swap=%lld%s unevictable=%lld%s "
+		   "pgfault=%lld pgmajfault=%lld "
+		   "pgpgin=%lld pgpgout=%lld"
 		   , UNIT_STR (kb_total_cache)
 		   , UNIT_STR (kb_total_rss)
 		   , UNIT_STR (kb_total_swap)
