@@ -492,7 +492,7 @@ echo "  LDFLAGS            = $LDFLAGS"
 echo
 
 if test "$libcurl_cv_lib_curl_usable" = "yes"; then
-  echo "  LIBCURL_CPPFLAGS = $LIBCURL_CPPFLAGS"
-  echo "  LIBCURL          = $LIBCURL"
+  echo "  LIBCURL_CPPFLAGS   = $LIBCURL_CPPFLAGS"
+  echo "  LIBCURL            = $LIBCURL"
   echo
 fi
