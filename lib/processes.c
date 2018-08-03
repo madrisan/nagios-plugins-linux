@@ -122,23 +122,23 @@ procs_list_node_add (uid_t uid, unsigned long inc,
 {
   struct procs_list_node *p = plist;
 
-  dbg ("procs_list_node_add (uid %d, #threads %lu)\n", uid,
+  dbg ("procs_list_node_add (uid %u, #threads %lu)\n", uid,
        plist->nbr + inc);
   while (p != p->next)
     {
       p = p->next;
-      dbg (" - iteration: uid = %d\n", p->uid);
+      dbg (" - iteration: uid = %u\n", p->uid);
       if (p->uid == uid)
 	{
 	  p->nbr += inc;
 	  plist->nbr += inc;
-	  dbg (" - found uid %d: now #%ld\n", uid, p->nbr);
+	  dbg (" - found uid %u: now #%ld\n", uid, p->nbr);
 	  return p;
 	}
     }
 
   struct procs_list_node *new = xmalloc (sizeof (struct procs_list_node));
-  dbg ("new uid --> append uid %d #1\n", uid);
+  dbg ("new uid --> append uid %u #1\n", uid);
   new->uid = uid;
   new->nbr = inc;
   plist->nbr += inc;
@@ -151,7 +151,7 @@ procs_list_node_add (uid_t uid, unsigned long inc,
     new->rlimit_nproc_soft = new->rlimit_nproc_hard = RLIM_INFINITY;
   else
     {
-      dbg (" - with rlimits: %ld %ld\n", rlim.rlim_cur, rlim.rlim_max);
+      dbg (" - with rlimits: %lu %lu\n", rlim.rlim_cur, rlim.rlim_max);
       new->rlimit_nproc_soft = rlim.rlim_cur;
       new->rlimit_nproc_hard = rlim.rlim_max;
     }

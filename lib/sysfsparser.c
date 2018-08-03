@@ -430,7 +430,7 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
 		  *zone = strtoul (de->d_name + 12, NULL, 10);
 		}
 	    }
-	  dbg ("thermal information found: %.2f degrees C, zone: %d\n",
+	  dbg ("thermal information found: %.2f degrees C, zone: %u\n",
 	       (float) (max_temp / 1000.0), *zone);
 	}
     }
