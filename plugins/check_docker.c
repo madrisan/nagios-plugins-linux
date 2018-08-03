@@ -72,7 +72,7 @@ usage (FILE * out)
   fputs
     ("  -i, --image IMAGE   limit the investigation only to the containers "
      "running IMAGE\n", out);
-  fputs ("  -M, --memory    return the runtime memory metrics\n", out);
+  fputs ("  -M, --memory    return the runtime memory metrics (alpha!)\n", out);
   fputs ("  -b,-k,-m,-g     "
          "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs ("  -w, --warning COUNTER    warning threshold\n", out);

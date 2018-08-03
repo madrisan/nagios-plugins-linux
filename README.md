@@ -25,7 +25,7 @@ Here is the list of the available plugins:
 * **check_cpu** - checks the CPU (user mode) utilization 
 * **check_cpufreq** - displays the CPU frequency characteristics
 * **check_cswch** - checks the total number of context switches across all CPUs
-* **check_docker** - checks the number of running docker containers :new: (:warning: *under development*)
+* **check_docker** - checks the number of running docker containers :new: (:warning: *alpha*)
 * **check_fc** - monitors the status of the fiber status ports
 * **check_ifmountfs** - checks whether the given filesystems are mounted
 * **check_intr** - monitors the total number of system interrupts
