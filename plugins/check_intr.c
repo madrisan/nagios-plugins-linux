@@ -102,7 +102,7 @@ get_intrdelta (unsigned int *ncpus0, unsigned int *ncpus1,
   dnintr = nintr[0] = cpu_stats_get_intr ();
 
   if (verbose)
-    printf ("intr = %Lu\n", dnintr);
+    printf ("intr = %llu\n", dnintr);
 
   if (count <= 2)
     (*vintr)[0] = proc_interrupts_get_nintr_per_cpu (ncpus0);
@@ -116,7 +116,7 @@ get_intrdelta (unsigned int *ncpus0, unsigned int *ncpus1,
 
       dnintr = (nintr[tog] - nintr[!tog]) / delay;
       if (verbose)
-	printf ("intr = %Lu --> %Lu/s\n", nintr[tog], dnintr);
+	printf ("intr = %llu --> %llu/s\n", nintr[tog], dnintr);
 
       if (count - 2 == i)
 	(*vintr)[0] = proc_interrupts_get_nintr_per_cpu (ncpus0);
@@ -196,7 +196,7 @@ main (int argc, char **argv)
   free (my_threshold);
 
   char *time_unit = (count > 1) ? "/s" : "";
-  printf ("%s %s - number of interrupts%s %Lu | intr%s=%Lu",
+  printf ("%s %s - number of interrupts%s %llu | intr%s=%llu",
 	  program_name_short, state_text (status),
 	  time_unit, dnintr, time_unit, dnintr);
 
