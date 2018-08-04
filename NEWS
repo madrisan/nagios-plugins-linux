@@ -42,7 +42,7 @@
 
 -- Fixes:
 
-* Fix some issues reported by Codacy and Coverity.
+* Fix some issues reported by Codacy, Coverity, and LGTM.
 
 -- Experimental
 
