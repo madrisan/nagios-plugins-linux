@@ -1,4 +1,59 @@
+    Major changes between "nagios-plugins-linux" versions 22 and 23
+                   -= Korbielow.pl 2018 release =-
+
+-- Enhancements
+
+* New plugin 'check_docker':
+
+  This new plugin can be used for:
+   * checking the total number of running docker containers or the containers
+     of a given type
+   * checking the memory usage (alpha!)
+
+* Build system:
+
+   * Build the sources with the available compiler's hardening flags.
+     The following compiler flags are tested/added when available:
+      * -D_FORTIFY_SOURCE=2 (Buffer overflow checks)
+      * -fstack-protector-strong or -fstack-protector-all
+      * -fpie -fPIE (Position Independent Executable support)
+      * -Wstack-protector
+      * -Wl,-z,relro (RELRO (read-only relocation))
+      * -Wl,-z,now
+
+     The option `--disable-hardening' disable the attempt to harden
+     the resulting executables.
+
+   * End the ./configure output with a summary of the build options.
+
+   * Add the option --enable-werror to ./configure, to make all warnings
+     as errors. This option is disabled by default.
+
+* Package creation:
+
+   * Add Fedora 27 and Fedora 28 to the supported distributions.
+
+* Test framework:
+
+   * Some new unit tests have been added.
+      * lib/container
+      * lib/url_encode
+      * tests/testutils
+
+-- Fixes:
+
+* Fix some issues reported by Codacy and Coverity.
+
+-- Experimental
+
+* Add the command line option `--enable-libprocps' that will
+  link the binaries with the library libprocps newlib instead
+  of using the internal libraries.
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 21 and 22
+    -- "Commit 600" release
 
 -- Fixes
 
