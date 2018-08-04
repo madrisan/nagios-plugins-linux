@@ -2,12 +2,15 @@
 
 # Nagios Plugins for Linux
 
-[![Build Status](https://travis-ci.org/madrisan/nagios-plugins-linux.svg?branch=master)](https://travis-ci.org/madrisan/nagios-plugins-linux)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/3779/badge.svg)](https://scan.coverity.com/projects/3779)
 ![Release Status](https://img.shields.io/badge/status-stable-brightgreen.svg)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://spdx.org/licenses/GPL-3.0.html)
 [![Download Latest Release](https://img.shields.io/badge/download-latest--tarball-blue.svg)](https://github.com/madrisan/nagios-plugins-linux/releases/download/v22/nagios-plugins-linux-22.tar.xz)
 [![SayThanks](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/madrisan)
+
+[![Build Status](https://travis-ci.org/madrisan/nagios-plugins-linux.svg?branch=master)](https://travis-ci.org/madrisan/nagios-plugins-linux)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/3779/badge.svg)](https://scan.coverity.com/projects/3779)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/madrisan/nagios-plugins-linux.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/madrisan/nagios-plugins-linux/alerts/)
+[![Language Grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/madrisan/nagios-plugins-linux.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/madrisan/nagios-plugins-linux/context:cpp)
 
 ---------------
 
