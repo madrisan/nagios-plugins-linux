@@ -192,7 +192,15 @@ main (int argc, char **argv)
   result_line =
     xasprintf ("%s %s: %s", program_name_short,
 	       state_text (status), sprint_uptime (uptime_secs));
-  printf ("%s | uptime=%d\n", result_line, uptime_mins);
+  if (warning && critical) {
+    printf ("%s | uptime=%d;%d;%d;0;\n", result_line, uptime_mins, atoi(warning), atoi(critical));
+  } else if (warning) {
+    printf ("%s | uptime=%d;%d;;0;\n", result_line, uptime_mins, atoi(warning));
+  } else if (critical) {
+    printf ("%s | uptime=%d;;%d;0;\n", result_line, uptime_mins, atoi(critical));
+  } else {
+    printf ("%s | uptime=%d;;;0;\n", result_line, uptime_mins);
+  }
 
   return status;
 }
