@@ -112,6 +112,7 @@ cc_TRY_CFLAGS([-Wredundant-decls])
 cc_TRY_CFLAGS([-Wshadow])
 cc_TRY_CFLAGS([-Wsign-compare])
 cc_TRY_CFLAGS([-Wstrict-aliasing=2])
+cc_TRY_CFLAGS([-Wstringop-truncation])
 cc_TRY_CFLAGS([-Wunused])
 # The gcc compiler shipped by RHEL5 (gcc-4.1.2) does not recognize it
 #cc_TRY_CFLAGS([-Warray-bounds])
