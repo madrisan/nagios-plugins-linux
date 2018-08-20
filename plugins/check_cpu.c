@@ -110,6 +110,21 @@ print_version (void)
   exit (STATE_OK);
 }
 
+void print_metric(const char* cpu, char *name, float value, float ratio, char* warning, char* critical) {
+    printf(" %s_%s=%.4f;", cpu, name, value / ratio);
+    if (warning == NULL) {
+        printf(";");
+    } else {
+        printf("%.2f;", atof(warning) / 100);
+    }
+    if (critical == NULL) {
+        printf(";");
+    } else {
+        printf("%.2f;", atof(critical) / 100);
+    }
+    printf("0;1");
+}
+
 /* output formats "<key>:  <value>" */
 #define print_d(_key, _val)  printf ("%-30s%d\n", _key, _val)
 #define print_u(_key, _val)  printf ("%-30s%u\n", _key, _val)
@@ -261,7 +276,11 @@ main (int argc, char **argv)
     plugin_error (STATE_UNKNOWN, 0,
 		  "bug: the plugin does not have a standard name");
 
-  if (!strncmp (p, "iowait", 6))	/* check_iowait --> cpu_iowait */
+  bool is_iowait_check = strncmp (p, "iowait", 6) == 0;
+  bool is_cpu_wait = ! is_iowait_check;
+  
+
+  if (is_cpu_wait)
     {
       cpu_progname = xstrdup ("iowait");
       program_shorthelp =
@@ -346,7 +365,7 @@ main (int argc, char **argv)
        diowait[ncpus], dsteal[ncpus], ratio[ncpus];
   int debt[ncpus];			/* handle idle ticks running backwards */
   struct cpu_time cpuv[2][ncpus];
-  jiff *cpu_value = strncmp (p, "iowait", 6) ? duser : diowait;
+  jiff *cpu_value = is_iowait_check ? duser : diowait;
   const char *cpuname;
 
   cpu_stats_get_time (cpuv[0], ncpus);
@@ -438,6 +457,7 @@ main (int argc, char **argv)
   for (c = 0; c < ncpus; c++)
     {
       if ((cpuname = cpuv[0][c].cpuname))
+/*
         printf (" %s_user=%.1f%% %s_system=%.1f%% %s_idle=%.1f%%"
 		" %s_iowait=%.1f%% %s_steal=%.1f%%"
 		, cpuname, 100.0 * duser[c]   / ratio[c]
@@ -445,9 +465,20 @@ main (int argc, char **argv)
 		, cpuname, 100.0 * didle[c]   / ratio[c]
 		, cpuname, 100.0 * diowait[c] / ratio[c]
 		, cpuname, 100.0 * dsteal[c]  / ratio[c]);
+*/
+        print_metric(cpuname, "user", duser[c], ratio[c], 
+                    is_cpu_wait? warning : NULL,
+                    is_cpu_wait ? critical: NULL);
+        print_metric(cpuname, "system", dsystem[c], ratio[c], warning, critical);
+        print_metric(cpuname, "idle", didle[c], ratio[c], NULL, NULL);
+        print_metric(cpuname, "iowait", diowait[c], ratio[c],
+                    is_iowait_check ? warning : NULL,
+                    is_iowait_check ? critical : NULL);
+        print_metric(cpuname, "steal", dsteal[c], ratio[c], NULL, NULL);
     }
   putchar ('\n');
 
   cpu_desc_unref (cpudesc);
   return status;
 }
+
