@@ -146,7 +146,7 @@ main (int argc, char **argv)
 {
   int c, uptime_mins, status;
   char *critical = NULL, *warning = NULL;
-  char *result_line;
+  char *status_msg, *perfdata_msg;
   double uptime_secs;
   thresholds *my_threshold = NULL;
   double (*uptime) ();
@@ -189,10 +189,13 @@ main (int argc, char **argv)
   status = get_status (uptime_mins, my_threshold);
   free (my_threshold);
 
-  result_line =
+  status_msg =
     xasprintf ("%s %s: %s", program_name_short,
 	       state_text (status), sprint_uptime (uptime_secs));
-  printf ("%s | uptime=%d\n", result_line, uptime_mins);
+  perfdata_msg =
+    xasprintf ("uptime=%d;%s;%s;0;", uptime_mins,
+	       warning ? warning : "", critical ? critical : "");
+  printf ("%s | %s\n", status_msg, perfdata_msg);
 
   return status;
 }
