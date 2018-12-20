@@ -1,6 +1,5 @@
 <a href='https://ko-fi.com/K3K57TH3' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi2.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
-
-<a href='https://www.amazon.fr/hz/wishlist/dl/invite/asbDKEd'>My Wish List at amazon.fr</a>
+<a href='https://www.amazon.fr/hz/wishlist/dl/invite/asbDKEd'><img height='36' src='http://png-1.findicons.com/files/icons/2229/social_media_mini/48/amazon.png' border='0' alt='Wish List at Amazon.fr' /></a>
 
 # Nagios Plugins for Linux
 
