@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014,2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2015,2019 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check the CPU frequency characteristics.
  *
@@ -36,7 +36,7 @@
 #include "xasprintf.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014,2015,2019 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "no-cpu-model", no_argument, NULL, 'm'},
@@ -54,12 +54,12 @@ usage (FILE * out)
   fputs ("This plugin displays the CPU frequency characteristics.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-m] [-w PERC] [-c PERC]\n", program_name);
+  fprintf (out, "  %s [-m] [-w COUNTER] [-c COUNTER]\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -m, --no-cpu-model  "
 	 "do not display the CPU model in the output message\n", out);
-  fputs ("  -w, --warning PERCENT   warning threshold\n", out);
-  fputs ("  -c, --critical PERCENT   critical threshold\n", out);
+  fputs ("  -w, --warning COUNTER (kHz)   warning threshold\n", out);
+  fputs ("  -c, --critical COUNTER (kHz)   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
@@ -152,7 +152,7 @@ main (int argc, char **argv)
 	  /* expected format for the Nagios performance data:
 	   *   'label'=value[UOM];[warn];[crit];[min];[max]	*/
 	  if (freq_kernel)
-	    printf (" cpu%d_freq=%luHz;;;%lu;%lu",
+	    printf (" cpu%d_freq=%lu;;;%lu;%lu",
 		    c, freq_kernel, freq_min, freq_max);
 	}
     }
