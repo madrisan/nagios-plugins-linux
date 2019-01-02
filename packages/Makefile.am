@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-## Copyright (c) 2016-2018 Davide Madrisan <davide.madrisan@gmail.com>
+## Copyright (c) 2016-2019 Davide Madrisan <davide.madrisan@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -35,10 +35,11 @@ MULTIBUILD_OPTS = \
 
 TARGETS_REDHAT = \
 	centos-5 centos-6 centos-7 \
-	fedora-24 fedora-25 fedora-26 fedora-27 fedora-28 fedora-rawhide
+	fedora-24 fedora-25 fedora-26 fedora-27 fedora-28 fedora-29 \
+	fedora-rawhide
 
 centos-latest: centos-7
-fedora-latest: fedora-28
+fedora-latest: fedora-29
 
 TARGETS_DEBIAN = debian-squeeze debian-wheezy debian-jessie debian-stretch
 
