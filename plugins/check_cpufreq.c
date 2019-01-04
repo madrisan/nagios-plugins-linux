@@ -33,6 +33,8 @@
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
+#include "units.h"
+#include "xalloc.h"
 #include "xasprintf.h"
 
 static const char *program_copyright =
@@ -40,6 +42,10 @@ static const char *program_copyright =
 
 static struct option const longopts[] = {
   {(char *) "no-cpu-model", no_argument, NULL, 'm'},
+  {(char *) "Hz", no_argument, NULL, 'H'},
+  {(char *) "kHz", no_argument, NULL, 'K'},
+  {(char *) "mHz", no_argument, NULL, 'M'},
+  {(char *) "gHz", no_argument, NULL, 'G'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
@@ -54,10 +60,13 @@ usage (FILE * out)
   fputs ("This plugin displays the CPU frequency characteristics.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-m] [-w COUNTER] [-c COUNTER]\n", program_name);
+  fprintf (out, "  %s [-m] [-H,-K,-M,-G] [-w COUNTER] [-c COUNTER]\n",
+	   program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -m, --no-cpu-model  "
 	 "do not display the CPU model in the output message\n", out);
+  fputs ("  -H,-K,-M,-G     "
+         "show output in Hz, kHz (the default), mHz, or gHz\n", out);
   fputs ("  -w, --warning COUNTER (kHz)   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER (kHz)   critical threshold\n", out);
   fputs (USAGE_HELP, out);
@@ -84,6 +93,7 @@ main (int argc, char **argv)
   int c, err;
   bool cpu_model;
   char *critical = NULL, *warning = NULL;
+  float factor = 1.0;
   nagstatus currstatus, status = STATE_OK;
   thresholds *my_threshold = NULL;
   struct cpu_desc *cpudesc = NULL;
@@ -99,7 +109,7 @@ main (int argc, char **argv)
   cpu_model = true;
 
   while ((c = getopt_long (
-		argc, argv, "c:w:m"
+		argc, argv, "c:w:mHKMG"
 		GETOPT_HELP_VERSION_STRING, longopts, NULL)) != -1)
     {
       switch (c)
@@ -115,6 +125,10 @@ main (int argc, char **argv)
 	case 'w':
 	  warning = optarg;
 	  break;
+	case 'H': factor = 1000.0; break;
+	case 'K': factor = 1.0; break;
+	case 'M': factor = 1.0/1000; break;
+	case 'G': factor = 1.0/100000; break;
 
 	case_GETOPT_HELP_CHAR
 	case_GETOPT_VERSION_CHAR
@@ -144,6 +158,7 @@ main (int argc, char **argv)
   printf ("%s %s%s |"
 	  , program_name_short, cpu_model ? cpu_model_str : ""
 	  , state_text (status));
+#define unit_convert(_val, _factor) (unsigned long long)(_val * _factor)
   for (c = 0; c < ncpus; c++)
     {
       if (0 == cpufreq_get_hardware_limits (c, &freq_min, &freq_max))
@@ -152,10 +167,14 @@ main (int argc, char **argv)
 	  /* expected format for the Nagios performance data:
 	   *   'label'=value[UOM];[warn];[crit];[min];[max]	*/
 	  if (freq_kernel)
-	    printf (" cpu%d_freq=%lu;;;%lu;%lu",
-		    c, freq_kernel, freq_min, freq_max);
+	    printf (" cpu%d_freq=%llu;;;%llu;%llu",
+		    c,
+		    unit_convert(freq_kernel, factor),
+		    unit_convert(freq_min, factor),
+		    unit_convert(freq_max, factor));
 	}
     }
+#undef unit_convert
   putchar ('\n');
   cpu_desc_unref (cpudesc);
 
