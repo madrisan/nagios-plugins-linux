@@ -22,6 +22,7 @@ config.hin~
 config.status
 configure
 configure.scan
+libtool
 stamp-h1
 **/Makefile.in
 **/Makefile
