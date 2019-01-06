@@ -23,9 +23,9 @@ dnl If supported, the current CFLAGS is appended to SUPPORTED_CFLAGS
 AC_DEFUN([cc_TRY_CFLAGS],
    [AC_MSG_CHECKING([whether compiler accepts $1])
    ac_save_CFLAGS="$CFLAGS"
-   CFLAGS="$CFLAGS $1"
+   CFLAGS="$CFLAGS -Werror $1"
    AC_COMPILE_IFELSE(
-     [AC_LANG_PROGRAM([[]],[[int x;]])],
+     [AC_LANG_PROGRAM([[]],[[]])],
      [AC_MSG_RESULT([yes])
       SUPPORTED_CFLAGS="$SUPPORTED_CFLAGS $1"],
      [AC_MSG_RESULT([no])]
