@@ -126,10 +126,11 @@ main (int argc, char **argv)
 	  numuser++;
 	  if (!verbose)
 	    continue;
+	  char buf[26];
 	  time_t timetmp = ut->ut_tv.tv_sec;
 	  printf ("%-8s %5ld %-6.6s %-9.9s %s", ut->ut_user,
 		  (long) ut->ut_pid, ut->ut_line, ut->ut_host,
-		  ctime (&timetmp));
+		  ctime_r (&timetmp, buf));
 	}
     }
   endutxent ();

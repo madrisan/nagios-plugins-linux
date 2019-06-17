@@ -89,15 +89,15 @@ print_version (void)
 static int
 get_timedelta (unsigned long refclock, bool verbose)
 {
-  struct tm *tm;
-  time_t t;
+  struct tm tminfo;
+  time_t rawtime;
   char outstr[32];
   char *end = NULL;
   long timedelta;
 
-  t = time (NULL);
-  tm = localtime (&t);
-  if (strftime (outstr, sizeof (outstr), "%s", tm) == 0)
+  rawtime = time (NULL);
+  localtime_r (&rawtime, &tminfo);
+  if (strftime (outstr, sizeof (outstr), "%s", &tminfo) == 0)
     plugin_error (STATE_UNKNOWN, errno, "strftime() failed");
 
   timedelta = (strtol (outstr, &end, 10) - refclock);
