@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2019 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A library for parsing the sysfs filesystem
  *
@@ -387,6 +387,7 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
   DIR *d;
   struct dirent *de;
   bool found_data = false;
+  unsigned int thermal_zone;
   unsigned long max_temp = 0, temp = 0;
 
   if (chdir (PATH_SYS_ACPI_THERMAL) < 0)
@@ -406,32 +407,30 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
       if (!STRPREFIX (de->d_name, "thermal_zone"))
 	continue;
 
+      thermal_zone = strtoul (de->d_name + 12, NULL, 10);
       if ((selected_zone != ALL_THERMAL_ZONES) &&
-	  (selected_zone != strtoul (de->d_name + 12, NULL, 10)))
+	  (selected_zone != thermal_zone))
 	continue;
 
-      if (STRPREFIX (de->d_name, "thermal_zone"))
-	{
-	  /* temperatures are stored in the files
-	   *  /sys/class/thermal/thermal_zone[0-9]/temp	  */
-	  temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL "/%s/temp",
-				       de->d_name);
-	  *type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
-				       de->d_name);
+      /* temperatures are stored in the files
+       *  /sys/class/thermal/thermal_zone[0-9]/temp	  */
+      temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL "/%s/temp",
+				   de->d_name);
+      *type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
+				   de->d_name);
 
-	  /* FIXME: as a 1st step we get the highest temp
-	   *        reported by sysfs */
-	  if (temp > 0)
+      /* If a thermal zone is not set by user, get the highest temperature
+       * reported by sysfs */
+      if (temp > 0)
+	{
+	  found_data = true;
+	  dbg ("thermal information found: %.2f degrees C, zone: %u, type: %s\n",
+	       (float) (temp / 1000.0), thermal_zone, *type);
+	  if (max_temp < temp)
 	    {
-	      found_data = true;
-	      if (max_temp < temp)
-		{
-		  max_temp = temp;
-		  *zone = strtoul (de->d_name + 12, NULL, 10);
-		}
+	      max_temp = temp;
+	      *zone = thermal_zone;
 	    }
-	  dbg ("thermal information found: %.2f degrees C, zone: %u\n",
-	       (float) (max_temp / 1000.0), *zone);
 	}
     }
   closedir (d);
