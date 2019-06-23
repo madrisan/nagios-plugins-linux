@@ -74,7 +74,7 @@ test_docker_running_containers (const void *tdata)
 {
   const struct test_data *data = tdata;
   int err, ret = 0;
-  char * perfdata;
+  char * perfdata = NULL;
   unsigned int containers;
 
   err = docker_running_containers (&containers, data->image, &perfdata, false);
