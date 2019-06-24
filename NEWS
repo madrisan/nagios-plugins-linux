@@ -1,3 +1,55 @@
+
+    Major changes between "nagios-plugins-linux" versions 23 and 24
+                   -= New Year 2019 release =-
+
+-- Fixes:
+
+* check_cpufreq: the frequences returned by sysfs are in KHz.
+  This issue has been reported by "sbraz". Thanks!
+
+-- Enhancements
+
+* check_uptime: add warn, crit, and min values to perfdata
+  Based on a merge request opened by "magmax" (https://github.com/magmax).
+  Thanks!
+
+* check_cpufreq: make it possible to output the values in Hz/kHz/mHz/gHz
+  by adding some new command-line switches:
+
+    -H | --Hz
+    -K | --kHz
+    -M | --mHz
+    -G | --gHz
+
+* Build system:
+
+  * Check for the compiler flag `-Wstringop-truncation' availability.
+
+  * Remove the autotools-generated file `libtool'.
+
+  * Fix unsupported warning options for clang (7.0.0):
+
+      `-Wformat-signedness'
+      `-Wstringop-truncation'
+
+  * Support Fedora 29 packaging (rpm packages generation).
+
+
+-- git diff --stat 0a3b90b 0b7e7ea
+
+   .github/ISSUE_TEMPLATE/bug_report.md |    26 +
+   .gitignore                           |     1 +
+   README.md                            |     8 +-
+   configure.ac                         |     3 +-
+   libtool                              | 11645 --------------------------------
+   m4/cc_try_cflags.m4                  |     4 +-
+   packages/Makefile.am                 |     7 +-
+   plugins/check_cpufreq.c              |    35 +-
+   plugins/check_uptime.c               |     9 +-
+   9 files changed, 73 insertions(+), 11665 deletions(-)
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 22 and 23
                    -= Korbielow.pl 2018 release =-
 

@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.59])
 
-AC_INIT([nagios-plugins-linux],[23],
+AC_INIT([nagios-plugins-linux],[24],
         [davide.madrisan@gmail.com])
 
 AC_CANONICAL_TARGET
@@ -431,7 +431,7 @@ AC_TYPE_UID_T
 AC_TYPE_UINT64_T
 
 dnl Checks for programs
-AC_PROG_RANLIB
+LT_INIT
 
 dnl Check the support for soft links
 AC_PROG_LN_S
@@ -462,6 +462,7 @@ AC_DEFINE_UNQUOTED(
 
 AC_SUBST([CFLAGS], ["$SUPPORTED_CFLAGS $CFLAGS"])
 AC_SUBST([LDFLAGS], ["$SUPPORTED_LDFLAGS $LDFLAGS"])
+AC_SUBST([LIBTOOL_DEPS])
 
 AC_CONFIG_FILES([\
   Makefile \
