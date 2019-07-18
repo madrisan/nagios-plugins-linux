@@ -123,14 +123,9 @@ Command            | Distribution
 CentOS 5           | `make -C packages centos-5`
 CentOS 6           | `make -C packages centos-6`
 CentOS 7           | `make -C packages centos-7`
-Debian 7 (Wheezy)  | `make -C packages debian-wheezy`
 Debian 8 (Jessie)  | `make -C packages debian-jessie`
 Debian 9 (Stretch) | `make -C packages debian-stretch`
 Debian 10 (Buster) | `make -C packages debian-buster`
-Fedora 24          | `make -C packages fedora-24`
-Fedora 25          | `make -C packages fedora-25`
-Fedora 26          | `make -C packages fedora-26`
-Fedora 27          | `make -C packages fedora-27`
 Fedora 28          | `make -C packages fedora-28`
 Fedora 29          | `make -C packages fedora-29`
 Fedora 30          | `make -C packages fedora-30`
