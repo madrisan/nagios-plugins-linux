@@ -127,6 +127,7 @@ Debian 6 (Squeeze) | `make -C packages debian-squeeze`
 Debian 7 (Wheezy)  | `make -C packages debian-wheezy`
 Debian 8 (Jessie)  | `make -C packages debian-jessie`
 Debian 9 (Stretch) | `make -C packages debian-stretch`
+Debian 10 (Buster) | `make -C packages debian-buster`
 Fedora 24          | `make -C packages fedora-24`
 Fedora 25          | `make -C packages fedora-25`
 Fedora 26          | `make -C packages fedora-26`
