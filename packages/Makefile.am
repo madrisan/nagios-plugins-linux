@@ -55,13 +55,14 @@ $(SPECFILE):
 $(SRC_BZ2):
 	@cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) dist
 
+
 $(TARGETS_REDHAT): $(SPECFILE) $(SRC_BZ2) $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --spec $(multibuilddir)/specs/$(SPECFILE) \
 	   --os $$distr --target pcks/$@
 
-$(TARGETS_DEBIAN): $(SRC_XZ) $(DOCKER) $(MULTIBUILD_SCRIPT)
+$(TARGETS_DEBIAN): $(SRC_BZ2) $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`-slim; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --os $$distr --target pcks/$@
