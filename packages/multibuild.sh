@@ -34,9 +34,8 @@ Where:
 
 Supported distributions:
    CentOS 5/6/7
-   Debian squeeze        (support level: alpha)
-   Debian wheezy/jessie/stretch/buster
-   Fedora 24/25/26/27/28/29/30/rawhide
+   Debian jessie/stretch/buster
+   Fedora 28/29/30/rawhide
 
 Example:
        $0 -s $PROGPATH/../../nagios-plugins-linux:/shared:rw \\
@@ -134,14 +133,14 @@ case "$os" in
       pck_format="rpm"
       pck_install="yum install -y"
       pck_dist=".el${os:7:1}"
-      pcks_dev="bzip2 make gcc xz rpm-build" ;;
+      pcks_dev="bzip2 make gcc libcurl-devel xz rpm-build" ;;
    debian-*)
       pck_format="deb"
       pck_install="\
 export DEBIAN_FRONTEND=noninteractive;
 apt-get update && apt-get -y --no-install-recommends install"
-      pcks_dev="bzip2 make gcc xz-utils devscripts"
-      ;;
+      pcks_dev="build-essential bzip2 debhelper make gcc xz-utils devscripts"
+      pcks_dev="$pcks_dev libcurl4-gnutls-dev" ;;
    fedora-*)
       pck_format="rpm"
       pck_install="dnf install -y"
