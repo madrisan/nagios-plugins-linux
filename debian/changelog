@@ -1,3 +1,22 @@
+nagios-plugins-linux (24-1) stable; urgency=low
+  * Release 24:
+     - check_cpufreq: the frequences returned by sysfs are in KHz.
+     - check_uptime: add warn, crit, and min values to perfdata.
+     - check_cpufreq: make it possible to output the values in Hz/kHz/mHz/gHz.
+     - Remove some unsupported warning options for clang (7.0.0).
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Sun, 13 Jan 2019 23:38:01 +0200
+
+nagios-plugins-linux (23-1) stable; urgency=low
+
+  * Release "Korbielow.pl 2018":
+     - New plugin 'check_docker'
+     - Build the sources with the available compiler's hardening flags.
+     - Some new unit tests have been added.
+     - Fix some issues reported by Codacy and Coverity.
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Sat,  4 Aug 2018 08:56:16 +0200
+
 nagios-plugins-linux (22-1) stable; urgency=low
 
   * Release "Commit #600":
