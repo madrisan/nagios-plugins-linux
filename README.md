@@ -123,7 +123,6 @@ Command            | Distribution
 CentOS 5           | `make -C packages centos-5`
 CentOS 6           | `make -C packages centos-6`
 CentOS 7           | `make -C packages centos-7`
-Debian 6 (Squeeze) | `make -C packages debian-squeeze`
 Debian 7 (Wheezy)  | `make -C packages debian-wheezy`
 Debian 8 (Jessie)  | `make -C packages debian-jessie`
 Debian 9 (Stretch) | `make -C packages debian-stretch`
