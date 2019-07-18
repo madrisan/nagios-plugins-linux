@@ -35,20 +35,19 @@ MULTIBUILD_OPTS = \
 
 TARGETS_REDHAT = \
 	centos-5 centos-6 centos-7 \
-	fedora-24 fedora-25 fedora-26 fedora-27 \
 	fedora-28 fedora-29 fedora-30 \
 	fedora-rawhide
 
 centos-latest: centos-7
 fedora-latest: fedora-30
 
-TARGETS_DEBIAN = debian-squeeze debian-wheezy debian-jessie debian-stretch
+TARGETS_DEBIAN = \
+	debian-jessie debian-stretch debian-buster
 
-debian-6: debian-squeeze
-debian-7: debian-wheezy
 debian-8: debian-jessie
 debian-9: debian-stretch
-debian-latest: debian-stretch
+debian-10: debian-buster
+debian-latest: debian-buster
 
 $(SPECFILE):
 	@cd $(builddir)/specs && $(MAKE) $(AM_MAKEFLAGS) all
@@ -56,14 +55,15 @@ $(SPECFILE):
 $(SRC_BZ2):
 	@cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) dist
 
+
 $(TARGETS_REDHAT): $(SPECFILE) $(SRC_BZ2) $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --spec $(multibuilddir)/specs/$(SPECFILE) \
 	   --os $$distr --target pcks/$@
 
-$(TARGETS_DEBIAN): $(SRC_XZ) $(DOCKER) $(MULTIBUILD_SCRIPT)
-	@distr=`echo $@ | sed s/-/:/`; \
+$(TARGETS_DEBIAN): $(SRC_BZ2) $(DOCKER) $(MULTIBUILD_SCRIPT)
+	@distr=`echo $@ | sed s/-/:/`-slim; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --os $$distr --target pcks/$@
 
