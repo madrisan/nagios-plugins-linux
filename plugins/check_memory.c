@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2014,2015 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A Nagios plugin to check sysem memory usage on Linux.
+ * A Nagios plugin to check system memory usage on Linux.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
