@@ -55,7 +55,6 @@ $(SPECFILE):
 $(SRC_BZ2):
 	@cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) dist
 
-
 $(TARGETS_REDHAT): $(SPECFILE) $(SRC_BZ2) $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
