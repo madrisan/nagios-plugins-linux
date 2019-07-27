@@ -160,7 +160,7 @@ parse_range_string (char *str)
 }
 
 /*
- * returns 0 if okay, otherwise 1 
+ * Returns 0 if okay, otherwise 1 (NP_RANGE_UNPARSEABLE)
  */
 int
 set_thresholds (thresholds ** my_thresholds, char *warn_string,

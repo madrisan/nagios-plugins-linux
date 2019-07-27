@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014,2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2019 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check system memory usage on Linux.
  *
@@ -38,7 +38,7 @@
 #include "xasprintf.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014-2019 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "available", no_argument, NULL, 'a'},
@@ -112,7 +112,9 @@ main (int argc, char **argv)
   char *critical = NULL, *warning = NULL;
   char *units = NULL;
   char *status_msg, *perfdata_mem_msg,
-       *perfdata_vmem_msg = "", *perfdata_memavailable_msg = "";
+       *perfdata_vmem_msg = "",
+       *perfdata_memavailable_msg = "",
+       *perfdata_memused_msg = "";
   float mem_percent = 0;
   thresholds *my_threshold = NULL;
 
@@ -242,8 +244,43 @@ main (int argc, char **argv)
     mem_percent = ((*kb_mem_monitored) * 100.0 / kb_mem_main_total);
   status = get_status (mem_percent, my_threshold);
 
+  char *mem_monitored_warning = NULL,
+       *mem_monitored_critical = NULL;
+  if (my_threshold->warning)
+    {
+      double warning_threshold = max (my_threshold->warning->start,
+				      my_threshold->warning->end);
+      unsigned long mem_amount =
+	UNIT_CONVERT (kb_mem_main_total * warning_threshold / 100.0, shift);
+      mem_monitored_warning = xasprintf ("%lu", mem_amount);
+    }
+  if (my_threshold->critical)
+    {
+      double critical_threshold = max (my_threshold->critical->start,
+				       my_threshold->critical->end);
+      unsigned long mem_amount =
+	UNIT_CONVERT (kb_mem_main_total * critical_threshold / 100.0, shift);
+      mem_monitored_critical = xasprintf ("%lu", mem_amount);
+    }
+
+  /* performance data format:
+   * 'label'=value[UOM];[warn];[crit];[min];[max] */
   perfdata_memavailable_msg =
-    xasprintf ("mem_available=%llu%s ", UNIT_STR (kb_mem_main_available));
+    xasprintf ("mem_available=%llu%s;%s;%s;0;%llu",
+	       UNIT_STR (kb_mem_main_available),
+	       (kb_mem_monitored == &kb_mem_main_available
+	        && mem_monitored_warning) ? mem_monitored_warning : "",
+	       (kb_mem_monitored == &kb_mem_main_available
+	        && mem_monitored_critical) ? mem_monitored_critical : "",
+	       UNIT_CONVERT (kb_mem_main_total, shift));
+  perfdata_memused_msg =
+    xasprintf ("mem_used=%llu%s;%s;%s;0;%llu",
+	       UNIT_STR (kb_mem_main_used),
+	       (kb_mem_monitored == &kb_mem_main_used
+	        && mem_monitored_warning) ? mem_monitored_warning : "",
+	       (kb_mem_monitored == &kb_mem_main_used
+	        && mem_monitored_critical) ? mem_monitored_critical : "",
+	       UNIT_CONVERT (kb_mem_main_total, shift));
 
   status_msg =
     xasprintf ("%s: %.2f%% (%llu %s) %s",
@@ -254,12 +291,12 @@ main (int argc, char **argv)
   free (my_threshold);
 
   perfdata_mem_msg =
-    xasprintf ("mem_total=%llu%s mem_used=%llu%s mem_free=%llu%s "
-	       "mem_shared=%llu%s mem_buffers=%llu%s mem_cached=%llu%s %s"
+    xasprintf ("mem_total=%llu%s %s mem_free=%llu%s "
+	       "mem_shared=%llu%s mem_buffers=%llu%s mem_cached=%llu%s %s "
 	       "mem_active=%llu%s mem_anonpages=%llu%s mem_committed=%llu%s "
 	       "mem_dirty=%llu%s mem_inactive=%llu%s"
 	       , UNIT_STR (kb_mem_main_total)
-	       , UNIT_STR (kb_mem_main_used)
+	       , perfdata_memused_msg
 	       , UNIT_STR (kb_mem_main_free)
 	       , UNIT_STR (kb_mem_main_shared)
 	       , UNIT_STR (kb_mem_main_buffers)
