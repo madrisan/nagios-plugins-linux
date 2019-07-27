@@ -31,6 +31,7 @@
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
+#include "system.h"
 #include "thresholds.h"
 #include "units.h"
 #include "vminfo.h"
@@ -250,36 +251,39 @@ main (int argc, char **argv)
     {
       double warning_threshold = max (my_threshold->warning->start,
 				      my_threshold->warning->end);
-      unsigned long mem_amount =
+      unsigned long long mem_amount =
 	UNIT_CONVERT (kb_mem_main_total * warning_threshold / 100.0, shift);
-      mem_monitored_warning = xasprintf ("%lu", mem_amount);
+      mem_monitored_warning = xasprintf ("%llu", mem_amount);
     }
   if (my_threshold->critical)
     {
       double critical_threshold = max (my_threshold->critical->start,
 				       my_threshold->critical->end);
-      unsigned long mem_amount =
+      unsigned long long mem_amount =
 	UNIT_CONVERT (kb_mem_main_total * critical_threshold / 100.0, shift);
-      mem_monitored_critical = xasprintf ("%lu", mem_amount);
+      mem_monitored_critical = xasprintf ("%llu", mem_amount);
     }
 
   /* performance data format:
    * 'label'=value[UOM];[warn];[crit];[min];[max] */
+  bool add_perfdata = (kb_mem_monitored == &kb_mem_main_available);
   perfdata_memavailable_msg =
     xasprintf ("mem_available=%llu%s;%s;%s;0;%llu",
 	       UNIT_STR (kb_mem_main_available),
-	       (kb_mem_monitored == &kb_mem_main_available
+	       (add_perfdata
 	        && mem_monitored_warning) ? mem_monitored_warning : "",
-	       (kb_mem_monitored == &kb_mem_main_available
+	       (add_perfdata
 	        && mem_monitored_critical) ? mem_monitored_critical : "",
 	       UNIT_CONVERT (kb_mem_main_total, shift));
+
+  add_perfdata = (kb_mem_monitored == &kb_mem_main_used);
   perfdata_memused_msg =
     xasprintf ("mem_used=%llu%s;%s;%s;0;%llu",
 	       UNIT_STR (kb_mem_main_used),
-	       (kb_mem_monitored == &kb_mem_main_used
-	        && mem_monitored_warning) ? mem_monitored_warning : "",
-	       (kb_mem_monitored == &kb_mem_main_used
-	        && mem_monitored_critical) ? mem_monitored_critical : "",
+	       (add_perfdata
+		&& mem_monitored_warning) ? mem_monitored_warning : "",
+	       (add_perfdata &&
+		mem_monitored_critical) ? mem_monitored_critical : "",
 	       UNIT_CONVERT (kb_mem_main_total, shift));
 
   status_msg =
