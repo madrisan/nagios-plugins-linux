@@ -29,9 +29,9 @@ typedef struct range_struct
 {
   double start;
   double end;
-  bool start_infinity;		/* false (default) or true */
+  bool start_infinity;	/* false (default) or true */
   bool end_infinity;
-  int alert_on;			/* OUTSIDE (default) or INSIDE */
+  int alert_on;		/* NP_RANGE_OUTSIDE (default) or NP_RANGE_INSIDE */
 } range;
 
 typedef struct thresholds_struct
