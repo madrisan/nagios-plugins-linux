@@ -30,6 +30,7 @@
 #include "logging.h"
 #include "meminfo.h"
 #include "messages.h"
+#include "perfdata.h"
 #include "progname.h"
 #include "progversion.h"
 #include "system.h"
@@ -102,65 +103,6 @@ print_version (void)
   fputs (GPLv3_DISCLAIMER, stdout);
 
   exit (STATE_OK);
-}
-
-static int
-get_perfdata_limit (range * threshold, unsigned long base,
-		    unsigned long long *limit, bool percent)
-{
-  if (NULL == threshold)
-    return -1;
-
-  double threshold_limit;
-
-  if (NP_RANGE_INSIDE == threshold->alert_on)
-    {
-      /* example: @10:20  >= 10 and <= 20, (inside the range of {10 .. 20}) */
-      dbg ("threshold {%g, %g} with alert_on set to true\n",
-	   threshold->start, threshold->end);
-      return -1;
-    }
-  else if (threshold->start_infinity)
-    {
-      /* example: ~:10    > 10, (outside the range of {-\infty .. 10}) */
-      dbg ("threshold {%g, %g} with start_infinity set to true\n",
-	   threshold->start, threshold->end);
-      return -1;
-    }
-  else if (threshold->end_infinity)
-    {
-      /* example: 10:     < 10, (outside {10 .. \infty}) */
-      dbg ("threshold {%g, %g} with end_infinity set to true\n",
-	   threshold->start, threshold->end);
-      threshold_limit = threshold->start;
-    }
-  else
-    {
-      /* example: 10      < 0 or > 10, (outside the range of {0 .. 10})
-       *          ~:10    > 10, (outside the range of {-\infty .. 10}) */
-      dbg ("threshold {%g, %g}\n",
-	   threshold->start, threshold->end);
-      threshold_limit = threshold->end;
-  }
-
-  *limit = (unsigned long long) (base * threshold_limit);
-  if (percent)
-    *limit = (unsigned long long) (*limit / 100.0);
-
-  return 0;
-}
-
-static int
-get_perfdata_limit_converted (range * threshold, unsigned long base, int shift,
-			      unsigned long long *limit, bool percent)
-{
-  int error = get_perfdata_limit (threshold, base, limit, percent);
-  if (0 != error)
-    return error;
-
-  *limit = UNIT_CONVERT (*limit, shift);
-  return 0;
-
 }
 
 #ifndef NPL_TESTING

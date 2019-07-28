@@ -36,6 +36,7 @@ libutils_a_SOURCES =  \
 	messages.c    \
 	mountlist.c   \
 	netinfo.c     \
+	perfdata.c    \
 	processes.c   \
 	procparser.c  \
 	progname.c    \
