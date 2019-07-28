@@ -30,9 +30,6 @@
 #include "thresholds.h"
 #include "xalloc.h"
 
-#define OUTSIDE 0
-#define INSIDE  1
-
 /*
  * Returns TRUE if alert should be raised based on the range 
  */
@@ -42,7 +39,7 @@ check_range (double value, range * my_range)
   bool no = false;
   bool yes = true;
 
-  if (my_range->alert_on == INSIDE)
+  if (my_range->alert_on == NP_RANGE_INSIDE)
     {
       no = true;
       yes = false;
@@ -121,11 +118,11 @@ parse_range_string (char *str)
   temp_range->start_infinity = false;
   temp_range->end = 0;
   temp_range->end_infinity = true;
-  temp_range->alert_on = OUTSIDE;
+  temp_range->alert_on = NP_RANGE_OUTSIDE;
 
   if (str[0] == '@')
     {
-      temp_range->alert_on = INSIDE;
+      temp_range->alert_on = NP_RANGE_INSIDE;
       str++;
     }
 
@@ -160,7 +157,7 @@ parse_range_string (char *str)
 }
 
 /*
- * returns 0 if okay, otherwise 1 
+ * Returns 0 if okay, otherwise 1 (NP_RANGE_UNPARSEABLE)
  */
 int
 set_thresholds (thresholds ** my_thresholds, char *warn_string,
@@ -199,4 +196,19 @@ set_thresholds (thresholds ** my_thresholds, char *warn_string,
   *my_thresholds = temp_thresholds;
 
   return 0;
+}
+
+/*
+ * Returns true if the warning and critical thresholds are expressed
+ * as percentages (when defined), false otherwise
+ */
+
+bool
+thresholds_expressed_as_percentages (char *warn_string, char *critical_string)
+{
+  if ((warn_string && !STRCONTAINS (warn_string, "%"))
+      || (critical_string && !STRCONTAINS (critical_string, "%")))
+    return false;
+
+  return true;
 }
