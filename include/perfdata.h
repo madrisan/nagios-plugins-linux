@@ -1,4 +1,4 @@
-/* string-macros.h -- a collection of macros for checking strings
+/* perfdata.h -- a library for managing the Nagios perfdata
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,14 +13,25 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef _STRING_MACROS_H
-# define _STRING_MACROS_H     1
+#ifndef _PERFDATA_H_
+#define _PERFDATA_H_
 
-# define STRCONTAINS(a, b) (NULL != strpbrk(a, b))
-# define STREQ(a, b) (strcmp(a, b) == 0)
-# define STRNEQ(a, b) (strcmp(a, b) != 0)
-# define STREQLEN(a, b, n) (strncmp(a, b, n) == 0)
-# define STRNEQLEN(a, b, n) (strncmp(a, b, n) != 0)
-# define STRPREFIX(a, b) (strncmp(a, b, strlen(b)) == 0)
+#include "system.h"
+#include "thresholds.h"
 
-#endif			/* _STRING_MACROS_H */
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+  int get_perfdata_limit (range * threshold, unsigned long base,
+			  unsigned long long *limit, bool percent);
+  int get_perfdata_limit_converted (range * threshold, unsigned long base,
+				    int shift, unsigned long long *limit,
+				    bool percent);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif				/* _PERFDATA_H_ */
