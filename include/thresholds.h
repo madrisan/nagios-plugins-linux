@@ -21,6 +21,9 @@
 #define NP_RANGE_UNPARSEABLE 1
 #define NP_WARN_WITHIN_CRIT  2
 
+#define NP_RANGE_OUTSIDE 0
+#define NP_RANGE_INSIDE  1
+
 /* see: nagios-plugins-1.4.15/lib/utils_base.h */
 typedef struct range_struct
 {
@@ -39,3 +42,5 @@ typedef struct thresholds_struct
 
 int get_status (double, thresholds *);
 int set_thresholds (thresholds **, char *, char *);
+bool thresholds_expressed_as_percentages (char *warn_string,
+					  char *critical_string);

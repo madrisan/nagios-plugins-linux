@@ -16,6 +16,7 @@
 #ifndef _STRING_MACROS_H
 # define _STRING_MACROS_H     1
 
+# define STRCONTAINS(a, b) (NULL != strpbrk(a, b))
 # define STREQ(a, b) (strcmp(a, b) == 0)
 # define STRNEQ(a, b) (strcmp(a, b) != 0)
 # define STREQLEN(a, b, n) (strncmp(a, b, n) == 0)

@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "logging.h"
 #include "meminfo.h"
 #include "messages.h"
 #include "progname.h"
@@ -103,6 +104,65 @@ print_version (void)
   exit (STATE_OK);
 }
 
+static int
+get_perfdata_limit (range * threshold, unsigned long base,
+		    unsigned long long *limit, bool percent)
+{
+  if (NULL == threshold)
+    return -1;
+
+  double threshold_limit;
+
+  if (NP_RANGE_INSIDE == threshold->alert_on)
+    {
+      /* example: @10:20  >= 10 and <= 20, (inside the range of {10 .. 20}) */
+      dbg ("threshold {%g, %g} with alert_on set to true\n",
+	   threshold->start, threshold->end);
+      return -1;
+    }
+  else if (threshold->start_infinity)
+    {
+      /* example: ~:10    > 10, (outside the range of {-\infty .. 10}) */
+      dbg ("threshold {%g, %g} with start_infinity set to true\n",
+	   threshold->start, threshold->end);
+      return -1;
+    }
+  else if (threshold->end_infinity)
+    {
+      /* example: 10:     < 10, (outside {10 .. \infty}) */
+      dbg ("threshold {%g, %g} with end_infinity set to true\n",
+	   threshold->start, threshold->end);
+      threshold_limit = threshold->start;
+    }
+  else
+    {
+      /* example: 10      < 0 or > 10, (outside the range of {0 .. 10})
+       *          ~:10    > 10, (outside the range of {-\infty .. 10}) */
+      dbg ("threshold {%g, %g}\n",
+	   threshold->start, threshold->end);
+      threshold_limit = threshold->end;
+  }
+
+  *limit = (unsigned long long) (base * threshold_limit);
+  if (percent)
+    *limit = (unsigned long long) (*limit / 100.0);
+
+  return 0;
+}
+
+static int
+get_perfdata_limit_converted (range * threshold, unsigned long base, int shift,
+			      unsigned long long *limit, bool percent)
+{
+  int error = get_perfdata_limit (threshold, base, limit, percent);
+  if (0 != error)
+    return error;
+
+  *limit = UNIT_CONVERT (*limit, shift);
+  return 0;
+
+}
+
 #ifndef NPL_TESTING
 int
 main (int argc, char **argv)
@@ -177,6 +237,9 @@ main (int argc, char **argv)
 	}
     }
 
+  if (!thresholds_expressed_as_percentages (warning, critical))
+    usage (stderr);
+
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
@@ -247,28 +310,21 @@ main (int argc, char **argv)
 
   char *mem_monitored_warning = NULL,
        *mem_monitored_critical = NULL;
-  if (my_threshold->warning)
-    {
-      double warning_threshold = max (my_threshold->warning->start,
-				      my_threshold->warning->end);
-      unsigned long long mem_amount =
-	UNIT_CONVERT (kb_mem_main_total * warning_threshold / 100.0, shift);
-      mem_monitored_warning = xasprintf ("%llu", mem_amount);
-    }
-  if (my_threshold->critical)
-    {
-      double critical_threshold = max (my_threshold->critical->start,
-				       my_threshold->critical->end);
-      unsigned long long mem_amount =
-	UNIT_CONVERT (kb_mem_main_total * critical_threshold / 100.0, shift);
-      mem_monitored_critical = xasprintf ("%llu", mem_amount);
-    }
+  unsigned long long warning_limit, critical_limit;
+
+  if (0 == (get_perfdata_limit_converted
+      (my_threshold->warning, kb_mem_main_total, shift, &warning_limit, true)))
+    mem_monitored_warning = xasprintf ("%llu", warning_limit);
+  if (0 == (get_perfdata_limit_converted
+	    (my_threshold->critical, kb_mem_main_total, shift,
+	     &critical_limit, true)))
+    mem_monitored_critical = xasprintf ("%llu", critical_limit);
 
   /* performance data format:
    * 'label'=value[UOM];[warn];[crit];[min];[max] */
   bool add_perfdata = (kb_mem_monitored == &kb_mem_main_available);
   perfdata_memavailable_msg =
-    xasprintf ("mem_available=%llu%s;%s;%s;0;%llu;",
+    xasprintf ("mem_available=%llu%s;%s;%s;0;%llu",
 	       UNIT_STR (kb_mem_main_available),
 	       (add_perfdata
 	        && mem_monitored_warning) ? mem_monitored_warning : "",
@@ -278,7 +334,7 @@ main (int argc, char **argv)
 
   add_perfdata = (kb_mem_monitored == &kb_mem_main_used);
   perfdata_memused_msg =
-    xasprintf ("mem_used=%llu%s;%s;%s;0;%llu;",
+    xasprintf ("mem_used=%llu%s;%s;%s;0;%llu",
 	       UNIT_STR (kb_mem_main_used),
 	       (add_perfdata
 		&& mem_monitored_warning) ? mem_monitored_warning : "",
