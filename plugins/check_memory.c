@@ -268,7 +268,7 @@ main (int argc, char **argv)
    * 'label'=value[UOM];[warn];[crit];[min];[max] */
   bool add_perfdata = (kb_mem_monitored == &kb_mem_main_available);
   perfdata_memavailable_msg =
-    xasprintf ("mem_available=%llu%s;%s;%s;0;%llu",
+    xasprintf ("mem_available=%llu%s;%s;%s;0;%llu;",
 	       UNIT_STR (kb_mem_main_available),
 	       (add_perfdata
 	        && mem_monitored_warning) ? mem_monitored_warning : "",
@@ -278,7 +278,7 @@ main (int argc, char **argv)
 
   add_perfdata = (kb_mem_monitored == &kb_mem_main_used);
   perfdata_memused_msg =
-    xasprintf ("mem_used=%llu%s;%s;%s;0;%llu",
+    xasprintf ("mem_used=%llu%s;%s;%s;0;%llu;",
 	       UNIT_STR (kb_mem_main_used),
 	       (add_perfdata
 		&& mem_monitored_warning) ? mem_monitored_warning : "",
