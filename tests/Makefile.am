@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-## Copyright (c) 2016,2018 Davide Madrisan <davide.madrisan@gmail.com>
+## Copyright (c) 2016-2019 Davide Madrisan <davide.madrisan@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@ test_programs = \
 	tslibmeminfo_interface \
 	tslibmeminfo_procparser \
 	tslibmessages \
+	tslibperfdata \
 	tsliburlencode
 if !HAVE_LIBPROCPS
 test_programs += \
@@ -98,6 +99,9 @@ tslibmeminfo_procparser_LDADD = $(LDADDS)
 
 tslibmessages_SOURCES = $(test_utils) tslibmessages.c
 tslibmessages_LDADD = $(LDADDS)
+
+tslibperfdata_SOURCES = $(test_utils) tslibperfdata.c
+tslibperfdata_LDADD = $(LDADDS)
 
 tsliburlencode_SOURCES = $(test_utils) tsliburlencode.c
 tsliburlencode_LDADD = $(LDADDS)
