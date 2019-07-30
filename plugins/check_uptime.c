@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2010,2012,2013 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2010-2019 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check how long the system has been running.
  *
@@ -37,7 +37,7 @@
 #include "xasprintf.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2010,2012-2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2010-2019 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 #define BUFSIZE 0x80
 static char buf[BUFSIZE + 1];
@@ -66,8 +66,8 @@ usage (FILE * out)
   fputs ("  -m, --clock-monotonic  "
 	 "use the monotonic clock for retrieving the time\n", out);
 #endif
-  fputs ("  -w, --warning PERCENT   warning threshold\n", out);
-  fputs ("  -c, --critical PERCENT   critical threshold\n", out);
+  fputs ("  -w, --warning MINUTES   warning threshold\n", out);
+  fputs ("  -c, --critical MINUTES   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
