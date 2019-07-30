@@ -137,6 +137,9 @@ main (int argc, char **argv)
         }
     }
 
+  if (!thresholds_expressed_as_percentages (warning, critical))
+    usage (stderr);
+
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);

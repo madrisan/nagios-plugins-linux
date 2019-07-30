@@ -316,6 +316,9 @@ main (int argc, char **argv)
 	}
     }
 
+  if (!thresholds_expressed_as_percentages (warning, critical))
+    usage (stderr);
+
   delay = DELAY_DEFAULT, count = COUNT_DEFAULT;
   if (optind < argc)
     {
