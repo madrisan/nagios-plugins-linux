@@ -60,10 +60,9 @@ get_perfdata_limit (range * threshold, unsigned long base,
     {
       /* example: 10      < 0 or > 10, (outside the range of {0 .. 10})
        *          ~:10    > 10, (outside the range of {-\infty .. 10}) */
-      dbg ("threshold {%g, %g}\n",
-	   threshold->start, threshold->end);
+      dbg ("threshold {%g, %g}\n", threshold->start, threshold->end);
       threshold_limit = threshold->end;
-  }
+    }
 
   *limit = (unsigned long long) (base * threshold_limit);
   if (percent)
@@ -73,8 +72,9 @@ get_perfdata_limit (range * threshold, unsigned long base,
 }
 
 int
-get_perfdata_limit_converted (range * threshold, unsigned long base, int shift,
-			      unsigned long long *limit, bool percent)
+get_perfdata_limit_converted (range * threshold, unsigned long base,
+			      int shift, unsigned long long *limit,
+			      bool percent)
 {
   int error = get_perfdata_limit (threshold, base, limit, percent);
   if (0 != error)
@@ -82,5 +82,4 @@ get_perfdata_limit_converted (range * threshold, unsigned long base, int shift,
 
   *limit = UNIT_CONVERT (*limit, shift);
   return 0;
-
 }
