@@ -44,6 +44,8 @@ static const char *docker_socket = DOCKER_SOCKET;
 #include "xalloc.h"
 #include "xasprintf.h"
 
+/* Hide all jsmn API symbols by making them static */
+#define JSMN_STATIC
 #include "json.h"
 
 #define DOCKER_CONTAINERS_JSON  0x01

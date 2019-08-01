@@ -32,7 +32,6 @@ libutils_a_SOURCES =  \
 	cputopology.c \
 	kernelver.c   \
 	interrupts.c  \
-	json.c        \
 	messages.c    \
 	mountlist.c   \
 	netinfo.c     \
