@@ -28,17 +28,17 @@
 static int
 mymain (void)
 {
+#ifdef KERNEL_VERSION
   int ret = 0;
   unsigned int lnxver = linux_version ();
 
-#ifndef KERNEL_VERSION
-  return EXIT_AM_SKIP
-#else
   TEST_ASSERT_EQUAL_NUMERIC (lnxver,
 			     KERNEL_VERSION (TEST_KERNEL_VERSION_MAJOR,
 					     TEST_KERNEL_VERSION_MINOR,
 					     TEST_KERNEL_VERSION_PATCH));
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+#else
+  return EXIT_AM_SKIP;
 #endif
 }
 
