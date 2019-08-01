@@ -50,9 +50,7 @@ Here is the list of the available plugins:
 ## Full documentation
 
 The full documentation of the `nagios-plugins-linux` is available online
-in the GitHub [wiki page](https://github.com/madrisan/nagios-plugins-linux/wiki) or
-[here](https://sites.google.com/site/davidemadrisan/nagios-monitoring/linux-os).
-
+in the GitHub [wiki page](https://github.com/madrisan/nagios-plugins-linux/wiki).
 
 ## Installation
 
