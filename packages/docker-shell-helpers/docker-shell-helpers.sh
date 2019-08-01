@@ -1,5 +1,5 @@
 #!/bin/bash
-# Helper functions for using Docker in shell scripts
+# Helper functions for using Docker in shell scripts, revision 3
 # Copyright (C) 2016,2017 Davide Madrisan <davide.madrisan@gmail.com>
 
 # Here's is a simple example of how the library functions can be used!
@@ -10,8 +10,6 @@
 #    echo "The running OS is: $(container_property --os centos7)"
 #    container_exec_command centos7 "echo 'Hello World!'"
 #    container_remove centos7
-
-docker_bash_helpers_revision="3"
 
 # 'private' definitions and functions
 

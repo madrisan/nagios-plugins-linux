@@ -227,7 +227,8 @@ get_cputopology_read (unsigned int *nsockets, unsigned int *ncores,
       if (*ncores == 0)
 	*ncores = 1;
 
-      int ncpus = get_processor_number_online ();
+      int ncpus_online = get_processor_number_online ();
+      unsigned int ncpus = ncpus_online > 0 ? ncpus_online : 0;
 
       *nsockets = ncpus / *nthreads / *ncores;
       if (!*nsockets)
