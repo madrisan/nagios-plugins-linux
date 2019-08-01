@@ -134,10 +134,10 @@ docker_memory_desc_read (struct docker_memory_desc *__restrict memdesc)
 /* Accessing the values from docker_memory_desc */
 
 #define docker_memory_desc_get(arg, prefix) \
-  long long docker_memory_get_ ## arg (struct docker_memory_desc *p) \
-    {                                                                \
-      dbg(" -> %s: %lld\n", #arg, p->prefix ## _ ## arg);            \
-      return (p == NULL) ? 0 : p->prefix ## _ ## arg;                \
+  long long docker_memory_get_ ## arg (struct docker_memory_desc *p)        \
+    {                                                                       \
+      dbg(" -> %s: %lld\n", #arg, (p == NULL) ? 0 : p->prefix ## _ ## arg); \
+      return (p == NULL) ? 0 : p->prefix ## _ ## arg;                       \
     }
 #define docker_memory_desc_get_bytes(arg) \
    docker_memory_desc_get(arg, b)

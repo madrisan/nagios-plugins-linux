@@ -33,12 +33,13 @@ mymain (void)
 
 #ifndef KERNEL_VERSION
   return EXIT_AM_SKIP
-#endif
+#else
   TEST_ASSERT_EQUAL_NUMERIC (lnxver,
 			     KERNEL_VERSION (TEST_KERNEL_VERSION_MAJOR,
 					     TEST_KERNEL_VERSION_MINOR,
 					     TEST_KERNEL_VERSION_PATCH));
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+#endif
 }
 
 TEST_MAIN_PRELOAD (mymain, abs_builddir "/.libs/tslib_uname.so");
