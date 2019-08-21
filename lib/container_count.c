@@ -31,7 +31,10 @@ static const char *docker_socket = DOCKER_SOCKET;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if HAVE_LIBCURL
 #include <curl/curl.h>
+#endif
 
 #include "common.h"
 #include "collection.h"
@@ -103,7 +106,7 @@ docker_json_parser (const char *json, const char *token, unsigned long increment
   return hashtable;
 }
 
-#ifndef NPL_TESTING
+#if !defined NPL_TESTING && defined HAVE_LIBCURL
 
 static size_t
 write_memory_callback (void *contents, size_t size, size_t nmemb, void *userp)
