@@ -292,11 +292,20 @@ AC_CHECK_DECLS([CPU_ALLOC], [], [],
     #include <sched.h>]])
 
 dnl Check for libcurl
-LIBCURL_CHECK_CONFIG([], 7.40.0, [],
-  [AC_MSG_WARN([Missing required libcurl >= 7.40.0])])
-AC_SUBST([LIBCURL_CPPFLAGS])
-AC_SUBST([LIBCURL])
-AM_CONDITIONAL(HAVE_LIBCURL, [test "$libcurl_cv_lib_curl_usable" = "yes"])
+#LIBCURL_CHECK_CONFIG([], 7.40.0, [],
+#  [AC_MSG_WARN([Missing required libcurl >= 7.40.0])])
+#AC_SUBST([LIBCURL_CPPFLAGS])
+#AC_SUBST([LIBCURL])
+#AM_CONDITIONAL(HAVE_LIBCURL, [test "$libcurl_cv_lib_curl_usable" = "yes"])
+AC_ARG_ENABLE([libcurl],
+    AS_HELP_STRING([--disable-libcurl], [Disable libcurl]))
+AS_IF([test "x$enable_libcurl" != "xno"], [
+  LIBCURL_CHECK_CONFIG([], 7.40.0, [],
+    [AC_MSG_WARN([Missing required libcurl >= 7.40.0])])
+  AC_SUBST([LIBCURL_CPPFLAGS])
+  AC_SUBST([LIBCURL])
+  AM_CONDITIONAL(HAVE_LIBCURL, [test "$libcurl_cv_lib_curl_usable" = "yes"])
+], [AM_CONDITIONAL(HAVE_LIBCURL, false)])
 
 dnl Check for the procps newlib
 have_libprocps=no
