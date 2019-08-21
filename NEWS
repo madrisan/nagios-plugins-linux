@@ -1,4 +1,50 @@
 
+    Major changes between "nagios-plugins-linux" versions 24 and 25
+                      -= Gentoo release =-
+
+-- Fixes:
+
+* Fix two security issues reported by lgtm analyzer, an issue
+  reported by the clang static analyser v8, and some issues reported
+  by Codacy.
+
+* sysfsparser lib: fix debug messages in
+  "sysfsparser_thermal_get_temperature()".
+
+* check_memory:
+
+   * Minor code cleanup.
+   * Fix typo.
+   * Add perfdata to mem_available and mem_used:
+     Add min, max, warning and critical in perfdata for
+     "mem_available" and "mem_used" as asked by sbraz.
+
+* Build system:
+
+   * Fix compilation when libcurl headers are not installed.
+
+-- Enhancements / Changes
+
+* Udate the external jsmn library.
+
+* Move some functions to the new library 'perfdata'.
+
+* Build system:
+
+   * Fix warning message about obsolete AC_PROG_RANLIB
+   * Add a build option to disable libcurl: --disable-libcurl
+
+* Package creation:
+
+   * Make rpm packages for Fedora 30 and Debian 10 (Buster) packages.
+   * Drop support for Fedora 24-27 and Debian 6 (Squeeze).
+
+* Test framework:
+
+   * new unit test for lib/perfdata.c
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 23 and 24
                    -= New Year 2019 release =-
 
