@@ -8,7 +8,7 @@
 #                     --disk ~/docker-datadisk:/shared:rw
 #    container_start centos7
 #    echo "The running OS is: $(container_property --os centos7)"
-#    container_exec_command centos7 "echo 'Hello World!'"
+#    container_exec_command centos7 'echo "Hello World!"'
 #    container_remove centos7
 
 # 'private' definitions and functions
