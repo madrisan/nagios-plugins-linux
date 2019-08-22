@@ -1,3 +1,16 @@
+nagios-plugins-linux (2i5-1) stable; urgency=low
+  * Release 25 "Gentoo release":
+     - sysfsparser lib: fix debug messages in
+       sysfsparser_thermal_get_temperature().
+     - Fix compilation when libcurl headers are not installed.
+     - Fix two security issues reported by lgtm analyzer, an issue
+       reported by the clang static analyser v8, and some issues reported
+        by Codacy.
+     - check_memory: add perfdata to mem_available and mem_used.
+       Minor code cleanup and fixes.
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Thu, 22 Aug 2019 07:10:72 +0200
+
 nagios-plugins-linux (24-1) stable; urgency=low
   * Release 24:
      - check_cpufreq: the frequences returned by sysfs are in KHz.

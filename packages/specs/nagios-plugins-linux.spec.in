@@ -289,4 +289,4 @@ make DESTDIR=%{buildroot} install
 %changelog
 
 * @date@ Davide Madrisan <davide.madrisan@gmail.com> @version@-@release@
-- ported version @version@ from openmamba GNU/Linux
+- Upstream version @version@
