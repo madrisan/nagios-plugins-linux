@@ -1,4 +1,4 @@
-nagios-plugins-linux (2i5-1) stable; urgency=low
+nagios-plugins-linux (25-1) stable; urgency=low
   * Release 25 "Gentoo release":
      - sysfsparser lib: fix debug messages in
        sysfsparser_thermal_get_temperature().

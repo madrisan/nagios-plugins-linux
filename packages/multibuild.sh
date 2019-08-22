@@ -139,7 +139,8 @@ case "$os" in
       pck_install="\
 export DEBIAN_FRONTEND=noninteractive;
 apt-get update && apt-get -y --no-install-recommends install"
-      pcks_dev="build-essential bzip2 debhelper make gcc xz-utils devscripts"
+      pcks_dev="\
+build-essential bzip2 debhelper fakeroot make gcc xz-utils devscripts"
       pcks_dev="$pcks_dev libcurl4-gnutls-dev" ;;
    fedora-*)
       pck_format="rpm"
@@ -198,16 +199,18 @@ if [ \"'$pck_format'\" = rpm ] && [ \"'$specfile'\" ]; then
    fi
    popd &>/dev/null
 elif [ \"'$pck_format'\" = deb ]; then
+   msg \"creating the origin package ${pckname}_${usr_pckver}.orig.tar.xz...\"
    mkdir -p ~/debian-build
    cp $shared_disk_container/${pckname}-${usr_pckver}.tar.xz \
       ~/debian-build/${pckname}_${usr_pckver}.orig.tar.xz
 
    export PATH=\$PATH:/usr/sbin:/sbin
 
-   msg \"creating the deb package and build files ...\"
+   msg \"creating the deb package and build files for version ${usr_pckver}...\"
    cd ~/debian-build
    tar xf ${pckname}_${usr_pckver}.orig.tar.xz
    cd ~/debian-build/${pckname}-${usr_pckver}
+   cat debian/changelog
    debuild -us -uc || exit 1
    msg \"testing the installation of the deb package(s) ...\"
    dpkg --dry-run -i ../*.deb || exit 1

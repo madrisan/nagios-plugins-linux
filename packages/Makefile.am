@@ -19,7 +19,7 @@ multibuilddir = $(shell pwd)
 
 DOCKER = /usr/bin/docker
 SPECFILE = $(PACKAGE).spec
-SRC_BZ2 = $(top_srcdir)/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2
+SRC_ARCHIVE = $(top_srcdir)/$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2
 
 # GID and UID of the user 'developer'
 GID ?= "$(shell id -g)"
@@ -49,19 +49,21 @@ debian-9: debian-stretch
 debian-10: debian-buster
 debian-latest: debian-buster
 
-$(SPECFILE):
+.PHONY: specfile
+specfile:
 	@cd $(builddir)/specs && $(MAKE) $(AM_MAKEFLAGS) all
 
-$(SRC_BZ2):
+.PHONY: source-archive
+source-archive:
 	@cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) dist
 
-$(TARGETS_REDHAT): $(SPECFILE) $(SRC_BZ2) $(DOCKER) $(MULTIBUILD_SCRIPT)
+$(TARGETS_REDHAT): specfile source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --spec $(multibuilddir)/specs/$(SPECFILE) \
 	   --os $$distr --target pcks/$@
 
-$(TARGETS_DEBIAN): $(SRC_BZ2) $(DOCKER) $(MULTIBUILD_SCRIPT)
+$(TARGETS_DEBIAN): source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`-slim; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --os $$distr --target pcks/$@
