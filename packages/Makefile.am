@@ -16,7 +16,9 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 multibuilddir = $(shell pwd)
+
 DOCKER = /usr/bin/docker
+SPECFILE = $(PACKAGE).spec
 
 # GID and UID of the user 'developer'
 GID ?= "$(shell id -g)"
