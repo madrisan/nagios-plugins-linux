@@ -28,6 +28,7 @@ Requires: nagios-plugins-linux-clock
 Requires: nagios-plugins-linux-cpu
 Requires: nagios-plugins-linux-cpufreq
 Requires: nagios-plugins-linux-cswch
+Requires: nagios-plugins-linux-docker
 Requires: nagios-plugins-linux-ifmountfs
 Requires: nagios-plugins-linux-intr
 Requires: nagios-plugins-linux-iowait
@@ -74,6 +75,13 @@ Group: Applications/System
 
 %description cswch
 This Nagios plugin monitors the total number of context switches per second across all CPUs.
+
+%package docker
+Summary: Nagios plugins for Linux - check_docker
+Group: Applications/System
+
+%description docker
+This Nagios plugin checks the memory and the number of running docker container.
 
 %package fc
 Summary: Nagios plugins for Linux - check_fc
@@ -221,6 +229,10 @@ make DESTDIR=%{buildroot} install
 %files cswch
 %defattr(-,root,root)
 %{_libdir}/nagios/plugins/check_cswch
+
+%files docker
+%defattr(-,root,root)
+%{_libdir}/nagios/plugins/check_docker
 
 %files fc
 %defattr(-,root,root)
