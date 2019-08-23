@@ -1,4 +1,85 @@
 
+    Major changes between "nagios-plugins-linux" versions 24 and 25
+                      -= Gentoo release =-
+
+-- Fixes:
+
+* Fix two security issues reported by lgtm analyzer, an issue
+  reported by the clang static analyser v8, and some issues reported
+  by Codacy.
+
+* sysfsparser lib: fix debug messages in
+  "sysfsparser_thermal_get_temperature()".
+
+* check_memory:
+
+   * Minor code cleanup.
+   * Fix typo.
+   * Add perfdata to mem_available and mem_used:
+     Add min, max, warning and critical in perfdata for
+     "mem_available" and "mem_used" as asked by sbraz.
+
+* Build system:
+
+   * Fix compilation when libcurl headers are not installed.
+
+-- Enhancements / Changes
+
+* Udate the external jsmn library.
+
+* Move some functions to the new library 'perfdata'.
+
+* Build system:
+
+   * Fix warning message about obsolete AC_PROG_RANLIB
+   * Add a build option to disable libcurl: --disable-libcurl
+
+* Package creation:
+
+   * Make rpm packages for Fedora 30 and Debian 10 (Buster) packages.
+   * Drop support for Fedora 24-27 and Debian 6 (Squeeze).
+
+* Test framework:
+
+   * new unit test for lib/perfdata.c
+
+ -- git diff --stat 440eefa c4a58b5
+
+ AUTHORS                                               |   6 ++
+ README.md                                             |  16 ++--
+ configure.ac                                          |  17 +++--
+ debian/changelog                                      |  32 ++++++++
+ include/Makefile.am                                   |   1 +
+ include/json.h                                        | 490 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--------
+ include/perfdata.h                                    |  37 +++++++++
+ include/string-macros.h                               |   1 +
+ include/thresholds.h                                  |   9 ++-
+ lib/Makefile.am                                       |   2 +-
+ lib/container_count.c                                 |   7 +-
+ lib/container_memory.c                                |   8 +-
+ lib/cputopology.c                                     |   3 +-
+ lib/json.c                                            | 417 ------------------------------------------------------------------------------------------------------
+ lib/perfdata.c                                        |  85 +++++++++++++++++++++
+ lib/sysfsparser.c                                     |  41 +++++-----
+ lib/thresholds.c                                      |  26 +++++--
+ packages/Makefile.am                                  |  25 ++++---
+ packages/docker-shell-helpers/docker-shell-helpers.sh |   6 +-
+ packages/multibuild.sh                                |  30 +++-----
+ packages/specs/nagios-plugins-linux.spec.in           |  14 +++-
+ plugins/check_clock.c                                 |  10 +--
+ plugins/check_cpu.c                                   |   3 +
+ plugins/check_memory.c                                |  55 ++++++++++++--
+ plugins/check_swap.c                                  |   3 +
+ plugins/check_uptime.c                                |   8 +-
+ plugins/check_users.c                                 |   3 +-
+ tests/Makefile.am                                     |   9 ++-
+ tests/tslibcontainer_count.c                          |   2 +-
+ tests/tslibkernelver.c                                |   7 +-
+ tests/tslibperfdata.c                                 | 111 +++++++++++++++++++++++++++
+ 31 files changed, 925 insertions(+), 559 deletions(-)
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 23 and 24
                    -= New Year 2019 release =-
 
