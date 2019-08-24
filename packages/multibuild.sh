@@ -133,7 +133,9 @@ case "$os" in
       pck_format="rpm"
       pck_install="yum install -y"
       pck_dist=".el${os:7:1}"
-      pcks_dev="bzip2 make gcc libcurl-devel xz rpm-build" ;;
+      pcks_dev="bzip2 make gcc libcurl-devel xz rpm-build"
+      # requires libcurl-devel 7.40.0+ which is not available in < CentOS 8
+      have_libcurl="0" ;;
    debian-*)
       pck_format="deb"
       pck_install="\
@@ -146,7 +148,8 @@ build-essential bzip2 debhelper fakeroot make gcc xz-utils devscripts"
       pck_format="rpm"
       pck_install="dnf install -y"
       pck_dist=".fc${os:7:2}"
-      pcks_dev="bzip2 make gcc libcurl-devel xz rpm-build" ;;
+      pcks_dev="bzip2 make gcc libcurl-devel xz rpm-build"
+      have_libcurl="1" ;;
    *) die "unsupported os: $os" ;;
 esac
 pck_dist="${pck_dist}${usr_distro:+.$usr_distro}"
@@ -188,6 +191,7 @@ if [ \"'$pck_format'\" = rpm ] && [ \"'$specfile'\" ]; then
    rpmbuild \
       --define=\"dist $pck_dist\" \
       --define=\"_topdir \$HOME/rpmbuild\" \
+      --define=\"have_libcurl $have_libcurl\" \
       -ba ${pckname}.spec
 
    msg \"testing the installation of the rpm packages ...\"
