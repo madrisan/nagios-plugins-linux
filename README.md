@@ -133,6 +133,14 @@ in the root source folder.
 The building process requires the Docker software containerization platform running on your system, and an internet connection to download the Docker images of the operating systems you want to build the packages for.
 
 
+## Gentoo Package
+
+The plugins are available [in the Gentoo tree](https://packages.gentoo.org/packages/net-analyzer/nagios-plugins-linux-madrisan). They can be installed by running:
+```
+emerge -av net-analyzer/nagios-plugins-linux-madrisan
+```
+The `curl` USE flag is required to build `check_docker`.
+
 ## Bugs
 
 If you find a bug please create an issue in the project bug tracker at
