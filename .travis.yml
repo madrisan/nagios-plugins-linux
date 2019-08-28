@@ -35,7 +35,7 @@ addons:
 
 script:
   - |
-    if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then
+    if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
       [ -f ./Makefile ] || autoreconf -f -v -Wall -i -Im4 && ./configure
       make clean all
       VERBOSE=1 make check
