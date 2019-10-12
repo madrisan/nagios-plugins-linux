@@ -121,6 +121,7 @@ Command            | Distribution
 CentOS 5           | `make -C packages centos-5`
 CentOS 6           | `make -C packages centos-6`
 CentOS 7           | `make -C packages centos-7`
+CentOS 8           | `make -C packages centos-8`
 Debian 8 (Jessie)  | `make -C packages debian-jessie`
 Debian 9 (Stretch) | `make -C packages debian-stretch`
 Debian 10 (Buster) | `make -C packages debian-buster`
