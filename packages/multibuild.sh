@@ -135,7 +135,8 @@ case "$os" in
       pck_dist=".el${os:7:1}"
       pcks_dev="bzip2 make gcc libcurl-devel xz rpm-build"
       # requires libcurl-devel 7.40.0+ which is not available in < CentOS 8
-      have_libcurl="0" ;;
+      case "$os" in centos-8.*) have_libcurl="1" ;; *) have_libcurl="0" ;; esac
+   ;;
    debian-*)
       pck_format="deb"
       pck_install="\
@@ -159,6 +160,13 @@ pckname="nagios-plugins-linux"
 echo "\
 Container \"$container\"  status:running  ipaddr:$ipaddr  os:$os
 "
+
+if [ "$have_libcurl" = "0" ]; then
+   msg "the docker plugin will not be built because libcurl is too old."
+else
+   msg "the available curl library allows the docker plugin to be built."
+fi
+
 msg "testing the build process inside $container ..."
 container_exec_command "$container" "\
 # fixes for debian 6 (squeeze)
