@@ -125,14 +125,17 @@ CentOS 8           | `make -C packages centos-8`
 Debian 8 (Jessie)  | `make -C packages debian-jessie`
 Debian 9 (Stretch) | `make -C packages debian-stretch`
 Debian 10 (Buster) | `make -C packages debian-buster`
-Fedora 28          | `make -C packages fedora-28`
 Fedora 29          | `make -C packages fedora-29`
 Fedora 30          | `make -C packages fedora-30`
+Fedora 31          | `make -C packages fedora-31`
 Fedora Rawhide     | `make -C packages fedora-rawhide`
 
 in the root source folder.
-The building process requires the Docker software containerization platform running on your system, and an internet connection to download the Docker images of the operating systems you want to build the packages for.
+The building process requires the _Docker_ software containerization platform running on your system, and an internet connection to download the Docker images of the operating systems you want to build the packages for.
 
+On *Fedora 31* you can use the native *Podman* pod manager along with the Docker CLI emulation script:
+
+    sudo install dnf podman podman-docker
 
 ## Gentoo Package
 
