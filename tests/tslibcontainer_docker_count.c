@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2018 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * Unit test for lib/container_count.c
+ * Unit test for lib/container_docker_count.c
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #include <stdlib.h>
 
-#include "container.h"
+#include "container_docker.h"
 #include "testutils.h"
 
 #define NPL_TESTING
@@ -29,7 +29,7 @@
 static int docker_get (chunk_t * chunk, const int query);
 static void docker_close (chunk_t * chunk);
 
-#include "../lib/container_count.c"
+#include "../lib/container_docker_count.c"
 
 static int
 docker_get (chunk_t * chunk, const int query)
