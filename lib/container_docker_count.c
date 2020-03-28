@@ -38,7 +38,7 @@ static const char *docker_socket = DOCKER_SOCKET;
 
 #include "common.h"
 #include "collection.h"
-#include "container.h"
+#include "container_docker.h"
 #include "logging.h"
 #include "messages.h"
 #include "string-macros.h"

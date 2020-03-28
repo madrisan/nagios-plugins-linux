@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2018 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * Unit test for lib/container_memory.c
+ * Unit test for lib/container_docker_memory.c
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #include <stdlib.h>
 
-#include "container.h"
+#include "container_docker.h"
 #include "testutils.h"
 
 struct docker_memory_desc *dockermem = NULL;
@@ -33,7 +33,7 @@ get_docker_memory_stat_path ()
 }
 
 #define NPL_TESTING
-#include "../lib/container_memory.c"
+#include "../lib/container_docker_memory.c"
 #undef NPL_TESTING
 
 static int
@@ -53,7 +53,7 @@ test_memory_init ()
 static void
 test_memory_release ()
 {
-   docker_memory_desc_unref (dockermem);
+  docker_memory_desc_unref (dockermem);
 }
 
 typedef struct test_data

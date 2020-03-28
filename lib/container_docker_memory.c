@@ -23,7 +23,7 @@
 #include "sysfsparser.h"
 
 #include "common.h"
-#include "container.h"
+#include "container_docker.h"
 #include "logging.h"
 #include "messages.h"
 #include "xasprintf.h"

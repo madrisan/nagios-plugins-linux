@@ -43,7 +43,7 @@
 #define NPL_TEST_PATH_SYSDOCKERMEMSTAT abs_srcdir "/ts_sysdockermemstat.data"
 
 /* simulate the test of a query to the docker rest API */
-#define NPL_TEST_PATH_CONTAINER_JSON abs_srcdir "/ts_container.data"
+#define NPL_TEST_PATH_CONTAINER_JSON abs_srcdir "/ts_container_docker.data"
 
 #define TEST_ASSERT_EQUAL_NUMERIC(A, B) \
   do { if ((A) != (B)) ret = -1; } while (0)
