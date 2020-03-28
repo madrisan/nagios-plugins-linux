@@ -20,7 +20,7 @@ AM_CPPFLAGS = -include $(top_builddir)/config.h
 noinst_HEADERS = \
 	collection.h \
 	common.h \
-	container.h \
+	container_docker.h \
 	cpudesc.h \
 	cpufreq.h \
 	cpustats.h \

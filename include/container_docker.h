@@ -1,4 +1,4 @@
-/* container.h -- a library for checking sysfs for Docker exposed metrics
+/* container_docker.h -- a library for checking sysfs for Docker exposed metrics
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,8 +13,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef _CONTAINER_H
-#define _CONTAINER_H
+#ifndef _CONTAINER_DOCKER_H
+#define _CONTAINER_DOCKER_H
 
 #include "system.h"
 
@@ -86,4 +86,4 @@ extern "C"
 }
 #endif
 
-#endif				/* _CONTAINER_H */
+#endif				/* _CONTAINER_DOCKER_H */

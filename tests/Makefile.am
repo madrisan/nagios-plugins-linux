@@ -45,8 +45,8 @@ AM_CFLAGS = $(LIBPROCPS_CFLAGS)
 AM_LDFLAGS = $(LIBPROCPS_LIBS)
 
 test_programs = \
-	tslibcontainer_count \
-	tslibcontainer_memory \
+	tslibcontainer_docker_count \
+	tslibcontainer_docker_memory \
 	tslibkernelver \
 	tslibmeminfo_conversions \
 	tslibmeminfo_interface \
@@ -79,11 +79,11 @@ LDADDS = $(top_builddir)/lib/libutils.a
 TSLIBS_LDFLAGS = -module -avoid-version \
 	-rpath /evil/libtool/hack/to/force/shared/lib/creation
 
-tslibcontainer_count_SOURCES = $(test_utils) tslibcontainer_count.c
-tslibcontainer_count_LDADD = $(LDADDS)
+tslibcontainer_docker_count_SOURCES = $(test_utils) tslibcontainer_docker_count.c
+tslibcontainer_docker_count_LDADD = $(LDADDS)
 
-tslibcontainer_memory_SOURCES = $(test_utils) tslibcontainer_memory.c
-tslibcontainer_memory_LDADD = $(LDADDS)
+tslibcontainer_docker_memory_SOURCES = $(test_utils) tslibcontainer_docker_memory.c
+tslibcontainer_docker_memory_LDADD = $(LDADDS)
 
 tslibkernelver_SOURCES = $(test_utils) tslibkernelver.c
 tslibkernelver_LDADD = $(LDADDS)
@@ -150,7 +150,7 @@ endif ! WITH_TESTS
 TESTS = $(test_programs)
 
 dist_noinst_DATA = \
-	ts_container.data \
+	ts_container_docker.data \
 	ts_procmeminfo.data \
 	ts_procstat.data \
 	ts_procvmstat.data \
