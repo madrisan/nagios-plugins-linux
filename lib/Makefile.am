@@ -25,7 +25,7 @@ noinst_LIBRARIES = libutils.a
 
 libutils_a_SOURCES =  \
 	collection.c  \
-	container_memory.c \
+	container_docker_memory.c \
 	cpudesc.c     \
 	cpufreq.c     \
 	cpustats.c    \
@@ -49,7 +49,7 @@ libutils_a_SOURCES =  \
 
 if HAVE_LIBCURL
   libutils_a_SOURCES += \
-	container_count.c
+	container_docker_count.c
 endif
 
 if HAVE_LIBPROCPS
