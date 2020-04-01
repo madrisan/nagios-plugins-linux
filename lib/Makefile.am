@@ -19,6 +19,7 @@ AM_CPPFLAGS = \
 	-include $(top_builddir)/config.h \
 	-I$(top_srcdir)/include \
 	-DDOCKER_SOCKET=\"$(DOCKER_SOCKET)\" \
+	-DVARLINK_ADDRESS=\"$(VARLINK_ADDRESS)\" \
 	$(LIBCURL_CPPFLAGS)
 
 noinst_LIBRARIES = libutils.a
@@ -50,6 +51,11 @@ libutils_a_SOURCES =  \
 if HAVE_LIBCURL
   libutils_a_SOURCES += \
 	container_docker_count.c
+endif
+
+if HAVE_LIBVARLINK
+  libutils_a_SOURCES += \
+	container_podman.c
 endif
 
 if HAVE_LIBPROCPS
