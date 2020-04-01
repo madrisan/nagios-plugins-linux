@@ -526,3 +526,8 @@ if test "$libcurl_cv_lib_curl_usable" = "yes"; then
   echo "  LIBCURL            = $LIBCURL"
   echo
 fi
+
+if test "$have_libvarlink" = "yes"; then
+  echo "  VARLINK_ADDRESS   = $VARLINK_ADDRESS"
+  echo
+fi
