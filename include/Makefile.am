@@ -21,6 +21,7 @@ noinst_HEADERS = \
 	collection.h \
 	common.h \
 	container_docker.h \
+	container_podman.h \
 	cpudesc.h \
 	cpufreq.h \
 	cpustats.h \

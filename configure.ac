@@ -293,7 +293,7 @@ AC_CHECK_DECLS([CPU_ALLOC], [], [],
 
 dnl Check for libcurl
 AC_ARG_ENABLE([libcurl],
-    AS_HELP_STRING([--disable-libcurl], [Disable libcurl]))
+  AS_HELP_STRING([--disable-libcurl], [Disable libcurl]))
 AS_IF([test "x$enable_libcurl" != "xno"], [
   LIBCURL_CHECK_CONFIG([], 7.40.0, [],
     [AC_MSG_WARN([Missing required libcurl >= 7.40.0])])
@@ -301,6 +301,18 @@ AS_IF([test "x$enable_libcurl" != "xno"], [
   AC_SUBST([LIBCURL])
   AM_CONDITIONAL(HAVE_LIBCURL, [test "$libcurl_cv_lib_curl_usable" = "yes"])
 ], [AM_CONDITIONAL(HAVE_LIBCURL, false)])
+
+dnl Check for libvarlink
+AC_ARG_ENABLE([libvarlink],
+  AS_HELP_STRING([--disable-libvarlink], [Disable libvarlink]))
+AS_IF([test "x$enable_libvarlink" != "xno"], [
+  PKG_CHECK_EXISTS([libvarlink],
+    [PKG_CHECK_MODULES(LIBVARLINK, [libvarlink >= 18],
+      [AC_DEFINE(HAVE_LIBVARLINK, 1, [Define if libvarlink is available])
+       have_libvarlink=yes],
+      AC_MSG_ERROR([*** libvarlink version 18 or better not found]))])
+])
+AM_CONDITIONAL(HAVE_LIBVARLINK, [test "$have_libvarlink" = "yes"])
 
 dnl Check for the procps newlib
 have_libprocps=no
@@ -358,6 +370,17 @@ AC_ARG_WITH(
      (default is /var/run/docker.sock)])],
   [DOCKER_SOCKET="$with_dockersocket"])
 AC_SUBST(DOCKER_SOCKET)
+
+dnl Add the option: '--with-varlink-address'
+VARLINK_ADDRESS="unix:/run/podman/io.podman"
+AC_ARG_WITH(
+  [varlinkaddress],
+  [AS_HELP_STRING(
+    [--with-varlink-address],
+    [use a different address for varlink socket
+     (default is unix:/run/podman/io.podman)])],
+  [VARLINK_ADDRESS="$with_varlinkaddress"])
+AC_SUBST(VARLINK_ADDRESS)
 
 dnl Add the option: '--with-socketfile'
 MULTIPATHD_SOCKET="@/org/kernel/linux/storage/multipathd"
