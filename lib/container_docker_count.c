@@ -39,6 +39,7 @@ static const char *docker_socket = DOCKER_SOCKET;
 #include "common.h"
 #include "collection.h"
 #include "container_docker.h"
+#include "json_helpers.h"
 #include "logging.h"
 #include "messages.h"
 #include "string-macros.h"
@@ -49,19 +50,9 @@ static const char *docker_socket = DOCKER_SOCKET;
 
 /* Hide all jsmn API symbols by making them static */
 #define JSMN_STATIC
-#include "json.h"
+#include "jsmn.h"
 
 #define DOCKER_CONTAINERS_JSON  0x01
-
-static int
-json_eq (const char *json, jsmntok_t * tok, const char *s)
-{
-  if (tok->type == JSMN_STRING && (int) strlen (s) == tok->end - tok->start &&
-      strncmp (json + tok->start, s, tok->end - tok->start) == 0)
-    return 0;
-
-  return -1;
-}
 
 /* parse the json stream returned by Docker and return a pointer to the
    hashtable containing the values of the discovered 'tokens'.
@@ -70,26 +61,15 @@ json_eq (const char *json, jsmntok_t * tok, const char *s)
 static hashtable_t *
 docker_json_parser (const char *json, const char *token, unsigned long increment)
 {
-  int i, r;
-  jsmn_parser parser;
+  size_t i, ntoken;
   hashtable_t *hashtable = NULL;
 
-  jsmn_init (&parser);
-  r = jsmn_parse (&parser, json, strlen (json), NULL, 0);
-  if (r < 0)
-    return NULL;
-
-  jsmntok_t *buffer = xnmalloc (r, sizeof (jsmntok_t));
-  dbg ("number of json tokens: %d\n", r);
-
-  jsmn_init (&parser);
-  jsmn_parse (&parser, json, strlen (json), buffer, r);
-
+  jsmntok_t *buffer = json_tokenise (json, &ntoken);
   hashtable = counter_create ();
 
-  for (i = 1; i < r; i++)
+  for (i = 1; i < ntoken; i++)
     {
-      if (0 == json_eq (json, &buffer[i], token))
+      if (0 == json_token_streq (json, &buffer[i], token))
 	{
 	  size_t strsize = buffer[i + 1].end - buffer[i + 1].start;
 	  char *value = xmalloc (strsize + 1);
