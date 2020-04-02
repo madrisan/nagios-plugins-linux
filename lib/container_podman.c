@@ -325,7 +325,7 @@ json_parser (char *json)
 	}
     }
 
-  free (json_tokenise);
+  free (tokens);
   return hashtable;
 }
 
