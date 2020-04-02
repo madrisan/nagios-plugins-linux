@@ -215,39 +215,39 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
   return result;
 }
 
-/*
-{
-  "containerS": [
-    {
-      "command": [
-        "docker-entrypoint.sh",
-        "redis-server"
-      ],
-      "containerrunning": false,
-      "createdat": "2020-03-28T15:26:32+01:00",
-      "id": "5250ca78f8a28eeed8ebcd1c92c4fac9be8afc343c15071ed7a5b0a31c7d48db",
-      "image": "docker.io/library/redis:latest",
-      "imageid": "f0453552d7f26fc38ffc05fa034aa7a7bc6fbb01bc7bc5a9e4b3c0ab87068627",
-      "mounts": [
-         ...
-      ],
-      "names": "srv-redis-1",
-      ...
-      "status": "exited"
-    },
-    {
-      ...
-    },
-    {
-      ...
-    },
-  ]
-}
-*/
-
 /* parse the json stream and return a pointer to the hashtable containing
    the values of the discovered 'tokens', or return NULL if the data
-   cannot be parsed.  */
+   cannot be parsed;
+
+   the format of the data follows:
+
+       {
+         "containerS": [
+           {
+             "command": [
+               "docker-entrypoint.sh",
+               "redis-server"
+             ],
+             "containerrunning": false,
+             "createdat": "2020-03-28T15:26:32+01:00",
+             "id": "5250ca78f8a28eeed8ebcd1c92c4fac9be8afc343c15071ed7a5b0a31c7d48db",
+             "image": "docker.io/library/redis:latest",
+             "imageid": "f0453552d7f26fc38ffc05fa034aa7a7bc6fbb01bc7bc5a9e4b3c0ab87068627",
+             "mounts": [
+                ...
+             ],
+             "names": "srv-redis-1",
+             ...
+             "status": "exited"
+           },
+           {
+             ...
+           },
+           {
+             ...
+           },
+         ]
+       }   */
 
 static hashtable_t *
 json_parser (char *json)
@@ -315,10 +315,9 @@ json_parser (char *json)
 
       if (vals[0] && vals[1] && vals[2])
 	{
-	  //printf ("\n[block]\n");
-	  //for (size_t j = 0; j < sizeof (keys) / sizeof (char *); j++)
-	  //  printf ("\"%s\": \"%s\"\n", keys[j], vals[j]);
-	  //printf ("\n");
+	  dbg ("new container found:\n");
+	  for (size_t j = 0; j < sizeof (keys) / sizeof (char *); j++)
+	    dbg (" * \"%s\": \"%s\"\n", keys[j], vals[j]);
 	  if (STREQ (*containerrunning, "true"))
 	      counter_put (hashtable, *names, 1);
 	  vals[0] = vals[1] = vals[2] = NULL;
@@ -372,8 +371,6 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
         }
       fprintf (stream, "containers_total=%u", hashtable->elements);
       fclose (stream);
-
-      //*perfdata = xasprintf ("containers_total=%u", *count);
     }
 
   counter_free (hashtable);
