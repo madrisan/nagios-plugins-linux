@@ -29,7 +29,8 @@ noinst_HEADERS = \
 	getenv.h \
 	kernelver.h \
 	interrupts.h \
-	json.h \
+	jsmn.h \
+	json_helpers.h \
 	logging.h \
 	meminfo.h \
 	mountlist.h \

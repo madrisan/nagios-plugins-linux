@@ -32,6 +32,7 @@
 
 #include "common.h"
 #include "collection.h"
+#include "json_helpers.h"
 #include "logging.h"
 #include "messages.h"
 #include "string-macros.h"
@@ -40,7 +41,7 @@
 
 /* Hide all jsmn API symbols by making them static */
 #define JSMN_STATIC
-#include "json.h"
+#include "jsmn.h"
 
 typedef struct podman_varlink
 {
@@ -214,45 +215,6 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
   return result;
 }
 
-static int
-json_token_streq (const char *json, jsmntok_t * tok, const char *s)
-{
-  if (tok->type == JSMN_STRING && (int) strlen (s) == tok->end - tok->start &&
-      strncmp (json + tok->start, s, tok->end - tok->start) == 0)
-    return 0;
-
-  return -1;
-}
-
-static char *
-json_token_tostr (char *json, jsmntok_t * t)
-{
-  json[t->end] = '\0';
-  return json + t->start;
-}
-
-static jsmntok_t *
-json_tokenise (const char *json, size_t *ntoken)
-{
-  jsmn_parser parser;
-  int r, ret;
-
-  jsmn_init (&parser);
-  r = jsmn_parse (&parser, json, strlen (json), NULL, 0);
-  if (r < 0)
-    plugin_error (STATE_UNKNOWN, 0, "jsmn_parse: invalid JSON string");
-
-  dbg ("number of json tokens: %d\n", r);
-  jsmntok_t *tokens = xnmalloc (r, sizeof (jsmntok_t));
-
-  jsmn_init (&parser);
-  ret = jsmn_parse (&parser, json, strlen (json), tokens, r);
-  assert (ret >= 0);
-
-  *ntoken = r;
-  return tokens;
-}
-
 /*
 {
   "containerS": [
@@ -299,6 +261,9 @@ json_parser (char *json)
     **containerrunning = &vals[0], **names = &vals[1];
 
   tokens = json_tokenise (json, &ntoken);
+  if (NULL == tokens)
+    plugin_error (STATE_UNKNOWN, 0, "invalid or corrupted JSON data");
+
   dbg ("number of json tokens: %lu\n", ntoken);
 
   hashtable = counter_create ();
@@ -360,6 +325,7 @@ json_parser (char *json)
 	}
     }
 
+  free (json_tokenise);
   return hashtable;
 }
 
