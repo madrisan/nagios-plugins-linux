@@ -353,7 +353,6 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
   if (image)
     {
       hashable_t *np = counter_lookup (hashtable, image);
-      assert (NULL != np);
       running_containers = np ? np->count : 0;
       *perfdata = xasprintf ("containers_%s=%u", image, running_containers);
     }
