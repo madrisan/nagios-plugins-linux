@@ -66,6 +66,10 @@ usage (FILE * out)
 	 "(Nagios may truncate output)\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
+  fputs (USAGE_EXAMPLES, out);
+  fprintf (out, "  %s -w 100 -c 120\n", program_name);
+  fprintf (out, "  %s --image \"docker.io/library/nginx:latest\" -c 5:\n",
+	   program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }

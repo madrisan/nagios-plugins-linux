@@ -215,6 +215,18 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
   return result;
 }
 
+static bool
+array_is_full (char *vals[], size_t keys_num)
+{
+  for (size_t i = 0; i < keys_num && vals; i++)
+    {
+      dbg ("var[%lu] = %s\n", i, vals[i]);
+      if (NULL == vals[i])
+	return false;
+    }
+  return true;
+}
+
 /* parse the json stream and return a pointer to the hashtable containing
    the values of the discovered 'tokens', or return NULL if the data
    cannot be parsed;
@@ -256,9 +268,10 @@ json_parser (char *json)
   jsmntok_t *tokens;
   size_t i, ntoken, level = 0;
 
-  char *keys[] = { "containerrunning", "names", "status" },
-    *vals[] = { NULL, NULL, NULL },
-    **containerrunning = &vals[0], **names = &vals[1];
+  char *keys[] = { "containerrunning", "image", "names", "status" },
+    *vals[] = { NULL, NULL, NULL, NULL },
+    **containerrunning = &vals[0], **image = &vals[1];
+  size_t keys_num = sizeof (keys) / sizeof (char *);
 
   tokens = json_tokenise (json, &ntoken);
   if (NULL == tokens)
@@ -293,7 +306,7 @@ json_parser (char *json)
 	  if ((1 == level) && (0 != json_token_streq (json, t, "containerS")))
 	    plugin_error (STATE_UNKNOWN, 0,
 			  "json_parser: expected string \"containerS\" not found");
-	  for (size_t j = 0; j < sizeof (keys) / sizeof (char *); j++)
+	  for (size_t j = 0; j < keys_num; j++)
 	    {
 	      if (0 == json_token_streq (json, t, keys[j]))
 		{
@@ -313,14 +326,16 @@ json_parser (char *json)
 
 	}
 
-      if (vals[0] && vals[1] && vals[2])
+      if (array_is_full (vals, keys_num))
 	{
-	  dbg ("new container found:\n");
-	  for (size_t j = 0; j < sizeof (keys) / sizeof (char *); j++)
-	    dbg (" * \"%s\": \"%s\"\n", keys[j], vals[j]);
 	  if (STREQ (*containerrunning, "true"))
-	      counter_put (hashtable, *names, 1);
-	  vals[0] = vals[1] = vals[2] = NULL;
+	    counter_put (hashtable, *image, 1);
+	  dbg ("new container found:\n");
+	  for (size_t j = 0; j < keys_num; j++)
+	    {
+	      dbg (" * \"%s\": \"%s\"\n", keys[j], vals[j]);
+	      vals[j] = NULL;
+	    }
 	}
     }
 
