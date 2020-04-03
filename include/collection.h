@@ -40,7 +40,7 @@ extern "C"
   hashtable_t *counter_create (void);
   void counter_free (hashtable_t * hashtable);
 
-  hashable_t *counter_lookup (const hashtable_t * hashtable, const char *s);
+  hashable_t *counter_lookup (const hashtable_t * hashtable, const char *key);
   hashable_t *counter_put (hashtable_t * hashtable, const char *key,
 			   unsigned long increment);
   unsigned int counter_get_elements (const hashtable_t * hashtable);

@@ -363,8 +363,6 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
 
   hashtable = json_parser (json);
 
-  *count = running_containers;
-
   if (image)
     {
       hashable_t *np = counter_lookup (hashtable, image);
@@ -378,14 +376,17 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
       FILE *stream = open_memstream (perfdata, &size);
       for (unsigned int j = 0; j < hashtable->uniq; j++)
         {
-          hashable_t *np = counter_lookup (hashtable, hashtable->keys[j]);
-          assert (NULL != np);
+	  hashable_t *np = counter_lookup (hashtable, hashtable->keys[j]);
+	  assert (NULL != np);
           fprintf (stream, "containers_%s=%lu ",
                    hashtable->keys[j], np->count);
         }
       fprintf (stream, "containers_total=%u", hashtable->elements);
       fclose (stream);
     }
+
+  dbg ("running containers: %u\n", running_containers);
+  *count = running_containers;
 
   counter_free (hashtable);
   free (errmsg);
