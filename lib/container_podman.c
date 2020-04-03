@@ -262,7 +262,7 @@ array_is_full (char *vals[], size_t keys_num)
        }   */
 
 static void
-json_parser (char *json, hashtable_t **ht_running, hashtable_t **ht_exited)
+json_parser (char *json, hashtable_t ** ht_running, hashtable_t ** ht_exited)
 {
   jsmntok_t *tokens;
   size_t i, ntoken, level = 0;
@@ -299,7 +299,7 @@ json_parser (char *json, hashtable_t **ht_running, hashtable_t **ht_exited)
       switch (t->type)
 	{
 	case JSMN_OBJECT:
-	  level++; /* FIXME: should be decremented at each object end */
+	  level++;		/* FIXME: should be decremented at each object end */
 	  break;
 
 	case JSMN_STRING:
@@ -367,15 +367,14 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
   if (image)
     {
       hashable_t *np_exited = counter_lookup (ht_exited, image),
-		 *np_running = counter_lookup (ht_running, image);
+	*np_running = counter_lookup (ht_running, image);
 
       exited_containers = np_exited ? np_exited->count : 0;
 
       running_containers = np_running ? np_running->count : 0;
-      *perfdata = xasprintf (
-	  "containers_exited_%s=%u containers_running_%s=%u",
-	  image, exited_containers,
-	  image, running_containers);
+      *perfdata =
+	xasprintf ("containers_exited_%s=%u containers_running_%s=%u", image,
+		   exited_containers, image, running_containers);
     }
   else
     {
