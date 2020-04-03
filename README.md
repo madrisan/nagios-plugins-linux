@@ -40,6 +40,7 @@ Here is the list of the available plugins:
 * **check_nbprocs** - displays the number of running processes per user 
 * **check_network** - displays some network interfaces statistics 
 * **check_paging** - checks the memory and swap paging 
+* **check_podman** - checks the number of running podman containers :new: (:warning: *alpha*, requires *libvarlink*) 
 * **check_readonlyfs** - checks for readonly filesystems 
 * **check_swap** - checks the swap usage 
 * **check_tcpcount** - checks the tcp network usage 
