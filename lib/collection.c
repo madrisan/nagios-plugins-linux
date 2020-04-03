@@ -56,18 +56,22 @@ counter_create (void)
   return hashtable;
 }
 
-/* lookup: look for s in hash table */
+/* lookup: look for a key in hash table */
 
 hashable_t *
-counter_lookup (const hashtable_t * hashtable, const char *s)
+counter_lookup (const hashtable_t * hashtable, const char *key)
 {
   hashable_t *np;
 
-  for (np = hashtable->table[hash (s)]; np != NULL; np = np->next)
-    if (STREQ (s, np->key))
-      return np;		/* found */
+  for (np = hashtable->table[hash (key)]; np != NULL; np = np->next)
+    if (STREQ (key, np->key))
+      {
+	dbg ("hashtable lookup: found key \"%s\"\n", key);
+	return np;
+      }
 
-  return NULL;			/* not found */
+  dbg ("hashtable lookup: key \"%s\" not found\n", key);
+  return NULL;
 }
 
 /* Insert the element 'key' into the hash table.
@@ -81,6 +85,7 @@ counter_put (hashtable_t * hashtable, const char *key, unsigned long increment)
 
   if ((np = counter_lookup (hashtable, key)) == NULL)
     {				/* not found */
+      dbg ("hashtable: adding a new key \"%s\"\n", key);
       np = xmalloc (sizeof (*np));
       np->key = xstrdup (key);
 
@@ -101,8 +106,12 @@ counter_put (hashtable_t * hashtable, const char *key, unsigned long increment)
       hashtable->uniq++;
     }
   else
-    /* already there */
-    np->count += increment;
+    {
+      /* already there */
+      dbg ("hashtable: the key \"%s\" is already present, "
+	   "counter incremented: %lu\n", key, np->count);
+      np->count += increment;
+    }
 
   hashtable->elements++;
 
