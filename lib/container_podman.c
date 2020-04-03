@@ -261,10 +261,9 @@ array_is_full (char *vals[], size_t keys_num)
          ]
        }   */
 
-static hashtable_t *
-json_parser (char *json)
+static void
+json_parser (char *json, hashtable_t **ht_running, hashtable_t **ht_exited)
 {
-  hashtable_t *hashtable;
   jsmntok_t *tokens;
   size_t i, ntoken, level = 0;
 
@@ -279,7 +278,8 @@ json_parser (char *json)
 
   dbg ("number of json tokens: %lu\n", ntoken);
 
-  hashtable = counter_create ();
+  *ht_exited = counter_create ();
+  *ht_running = counter_create ();
 
   for (i = 0; i < ntoken; i++)
     {
@@ -329,7 +329,9 @@ json_parser (char *json)
       if (array_is_full (vals, keys_num))
 	{
 	  if (STREQ (*containerrunning, "true"))
-	    counter_put (hashtable, *image, 1);
+	    counter_put (*ht_running, *image, 1);
+	  else
+	    counter_put (*ht_exited, *image, 1);
 	  dbg ("new container found:\n");
 	  for (size_t j = 0; j < keys_num; j++)
 	    {
@@ -340,7 +342,6 @@ json_parser (char *json)
     }
 
   free (tokens);
-  return hashtable;
 }
 
 int
@@ -349,9 +350,9 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
 {
   const char *varlinkmethod = "io.podman.GetContainersByStatus";
 
-  hashtable_t *hashtable;
+  hashtable_t *ht_running, *ht_exited;
   char *errmsg = NULL, *json;
-  unsigned int running_containers = 0;
+  unsigned int running_containers = 0, exited_containers = 0;
 
   json = podman_varlink_get (pv, varlinkmethod, &errmsg);
   if (NULL == json)
@@ -361,34 +362,47 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
     }
   dbg ("varlink %s returned: %s", varlinkmethod, json);
 
-  hashtable = json_parser (json);
+  json_parser (json, &ht_running, &ht_exited);
 
   if (image)
     {
-      hashable_t *np = counter_lookup (hashtable, image);
-      running_containers = np ? np->count : 0;
-      *perfdata = xasprintf ("containers_%s=%u", image, running_containers);
+      hashable_t *np_exited = counter_lookup (ht_exited, image),
+		 *np_running = counter_lookup (ht_running, image);
+
+      exited_containers = np_exited ? np_exited->count : 0;
+
+      running_containers = np_running ? np_running->count : 0;
+      *perfdata = xasprintf (
+	  "containers_exited_%s=%u containers_running_%s=%u",
+	  image, exited_containers,
+	  image, running_containers);
     }
   else
     {
-      running_containers = counter_get_elements (hashtable);
+      exited_containers = counter_get_elements (ht_exited);
+      running_containers = counter_get_elements (ht_running);
+
       size_t size;
       FILE *stream = open_memstream (perfdata, &size);
-      for (unsigned int j = 0; j < hashtable->uniq; j++)
-        {
-	  hashable_t *np = counter_lookup (hashtable, hashtable->keys[j]);
+      for (unsigned int j = 0; j < ht_running->uniq; j++)
+	{
+	  hashable_t *np = counter_lookup (ht_running, ht_running->keys[j]);
 	  assert (NULL != np);
-          fprintf (stream, "containers_%s=%lu ",
-                   hashtable->keys[j], np->count);
-        }
-      fprintf (stream, "containers_total=%u", hashtable->elements);
+	  fprintf (stream, "containers_%s=%lu ",
+		   ht_running->keys[j], np->count);
+	}
+      fprintf (stream,
+	       "containers_exited_total=%u containers_running_total=%u",
+	       exited_containers, ht_running->elements);
       fclose (stream);
     }
 
-  dbg ("running containers: %u\n", running_containers);
+  dbg ("running containers: %u, exited: %u \n",
+       running_containers, exited_containers);
   *count = running_containers;
 
-  counter_free (hashtable);
+  counter_free (ht_running);
+  counter_free (ht_exited);
   free (errmsg);
 
   return 0;
