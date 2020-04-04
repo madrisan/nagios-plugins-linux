@@ -47,6 +47,7 @@ AM_LDFLAGS = $(LIBPROCPS_LIBS)
 test_programs = \
 	tslibcontainer_docker_count \
 	tslibcontainer_docker_memory \
+	tslibcontainer_podman \
 	tslibkernelver \
 	tslibmeminfo_conversions \
 	tslibmeminfo_interface \
@@ -84,6 +85,9 @@ tslibcontainer_docker_count_LDADD = $(LDADDS)
 
 tslibcontainer_docker_memory_SOURCES = $(test_utils) tslibcontainer_docker_memory.c
 tslibcontainer_docker_memory_LDADD = $(LDADDS)
+
+tslibcontainer_podman_SOURCES = $(test_utils) tslibcontainer_podman.c
+tslibcontainer_podman_LDADD = $(LDADDS)
 
 tslibkernelver_SOURCES = $(test_utils) tslibkernelver.c
 tslibkernelver_LDADD = $(LDADDS)
@@ -151,6 +155,7 @@ TESTS = $(test_programs)
 
 dist_noinst_DATA = \
 	ts_container_docker.data \
+	ts_container_podman_GetContainersByStatus.data \
 	ts_procmeminfo.data \
 	ts_procstat.data \
 	ts_procvmstat.data \
