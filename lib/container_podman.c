@@ -49,6 +49,8 @@ typedef struct podman_varlink
   VarlinkObject *parameters;
 } podman_varlink_t;
 
+#ifndef NPL_TESTING
+
 static long
 podman_varlink_check_event (VarlinkConnection * connection, char **err)
 {
@@ -170,9 +172,9 @@ podman_varlink_unref (struct podman_varlink *pv)
   return NULL;
 }
 
-static char *
+static int
 podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
-		    char **err)
+		    char **json, char **err)
 {
   char *result = NULL;
   long ret;
@@ -186,7 +188,7 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
       *err =
 	xasprintf ("varlink_object_new: %s",
 		   varlink_error_string (labs (ret)));
-      return NULL;
+      return ret;
     }
   assert (pv->parameters);
 
@@ -198,22 +200,25 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
       *err =
 	xasprintf ("varlink_connection_call: %s",
 		   varlink_error_string (labs (ret)));
-      return NULL;
+      return ret;
     }
 
   ret = podman_varlink_check_event (pv->connection, err);
   if (ret < 0)
-    return NULL;
+    return ret;
 
   ret = varlink_object_to_json (out, &result);
   if (ret < 0)
     {
       varlink_object_unref (out);
-      return NULL;
+      return ret;
     }
 
-  return result;
+  *json = result;
+  return 0;
 }
+
+#endif /* NPL_TESTING */
 
 static bool
 array_is_full (char *vals[], size_t keys_num)
@@ -284,6 +289,7 @@ json_parser (char *json, hashtable_t ** ht_running, hashtable_t ** ht_exited)
     **containerrunning = &vals[0], **image = &vals[1];
   size_t keys_num = sizeof (keys) / sizeof (char *);
 
+  assert (NULL != json);
   tokens = json_tokenise (json, &ntoken);
   if (NULL == tokens)
     plugin_error (STATE_UNKNOWN, 0, "invalid or corrupted JSON data");
@@ -365,9 +371,10 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
   hashtable_t *ht_running, *ht_exited;
   char *errmsg = NULL, *json;
   unsigned int running_containers = 0, exited_containers = 0;
+  int ret;
 
-  json = podman_varlink_get (pv, varlinkmethod, &errmsg);
-  if (NULL == json)
+  ret = podman_varlink_get (pv, varlinkmethod, &json, &errmsg);
+  if (ret < 0)
     {
       podman_varlink_unref (pv);
       plugin_error (STATE_UNKNOWN, 0, "%s", errmsg);
