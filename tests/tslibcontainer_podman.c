@@ -43,7 +43,7 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
   char *filename = NPL_TEST_PATH_PODMAN_GETCONTAINERSBYSTATUS_JSON;
 
   *json = test_fstringify (filename);
-  if (NULL == json)
+  if (NULL == *json)
     return EXIT_AM_HARDFAIL;
 
   return 0;
