@@ -26,7 +26,9 @@
 #include <assert.h>
 #include <errno.h>
 #include <unistd.h>
-#include <varlink.h>
+#ifndef NPL_TESTING
+# include <varlink.h>
+#endif
 #include <string.h>
 #include <sys/epoll.h>
 
@@ -43,13 +45,13 @@
 #define JSMN_STATIC
 #include "jsmn.h"
 
+#ifndef NPL_TESTING
+
 typedef struct podman_varlink
 {
   VarlinkConnection *connection;
   VarlinkObject *parameters;
 } podman_varlink_t;
-
-#ifndef NPL_TESTING
 
 static long
 podman_varlink_check_event (VarlinkConnection * connection, char **err)
