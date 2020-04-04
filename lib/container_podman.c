@@ -227,6 +227,18 @@ array_is_full (char *vals[], size_t keys_num)
   return true;
 }
 
+/* return a string valid for Nagios performance data output */
+
+static char*
+image_name_normalize (const char *image)
+{
+  char *nstring = xstrdup (basename (image));
+  for (size_t i = 0; i < strlen (nstring); i++)
+    if (nstring[i] == ':')
+      nstring[i] = '_';
+  return nstring;
+}
+
 /* parse the json stream and return a pointer to the hashtable containing
    the values of the discovered 'tokens', or return NULL if the data
    cannot be parsed;
@@ -366,6 +378,7 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
 
   if (image)
     {
+      char *image_norm = image_name_normalize (image);
       hashable_t *np_exited = counter_lookup (ht_exited, image),
 	*np_running = counter_lookup (ht_running, image);
 
@@ -373,8 +386,10 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
 
       running_containers = np_running ? np_running->count : 0;
       *perfdata =
-	xasprintf ("containers_exited_%s=%u containers_running_%s=%u", image,
-		   exited_containers, image, running_containers);
+	xasprintf ("containers_exited_%s=%u containers_running_%s=%u",
+		   image_norm, exited_containers,
+		   image_norm, running_containers);
+      free (image_norm);
     }
   else
     {
@@ -385,13 +400,14 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
       FILE *stream = open_memstream (perfdata, &size);
       for (unsigned int j = 0; j < ht_running->uniq; j++)
 	{
+          char *image_norm = image_name_normalize (ht_running->keys[j]);
 	  hashable_t *np = counter_lookup (ht_running, ht_running->keys[j]);
 	  assert (NULL != np);
-	  fprintf (stream, "containers_%s=%lu ",
-		   ht_running->keys[j], np->count);
+	  fprintf (stream, "%s=%lu ", image_norm, np->count);
+	  free (image_norm);
 	}
       fprintf (stream,
-	       "containers_exited_total=%u containers_running_total=%u",
+	       "containers_exited=%u containers_running=%u",
 	       exited_containers, ht_running->elements);
       fclose (stream);
     }
