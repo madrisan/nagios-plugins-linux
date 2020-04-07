@@ -23,7 +23,30 @@ extern "C"
 {
 #endif
 
+#ifdef CONTAINER_PODMAN_PRIVATE
+
+  typedef struct podman_varlink
+  {
+    VarlinkConnection *connection;
+    VarlinkObject *parameters;
+  } podman_varlink_t;
+
+  long podman_varlink_callback (VarlinkConnection * connection,
+				const char *error, VarlinkObject * parameters,
+				uint64_t flags, void *userdata);
+
+  long podman_varlink_check_event (VarlinkConnection * connection,
+				   char **err);
+
+  int podman_varlink_get (struct podman_varlink *pv,
+			  const char *varlinkmethod, char *param, char **json,
+			  char **err);
+
+#else
+
   struct podman_varlink;
+
+#endif
 
   /* Allocates space for a new varlink object.
    * Returns 0 if all went ok. Errors are returned as negative values.  */
@@ -33,8 +56,11 @@ extern "C"
    * reaches zero, the resources of the context will be released.  */
   struct podman_varlink *podman_varlink_unref (struct podman_varlink *pv);
 
-  int podman_running_containers (struct podman_varlink *pv, unsigned int *count,
-				 const char *image, char **perfdata, bool verbose);
+  int podman_running_containers (struct podman_varlink *pv,
+				 unsigned int *count, const char *image,
+				 char **perfdata, bool verbose);
+  int podman_memory (struct podman_varlink *pv, char **perfdata,
+		     bool verbose);
 
 #ifdef __cplusplus
 }
