@@ -29,7 +29,9 @@
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
+#include "units.h"
 #include "xasprintf.h"
+#include "xalloc.h"
 
 static const char *program_copyright =
   "Copyright (C) 2020 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
@@ -37,6 +39,7 @@ static const char *program_copyright =
 static struct option const longopts[] = {
   {(char *) "image", required_argument, NULL, 'i'},
   {(char *) "varlink-address", required_argument, NULL, 'a'},
+  {(char *) "byte", no_argument, NULL, 'b'},
   {(char *) "verbose", no_argument, NULL, 'v'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},

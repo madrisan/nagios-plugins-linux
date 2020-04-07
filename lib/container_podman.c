@@ -22,6 +22,7 @@
 #endif
 
 #define EPOLL_TIMEOUT 100
+#define CONTAINER_PODMAN_PRIVATE
 
 #include <assert.h>
 #include <errno.h>
@@ -33,27 +34,15 @@
 #include <sys/epoll.h>
 
 #include "common.h"
-#include "collection.h"
-#include "json_helpers.h"
-#include "logging.h"
+#include "container_podman.h"
 #include "messages.h"
-#include "string-macros.h"
-#include "xalloc.h"
 #include "xasprintf.h"
 
-/* Hide all jsmn API symbols by making them static */
-#define JSMN_STATIC
-#include "jsmn.h"
+#undef CONTAINER_PODMAN_PRIVATE
 
 #ifndef NPL_TESTING
 
-typedef struct podman_varlink
-{
-  VarlinkConnection *connection;
-  VarlinkObject *parameters;
-} podman_varlink_t;
-
-static long
+long
 podman_varlink_check_event (VarlinkConnection * connection, char **err)
 {
   struct epoll_event events;
@@ -110,7 +99,7 @@ free_fd:
   return ret;
 }
 
-static long
+long
 podman_varlink_callback (VarlinkConnection * connection,
 			 const char *error,
 			 VarlinkObject * parameters,
@@ -174,17 +163,18 @@ podman_varlink_unref (struct podman_varlink *pv)
   return NULL;
 }
 
-static int
+int
 podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
-		    char **json, char **err)
+		    char *param, char **json, char **err)
 {
-  char *result = NULL;
   long ret;
   VarlinkObject *out;
 
   assert (pv->connection);
-
-  ret = varlink_object_new (&pv->parameters);
+  if (NULL == param)
+    ret = varlink_object_new (&pv->parameters);
+  else
+    ret = varlink_object_new_from_json (&pv->parameters, param);
   if (ret < 0)
     {
       *err =
@@ -209,225 +199,14 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
   if (ret < 0)
     return ret;
 
-  ret = varlink_object_to_json (out, &result);
+  ret = varlink_object_to_json (out, json);
   if (ret < 0)
     {
       varlink_object_unref (out);
       return ret;
     }
 
-  *json = result;
   return 0;
 }
 
-#endif /* NPL_TESTING */
-
-static bool
-array_is_full (char *vals[], size_t keys_num)
-{
-  for (size_t i = 0; i < keys_num && vals; i++)
-    {
-      dbg ("var[%lu] = %s\n", i, vals[i]);
-      if (NULL == vals[i])
-	return false;
-    }
-  return true;
-}
-
-/* return a string valid for Nagios performance data output */
-
-static char*
-image_name_normalize (const char *image)
-{
-  char *nstring = xstrdup (basename (image));
-  for (size_t i = 0; i < strlen (nstring); i++)
-    if (nstring[i] == ':')
-      nstring[i] = '_';
-  return nstring;
-}
-
-/* parse the json stream and return a pointer to the hashtable containing
-   the values of the discovered 'tokens', or return NULL if the data
-   cannot be parsed;
-
-   the format of the data follows:
-
-       {
-         "containerS": [
-           {
-             "command": [
-               "docker-entrypoint.sh",
-               "redis-server"
-             ],
-             "containerrunning": false,
-             "createdat": "2020-03-28T15:26:32+01:00",
-             "id": "5250ca78f8a28eeed8ebcd1c92c4fac9be8afc343c15071ed7a5b0a31c7d48db",
-             "image": "docker.io/library/redis:latest",
-             "imageid": "f0453552d7f26fc38ffc05fa034aa7a7bc6fbb01bc7bc5a9e4b3c0ab87068627",
-             "mounts": [
-                ...
-             ],
-             "names": "srv-redis-1",
-             ...
-             "status": "exited"
-           },
-           {
-             ...
-           },
-           {
-             ...
-           },
-         ]
-       }   */
-
-static void
-json_parser (char *json, hashtable_t ** ht_running, hashtable_t ** ht_exited)
-{
-  jsmntok_t *tokens;
-  size_t i, ntoken, level = 0;
-
-  char *keys[] = { "containerrunning", "image", "names", "status" },
-    *vals[] = { NULL, NULL, NULL, NULL },
-    **containerrunning = &vals[0], **image = &vals[1];
-  size_t keys_num = sizeof (keys) / sizeof (char *);
-
-  assert (NULL != json);
-  tokens = json_tokenise (json, &ntoken);
-  if (NULL == tokens)
-    plugin_error (STATE_UNKNOWN, 0, "invalid or corrupted JSON data");
-
-  dbg ("number of json tokens: %lu\n", ntoken);
-
-  *ht_exited = counter_create ();
-  *ht_running = counter_create ();
-
-  for (i = 0; i < ntoken; i++)
-    {
-      jsmntok_t *t = &tokens[i];
-
-      // should never reach uninitialized tokens
-      assert (t->start != -1 && t->end != -1);
-
-      dbg ("[%lu] %s: \"%.*s\"\n", i,
-	   (t->type == JSMN_ARRAY) ? "JSMN_ARRAY" :
-	   ((t->type == JSMN_OBJECT) ? "JSMN_OBJECT" :
-	    ((t->type == JSMN_STRING) ? "JSMN_STRING" :
-	     ((t->type ==
-	       JSMN_UNDEFINED) ? "JSMN_UNDEFINED" : "JSMN_PRIMITIVE"))),
-	   t->end - t->start, json + t->start);
-
-      switch (t->type)
-	{
-	case JSMN_OBJECT:
-	  level++;		/* FIXME: should be decremented at each object end */
-	  break;
-
-	case JSMN_STRING:
-	  if ((1 == level) && (0 != json_token_streq (json, t, "containerS")))
-	    plugin_error (STATE_UNKNOWN, 0,
-			  "json_parser: expected string \"containerS\" not found");
-	  for (size_t j = 0; j < keys_num; j++)
-	    {
-	      if (0 == json_token_streq (json, t, keys[j]))
-		{
-		  vals[j] = json_token_tostr (json, &tokens[++i]);
-		  dbg
-		    ("found token \"%s\" with value \"%s\" at position %d\n",
-		     keys[j], vals[j], t->start);
-		  break;
-		}
-	    }
-	  break;
-
-	default:
-	  if (0 == level)
-	    plugin_error (STATE_UNKNOWN, 0,
-			  "json_parser: root element must be an object");
-
-	}
-
-      if (array_is_full (vals, keys_num))
-	{
-	  if (STREQ (*containerrunning, "true"))
-	    counter_put (*ht_running, *image, 1);
-	  else
-	    counter_put (*ht_exited, *image, 1);
-	  dbg ("new container found:\n");
-	  for (size_t j = 0; j < keys_num; j++)
-	    {
-	      dbg (" * \"%s\": \"%s\"\n", keys[j], vals[j]);
-	      vals[j] = NULL;
-	    }
-	}
-    }
-
-  free (tokens);
-}
-
-int
-podman_running_containers (struct podman_varlink *pv, unsigned int *count,
-			   const char *image, char **perfdata, bool verbose)
-{
-  const char *varlinkmethod = "io.podman.GetContainersByStatus";
-
-  hashtable_t *ht_running, *ht_exited;
-  char *errmsg = NULL, *json;
-  unsigned int running_containers = 0, exited_containers = 0;
-  int ret;
-
-  ret = podman_varlink_get (pv, varlinkmethod, &json, &errmsg);
-  if (ret < 0)
-    {
-      podman_varlink_unref (pv);
-      plugin_error (STATE_UNKNOWN, 0, "%s", errmsg);
-    }
-  dbg ("varlink %s returned: %s", varlinkmethod, json);
-
-  json_parser (json, &ht_running, &ht_exited);
-
-  if (image)
-    {
-      char *image_norm = image_name_normalize (image);
-      hashable_t *np_exited = counter_lookup (ht_exited, image),
-	*np_running = counter_lookup (ht_running, image);
-
-      exited_containers = np_exited ? np_exited->count : 0;
-
-      running_containers = np_running ? np_running->count : 0;
-      *perfdata =
-	xasprintf ("containers_exited_%s=%u containers_running_%s=%u",
-		   image_norm, exited_containers,
-		   image_norm, running_containers);
-      free (image_norm);
-    }
-  else
-    {
-      exited_containers = counter_get_elements (ht_exited);
-      running_containers = counter_get_elements (ht_running);
-
-      size_t size;
-      FILE *stream = open_memstream (perfdata, &size);
-      for (unsigned int j = 0; j < ht_running->uniq; j++)
-	{
-          char *image_norm = image_name_normalize (ht_running->keys[j]);
-	  hashable_t *np = counter_lookup (ht_running, ht_running->keys[j]);
-	  assert (NULL != np);
-	  fprintf (stream, "%s=%lu ", image_norm, np->count);
-	  free (image_norm);
-	}
-      fprintf (stream,
-	       "containers_exited=%u containers_running=%u",
-	       exited_containers, ht_running->elements);
-      fclose (stream);
-    }
-
-  dbg ("running containers: %u, exited: %u \n",
-       running_containers, exited_containers);
-  *count = running_containers;
-
-  counter_free (ht_running);
-  counter_free (ht_exited);
-  free (errmsg);
-
-  return 0;
-}
+#endif		/* NPL_TESTING */
