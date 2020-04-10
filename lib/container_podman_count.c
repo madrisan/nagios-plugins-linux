@@ -45,30 +45,6 @@
 
 #undef CONTAINER_PODMAN_PRIVATE
 
-static bool
-array_is_full (char *vals[], size_t keys_num)
-{
-  for (size_t i = 0; i < keys_num && vals; i++)
-    {
-      dbg ("var[%lu] = %s\n", i, vals[i]);
-      if (NULL == vals[i])
-	return false;
-    }
-  return true;
-}
-
-/* return a string valid for Nagios performance data output */
-
-static char*
-image_name_normalize (const char *image)
-{
-  char *nstring = xstrdup (basename (image));
-  for (size_t i = 0; i < strlen (nstring); i++)
-    if (nstring[i] == ':')
-      nstring[i] = '_';
-  return nstring;
-}
-
 /* parse the json stream and return a pointer to the hashtable containing
    the values of the discovered 'tokens', or return NULL if the data
    cannot be parsed;
@@ -170,7 +146,7 @@ json_parser (char *json, const char *root_key, hashtable_t ** ht_running,
 			  "%s: root element must be an object", __func__);
 	}
 
-      if (array_is_full (vals, keys_num))
+      if (podman_array_is_full (vals, keys_num))
 	{
 	  if (STREQ (*containerrunning, "true"))
 	    counter_put (*ht_running, *image, 1);
@@ -211,7 +187,7 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
 
   if (image)
     {
-      char *image_norm = image_name_normalize (image);
+      char *image_norm = podman_image_name_normalize (image);
       hashable_t *np_exited = counter_lookup (ht_exited, image),
 	*np_running = counter_lookup (ht_running, image);
 
@@ -233,7 +209,7 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
       FILE *stream = open_memstream (perfdata, &size);
       for (unsigned int j = 0; j < ht_running->uniq; j++)
 	{
- 	  char *image_norm = image_name_normalize (ht_running->keys[j]);
+ 	  char *image_norm = podman_image_name_normalize (ht_running->keys[j]);
 	  hashable_t *np = counter_lookup (ht_running, ht_running->keys[j]);
 	  assert (NULL != np);
 	  fprintf (stream, "%s=%lu ", image_norm, np->count);

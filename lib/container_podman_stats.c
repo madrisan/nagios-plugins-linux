@@ -47,28 +47,6 @@
 
 #undef CONTAINER_PODMAN_PRIVATE
 
-/* return a string valid for Nagios performance data output */
-
-static char*
-image_name_normalize (const char *image)
-{
-  char *nstring = xstrdup (basename (image));
-  for (size_t i = 0; i < strlen (nstring); i++)
-    if (nstring[i] == ':')
-      nstring[i] = '_';
-  return nstring;
-}
-
-/* Return the short ID in the 'shortid' buffer. This buffer must have a
-   size PODMAN_SHORTID_LEN   */
-
-static void
-podman_shortid (const char *id, char *shortid)
-{
-  memcpy (shortid, id, PODMAN_SHORTID_LEN - 1);
-  shortid[PODMAN_SHORTID_LEN - 1] = '\0';
-}
-
 /* parse the json stream containing the statistics for the container
    with the given id. The format of the data follows:
 
@@ -293,7 +271,7 @@ json_parser_list (struct podman_varlink *pv, unsigned int *containers,
 			  "%s: root element must be an object", __func__);
 	}
 
-      if (vals[0] && vals[1] && vals[2])
+      if (podman_array_is_full (vals, keys_num))
 	{
 	  if (STREQ (*containerrunning, "true"))
 	    {
@@ -321,7 +299,7 @@ json_parser_list (struct podman_varlink *pv, unsigned int *containers,
   FILE *stream = open_memstream (perfdata, &size);
   for (unsigned int j = 0; j < counter_get_unique_elements (hashtable); j++)
     {
-      char *image_norm = image_name_normalize (hashtable->keys[j]);
+      char *image_norm = podman_image_name_normalize (hashtable->keys[j]);
       hashable_t *np = counter_lookup (hashtable, hashtable->keys[j]);
       assert (NULL != np);
       fprintf (stream, "%s=%lukB ", image_norm, (np->count / 1000));
