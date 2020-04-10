@@ -156,6 +156,8 @@ TESTS = $(test_programs)
 dist_noinst_DATA = \
 	ts_container_docker.data \
 	ts_container_podman_GetContainersByStatus.data \
+	ts_container_podman_GetContainerStats.data \
+	ts_container_podman_ListContainers.data \
 	ts_procmeminfo.data \
 	ts_procstat.data \
 	ts_procvmstat.data \

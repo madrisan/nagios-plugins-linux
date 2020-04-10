@@ -57,7 +57,8 @@ endif
 if HAVE_LIBVARLINK
   libutils_a_SOURCES += \
 	container_podman.c \
-	container_podman_count.c
+	container_podman_count.c \
+	container_podman_stats.c
 endif
 
 if HAVE_LIBPROCPS

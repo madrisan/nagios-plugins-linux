@@ -17,6 +17,7 @@
 #define _CONTAINER_PODMAN_H
 
 #include "system.h"
+#include "units.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -24,6 +25,11 @@ extern "C"
 #endif
 
 #ifdef CONTAINER_PODMAN_PRIVATE
+
+  enum
+  {
+    PODMAN_SHORTID_LEN = 13
+  };
 
   typedef struct podman_varlink
   {
@@ -59,8 +65,8 @@ extern "C"
   int podman_running_containers (struct podman_varlink *pv,
 				 unsigned int *count, const char *image,
 				 char **perfdata, bool verbose);
-  int podman_memory (struct podman_varlink *pv, char **perfdata,
-		     bool verbose);
+  int podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
+		    unit_shift shift, char **status, char **perfdata);
 
 #ifdef __cplusplus
 }
