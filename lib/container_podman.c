@@ -36,6 +36,7 @@
 #include "common.h"
 #include "container_podman.h"
 #include "messages.h"
+#include "xalloc.h"
 #include "xasprintf.h"
 
 #undef CONTAINER_PODMAN_PRIVATE
@@ -210,3 +211,39 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
 }
 
 #endif		/* NPL_TESTING */
+
+/* Return true if the array has all the element non NULL, false otherwise */
+
+bool
+podman_array_is_full (char *v[], size_t vsize)
+{
+  for (size_t i = 0; i < vsize && v; i++)
+    {
+      // dbg ("v[%lu] = %s\n", i, v[i]);
+      if (NULL == v[i])
+	return false;
+    }
+  return true;
+}
+
+/* Return a string valid for Nagios performance data output */
+
+char*
+podman_image_name_normalize (const char *image)
+{
+  char *nstring = xstrdup (basename (image));
+  for (size_t i = 0; i < strlen (nstring); i++)
+    if (nstring[i] == ':')
+      nstring[i] = '_';
+  return nstring;
+}
+
+/* Return the short ID in the 'shortid' buffer. This buffer must have a size
+   PODMAN_SHORTID_LEN   */
+
+void
+podman_shortid (const char *id, char *shortid)
+{
+  memcpy (shortid, id, PODMAN_SHORTID_LEN - 1);
+  shortid[PODMAN_SHORTID_LEN - 1] = '\0';
+}
