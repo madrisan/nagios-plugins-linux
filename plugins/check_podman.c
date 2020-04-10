@@ -38,8 +38,12 @@ static const char *program_copyright =
 
 static struct option const longopts[] = {
   {(char *) "image", required_argument, NULL, 'i'},
+  {(char *) "memory", no_argument, NULL, 'M'},
   {(char *) "varlink-address", required_argument, NULL, 'a'},
   {(char *) "byte", no_argument, NULL, 'b'},
+  {(char *) "kilobyte", no_argument, NULL, 'k'},
+  {(char *) "megabyte", no_argument, NULL, 'm'},
+  {(char *) "gigabyte", no_argument, NULL, 'g'},
   {(char *) "verbose", no_argument, NULL, 'v'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
@@ -56,10 +60,14 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [--image IMAGE] [-w COUNTER] [-c COUNTER]\n",
 	   program_name);
+  fprintf (out, "  %s --memory XXX\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs
     ("  -i, --image IMAGE   limit the investigation only to the containers "
      "running IMAGE\n", out);
+  fputs ("  -M, --memory    return the runtime memory metrics\n", out);
+  fputs ("  'b,-k,-m,-g     "
+	 "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs
     ("  -a, --varlink-address ADDRESS   varlink address "
      "(default: " VARLINK_ADDRESS ")\n", out);
@@ -73,6 +81,7 @@ usage (FILE * out)
   fprintf (out, "  %s -w 100 -c 120\n", program_name);
   fprintf (out, "  %s --image \"docker.io/library/nginx:latest\" -c 5:\n",
 	   program_name);
+  fprintf (out, "  %s --memory -m XXX\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -92,7 +101,9 @@ int
 main (int argc, char **argv)
 {
   int c, err;
-  bool verbose = false;
+  int shift = k_shift;
+  bool check_memory = false,
+       verbose = false;
   char *image = NULL;
   char *varlink_address = NULL;
   char *critical = NULL, *warning = NULL;
@@ -101,11 +112,12 @@ main (int argc, char **argv)
   struct podman_varlink *pv = NULL;
   thresholds *my_threshold = NULL;
   unsigned int containers;
+  unsigned long long tot_memory;
 
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "a:c:w:vi:" GETOPT_HELP_VERSION_STRING,
+			   "a:c:w:vi:Mbkmg" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -116,6 +128,13 @@ main (int argc, char **argv)
 	case 'i':
 	  image = optarg;
 	  break;
+	case 'M':
+	  check_memory = true;
+	  break;
+	case 'b': shift = b_shift; break;
+	case 'k': shift = k_shift; break;
+	case 'm': shift = m_shift; break;
+	case 'g': shift = g_shift; break;
 	case 'c':
 	  critical = optarg;
 	  break;
@@ -143,17 +162,25 @@ main (int argc, char **argv)
   if (err < 0)
     plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
-  podman_running_containers (pv, &containers, image, &perfdata_msg, verbose);
+  if (check_memory)
+    {
+      podman_stats (pv, &tot_memory, shift, &status_msg, &perfdata_msg);
+      status = get_status (tot_memory, my_threshold);
+      printf ("%s: %s | %s\n", program_name_short, status_msg, perfdata_msg);
+    }
+  else
+    {
+      podman_running_containers (pv, &containers, image, &perfdata_msg, verbose);
+      status = get_status (containers, my_threshold);
+      status_msg = image ?
+	xasprintf ("%s: %u running container(s) of type \"%s\"",
+		   state_text (status), containers, image) :
+	xasprintf ("%s: %u running container(s)", state_text (status),
+		   containers);
 
-  status = get_status (containers, my_threshold);
-  status_msg = image ?
-    xasprintf ("%s: %u running container(s) of type \"%s\"",
-	       state_text (status), containers, image) :
-    xasprintf ("%s: %u running container(s)", state_text (status),
-	       containers);
-
-  printf ("%s containers %s | %s\n", program_name_short,
-	  status_msg, perfdata_msg);
+      printf ("%s containers %s | %s\n", program_name_short,
+	      status_msg, perfdata_msg);
+    }
 
   free (my_threshold);
   podman_varlink_unref (pv);

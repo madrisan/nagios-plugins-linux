@@ -233,7 +233,7 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
       FILE *stream = open_memstream (perfdata, &size);
       for (unsigned int j = 0; j < ht_running->uniq; j++)
 	{
-          char *image_norm = image_name_normalize (ht_running->keys[j]);
+ 	  char *image_norm = image_name_normalize (ht_running->keys[j]);
 	  hashable_t *np = counter_lookup (ht_running, ht_running->keys[j]);
 	  assert (NULL != np);
 	  fprintf (stream, "%s=%lu ", image_norm, np->count);
