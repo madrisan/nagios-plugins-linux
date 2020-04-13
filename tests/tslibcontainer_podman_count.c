@@ -2,7 +2,7 @@
  * License: GPLv3+
  * Copyright (c) 2020 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * Unit test for lib/container_podman.c
+ * Unit test for lib/container_podman_count.c
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
