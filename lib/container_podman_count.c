@@ -21,8 +21,6 @@
 #define _GNU_SOURCE		/* activate extra prototypes for glibc */
 #endif
 
-#define CONTAINER_PODMAN_PRIVATE
-
 #include <assert.h>
 #ifndef NPL_TESTING
 # include <varlink.h>
@@ -42,8 +40,6 @@
 /* Hide all jsmn API symbols by making them static */
 #define JSMN_STATIC
 #include "jsmn.h"
-
-#undef CONTAINER_PODMAN_PRIVATE
 
 /* parse the json stream and return a pointer to the hashtable containing
    the values of the discovered 'tokens', or return NULL if the data
