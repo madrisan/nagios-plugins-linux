@@ -26,11 +26,9 @@
 #include <assert.h>
 #include <errno.h>
 #include <unistd.h>
-#ifndef NPL_TESTING
-# include <varlink.h>
-#endif
 #include <string.h>
 #include <sys/epoll.h>
+#include <varlink.h>
 
 #include "common.h"
 #include "container_podman.h"
