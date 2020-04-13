@@ -23,7 +23,8 @@
 # include "messages.h"
 # include "xalloc.h"
 
-/* Allocate N bytes of memory dynamically, with error checking.  */
+/* Allocate N bytes of memory dynamically, with error checking.
+ * The memory is set to zero.  */
 
 void *
 xmalloc (const size_t n)
@@ -35,8 +36,8 @@ xmalloc (const size_t n)
 }
 
 /* Clone an object P of size S, with error checking.  There's no need
- *    for xnmemdup (P, N, S), since xmemdup (P, N * S) works without any
- *       need for an arithmetic overflow check.  */
+ * for xnmemdup (P, N, S), since xmemdup (P, N * S) works without any
+ * need for an arithmetic overflow check.  */
 
 void *
 xmemdup (void const *p, const size_t s)
@@ -50,6 +51,16 @@ char *
 xstrdup (char const *string)
 {
   return xmemdup (string, strlen (string) + 1);
+}
+
+/* Clone a substring of lenght S, starting at the address START.
+ * S characters will be copied into the new allocated memory and
+ * a null character will be added at the and.  */
+
+char *
+xsubstrdup (char const *start, const size_t s)
+{
+  return memcpy (xmalloc (s + 1), start, s);
 }
 
 /* Allocate an array of N objects, each with S bytes of memory,

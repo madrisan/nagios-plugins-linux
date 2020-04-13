@@ -87,7 +87,6 @@ json_parser (char *json, const char *root_key, hashtable_t ** ht_running,
     **containerrunning = &vals[0], **image = &vals[2];
   size_t keys_num = sizeof (keys) / sizeof (char *);
 
-  assert (NULL != json);
   tokens = json_tokenise (json, &ntoken);
   if (NULL == tokens)
     plugin_error (STATE_UNKNOWN, 0, "invalid or corrupted JSON data");
@@ -152,6 +151,7 @@ json_parser (char *json, const char *root_key, hashtable_t ** ht_running,
 	  for (size_t j = 0; j < keys_num; j++)
 	    {
 	      dbg (" * \"%s\": \"%s\"\n", keys[j], vals[j]);
+	      free (vals[j]);
 	      vals[j] = NULL;
 	    }
 	}

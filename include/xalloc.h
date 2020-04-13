@@ -28,6 +28,8 @@ extern "C" {
 	_attribute_malloc_ _attribute_alloc_size_ ((2));
   char *xstrdup (char const *str)
 	_attribute_malloc_;
+  char *xsubstrdup (char const *start, const size_t s)
+	_attribute_malloc_;
   void *xnmalloc (const size_t n, const size_t s)
 	_attribute_malloc_ _attribute_alloc_size_ ((1, 2));
   void *xrealloc (void *p, const size_t s)
