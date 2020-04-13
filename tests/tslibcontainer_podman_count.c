@@ -25,10 +25,10 @@
 
 #include <stdlib.h>
 
+#define NPL_TESTING
+
 #include "container_podman.h"
 #include "testutils.h"
-
-#define NPL_TESTING
 
 static int podman_varlink_get (struct podman_varlink *pv,
 			       const char *varlinkmethod, const char *param,

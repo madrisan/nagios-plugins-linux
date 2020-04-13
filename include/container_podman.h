@@ -31,7 +31,7 @@ extern "C"
     PODMAN_SHORTID_LEN = 13
   };
 
-#ifdef CONTAINER_PODMAN_PRIVATE
+#ifndef NPL_TESTING
 
   typedef struct podman_varlink
   {

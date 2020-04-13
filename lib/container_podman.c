@@ -22,7 +22,6 @@
 #endif
 
 #define EPOLL_TIMEOUT 100
-#define CONTAINER_PODMAN_PRIVATE
 
 #include <assert.h>
 #include <errno.h>
@@ -38,8 +37,6 @@
 #include "messages.h"
 #include "xalloc.h"
 #include "xasprintf.h"
-
-#undef CONTAINER_PODMAN_PRIVATE
 
 #ifndef NPL_TESTING
 

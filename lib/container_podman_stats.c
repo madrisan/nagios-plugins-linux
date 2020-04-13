@@ -21,8 +21,6 @@
 #define _GNU_SOURCE		/* activate extra prototypes for glibc */
 #endif
 
-#define CONTAINER_PODMAN_PRIVATE
-
 #include <assert.h>
 #ifndef NPL_TESTING
 #include <varlink.h>
@@ -44,8 +42,6 @@
 /* Hide all jsmn API symbols by making them static */
 #define JSMN_STATIC
 #include "jsmn.h"
-
-#undef CONTAINER_PODMAN_PRIVATE
 
 /* parse the json stream containing the statistics for the container
    with the given id. The format of the data follows:
