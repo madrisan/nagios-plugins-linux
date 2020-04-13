@@ -22,10 +22,8 @@
 #endif
 
 #include <assert.h>
-#ifndef NPL_TESTING
-#include <varlink.h>
-#endif
 #include <string.h>
+#include <varlink.h>
 
 #include "common.h"
 #include "collection.h"
@@ -85,8 +83,12 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
   ret = podman_varlink_get (pv, varlinkmethod, param, &json, &errmsg);
   if (ret < 0)
     {
+#ifndef NPL_TESTING
       podman_varlink_unref (pv);
       plugin_error (STATE_UNKNOWN, 0, "%s", errmsg);
+#else
+      plugin_error (STATE_UNKNOWN, 0, "podman_varlink_get has failed");
+#endif
     }
   dbg ("varlink %s returned: %s", varlinkmethod, json);
 
@@ -213,8 +215,12 @@ json_parser_list (struct podman_varlink *pv, unsigned int *containers,
   ret = podman_varlink_get (pv, varlinkmethod, NULL, &json, &errmsg);
   if (ret < 0)
     {
+#ifndef NPL_TESTING
       podman_varlink_unref (pv);
       plugin_error (STATE_UNKNOWN, 0, "%s", errmsg);
+#else
+      plugin_error (STATE_UNKNOWN, 0, "podman_varlink_get has failed");
+#endif
     }
   dbg ("varlink %s returned: %s", varlinkmethod, json);
 

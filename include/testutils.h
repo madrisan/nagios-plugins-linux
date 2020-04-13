@@ -48,6 +48,8 @@
 /* simulate the test of a query to varlink */
 #define NPL_TEST_PATH_PODMAN_GETCONTAINERSBYSTATUS_JSON \
 	abs_srcdir "/ts_container_podman_GetContainersByStatus.data"
+#define NPL_TEST_PATH_PODMAN_GETCONTAINERSTATS_JSON \
+	abs_srcdir "/ts_container_podman_GetContainerStats.data"
 
 #define TEST_ASSERT_EQUAL_NUMERIC(A, B) \
   do { if ((A) != (B)) ret = -1; } while (0)
