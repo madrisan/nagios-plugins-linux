@@ -16,6 +16,8 @@
 #ifndef _CONTAINER_PODMAN_H
 #define _CONTAINER_PODMAN_H
 
+#include <varlink.h>
+
 #include "system.h"
 #include "units.h"
 
