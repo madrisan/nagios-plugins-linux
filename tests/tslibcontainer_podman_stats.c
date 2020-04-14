@@ -56,6 +56,7 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
 typedef struct test_data
 {
   char *id;
+  char *container_name;
   unsigned long container_memory;
 } test_data;
 
@@ -65,13 +66,15 @@ test_podman_json_parser_stats (const void *tdata)
   const struct test_data *data = tdata;
   int ret = 0;
   /* the id is ignored by json_parser_stats in test mode */
-  char *id = NULL; /* *id = ((test_data *)tdata)->id; */
+  char *container_name = NULL,
+    *id = NULL; /* *id = ((test_data *)tdata)->id; */
   struct podman_varlink *pv = NULL;
   unsigned long container_memory;
 
-  json_parser_stats (pv, id, &container_memory);
+  json_parser_stats (pv, id, &container_memory, &container_name);
 
   TEST_ASSERT_EQUAL_NUMERIC (container_memory, data->container_memory);
+  TEST_ASSERT_EQUAL_STRING (container_name, data->container_name);
 
   return ret;
 }
@@ -81,12 +84,13 @@ mymain (void)
 {
   int ret = 0;
 
-#define DO_TEST(MSG, ID, MEMORY)                                   \
+#define DO_TEST(MSG, ID, MEMORY, NAME)                             \
   do                                                               \
     {                                                              \
       test_data data = {                                           \
         .id = ID,                                                  \
-        .container_memory = MEMORY                                 \
+        .container_memory = MEMORY,                                \
+        .container_name = NAME                                     \
       };                                                           \
       if (test_run(MSG, test_podman_json_parser_stats, &data) < 0) \
         ret = -1;                                                  \
@@ -94,7 +98,7 @@ mymain (void)
   while (0)
 
   DO_TEST ("check container memory executing json_parser_stats",
-	   "fced2dbe15a84", 9224192);
+	   "fced2dbe15a84", 9224192, "web-server-1");
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

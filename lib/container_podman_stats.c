@@ -64,12 +64,13 @@
 
 static void
 json_parser_stats (struct podman_varlink *pv, const char *id,
-		   unsigned long *container_memory)
+		   unsigned long *container_memory, char **container_name)
 {
   const char *varlinkmethod = "io.podman.GetContainerStats";
   char *errmsg = NULL, *json,
-    *keys[] = { "cpu_nano", "mem_usage" },
-    *vals[] = { NULL, NULL }, **cpu_nano = &vals[0], **mem_usage = &vals[1],
+    *keys[] = { "cpu_nano", "mem_usage", "name" },
+    *vals[] = { NULL, NULL, NULL },
+    **cpu_nano = &vals[0], **mem_usage = &vals[1], **name = &vals[2],
     *root_key = "container", param[80];
   size_t i, ntoken, level = 0, keys_num = sizeof (keys) / sizeof (char *);
   jsmntok_t *tokens;
@@ -148,9 +149,15 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
 	  *container_memory = strtol_or_err (*mem_usage,
 					     "failed to parse mem_usage counter");
 	}
+      if (*name)
+	*container_name = xstrdup (*name);
     }
 
+  assert (NULL != container_memory);
+  assert (NULL != container_name);
+
   dbg ("%s: container memory: %lu kb\n", __func__, *container_memory);
+  dbg ("%s: container name: %s\n", __func__, *container_name);
   free (tokens);
 }
 
@@ -193,9 +200,7 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
        }	*/
 
 static void
-json_parser_list (struct podman_varlink *pv, unsigned int *containers,
-		  unsigned long long *tot_memory, unit_shift shift,
-		  char **perfdata)
+json_parser_list (struct podman_varlink *pv, hashtable_t ** hashtable)
 {
   char *errmsg = NULL, *json,
     *keys[] = { "containerrunning", "id", "image" },
@@ -203,14 +208,11 @@ json_parser_list (struct podman_varlink *pv, unsigned int *containers,
     **containerrunning = &vals[0], **id = &vals[1], **image = &vals[2];
   const char *root_key = "containers";
   size_t i, ntoken, level = 0, keys_num = sizeof (keys) / sizeof (char *);
-  hashtable_t * hashtable;
   jsmntok_t *tokens;
   int ret;
 
   const char *varlinkmethod = "io.podman.ListContainers";
-  *containers = 0;
-  *tot_memory = 0;
-  hashtable = counter_create ();
+  *hashtable = counter_create ();
 
   ret = podman_varlink_get (pv, varlinkmethod, NULL, &json, &errmsg);
   if (ret < 0)
@@ -278,15 +280,9 @@ json_parser_list (struct podman_varlink *pv, unsigned int *containers,
 	  if (STREQ (*containerrunning, "true"))
 	    {
 	      char shortid[PODMAN_SHORTID_LEN];
-	      unsigned long container_memory;
-
 	      podman_shortid (*id, shortid);
 	      dbg ("(running) container id: %s (%s)\n", *id, shortid);
-	      // json_parser_stats (pv, *id, &container_memory);
-	      json_parser_stats (pv, shortid, &container_memory);
-	      counter_put (hashtable, *image, container_memory);
-	      *tot_memory += container_memory;
-	      (*containers)++;
+	      counter_put (*hashtable, shortid, 1);
 	    }
 	  dbg ("new container found:\n");
 	  for (size_t j = 0; j < keys_num; j++)
@@ -297,17 +293,6 @@ json_parser_list (struct podman_varlink *pv, unsigned int *containers,
 	}
     }
 
-  size_t size;
-  FILE *stream = open_memstream (perfdata, &size);
-  for (unsigned int j = 0; j < counter_get_unique_elements (hashtable); j++)
-    {
-      char *image_norm = podman_image_name_normalize (hashtable->keys[j]);
-      hashable_t *np = counter_lookup (hashtable, hashtable->keys[j]);
-      assert (NULL != np);
-      fprintf (stream, "%s=%lukB ", image_norm, (np->count / 1000));
-      free (image_norm);
-    }
-  fclose (stream);
   free (tokens);
 }
 
@@ -316,7 +301,12 @@ podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
 	      unit_shift shift, char **status, char **perfdata)
 {
   char *units = NULL;
+  size_t size;
   unsigned int containers;
+  hashtable_t * hashtable;
+  hashable_t * np;
+
+  FILE *stream = open_memstream (perfdata, &size);
 
   switch (shift)
     {
@@ -326,7 +316,24 @@ podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
       case g_shift: units = xstrdup ("GB"); break;
     }
 
-  json_parser_list (pv, &containers, tot_memory, shift, perfdata);
+  json_parser_list (pv, &hashtable);
+
+  *tot_memory = 0;
+  containers = counter_get_unique_elements (hashtable);
+
+  for (unsigned int j = 0; j < containers; j++)
+    {
+      char *container_name, *shortid = hashtable->keys[j];
+      unsigned long container_memory;
+
+      json_parser_stats (pv, shortid, &container_memory, &container_name);
+      np = counter_lookup (hashtable, shortid);
+      assert (NULL != np);
+      fprintf (stream, "%s=%lukB ", container_name, (container_memory / 1000));
+
+      *tot_memory += container_memory;
+    }
+  fclose (stream);
 
   *status =
     xasprintf ("%llu%s of memory used by %u running containers"
