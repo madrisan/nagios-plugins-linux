@@ -72,7 +72,7 @@ test_podman_json_parser_list (const void *tdata)
   unsigned int containers;
   hashtable_t * hashtable;
 
-  json_parser_list (pv, &hashtable);
+  json_parser_list (pv, NULL, &hashtable);
   containers = counter_get_unique_elements (hashtable);
 
   shortid_0 = hashtable->keys[0];
