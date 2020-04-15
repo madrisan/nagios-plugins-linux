@@ -68,7 +68,8 @@ extern "C"
 				 unsigned int *count, const char *image,
 				 char **perfdata, bool verbose);
   int podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
-		    unit_shift shift, char **status, char **perfdata);
+		    unit_shift shift, const char *image_name, char **status,
+		    char **perfdata);
 
   /* Return a string valid for Nagios performance data output.  */
   char* podman_image_name_normalize (const char *image);

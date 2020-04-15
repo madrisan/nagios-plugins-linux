@@ -164,7 +164,7 @@ main (int argc, char **argv)
 
   if (check_memory)
     {
-      podman_stats (pv, &tot_memory, shift, &status_msg, &perfdata_msg);
+      podman_stats (pv, &tot_memory, shift, image, &status_msg, &perfdata_msg);
       status = get_status (tot_memory, my_threshold);
       printf ("%s: %s | %s\n", program_name_short, status_msg, perfdata_msg);
     }

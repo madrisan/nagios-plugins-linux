@@ -200,7 +200,8 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
        }	*/
 
 static void
-json_parser_list (struct podman_varlink *pv, hashtable_t ** hashtable)
+json_parser_list (struct podman_varlink *pv, const char *image_name,
+		  hashtable_t ** hashtable)
 {
   char *errmsg = NULL, *json,
     *keys[] = { "containerrunning", "id", "image" },
@@ -279,10 +280,16 @@ json_parser_list (struct podman_varlink *pv, hashtable_t ** hashtable)
 	{
 	  if (STREQ (*containerrunning, "true"))
 	    {
-	      char shortid[PODMAN_SHORTID_LEN];
-	      podman_shortid (*id, shortid);
-	      dbg ("(running) container id: %s (%s)\n", *id, shortid);
-	      counter_put (*hashtable, shortid, 1);
+	      if (image_name && STRNEQ (*image, image_name))
+		dbg ("the container name does not match with %s\n",
+		     image_name);
+	      else
+		{
+		  char shortid[PODMAN_SHORTID_LEN];
+		  podman_shortid (*id, shortid);
+		  dbg ("(running) container id: %s (%s)\n", *id, shortid);
+		  counter_put (*hashtable, shortid, 1);
+		}
 	    }
 	  dbg ("new container found:\n");
 	  for (size_t j = 0; j < keys_num; j++)
@@ -298,7 +305,8 @@ json_parser_list (struct podman_varlink *pv, hashtable_t ** hashtable)
 
 int
 podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
-	      unit_shift shift, char **status, char **perfdata)
+	      unit_shift shift, const char *image, char **status,
+	      char **perfdata)
 {
   char *units = NULL;
   size_t size;
@@ -315,7 +323,7 @@ podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
       case g_shift: units = xstrdup ("GB"); break;
     }
 
-  json_parser_list (pv, &hashtable);
+  json_parser_list (pv, image, &hashtable);
 
   *tot_memory = 0;
   containers = counter_get_unique_elements (hashtable);
