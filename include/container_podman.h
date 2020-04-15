@@ -26,6 +26,13 @@ extern "C"
 {
 #endif
 
+  typedef struct container_stats
+  {
+    unsigned long mem_limit;
+    unsigned long mem_usage;
+    char *name;
+  } container_stats_t;
+
   enum
   {
     PODMAN_SHORTID_LEN = 13
