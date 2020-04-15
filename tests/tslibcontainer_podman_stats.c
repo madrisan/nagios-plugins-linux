@@ -57,6 +57,7 @@ typedef struct test_data
 {
   char *id;
   char *container_name;
+  unsigned long container_limit;
   unsigned long container_memory;
 } test_data;
 
@@ -66,15 +67,15 @@ test_podman_json_parser_stats (const void *tdata)
   const struct test_data *data = tdata;
   int ret = 0;
   /* the id is ignored by json_parser_stats in test mode */
-  char *container_name = NULL,
-    *id = NULL; /* *id = ((test_data *)tdata)->id; */
+  char *id = NULL; /* *id = ((test_data *)tdata)->id; */
   struct podman_varlink *pv = NULL;
-  unsigned long container_memory;
+  container_stats_t stats;
 
-  json_parser_stats (pv, id, &container_memory, &container_name);
+  json_parser_stats (pv, id, &stats);
 
-  TEST_ASSERT_EQUAL_NUMERIC (container_memory, data->container_memory);
-  TEST_ASSERT_EQUAL_STRING (container_name, data->container_name);
+  TEST_ASSERT_EQUAL_NUMERIC (stats.mem_limit, data->container_limit);
+  TEST_ASSERT_EQUAL_NUMERIC (stats.mem_usage, data->container_memory);
+  TEST_ASSERT_EQUAL_STRING (stats.name, data->container_name);
 
   return ret;
 }
@@ -84,11 +85,12 @@ mymain (void)
 {
   int ret = 0;
 
-#define DO_TEST(MSG, ID, MEMORY, NAME)                             \
+#define DO_TEST(MSG, ID, MEMORY, MEM_LIMIT, NAME)                  \
   do                                                               \
     {                                                              \
       test_data data = {                                           \
         .id = ID,                                                  \
+        .container_limit = MEM_LIMIT,                              \
         .container_memory = MEMORY,                                \
         .container_name = NAME                                     \
       };                                                           \
@@ -98,7 +100,7 @@ mymain (void)
   while (0)
 
   DO_TEST ("check container memory executing json_parser_stats",
-	   "fced2dbe15a84", 9224192, "web-server-1");
+	   "fced2dbe15a84", 9224192, 8232517632, "web-server-1");
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -64,19 +64,20 @@
 
 static void
 json_parser_stats (struct podman_varlink *pv, const char *id,
-		   unsigned long *container_memory, char **container_name)
+		   container_stats_t * stats)
 {
   const char *varlinkmethod = "io.podman.GetContainerStats";
   char *errmsg = NULL, *json,
-    *keys[] = { "cpu_nano", "mem_usage", "name" },
+    *keys[] = { "mem_limit", "mem_usage", "name" },
     *vals[] = { NULL, NULL, NULL },
-    **cpu_nano = &vals[0], **mem_usage = &vals[1], **name = &vals[2],
+    **mem_limit = &vals[0], **mem_usage = &vals[1], **name = &vals[2],
     *root_key = "container", param[80];
   size_t i, ntoken, level = 0, keys_num = sizeof (keys) / sizeof (char *);
   jsmntok_t *tokens;
   int ret;
 
-  *container_memory = 0;
+  stats->mem_limit = 0;
+  stats->mem_usage = 0;
 
   sprintf (param, "{\"name\":\"%s\"}", id);
   dbg ("%s: parameter %s will be passed to podman_varlink_get()\n", __func__,
@@ -143,21 +144,25 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
 			  "%s: root element must be an object", __func__);
 	}
 
+      /* the memory limit and usage are reported in bytes */
+      if (*mem_limit)
+	stats->mem_limit = strtol_or_err (*mem_limit,
+					  "failed to parse mem_limit counter");
       if (*mem_usage)
-	{
-	  /* the memory is reported in bytes */
-	  *container_memory = strtol_or_err (*mem_usage,
-					     "failed to parse mem_usage counter");
-	}
+	stats->mem_usage = strtol_or_err (*mem_usage,
+					  "failed to parse mem_usage counter");
       if (*name)
-	*container_name = xstrdup (*name);
+	stats->name = xstrdup (*name);
     }
 
-  assert (NULL != container_memory);
-  assert (NULL != container_name);
+  assert (NULL != mem_limit);
+  assert (NULL != mem_usage);
+  assert (NULL != name);
 
-  dbg ("%s: container memory: %lu kb\n", __func__, *container_memory);
-  dbg ("%s: container name: %s\n", __func__, *container_name);
+  dbg ("%s: container memory: %lu/%lu\n", __func__, stats->mem_usage,
+       stats->mem_limit);
+  dbg ("%s: container name: %s\n", __func__, stats->name);
+
   free (tokens);
 }
 
@@ -322,12 +327,14 @@ podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
 
   for (unsigned int j = 0; j < containers; j++)
     {
-      char *container_name, *shortid = hashtable->keys[j];
-      unsigned long container_memory;
+      char *shortid = hashtable->keys[j];
+      container_stats_t stats;
 
-      json_parser_stats (pv, shortid, &container_memory, &container_name);
-      fprintf (stream, "%s=%lukB ", container_name, (container_memory / 1000));
-      *tot_memory += container_memory;
+      json_parser_stats (pv, shortid, &stats);
+      fprintf (stream, "%s=%lukB;;;0;%lu ", stats.name,
+	       (stats.mem_usage / 1000), (stats.mem_limit / 1000));
+      *tot_memory += stats.mem_usage;
+      free (stats.name);
     }
   fclose (stream);
 
