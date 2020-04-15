@@ -308,20 +308,12 @@ podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
 	      unit_shift shift, const char *image, char **status,
 	      char **perfdata)
 {
-  char *units = NULL;
+  char *tot_memory_str;
   size_t size;
   unsigned int containers;
   hashtable_t * hashtable;
 
   FILE *stream = open_memstream (perfdata, &size);
-
-  switch (shift)
-    {
-      case b_shift: units = xstrdup ("B"); break;
-      case k_shift: units = xstrdup ("kB"); break;
-      case m_shift: units = xstrdup ("MB"); break;
-      case g_shift: units = xstrdup ("GB"); break;
-    }
 
   json_parser_list (pv, image, &hashtable);
 
@@ -339,14 +331,30 @@ podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
     }
   fclose (stream);
 
+  switch (shift)
+    {
+    default:
+    case b_shift:
+      tot_memory_str = xasprintf ("%lluB", *tot_memory);
+      break;
+    case k_shift:
+      tot_memory_str = xasprintf ("%llukB", (*tot_memory) / 1000);
+      break;
+    case m_shift:
+      tot_memory_str = xasprintf ("%gMB", (*tot_memory) / 1000000.0);
+      break;
+    case g_shift:
+      tot_memory_str = xasprintf ("%gGB", (*tot_memory) / 1000000000.0);
+      break;
+  }
+
   *status =
-    xasprintf ("%llu%s of memory used by %u running containers"
-	       , *tot_memory / 1000
-	       , units
+    xasprintf ("%s of memory used by %u running containers"
+	       , tot_memory_str
 	       , containers);
 
   free (hashtable);
-  free (units);
+  free (tot_memory_str);
 
   return 0;
 }
