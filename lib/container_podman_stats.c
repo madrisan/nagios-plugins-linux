@@ -304,7 +304,6 @@ podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
   size_t size;
   unsigned int containers;
   hashtable_t * hashtable;
-  hashable_t * np;
 
   FILE *stream = open_memstream (perfdata, &size);
 
@@ -327,10 +326,7 @@ podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
       unsigned long container_memory;
 
       json_parser_stats (pv, shortid, &container_memory, &container_name);
-      np = counter_lookup (hashtable, shortid);
-      assert (NULL != np);
       fprintf (stream, "%s=%lukB ", container_name, (container_memory / 1000));
-
       *tot_memory += container_memory;
     }
   fclose (stream);
@@ -341,6 +337,8 @@ podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
 	       , units
 	       , containers);
 
-  free (units); 
+  free (hashtable);
+  free (units);
+
   return 0;
 }
