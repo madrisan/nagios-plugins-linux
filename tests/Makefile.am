@@ -57,6 +57,7 @@ test_programs = \
 if HAVE_LIBVARLINK
 test_programs += \
 	tslibcontainer_podman_count \
+	tslibcontainer_podman_list \
 	tslibcontainer_podman_stats
 endif
 if !HAVE_LIBPROCPS
@@ -93,6 +94,9 @@ tslibcontainer_docker_memory_LDADD = $(LDADDS)
 if HAVE_LIBVARLINK
 tslibcontainer_podman_count_SOURCES = $(test_utils) tslibcontainer_podman_count.c
 tslibcontainer_podman_count_LDADD = $(LDADDS) $(LIBVARLINK_LIBS)
+
+tslibcontainer_podman_list_SOURCES = $(test_utils) tslibcontainer_podman_list.c
+tslibcontainer_podman_list_LDADD = $(LDADDS) $(LIBVARLINK_LIBS)
 
 tslibcontainer_podman_stats_SOURCES = $(test_utils) tslibcontainer_podman_stats.c
 tslibcontainer_podman_stats_LDADD = $(LDADDS) $(LIBVARLINK_LIBS)
