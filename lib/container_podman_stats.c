@@ -356,9 +356,10 @@ podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
   }
 
   *status =
-    xasprintf ("%s of memory used by %u running containers"
+    xasprintf ("%s of memory used by %u running container%s"
 	       , tot_memory_str
-	       , containers);
+	       , containers
+	       , (containers > 1) ? "s" : "");
 
   free (hashtable);
   free (tot_memory_str);
