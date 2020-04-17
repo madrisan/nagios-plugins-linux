@@ -56,9 +56,11 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
 typedef struct test_data
 {
   char *id;
-  char *container_name;
-  unsigned long container_limit;
-  unsigned long container_memory;
+  char *name;
+  unsigned long mem_limit;
+  unsigned long mem_usage;
+  unsigned long net_input;
+  unsigned long net_output;
 } test_data;
 
 static int
@@ -73,9 +75,11 @@ test_podman_json_parser_stats (const void *tdata)
 
   json_parser_stats (pv, id, &stats);
 
-  TEST_ASSERT_EQUAL_NUMERIC (stats.mem_limit, data->container_limit);
-  TEST_ASSERT_EQUAL_NUMERIC (stats.mem_usage, data->container_memory);
-  TEST_ASSERT_EQUAL_STRING (stats.name, data->container_name);
+  TEST_ASSERT_EQUAL_NUMERIC (stats.mem_limit, data->mem_limit);
+  TEST_ASSERT_EQUAL_NUMERIC (stats.mem_usage, data->mem_usage);
+  TEST_ASSERT_EQUAL_NUMERIC (stats.net_input, data->net_input);
+  TEST_ASSERT_EQUAL_NUMERIC (stats.net_output, data->net_output);
+  TEST_ASSERT_EQUAL_STRING (stats.name, data->name);
 
   return ret;
 }
@@ -85,22 +89,29 @@ mymain (void)
 {
   int ret = 0;
 
-#define DO_TEST(MSG, ID, MEMORY, MEM_LIMIT, NAME)                  \
-  do                                                               \
-    {                                                              \
-      test_data data = {                                           \
-        .id = ID,                                                  \
-        .container_limit = MEM_LIMIT,                              \
-        .container_memory = MEMORY,                                \
-        .container_name = NAME                                     \
-      };                                                           \
-      if (test_run(MSG, test_podman_json_parser_stats, &data) < 0) \
-        ret = -1;                                                  \
-    }                                                              \
+#define DO_TEST(MSG, ID, NAME, MEM_USAGE, MEM_LIMIT, NET_IN, NET_OUT) \
+  do                                                                  \
+    {                                                                 \
+      test_data data = {                                              \
+        .id = ID,                                                     \
+        .name = NAME,                                                 \
+        .mem_limit = MEM_LIMIT,                                       \
+        .mem_usage = MEM_USAGE,                                       \
+        .net_input = NET_IN,                                          \
+        .net_output = NET_OUT                                         \
+      };                                                              \
+      if (test_run(MSG, test_podman_json_parser_stats, &data) < 0)    \
+        ret = -1;                                                     \
+    }                                                                 \
   while (0)
 
-  DO_TEST ("check container memory executing json_parser_stats",
-	   "fced2dbe15a84", 9224192, 8232517632, "web-server-1");
+  DO_TEST ("check container statistics executing json_parser_stats"
+	   , "fced2dbe15a84"
+	   , "web-server-1"
+	   , 9224192
+	   , 8232517632
+	   , 1118
+	   , 7222);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

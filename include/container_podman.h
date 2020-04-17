@@ -30,12 +30,17 @@ extern "C"
   {
     unsigned long mem_limit;
     unsigned long mem_usage;
+    unsigned long net_input;
+    unsigned long net_output;
     char *name;
   } container_stats_t;
 
   enum
   {
-    PODMAN_SHORTID_LEN = 13
+    PODMAN_SHORTID_LEN = 13,
+    memory_stats,
+    network_in_stats,
+    network_out_stats,
   };
 
 #ifndef NPL_TESTING
@@ -74,9 +79,18 @@ extern "C"
   int podman_running_containers (struct podman_varlink *pv,
 				 unsigned int *count, const char *image,
 				 char **perfdata, bool verbose);
-  int podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
-		    unit_shift shift, const char *image_name, char **status,
-		    char **perfdata);
+
+  /* Report the containers memory statistics */
+  int podman_stats_memory (struct podman_varlink *pv,
+			   unsigned long long *tot_memory, unit_shift shift,
+			   const char *image_name, char **status,
+			   char **perfdata);
+
+  /* Report the containers network I/O statistics */
+  int podman_stats_network (struct podman_varlink *pv, int check_type,
+			    unsigned long long *sum, unit_shift shift,
+			    const char *image_name,
+			    char **status, char **perfdata);
 
   /* Return a string valid for Nagios performance data output.  */
   char* podman_image_name_normalize (const char *image);
