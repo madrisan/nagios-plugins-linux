@@ -68,9 +68,10 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
 {
   const char *varlinkmethod = "io.podman.GetContainerStats";
   char *errmsg = NULL, *json,
-    *keys[] = { "mem_limit", "mem_usage", "name" },
-    *vals[] = { NULL, NULL, NULL },
-    **mem_limit = &vals[0], **mem_usage = &vals[1], **name = &vals[2],
+    *keys[] = { "mem_limit", "mem_usage", "name", "net_input", "net_output" },
+    *vals[] = { NULL, NULL, NULL, NULL, NULL },
+    **mem_limit = &vals[0], **mem_usage = &vals[1],
+    **name = &vals[2], **net_input = &vals[3], **net_output = &vals[4],
     *root_key = "container", param[80];
   size_t i, ntoken, level = 0, keys_num = sizeof (keys) / sizeof (char *);
   jsmntok_t *tokens;
@@ -78,6 +79,9 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
 
   stats->mem_limit = 0;
   stats->mem_usage = 0;
+  stats->net_input = 0;
+  stats->net_output = 0;
+  stats->name = NULL;
 
   sprintf (param, "{\"name\":\"%s\"}", id);
   dbg ("%s: parameter %s will be passed to podman_varlink_get()\n", __func__,
@@ -153,15 +157,26 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
 					  "failed to parse mem_usage counter");
       if (*name)
 	stats->name = xstrdup (*name);
+
+      if (*net_input)
+	stats->net_input = strtol_or_err (*net_input,
+					  "failed to parse net_input counter");
+      if (*net_output)
+	stats->net_output = strtol_or_err (*net_output,
+					   "failed to parse net_output counter");
     }
 
   assert (NULL != mem_limit);
   assert (NULL != mem_usage);
   assert (NULL != name);
+  assert (NULL != net_input);
+  assert (NULL != net_output);
 
   dbg ("%s: container memory: %lu/%lu\n", __func__, stats->mem_usage,
        stats->mem_limit);
   dbg ("%s: container name: %s\n", __func__, stats->name);
+  dbg ("%s: container network I/O: %lu/%lu\n", __func__,
+       stats->net_input, stats->net_output);
 
   free (tokens);
 }
@@ -308,35 +323,65 @@ json_parser_list (struct podman_varlink *pv, const char *image_name,
   free (tokens);
 }
 
-int
-podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
-	      unit_shift shift, const char *image, char **status,
-	      char **perfdata)
+static void
+podman_stats (struct podman_varlink *pv, int check_type,
+	      unsigned int *containers, unsigned long long *total,
+	      unit_shift shift, const char *image,
+	      char **status, char **perfdata)
 {
-  char *tot_memory_str;
   size_t size;
-  unsigned int containers;
   hashtable_t * hashtable;
 
   FILE *stream = open_memstream (perfdata, &size);
 
   json_parser_list (pv, image, &hashtable);
+  *containers = counter_get_unique_elements (hashtable);
 
-  *tot_memory = 0;
-  containers = counter_get_unique_elements (hashtable);
-
-  for (unsigned int j = 0; j < containers; j++)
+  for (unsigned int j = 0; j < *containers; j++)
     {
       char *shortid = hashtable->keys[j];
       container_stats_t stats;
 
       json_parser_stats (pv, shortid, &stats);
-      fprintf (stream, "%s=%lukB;;;0;%lu ", stats.name,
-	       (stats.mem_usage / 1000), (stats.mem_limit / 1000));
-      *tot_memory += stats.mem_usage;
+
+      switch (check_type)
+	{
+	default:
+	  plugin_error (STATE_UNKNOWN, 0, "unknown container metric");
+	  break;
+	case memory_stats:
+	  fprintf (stream, "%s=%lukB;;;0;%lu ", stats.name,
+		   (stats.mem_usage / 1000), (stats.mem_limit / 1000));
+	  *total += stats.mem_usage;
+	  break;
+	case network_in_stats:
+	  fprintf (stream, "%s=%luB ", stats.name, stats.net_input);
+	  *total += stats.net_input;
+	  break;
+	case network_out_stats:
+	  fprintf (stream, "%s=%luB ", stats.name, stats.net_output);
+	  *total += stats.net_output;
+	  break;
+	}
+
       free (stats.name);
     }
   fclose (stream);
+
+  free (hashtable);
+}
+
+int
+podman_stats_memory (struct podman_varlink *pv, unsigned long long *tot_memory,
+		     unit_shift shift, const char *image, char **status,
+		     char **perfdata)
+{
+  char *tot_memory_str;
+  unsigned int containers;
+
+  *tot_memory = 0;
+  podman_stats (pv, memory_stats, &containers, tot_memory, shift, image,
+		status, perfdata);
 
   switch (shift)
     {
@@ -361,8 +406,30 @@ podman_stats (struct podman_varlink *pv, unsigned long long *tot_memory,
 	       , containers
 	       , (containers > 1) ? "s" : "");
 
-  free (hashtable);
   free (tot_memory_str);
+
+  return 0;
+}
+
+int
+podman_stats_network (struct podman_varlink *pv, int check_type,
+		      unsigned long long *sum, unit_shift shift,
+		      const char *image, char **status, char **perfdata)
+{
+  char *sum_str;
+  unsigned int containers;
+
+  *sum = 0;
+  podman_stats (pv, check_type, &containers, sum, shift, image,
+		status, perfdata);
+
+  sum_str = xasprintf ("%gkB", (*sum) / 1000.0);
+  *status =
+    xasprintf ("%s of network %s used by %u running container%s"
+	       , sum_str
+	       , (check_type == network_in_stats) ? "input" : "output"
+	       , containers
+	       , (containers > 1) ? "s" : "");
 
   return 0;
 }

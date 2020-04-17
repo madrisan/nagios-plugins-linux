@@ -39,6 +39,8 @@ static const char *program_copyright =
 static struct option const longopts[] = {
   {(char *) "image", required_argument, NULL, 'i'},
   {(char *) "memory", no_argument, NULL, 'M'},
+  {(char *) "net-in", no_argument, NULL, 'I'},
+  {(char *) "net-out", no_argument, NULL, 'O'},
   {(char *) "varlink-address", required_argument, NULL, 'a'},
   {(char *) "byte", no_argument, NULL, 'b'},
   {(char *) "kilobyte", no_argument, NULL, 'k'},
@@ -66,6 +68,8 @@ usage (FILE * out)
     ("  -i, --image IMAGE   limit the investigation only to the containers "
      "running IMAGE\n", out);
   fputs ("  -M, --memory    return the runtime memory metrics\n", out);
+  fputs ("  -I, --net-in    return the network input metrics\n", out);
+  fputs ("  -O, --net-out   return the network output metrics\n", out);
   fputs ("  'b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs
@@ -81,7 +85,10 @@ usage (FILE * out)
   fprintf (out, "  %s -w 100 -c 120\n", program_name);
   fprintf (out, "  %s --image \"docker.io/library/nginx:latest\" -c 5:\n",
 	   program_name);
-  fprintf (out, "  %s --memory -m XXX\n", program_name);
+  fprintf (out, "  %s --memory -k\n", program_name);
+  fprintf (out, "  %s --memory -m --image \"docker.io/library/nginx:latest\"\n",
+	   program_name);
+  fprintf (out, "  %s --net-in\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -103,6 +110,8 @@ main (int argc, char **argv)
   int c, err;
   int shift = k_shift;
   bool check_memory = false,
+       check_network_input = false,
+       check_network_output = false,
        verbose = false;
   char *image = NULL;
   char *varlink_address = NULL;
@@ -112,12 +121,12 @@ main (int argc, char **argv)
   struct podman_varlink *pv = NULL;
   thresholds *my_threshold = NULL;
   unsigned int containers;
-  unsigned long long tot_memory;
+  unsigned long long sum;
 
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "a:c:w:vi:Mbkmg" GETOPT_HELP_VERSION_STRING,
+			   "a:c:w:vi:IMObkmg" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -130,6 +139,12 @@ main (int argc, char **argv)
 	  break;
 	case 'M':
 	  check_memory = true;
+	  break;
+	case 'I':
+	  check_network_input = true;
+	  break;
+	case 'O':
+	  check_network_output = true;
 	  break;
 	case 'b': shift = b_shift; break;
 	case 'k': shift = k_shift; break;
@@ -154,6 +169,11 @@ main (int argc, char **argv)
 	}
     }
 
+  if ((check_memory &&
+       (check_network_input || check_network_output))
+      || (check_network_input && check_network_output))
+    usage (stderr);
+
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
@@ -164,9 +184,22 @@ main (int argc, char **argv)
 
   if (check_memory)
     {
-      podman_stats (pv, &tot_memory, shift, image, &status_msg, &perfdata_msg);
-      status = get_status (tot_memory, my_threshold);
-      printf ("%s: %s | %s\n", program_name_short, status_msg, perfdata_msg);
+      podman_stats_memory (pv, &sum, shift, image, &status_msg,
+			   &perfdata_msg);
+      status = get_status (sum, my_threshold);
+      printf ("%s: %s | %s\n", program_name_short
+	      , status_msg, perfdata_msg);
+    }
+  else if (check_network_input || check_network_output)
+    {
+      int check_type =
+        check_network_input ? network_in_stats : network_out_stats;
+
+      podman_stats_network (pv, check_type, &sum, shift, image,
+			    &status_msg, &perfdata_msg);
+      status = get_status (sum, my_threshold);
+      printf ("%s: %s | %s\n", program_name_short
+	      , status_msg, perfdata_msg);
     }
   else
     {
