@@ -80,17 +80,11 @@ extern "C"
 				 unsigned int *count, const char *image,
 				 char **perfdata, bool verbose);
 
-  /* Report the containers memory statistics */
-  int podman_stats_memory (struct podman_varlink *pv,
-			   unsigned long long *tot_memory, unit_shift shift,
-			   const char *image_name, char **status,
-			   char **perfdata);
-
-  /* Report the containers network I/O statistics */
-  int podman_stats_network (struct podman_varlink *pv, int check_type,
-			    unsigned long long *sum, unit_shift shift,
-			    const char *image_name,
-			    char **status, char **perfdata);
+  /* Report the containers statistics.  */
+  void podman_stats (struct podman_varlink *pv, int check_type,
+		     unsigned long long *total, unit_shift shift,
+		     const char *image_name, char **status,
+		     char **perfdata);
 
   /* Return a string valid for Nagios performance data output.  */
   char* podman_image_name_normalize (const char *image);
