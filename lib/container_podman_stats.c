@@ -323,21 +323,24 @@ json_parser_list (struct podman_varlink *pv, const char *image_name,
   free (tokens);
 }
 
-static void
+void
 podman_stats (struct podman_varlink *pv, int check_type,
-	      unsigned int *containers, unsigned long long *total,
-	      unit_shift shift, const char *image,
-	      char **status, char **perfdata)
+	      unsigned long long *total, unit_shift shift,
+	      const char *image, char **status, char **perfdata)
 {
+  char *total_str;
   size_t size;
+  unsigned int containers;
   hashtable_t * hashtable;
 
   FILE *stream = open_memstream (perfdata, &size);
 
-  json_parser_list (pv, image, &hashtable);
-  *containers = counter_get_unique_elements (hashtable);
+  *total = 0;
 
-  for (unsigned int j = 0; j < *containers; j++)
+  json_parser_list (pv, image, &hashtable);
+  containers = counter_get_unique_elements (hashtable);
+
+  for (unsigned int j = 0; j < containers; j++)
     {
       char *shortid = hashtable->keys[j];
       container_stats_t stats;
@@ -366,70 +369,35 @@ podman_stats (struct podman_varlink *pv, int check_type,
 
       free (stats.name);
     }
+
   fclose (stream);
-
   free (hashtable);
-}
-
-int
-podman_stats_memory (struct podman_varlink *pv, unsigned long long *tot_memory,
-		     unit_shift shift, const char *image, char **status,
-		     char **perfdata)
-{
-  char *tot_memory_str;
-  unsigned int containers;
-
-  *tot_memory = 0;
-  podman_stats (pv, memory_stats, &containers, tot_memory, shift, image,
-		status, perfdata);
 
   switch (shift)
     {
     default:
     case b_shift:
-      tot_memory_str = xasprintf ("%lluB", *tot_memory);
+      total_str = xasprintf ("%lluB", *total);
       break;
     case k_shift:
-      tot_memory_str = xasprintf ("%llukB", (*tot_memory) / 1000);
+      total_str = xasprintf ("%llukB", (*total) / 1000);
       break;
     case m_shift:
-      tot_memory_str = xasprintf ("%gMB", (*tot_memory) / 1000000.0);
+      total_str = xasprintf ("%gMB", (*total) / 1000000.0);
       break;
     case g_shift:
-      tot_memory_str = xasprintf ("%gGB", (*tot_memory) / 1000000000.0);
+      total_str = xasprintf ("%gGB", (*total) / 1000000000.0);
       break;
-  }
+    }
 
   *status =
-    xasprintf ("%s of memory used by %u running container%s"
-	       , tot_memory_str
-	       , containers
-	       , (containers > 1) ? "s" : "");
+    xasprintf ("%s of %s used by %u running container%s", total_str,
+	       ((check_type ==
+		 memory_stats) ? "memory" : ((check_type ==
+					      network_in_stats) ?
+					     "network input" :
+					     "network output")), containers,
+	       (containers > 1) ? "s" : "");
 
-  free (tot_memory_str);
-
-  return 0;
-}
-
-int
-podman_stats_network (struct podman_varlink *pv, int check_type,
-		      unsigned long long *sum, unit_shift shift,
-		      const char *image, char **status, char **perfdata)
-{
-  char *sum_str;
-  unsigned int containers;
-
-  *sum = 0;
-  podman_stats (pv, check_type, &containers, sum, shift, image,
-		status, perfdata);
-
-  sum_str = xasprintf ("%gkB", (*sum) / 1000.0);
-  *status =
-    xasprintf ("%s of network %s used by %u running container%s"
-	       , sum_str
-	       , (check_type == network_in_stats) ? "input" : "output"
-	       , containers
-	       , (containers > 1) ? "s" : "");
-
-  return 0;
+  free (total_str);
 }

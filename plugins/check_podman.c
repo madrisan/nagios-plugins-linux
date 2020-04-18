@@ -121,7 +121,7 @@ main (int argc, char **argv)
   struct podman_varlink *pv = NULL;
   thresholds *my_threshold = NULL;
   unsigned int containers;
-  unsigned long long sum;
+  unsigned long long total;
 
   set_program_name (argv[0]);
 
@@ -182,24 +182,18 @@ main (int argc, char **argv)
   if (err < 0)
     plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
-  if (check_memory)
-    {
-      podman_stats_memory (pv, &sum, shift, image, &status_msg,
-			   &perfdata_msg);
-      status = get_status (sum, my_threshold);
-      printf ("%s: %s | %s\n", program_name_short
-	      , status_msg, perfdata_msg);
-    }
-  else if (check_network_input || check_network_output)
+  if (check_memory || check_network_input || check_network_output)
     {
       int check_type =
-        check_network_input ? network_in_stats : network_out_stats;
+        (check_memory ? memory_stats
+	 : (check_network_input ? network_in_stats : network_out_stats));
 
-      podman_stats_network (pv, check_type, &sum, shift, image,
-			    &status_msg, &perfdata_msg);
-      status = get_status (sum, my_threshold);
+      podman_stats (pv, check_type, &total, shift, image,
+		    &status_msg, &perfdata_msg);
+      status = get_status (total, my_threshold);
       printf ("%s: %s | %s\n", program_name_short
-	      , status_msg, perfdata_msg);
+	      , status_msg
+	      , perfdata_msg);
     }
   else
     {
@@ -211,8 +205,9 @@ main (int argc, char **argv)
 	xasprintf ("%s: %u running container(s)", state_text (status),
 		   containers);
 
-      printf ("%s containers %s | %s\n", program_name_short,
-	      status_msg, perfdata_msg);
+      printf ("%s containers %s | %s\n", program_name_short
+	      , status_msg
+	      , perfdata_msg);
     }
 
   free (my_threshold);
