@@ -68,7 +68,7 @@ test_podman_running_containers (const void *tdata)
   struct podman_varlink *pv = NULL;
   unsigned int containers;
 
-  err = podman_running_containers (pv, &containers, data->image, &perfdata, false);
+  err = podman_running_containers (pv, &containers, data->image, &perfdata);
   if (err != 0)
     {
       free (perfdata);

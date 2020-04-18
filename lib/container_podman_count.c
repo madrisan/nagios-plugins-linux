@@ -162,7 +162,7 @@ json_parser (char *json, const char *root_key, hashtable_t ** ht_running,
 
 int
 podman_running_containers (struct podman_varlink *pv, unsigned int *count,
-			   const char *image, char **perfdata, bool verbose)
+			   const char *image, char **perfdata)
 {
   const char *varlinkmethod = "io.podman.GetContainersByStatus";
 

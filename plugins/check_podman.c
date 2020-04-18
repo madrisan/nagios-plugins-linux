@@ -46,7 +46,6 @@ static struct option const longopts[] = {
   {(char *) "kilobyte", no_argument, NULL, 'k'},
   {(char *) "megabyte", no_argument, NULL, 'm'},
   {(char *) "gigabyte", no_argument, NULL, 'g'},
-  {(char *) "verbose", no_argument, NULL, 'v'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -77,8 +76,6 @@ usage (FILE * out)
      "(default: " VARLINK_ADDRESS ")\n", out);
   fputs ("  -w, --warning COUNTER    warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
-  fputs ("  -v, --verbose   show details for command-line debugging "
-	 "(Nagios may truncate output)\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
@@ -111,8 +108,7 @@ main (int argc, char **argv)
   int shift = k_shift;
   bool check_memory = false,
        check_network_input = false,
-       check_network_output = false,
-       verbose = false;
+       check_network_output = false;
   char *image = NULL;
   char *varlink_address = NULL;
   char *critical = NULL, *warning = NULL;
@@ -156,9 +152,6 @@ main (int argc, char **argv)
 	case 'w':
 	  warning = optarg;
 	  break;
-	case 'v':
-	  verbose = true;
-	  break;
 	default:
 	  usage (stderr);
 	  break;
@@ -197,7 +190,7 @@ main (int argc, char **argv)
     }
   else
     {
-      podman_running_containers (pv, &containers, image, &perfdata_msg, verbose);
+      podman_running_containers (pv, &containers, image, &perfdata_msg);
       status = get_status (containers, my_threshold);
       status_msg = image ?
 	xasprintf ("%s: %u running container(s) of type \"%s\"",
