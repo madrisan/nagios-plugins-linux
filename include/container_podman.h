@@ -18,7 +18,6 @@
 
 #include <varlink.h>
 
-#include "system.h"
 #include "units.h"
 
 #ifdef __cplusplus
@@ -78,7 +77,7 @@ extern "C"
 
   int podman_running_containers (struct podman_varlink *pv,
 				 unsigned int *count, const char *image,
-				 char **perfdata, bool verbose);
+				 char **perfdata);
 
   /* Report the containers statistics.  */
   void podman_stats (struct podman_varlink *pv, int check_type,
