@@ -68,15 +68,24 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
 {
   const char *varlinkmethod = "io.podman.GetContainerStats";
   char *errmsg = NULL, *json,
-    *keys[] = { "mem_limit", "mem_usage", "name", "net_input", "net_output" },
-    *vals[] = { NULL, NULL, NULL, NULL, NULL },
-    **mem_limit = &vals[0], **mem_usage = &vals[1],
-    **name = &vals[2], **net_input = &vals[3], **net_output = &vals[4],
+    *keys[] = {
+      "block_input", "block_output",
+      "mem_limit", "mem_usage",
+      "name",
+      "net_input", "net_output"
+    },
+    *vals[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+    **block_input = &vals[0], **block_output = &vals[1],
+    **mem_limit = &vals[2], **mem_usage = &vals[3],
+    **name = &vals[4],
+    **net_input = &vals[5], **net_output = &vals[6],
     *root_key = "container", param[80];
   size_t i, ntoken, level = 0, keys_num = sizeof (keys) / sizeof (char *);
   jsmntok_t *tokens;
   int ret;
 
+  stats->block_input = 0;
+  stats->block_output = 0;
   stats->mem_limit = 0;
   stats->mem_usage = 0;
   stats->net_input = 0;
@@ -148,30 +157,42 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
 			  "%s: root element must be an object", __func__);
 	}
 
-      /* the memory limit and usage are reported in bytes */
+      /* all the numeric statistics are reported in bytes */
+      if (*block_input)
+	stats->block_input = strtol_or_err (
+	  *block_input, "failed to parse block_input counter");
+      if (*block_output)
+	stats->block_output = strtol_or_err (
+	  *block_output, "failed to parse bock_output counter");
+
       if (*mem_limit)
-	stats->mem_limit = strtol_or_err (*mem_limit,
-					  "failed to parse mem_limit counter");
+	stats->mem_limit = strtol_or_err (
+	  *mem_limit, "failed to parse mem_limit counter");
       if (*mem_usage)
-	stats->mem_usage = strtol_or_err (*mem_usage,
-					  "failed to parse mem_usage counter");
+	stats->mem_usage = strtol_or_err (
+	  *mem_usage, "failed to parse mem_usage counter");
+
       if (*name)
 	stats->name = xstrdup (*name);
 
       if (*net_input)
-	stats->net_input = strtol_or_err (*net_input,
-					  "failed to parse net_input counter");
+	stats->net_input = strtol_or_err (
+	  *net_input, "failed to parse net_input counter");
       if (*net_output)
-	stats->net_output = strtol_or_err (*net_output,
-					   "failed to parse net_output counter");
+	stats->net_output = strtol_or_err (
+	  *net_output, "failed to parse net_output counter");
     }
 
+  assert (NULL != block_input);
+  assert (NULL != block_output);
   assert (NULL != mem_limit);
   assert (NULL != mem_usage);
   assert (NULL != name);
   assert (NULL != net_input);
   assert (NULL != net_output);
 
+  dbg ("%s: container block I/O: %lu/%lu\n", __func__,
+       stats->block_input, stats->block_output);
   dbg ("%s: container memory: %lu/%lu\n", __func__, stats->mem_usage,
        stats->mem_limit);
   dbg ("%s: container name: %s\n", __func__, stats->name);
@@ -324,7 +345,7 @@ json_parser_list (struct podman_varlink *pv, const char *image_name,
 }
 
 void
-podman_stats (struct podman_varlink *pv, int check_type,
+podman_stats (struct podman_varlink *pv, stats_type which_stats,
 	      bool report_perc, unsigned long long *total,
 	      unit_shift shift, const char *image,
 	      char **status, char **perfdata)
@@ -333,6 +354,16 @@ podman_stats (struct podman_varlink *pv, int check_type,
   size_t size;
   unsigned int containers;
   hashtable_t * hashtable;
+
+  /* see the enum type 'stats_type' declared in container_podman.h */
+  char const * which_stats_str[] = {
+     "block input",
+     "block output",
+     "memory",
+     "network input",
+     "network output"
+  };
+  assert (sizeof (which_stats_str) / sizeof (char *) != last_stats);
 
   FILE *stream = open_memstream (perfdata, &size);
 
@@ -348,15 +379,26 @@ podman_stats (struct podman_varlink *pv, int check_type,
 
       json_parser_stats (pv, shortid, &stats);
 
-      switch (check_type)
+      switch (which_stats)
 	{
 	default:
-	  plugin_error (STATE_UNKNOWN, 0, "unknown container metric");
+	  /* this should never happen */
+	  plugin_error (STATE_UNKNOWN, 0, "unknown podman container metric");
+	  break;
+	case block_in_stats:
+	  fprintf (stream, "%s=%lukB ", stats.name, (stats.block_input / 1000));
+	  *total += stats.block_input;
+	  break;
+	case block_out_stats:
+	  fprintf (stream, "%s=%lukB ",
+		   stats.name, (stats.block_output / 1000));
+	  *total += stats.block_output;
 	  break;
 	case memory_stats:
 	  if (report_perc)
-	    fprintf (stream, "%s=%.2f%% ", stats.name,
-		     ((double)(stats.mem_usage) / (double)(stats.mem_limit)) * 100);
+	    fprintf
+	      (stream, "%s=%.2f%% ", stats.name,
+	        ((double)(stats.mem_usage) / (double)(stats.mem_limit)) * 100);
 	  else
 	    fprintf (stream, "%s=%lukB;;;0;%lu ", stats.name,
 		     (stats.mem_usage / 1000), (stats.mem_limit / 1000));
@@ -397,11 +439,7 @@ podman_stats (struct podman_varlink *pv, int check_type,
 
   *status =
     xasprintf ("%s of %s used by %u running container%s", total_str,
-	       ((check_type ==
-		 memory_stats) ? "memory" : ((check_type ==
-					      network_in_stats) ?
-					     "network input" :
-					     "network output")), containers,
+	       which_stats_str[which_stats], containers,
 	       (containers > 1) ? "s" : "");
 
   free (total_str);

@@ -25,8 +25,15 @@ extern "C"
 {
 #endif
 
+  enum
+  {
+    PODMAN_SHORTID_LEN = 13
+  };
+
   typedef struct container_stats
   {
+    unsigned long block_input;
+    unsigned long block_output;
     unsigned long mem_limit;
     unsigned long mem_usage;
     unsigned long net_input;
@@ -34,13 +41,17 @@ extern "C"
     char *name;
   } container_stats_t;
 
-  enum
+  typedef enum
   {
-    PODMAN_SHORTID_LEN = 13,
+    unknown = -1,
+    /* these enum variables must be non negative */
+    block_in_stats = 0,
+    block_out_stats,
     memory_stats,
     network_in_stats,
     network_out_stats,
-  };
+    last_stats = network_out_stats
+  } stats_type;
 
 #ifndef NPL_TESTING
 
@@ -80,7 +91,7 @@ extern "C"
 				 char **perfdata);
 
   /* Report the containers statistics.  */
-  void podman_stats (struct podman_varlink *pv, int check_type,
+  void podman_stats (struct podman_varlink *pv, stats_type which_stats,
 		     bool report_perc, unsigned long long *total,
 		     unit_shift shift, const char *image_name,
 		     char **status, char **perfdata);

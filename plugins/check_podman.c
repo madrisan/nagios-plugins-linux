@@ -37,11 +37,13 @@ static const char *program_copyright =
   "Copyright (C) 2020 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
-  {(char *) "image", required_argument, NULL, 'i'},
+  {(char *) "block-in", no_argument, NULL, 'I'},
+  {(char *) "net-out", no_argument, NULL, 'O'},
   {(char *) "memory", no_argument, NULL, 'M'},
   {(char *) "memory-perc", no_argument, NULL, '%'},
   {(char *) "net-in", no_argument, NULL, 'I'},
   {(char *) "net-out", no_argument, NULL, 'O'},
+  {(char *) "image", required_argument, NULL, 'i'},
   {(char *) "varlink-address", required_argument, NULL, 'a'},
   {(char *) "byte", no_argument, NULL, 'b'},
   {(char *) "kilobyte", no_argument, NULL, 'k'},
@@ -63,6 +65,10 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [--image IMAGE] [-w COUNTER] [-c COUNTER]\n",
 	   program_name);
+  fprintf (out, "  %s --block-in [-b,-k,-m,-g] [--image IMAGE] "
+	   "[-w COUNTER] [-c COUNTER]\n", program_name);
+  fprintf (out, "  %s --block-out [-b,-k,-m,-g] [--image IMAGE] "
+	   "[-w COUNTER] [-c COUNTER]\n", program_name);
   fprintf (out, "  %s --memory [-b,-k,-m,-g] [--image IMAGE] [--perc] "
 	   "[-w COUNTER] [-c COUNTER]\n", program_name);
   fprintf (out, "  %s --net-in [-b,-k,-m,-g] [--image IMAGE] "
@@ -73,9 +79,11 @@ usage (FILE * out)
   fputs
     ("  -i, --image IMAGE   limit the investigation only to the containers "
      "running IMAGE\n", out);
+  fputs ("  -l, --block-in  return the block input metrics\n", out);
+  fputs ("  -L, --net-out   return the block output metrics\n", out);
   fputs ("  -M, --memory    return the runtime memory metrics\n", out);
-  fputs ("  -I, --net-in    return the network input metrics\n", out);
-  fputs ("  -O, --net-out   return the network output metrics\n", out);
+  fputs ("  -n, --net-in    return the network input metrics\n", out);
+  fputs ("  -N, --net-out   return the network output metrics\n", out);
   fputs ("  'b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs ("  -%, --perc      return the percentages when possible\n", out);
@@ -113,17 +121,16 @@ print_version (void)
 int
 main (int argc, char **argv)
 {
-  int c, err;
-  int shift = k_shift;
-  bool check_memory = false,
-       check_network_input = false,
-       check_network_output = false,
-       report_perc = false;
+  int c, err,
+      check_selected = 0,
+      shift = k_shift;
+  bool report_perc = false;
   char *image = NULL;
   char *varlink_address = NULL;
   char *critical = NULL, *warning = NULL;
   char *status_msg, *perfdata_msg;
   nagstatus status = STATE_OK;
+  stats_type which_stats = unknown;
   struct podman_varlink *pv = NULL;
   thresholds *my_threshold = NULL;
   unsigned int containers;
@@ -132,7 +139,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "a:c:w:vi:IMObkmg%" GETOPT_HELP_VERSION_STRING,
+			   "a:c:w:vi:lLnNMbkmg%" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -144,13 +151,24 @@ main (int argc, char **argv)
 	  image = optarg;
 	  break;
 	case 'M':
-	  check_memory = true;
+	  which_stats = memory_stats;
+	  check_selected++;
 	  break;
-	case 'I':
-	  check_network_input = true;
+	case 'l':
+	  which_stats = block_in_stats;
+	  check_selected++;
 	  break;
-	case 'O':
-	  check_network_output = true;
+	case 'L':
+	  which_stats = block_out_stats;
+	  check_selected++;
+	  break;
+	case 'n':
+	  which_stats = network_in_stats;
+	  check_selected++;
+	  break;
+	case 'N':
+	  which_stats = network_out_stats;
+	  check_selected++;
 	  break;
 	case 'b': shift = b_shift; break;
 	case 'k': shift = k_shift; break;
@@ -174,9 +192,7 @@ main (int argc, char **argv)
 	}
     }
 
-  if ((check_memory &&
-       (check_network_input || check_network_output))
-      || (check_network_input && check_network_output))
+  if (1 < check_selected)
     usage (stderr);
 
   status = set_thresholds (&my_threshold, warning, critical);
@@ -187,13 +203,9 @@ main (int argc, char **argv)
   if (err < 0)
     plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
-  if (check_memory || check_network_input || check_network_output)
+  if (0 <= which_stats)
     {
-      int check_type =
-        (check_memory ? memory_stats
-	 : (check_network_input ? network_in_stats : network_out_stats));
-
-      podman_stats (pv, check_type, report_perc, &total, shift, image,
+      podman_stats (pv, which_stats, report_perc, &total, shift, image,
 		    &status_msg, &perfdata_msg);
       status = get_status (total, my_threshold);
       printf ("%s: %s | %s\n", program_name_short
