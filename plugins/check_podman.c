@@ -39,6 +39,7 @@ static const char *program_copyright =
 static struct option const longopts[] = {
   {(char *) "image", required_argument, NULL, 'i'},
   {(char *) "memory", no_argument, NULL, 'M'},
+  {(char *) "memory-perc", no_argument, NULL, '%'},
   {(char *) "net-in", no_argument, NULL, 'I'},
   {(char *) "net-out", no_argument, NULL, 'O'},
   {(char *) "varlink-address", required_argument, NULL, 'a'},
@@ -46,6 +47,7 @@ static struct option const longopts[] = {
   {(char *) "kilobyte", no_argument, NULL, 'k'},
   {(char *) "megabyte", no_argument, NULL, 'm'},
   {(char *) "gigabyte", no_argument, NULL, 'g'},
+  {(char *) "perc", no_argument, NULL, '%'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -61,7 +63,12 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [--image IMAGE] [-w COUNTER] [-c COUNTER]\n",
 	   program_name);
-  fprintf (out, "  %s --memory XXX\n", program_name);
+  fprintf (out, "  %s --memory [-b,-k,-m,-g] [--image IMAGE] [--perc] "
+	   "[-w COUNTER] [-c COUNTER]\n", program_name);
+  fprintf (out, "  %s --net-in [-b,-k,-m,-g] [--image IMAGE] "
+	   "[-w COUNTER] [-c COUNTER]\n", program_name);
+  fprintf (out, "  %s --net-out [-b,-k,-m,-g] [--image IMAGE] "
+	    "[-w COUNTER] [-c COUNTER]\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs
     ("  -i, --image IMAGE   limit the investigation only to the containers "
@@ -71,6 +78,7 @@ usage (FILE * out)
   fputs ("  -O, --net-out   return the network output metrics\n", out);
   fputs ("  'b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
+  fputs ("  -%, --perc      return the percentages when possible\n", out);
   fputs
     ("  -a, --varlink-address ADDRESS   varlink address "
      "(default: " VARLINK_ADDRESS ")\n", out);
@@ -82,10 +90,11 @@ usage (FILE * out)
   fprintf (out, "  %s -w 100 -c 120\n", program_name);
   fprintf (out, "  %s --image \"docker.io/library/nginx:latest\" -c 5:\n",
 	   program_name);
-  fprintf (out, "  %s --memory -k\n", program_name);
+  fprintf (out, "  %s --memory -k --perc\n", program_name);
   fprintf (out, "  %s --memory -m --image \"docker.io/library/nginx:latest\"\n",
 	   program_name);
-  fprintf (out, "  %s --net-in\n", program_name);
+  fprintf (out, "  %s --net-in -k --image \"docker.io/library/redis:latest\"\n",
+	   program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -108,7 +117,8 @@ main (int argc, char **argv)
   int shift = k_shift;
   bool check_memory = false,
        check_network_input = false,
-       check_network_output = false;
+       check_network_output = false,
+       report_perc = false;
   char *image = NULL;
   char *varlink_address = NULL;
   char *critical = NULL, *warning = NULL;
@@ -122,7 +132,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "a:c:w:vi:IMObkmg" GETOPT_HELP_VERSION_STRING,
+			   "a:c:w:vi:IMObkmg%" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -146,6 +156,8 @@ main (int argc, char **argv)
 	case 'k': shift = k_shift; break;
 	case 'm': shift = m_shift; break;
 	case 'g': shift = g_shift; break;
+	case '%': report_perc = true;
+	  break;
 	case 'c':
 	  critical = optarg;
 	  break;
@@ -181,7 +193,7 @@ main (int argc, char **argv)
         (check_memory ? memory_stats
 	 : (check_network_input ? network_in_stats : network_out_stats));
 
-      podman_stats (pv, check_type, &total, shift, image,
+      podman_stats (pv, check_type, report_perc, &total, shift, image,
 		    &status_msg, &perfdata_msg);
       status = get_status (total, my_threshold);
       printf ("%s: %s | %s\n", program_name_short
