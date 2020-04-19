@@ -325,8 +325,9 @@ json_parser_list (struct podman_varlink *pv, const char *image_name,
 
 void
 podman_stats (struct podman_varlink *pv, int check_type,
-	      unsigned long long *total, unit_shift shift,
-	      const char *image, char **status, char **perfdata)
+	      bool report_perc, unsigned long long *total,
+	      unit_shift shift, const char *image,
+	      char **status, char **perfdata)
 {
   char *total_str;
   size_t size;
@@ -353,8 +354,12 @@ podman_stats (struct podman_varlink *pv, int check_type,
 	  plugin_error (STATE_UNKNOWN, 0, "unknown container metric");
 	  break;
 	case memory_stats:
-	  fprintf (stream, "%s=%lukB;;;0;%lu ", stats.name,
-		   (stats.mem_usage / 1000), (stats.mem_limit / 1000));
+	  if (report_perc)
+	    fprintf (stream, "%s=%.2f%% ", stats.name,
+		     ((double)(stats.mem_usage) / (double)(stats.mem_limit)) * 100);
+	  else
+	    fprintf (stream, "%s=%lukB;;;0;%lu ", stats.name,
+		     (stats.mem_usage / 1000), (stats.mem_limit / 1000));
 	  *total += stats.mem_usage;
 	  break;
 	case network_in_stats:

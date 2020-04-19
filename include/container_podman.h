@@ -81,9 +81,9 @@ extern "C"
 
   /* Report the containers statistics.  */
   void podman_stats (struct podman_varlink *pv, int check_type,
-		     unsigned long long *total, unit_shift shift,
-		     const char *image_name, char **status,
-		     char **perfdata);
+		     bool report_perc, unsigned long long *total,
+		     unit_shift shift, const char *image_name,
+		     char **status, char **perfdata);
 
   /* Return a string valid for Nagios performance data output.  */
   char* podman_image_name_normalize (const char *image);
