@@ -37,12 +37,12 @@ static const char *program_copyright =
   "Copyright (C) 2020 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
-  {(char *) "block-in", no_argument, NULL, 'I'},
-  {(char *) "net-out", no_argument, NULL, 'O'},
+  {(char *) "block-in", no_argument, NULL, 'l'},
+  {(char *) "block-out", no_argument, NULL, 'L'},
   {(char *) "memory", no_argument, NULL, 'M'},
   {(char *) "memory-perc", no_argument, NULL, '%'},
-  {(char *) "net-in", no_argument, NULL, 'I'},
-  {(char *) "net-out", no_argument, NULL, 'O'},
+  {(char *) "net-in", no_argument, NULL, 'n'},
+  {(char *) "net-out", no_argument, NULL, 'N'},
   {(char *) "pids", no_argument, NULL, 'p'},
   {(char *) "image", required_argument, NULL, 'i'},
   {(char *) "varlink-address", required_argument, NULL, 'a'},
@@ -98,6 +98,12 @@ usage (FILE * out)
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
+  fputs (USAGE_NOTE, out);
+  fputs ("  Podman stats will not work in rootless environments that use "
+	 "CGroups V1.\n", out);
+  fputs ("  Rootless environments that use CGroups V2 are not able to report "
+	 "statistics\n", out);
+  fputs ("  about their networking usage.\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -w 100 -c 120\n", program_name);
   fprintf (out, "  %s -i \"docker.io/library/nginx:latest\" -c 5:\n",
