@@ -43,6 +43,7 @@ static struct option const longopts[] = {
   {(char *) "memory-perc", no_argument, NULL, '%'},
   {(char *) "net-in", no_argument, NULL, 'I'},
   {(char *) "net-out", no_argument, NULL, 'O'},
+  {(char *) "pids", no_argument, NULL, 'p'},
   {(char *) "image", required_argument, NULL, 'i'},
   {(char *) "varlink-address", required_argument, NULL, 'a'},
   {(char *) "byte", no_argument, NULL, 'b'},
@@ -50,6 +51,8 @@ static struct option const longopts[] = {
   {(char *) "megabyte", no_argument, NULL, 'm'},
   {(char *) "gigabyte", no_argument, NULL, 'g'},
   {(char *) "perc", no_argument, NULL, '%'},
+  {(char *) "critical", required_argument, NULL, 'c'},
+  {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -84,6 +87,7 @@ usage (FILE * out)
   fputs ("  -M, --memory    return the runtime memory metrics\n", out);
   fputs ("  -n, --net-in    return the network input metrics\n", out);
   fputs ("  -N, --net-out   return the network output metrics\n", out);
+  fputs ("  -p, --pids      return the number of PIDs\n", out);
   fputs ("  'b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs ("  -%, --perc      return the percentages when possible\n", out);
@@ -96,13 +100,15 @@ usage (FILE * out)
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -w 100 -c 120\n", program_name);
-  fprintf (out, "  %s --image \"docker.io/library/nginx:latest\" -c 5:\n",
+  fprintf (out, "  %s -i \"docker.io/library/nginx:latest\" -c 5:\n",
 	   program_name);
+  fprintf (out, "  %s --block-out -m\n", program_name);
   fprintf (out, "  %s --memory -k --perc\n", program_name);
   fprintf (out, "  %s --memory -m --image \"docker.io/library/nginx:latest\"\n",
 	   program_name);
   fprintf (out, "  %s --net-in -k --image \"docker.io/library/redis:latest\"\n",
 	   program_name);
+  fprintf (out, "  %s --pids --warning 8:\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -139,7 +145,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "a:c:w:vi:lLnNMbkmg%" GETOPT_HELP_VERSION_STRING,
+			   "a:c:w:vi:lLnNMpbkmg%" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -168,6 +174,10 @@ main (int argc, char **argv)
 	  break;
 	case 'N':
 	  which_stats = network_out_stats;
+	  check_selected++;
+	  break;
+	case 'p':
+	  which_stats = pids_stats;
 	  check_selected++;
 	  break;
 	case 'b': shift = b_shift; break;

@@ -38,6 +38,7 @@ extern "C"
     unsigned long mem_usage;
     unsigned long net_input;
     unsigned long net_output;
+    unsigned pids;
     char *name;
   } container_stats_t;
 
@@ -50,7 +51,8 @@ extern "C"
     memory_stats,
     network_in_stats,
     network_out_stats,
-    last_stats = network_out_stats
+    pids_stats,
+    last_stats = pids_stats
   } stats_type;
 
 #ifndef NPL_TESTING
