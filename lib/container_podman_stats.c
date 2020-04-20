@@ -72,13 +72,15 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
       "block_input", "block_output",
       "mem_limit", "mem_usage",
       "name",
-      "net_input", "net_output"
+      "net_input", "net_output",
+      "pids"
     },
-    *vals[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+    *vals[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
     **block_input = &vals[0], **block_output = &vals[1],
     **mem_limit = &vals[2], **mem_usage = &vals[3],
     **name = &vals[4],
     **net_input = &vals[5], **net_output = &vals[6],
+    ** pids = &vals[7],
     *root_key = "container", param[80];
   size_t i, ntoken, level = 0, keys_num = sizeof (keys) / sizeof (char *);
   jsmntok_t *tokens;
@@ -91,6 +93,7 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
   stats->net_input = 0;
   stats->net_output = 0;
   stats->name = NULL;
+  stats->pids = 0;
 
   sprintf (param, "{\"name\":\"%s\"}", id);
   dbg ("%s: parameter %s will be passed to podman_varlink_get()\n", __func__,
@@ -181,6 +184,10 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
       if (*net_output)
 	stats->net_output = strtol_or_err (
 	  *net_output, "failed to parse net_output counter");
+
+      if (*pids)
+	stats->pids = strtol_or_err (
+	  *pids, "failed to parse pids counter");
     }
 
   assert (NULL != block_input);
@@ -190,6 +197,7 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
   assert (NULL != name);
   assert (NULL != net_input);
   assert (NULL != net_output);
+  assert (NULL != pids);
 
   dbg ("%s: container block I/O: %lu/%lu\n", __func__,
        stats->block_input, stats->block_output);
@@ -198,6 +206,7 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
   dbg ("%s: container name: %s\n", __func__, stats->name);
   dbg ("%s: container network I/O: %lu/%lu\n", __func__,
        stats->net_input, stats->net_output);
+  dbg ("%s: container pids: %u\n", __func__, stats->pids);
 
   free (tokens);
 }
@@ -361,7 +370,8 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
      "block output",
      "memory",
      "network input",
-     "network output"
+     "network output",
+     "pids"
   };
   assert (sizeof (which_stats_str) / sizeof (char *) != last_stats);
 
@@ -412,6 +422,10 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
 	  fprintf (stream, "%s=%luB ", stats.name, stats.net_output);
 	  *total += stats.net_output;
 	  break;
+	case pids_stats:
+	  fprintf (stream, "%s=%u ", stats.name, stats.pids);
+	  *total += stats.pids;
+	  break;
 	}
 
       free (stats.name);
@@ -420,22 +434,25 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
   fclose (stream);
   free (hashtable);
 
-  switch (shift)
-    {
-    default:
-    case b_shift:
-      total_str = xasprintf ("%lluB", *total);
-      break;
-    case k_shift:
-      total_str = xasprintf ("%llukB", (*total) / 1000);
-      break;
-    case m_shift:
-      total_str = xasprintf ("%gMB", (*total) / 1000000.0);
-      break;
-    case g_shift:
-      total_str = xasprintf ("%gGB", (*total) / 1000000000.0);
-      break;
-    }
+  if (pids_stats != which_stats)
+    switch (shift)
+      {
+      default:
+      case b_shift:
+	total_str = xasprintf ("%lluB", *total);
+	break;
+      case k_shift:
+	total_str = xasprintf ("%llukB", (*total) / 1000);
+	break;
+      case m_shift:
+	total_str = xasprintf ("%gMB", (*total) / 1000000.0);
+	break;
+      case g_shift:
+	total_str = xasprintf ("%gGB", (*total) / 1000000000.0);
+	break;
+      }
+  else
+    total_str = xasprintf ("%llu", *total);
 
   *status =
     xasprintf ("%s of %s used by %u running container%s", total_str,
