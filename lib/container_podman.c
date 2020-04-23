@@ -161,24 +161,13 @@ podman_varlink_unref (struct podman_varlink *pv)
 
 int
 podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
-		    char *param, char **json, char **err)
+		    char **json, char **err)
 {
   long ret;
   VarlinkObject *out;
 
   assert (pv->connection);
-  if (NULL == param)
-    ret = varlink_object_new (&pv->parameters);
-  else
-    ret = varlink_object_new_from_json (&pv->parameters, param);
-  if (ret < 0)
-    {
-      *err =
-	xasprintf ("varlink_object_new: %s",
-		   varlink_error_string (labs (ret)));
-      return ret;
-    }
-  assert (pv->parameters);
+  /*assert (pv->parameters);*/
 
   ret =
     varlink_connection_call (pv->connection, varlinkmethod, pv->parameters, 0,

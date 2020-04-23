@@ -31,15 +31,15 @@
 #include "testutils.h"
 
 static int podman_varlink_get (struct podman_varlink *pv,
-			       const char *varlinkmethod, const char *param,
-			       char **json, char **err);
+			       const char *varlinkmethod, char **json,
+			       char **err);
 
 #include "../lib/container_podman.c"
 #include "../lib/container_podman_count.c"
 
 static int 
 podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
-		    const char *param, char **json, char **err)
+		    char **json, char **err)
 { 
   char *filename = NPL_TEST_PATH_PODMAN_GETCONTAINERSBYSTATUS_JSON;
 

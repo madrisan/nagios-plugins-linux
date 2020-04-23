@@ -171,7 +171,7 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
   unsigned int running_containers = 0, exited_containers = 0;
   int ret;
 
-  ret = podman_varlink_get (pv, varlinkmethod, NULL, &json, &errmsg);
+  ret = podman_varlink_get (pv, varlinkmethod, &json, &errmsg);
   if (ret < 0)
     {
       podman_varlink_unref (pv);

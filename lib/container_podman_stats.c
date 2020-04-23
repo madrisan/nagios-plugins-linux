@@ -81,7 +81,7 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
     **name = &vals[4],
     **net_input = &vals[5], **net_output = &vals[6],
     ** pids = &vals[7],
-    *root_key = "container", param[80];
+    *root_key = "container";
   size_t i, ntoken, level = 0, keys_num = sizeof (keys) / sizeof (char *);
   jsmntok_t *tokens;
   int ret;
@@ -95,10 +95,12 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
   stats->name = NULL;
   stats->pids = 0;
 
-  sprintf (param, "{\"name\":\"%s\"}", id);
-  dbg ("%s: parameter %s will be passed to podman_varlink_get()\n", __func__,
-       param);
-  ret = podman_varlink_get (pv, varlinkmethod, param, &json, &errmsg);
+#ifndef NPL_TESTING
+  varlink_object_set_string (pv->parameters, "name", id);
+  dbg ("%s: parameter \"{name: %s}\" will be passed to podman_varlink_get\n",
+       __func__,  id);
+#endif
+  ret = podman_varlink_get (pv, varlinkmethod, &json, &errmsg);
   if (ret < 0)
     {
 #ifndef NPL_TESTING
@@ -208,6 +210,9 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
        stats->net_input, stats->net_output);
   dbg ("%s: container pids: %u\n", __func__, stats->pids);
 
+#ifndef NPL_TESTING
+  varlink_object_unref (pv->parameters);
+#endif
   free (tokens);
 }
 
@@ -265,7 +270,7 @@ json_parser_list (struct podman_varlink *pv, const char *image_name,
   const char *varlinkmethod = "io.podman.ListContainers";
   *hashtable = counter_create ();
 
-  ret = podman_varlink_get (pv, varlinkmethod, NULL, &json, &errmsg);
+  ret = podman_varlink_get (pv, varlinkmethod, &json, &errmsg);
   if (ret < 0)
     {
 #ifndef NPL_TESTING
