@@ -201,14 +201,14 @@ json_parser_stats (struct podman_varlink *pv, const char *id,
   assert (NULL != net_output);
   assert (NULL != pids);
 
-  dbg ("%s: container block I/O: %lu/%lu\n", __func__,
+  dbg ("%s: container block I/O: %ld/%ld\n", __func__,
        stats->block_input, stats->block_output);
-  dbg ("%s: container memory: %lu/%lu\n", __func__, stats->mem_usage,
+  dbg ("%s: container memory: %ld/%ld\n", __func__, stats->mem_usage,
        stats->mem_limit);
   dbg ("%s: container name: %s\n", __func__, stats->name);
-  dbg ("%s: container network I/O: %lu/%lu\n", __func__,
+  dbg ("%s: container network I/O: %ld/%ld\n", __func__,
        stats->net_input, stats->net_output);
-  dbg ("%s: container pids: %u\n", __func__, stats->pids);
+  dbg ("%s: container pids: %ld\n", __func__, stats->pids);
 
 #ifndef NPL_TESTING
   varlink_object_unref (pv->parameters);
@@ -401,11 +401,11 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
 	  plugin_error (STATE_UNKNOWN, 0, "unknown podman container metric");
 	  break;
 	case block_in_stats:
-	  fprintf (stream, "%s=%lukB ", stats.name, (stats.block_input / 1000));
+	  fprintf (stream, "%s=%ldkB ", stats.name, (stats.block_input / 1000));
 	  *total += stats.block_input;
 	  break;
 	case block_out_stats:
-	  fprintf (stream, "%s=%lukB ",
+	  fprintf (stream, "%s=%ldkB ",
 		   stats.name, (stats.block_output / 1000));
 	  *total += stats.block_output;
 	  break;
@@ -415,20 +415,20 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
 	      (stream, "%s=%.2f%% ", stats.name,
 	        ((double)(stats.mem_usage) / (double)(stats.mem_limit)) * 100);
 	  else
-	    fprintf (stream, "%s=%lukB;;;0;%lu ", stats.name,
+	    fprintf (stream, "%s=%ldkB;;;0;%ld ", stats.name,
 		     (stats.mem_usage / 1000), (stats.mem_limit / 1000));
 	  *total += stats.mem_usage;
 	  break;
 	case network_in_stats:
-	  fprintf (stream, "%s=%luB ", stats.name, stats.net_input);
+	  fprintf (stream, "%s=%ldB ", stats.name, stats.net_input);
 	  *total += stats.net_input;
 	  break;
 	case network_out_stats:
-	  fprintf (stream, "%s=%luB ", stats.name, stats.net_output);
+	  fprintf (stream, "%s=%ldB ", stats.name, stats.net_output);
 	  *total += stats.net_output;
 	  break;
 	case pids_stats:
-	  fprintf (stream, "%s=%u ", stats.name, stats.pids);
+	  fprintf (stream, "%s=%ld ", stats.name, stats.pids);
 	  *total += stats.pids;
 	  break;
 	}
