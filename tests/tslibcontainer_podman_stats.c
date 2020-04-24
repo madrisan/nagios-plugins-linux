@@ -57,10 +57,10 @@ typedef struct test_data
 {
   char *id;
   char *name;
-  unsigned long mem_limit;
-  unsigned long mem_usage;
-  unsigned long net_input;
-  unsigned long net_output;
+  int64_t mem_limit;
+  int64_t mem_usage;
+  int64_t net_input;
+  int64_t net_output;
 } test_data;
 
 static int

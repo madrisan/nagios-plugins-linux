@@ -32,13 +32,13 @@ extern "C"
 
   typedef struct container_stats
   {
-    unsigned long block_input;
-    unsigned long block_output;
-    unsigned long mem_limit;
-    unsigned long mem_usage;
-    unsigned long net_input;
-    unsigned long net_output;
-    unsigned pids;
+    int64_t block_input;
+    int64_t block_output;
+    int64_t mem_limit;
+    int64_t mem_usage;
+    int64_t net_input;
+    int64_t net_output;
+    int64_t pids;
     char *name;
   } container_stats_t;
 
