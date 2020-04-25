@@ -66,15 +66,12 @@ extern "C"
   long podman_varlink_callback (VarlinkConnection * connection,
 				const char *error, VarlinkObject * parameters,
 				uint64_t flags, void *userdata);
-
   long podman_varlink_check_event (VarlinkConnection * connection,
 				   char **err);
-
-  int podman_varlink_get (struct podman_varlink *pv,
-			  const char *varlinkmethod, char **json, char **err);
-
-  int podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
-			    container_stats_t *stats, char **err);
+  long podman_varlink_get (podman_varlink_t *pv, const char *varlinkmethod,
+			   char **json, char **err);
+  long podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
+			     container_stats_t *stats, char **err);
 #else
 
   struct podman_varlink;

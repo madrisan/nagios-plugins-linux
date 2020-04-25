@@ -183,6 +183,8 @@ json_parser_list (struct podman_varlink *pv, const char *image_name,
   free (tokens);
 }
 
+#ifndef NPL_TESTING
+
 void
 podman_stats (struct podman_varlink *pv, stats_type which_stats,
 	      bool report_perc, unsigned long long *total,
@@ -297,3 +299,5 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
 
   free (total_str);
 }
+
+#endif
