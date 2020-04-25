@@ -93,7 +93,11 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
       dbg (" * container image: %s\n", cnt_image);
       dbg (" * container status: %s\n", cnt_status);
 
+      /* discard non running containers */
       if (STRNEQ (cnt_status, "running"))
+	continue;
+      /* discard containers non running the selected image if any */
+      if (image && STRNEQ (cnt_image, image))
 	continue;
 
       containers++;
