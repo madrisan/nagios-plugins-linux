@@ -32,11 +32,24 @@
 
 #include "common.h"
 #include "container_podman.h"
+#include "logging.h"
 #include "messages.h"
 #include "xalloc.h"
 #include "xasprintf.h"
 
 #ifndef NPL_TESTING
+
+long
+podman_varlink_error (long ret, const char *funcname, char **err)
+{
+  if (ret < 0)
+    {
+      *err =
+       xasprintf ("%s: %s", funcname, varlink_error_string (labs (ret)));
+      return ret;
+    }
+  return 0;
+}
 
 long
 podman_varlink_check_event (VarlinkConnection * connection, char **err)
@@ -191,6 +204,61 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
       return ret;
     }
 
+  return 0;
+}
+
+int
+podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
+		      container_stats_t *cp, char **err)
+{
+  const char *temp;
+  char *varlinkmethod = "io.podman.GetContainerStats";
+  long ret;
+  VarlinkObject *reply, *stats;
+
+  assert (pv->connection);
+
+  dbg ("%s: parameter built from \"%s\" will be passed to varlink_call()\n",
+       __func__, shortid);
+  varlink_object_new (&(pv->parameters));
+  ret = varlink_object_set_string (pv->parameters, "name", shortid);
+  if (ret < 0)
+    return podman_varlink_error (ret, "varlink_object_set_string", err);
+
+  ret = varlink_connection_call (pv->connection, varlinkmethod,
+				 pv->parameters, 0, podman_varlink_callback,
+				 &reply);
+  if (ret < 0)
+    return podman_varlink_error (ret, "varlink_connection_call", err);
+  //varlink_object_unref (pv->parameters);
+
+  ret = podman_varlink_check_event (pv->connection, err);
+  if (ret < 0)
+    return ret;
+
+  ret = varlink_object_get_object (reply, "container", &stats);
+  if (ret < 0)
+    return podman_varlink_error (ret, "varlink_object_get_object", err);
+
+  varlink_object_get_int (stats, "block_input", &cp->block_input);
+  varlink_object_get_int (stats, "block_output", &cp->block_output);
+  varlink_object_get_int (stats, "net_input", &cp->net_input);
+  varlink_object_get_int (stats, "net_output", &cp->net_output);
+  //varlink_object_get_float (stats, "cpu", &cp->cpu);
+  varlink_object_get_int (stats, "mem_usage", &cp->mem_usage);
+  varlink_object_get_int (stats, "mem_limit", &cp->mem_limit);
+  varlink_object_get_int (stats, "pids", &cp->pids);
+  varlink_object_get_string (stats, "name", &temp);
+  cp->name = xstrdup (temp);
+
+  dbg ("%s: block I/O = %ld/%ld\n", __func__, cp->block_input,
+       cp->block_output);
+  dbg ("%s: network I/O = %ld/%ld\n", __func__, cp->net_input, cp->net_output);
+  dbg ("%s: memory usage = %ld/%ld\n", __func__, cp->mem_usage, cp->mem_limit);
+  dbg ("%s: pids = %ld\n", __func__, cp->pids);
+  dbg ("%s: name = %s\n", __func__, cp->name);
+
+  varlink_object_unref (reply);
   return 0;
 }
 

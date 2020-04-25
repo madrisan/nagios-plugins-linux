@@ -73,6 +73,8 @@ extern "C"
   int podman_varlink_get (struct podman_varlink *pv,
 			  const char *varlinkmethod, char **json, char **err);
 
+  int podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
+			    container_stats_t *stats, char **err);
 #else
 
   struct podman_varlink;
