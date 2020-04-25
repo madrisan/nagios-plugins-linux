@@ -207,6 +207,27 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
   return 0;
 }
 
+/* Get the statistics for a running container.
+ * The format of the data follows:
+ *
+ *     {
+ *       "container": {
+ *         "block_input": 16601088,
+ *         "block_output": 16384,
+ *         "cpu": 1.0191267811342149e-07,
+ *         "cpu_nano": 1616621000,
+ *         "id": "e15712d1db8f92b3a00be9649345856da53ab22abcc8b22e286c5cd8fbf08c36",
+ *         "mem_limit": 8232525824,
+ *         "mem_perc": 0.10095059739468847,
+ *         "mem_usage": 8310784,
+ *         "name": "srv-redis-1",
+ *         "net_input": 1048,
+ *         "net_output": 7074,
+ *         "pids": 4,
+ *         "system_nano": 1586280558931850500
+ *      }
+ */
+
 int
 podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
 		      container_stats_t *cp, char **err)
@@ -230,7 +251,8 @@ podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
 				 &reply);
   if (ret < 0)
     return podman_varlink_error (ret, "varlink_connection_call", err);
-  //varlink_object_unref (pv->parameters);
+
+  varlink_object_unref (pv->parameters);
 
   ret = podman_varlink_check_event (pv->connection, err);
   if (ret < 0)
