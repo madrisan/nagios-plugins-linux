@@ -44,8 +44,10 @@ podman_varlink_error (long ret, const char *funcname, char **err)
 {
   if (ret < 0)
     {
+      const char *varlink_err = varlink_error_string (labs (ret));
       *err =
-       xasprintf ("%s: %s", funcname, varlink_error_string (labs (ret)));
+	funcname ? xasprintf ("%s: %s", funcname,
+			      varlink_err) : xasprintf ("%s", varlink_err);
       return ret;
     }
   return 0;
@@ -207,6 +209,67 @@ podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
   return 0;
 }
 
+/* Return the list of podman containers.
+ * The format of the data in JSON format follows:
+ *
+ *     {
+ *       "containers": [
+ *         {
+ *           "command": [
+ *             ...
+ *           ],
+ *           "containerrunning": true,
+ *           "createdat": "2020-04-06T00:22:29+02:00",
+ *           "id": "3b395e067a3071ba77b2b44999235589a0957c72e99d1186ff1e53a0069da727",
+ *           "image": "docker.io/library/redis:latest",
+ *           "imageid": "f0453552d7f26fc38ffc05fa034aa7a7bc6fbb01bc7bc5a9e4b3c0ab87068627",
+ *           "mounts": [
+ *              ...
+ *           ],
+ *           "names": "srv-redis-1",
+ *           "namespaces": {
+ *             ...
+ *           },
+ *           "ports": [
+ *             ...
+ *           ],
+ *           "rootfssize": 98203942,
+ *           "runningfor": "52.347336247s",
+ *           "rwsize": 0,
+ *           "status": "running"
+ *         },
+ *         {
+ *           ...
+ *         }
+ *       ]
+ *     }
+ */
+
+long
+podman_varlink_list (podman_varlink_t *pv, VarlinkArray **list, char **err)
+{
+  const char *varlinkmethod = "io.podman.ListContainers";
+  long ret;
+  VarlinkObject *reply;
+
+  dbg ("varlink method \"%s\"\n", varlinkmethod);
+  ret = varlink_connection_call (pv->connection, varlinkmethod,
+				 pv->parameters, 0, podman_varlink_callback,
+				 &reply);
+  if (ret < 0)
+    return podman_varlink_error (ret, "varlink_connection_call", err);
+
+  ret = podman_varlink_check_event (pv->connection, err);
+  if (ret < 0)
+    return podman_varlink_error (ret, NULL, err);
+
+  ret = varlink_object_get_array (reply, "containers", list);
+  if (ret < 0)
+    return podman_varlink_error (ret, "varlink_object_get_array", err);
+
+  return 0;
+}
+
 /* Get the statistics for a running container.
  * The format of the data follows:
  *
@@ -246,6 +309,7 @@ podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
   if (ret < 0)
     return podman_varlink_error (ret, "varlink_object_set_string", err);
 
+  dbg ("varlink method \"%s\"\n", varlinkmethod);
   ret = varlink_connection_call (pv->connection, varlinkmethod,
 				 pv->parameters, 0, podman_varlink_callback,
 				 &reply);
@@ -256,7 +320,7 @@ podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
 
   ret = podman_varlink_check_event (pv->connection, err);
   if (ret < 0)
-    return ret;
+    return podman_varlink_error (ret, NULL, err);
 
   ret = varlink_object_get_object (reply, "container", &stats);
   if (ret < 0)
