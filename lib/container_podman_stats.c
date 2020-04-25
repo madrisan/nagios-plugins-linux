@@ -26,20 +26,11 @@
 #include <varlink.h>
 
 #include "common.h"
-#include "collection.h"
 #include "container_podman.h"
-#include "json_helpers.h"
 #include "logging.h"
 #include "messages.h"
 #include "string-macros.h"
-#include "units.h"
-#include "xalloc.h"
 #include "xasprintf.h"
-#include "xstrtol.h"
-
-/* Hide all jsmn API symbols by making them static */
-#define JSMN_STATIC
-#include "jsmn.h"
 
 void
 podman_stats (struct podman_varlink *pv, stats_type which_stats,
