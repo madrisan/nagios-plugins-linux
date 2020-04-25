@@ -392,7 +392,18 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
       char *shortid = hashtable->keys[j];
       container_stats_t stats;
 
+#ifdef NPL_TESTING
+      /* FIXME */
       json_parser_stats (pv, shortid, &stats);
+#else
+      char *errmsg = NULL;
+      long ret = podman_varlink_stats (pv, shortid, &stats, &errmsg);
+      if (ret < 0)
+	{
+	  podman_varlink_unref (pv);
+	  plugin_error (STATE_UNKNOWN, 0, "varlink_varlink_stats: %s", errmsg);
+	}
+#endif
 
       switch (which_stats)
 	{
