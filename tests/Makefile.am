@@ -57,8 +57,7 @@ test_programs = \
 if HAVE_LIBVARLINK
 test_programs += \
 	tslibcontainer_podman_count \
-	tslibcontainer_podman_list \
-	tslibcontainer_podman_stats
+	tslibcontainer_podman_list
 endif
 if !HAVE_LIBPROCPS
 test_programs += \
@@ -97,9 +96,6 @@ tslibcontainer_podman_count_LDADD = $(LDADDS) $(LIBVARLINK_LIBS)
 
 tslibcontainer_podman_list_SOURCES = $(test_utils) tslibcontainer_podman_list.c
 tslibcontainer_podman_list_LDADD = $(LDADDS) $(LIBVARLINK_LIBS)
-
-tslibcontainer_podman_stats_SOURCES = $(test_utils) tslibcontainer_podman_stats.c
-tslibcontainer_podman_stats_LDADD = $(LDADDS) $(LIBVARLINK_LIBS)
 endif
 
 tslibkernelver_SOURCES = $(test_utils) tslibkernelver.c

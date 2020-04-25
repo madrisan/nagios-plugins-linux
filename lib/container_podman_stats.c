@@ -41,181 +41,6 @@
 #define JSMN_STATIC
 #include "jsmn.h"
 
-/* parse the json stream containing the statistics for the container
-   with the given id. The format of the data follows:
-
-       {
-         "container": {
-           "block_input": 16601088,
-           "block_output": 16384,
-           "cpu": 1.0191267811342149e-07,
-           "cpu_nano": 1616621000,
-           "id": "e15712d1db8f92b3a00be9649345856da53ab22abcc8b22e286c5cd8fbf08c36",
-           "mem_limit": 8232525824,
-           "mem_perc": 0.10095059739468847,
-           "mem_usage": 8310784,
-           "name": "srv-redis-1",
-           "net_input": 1048,
-           "net_output": 7074,
-           "pids": 4,
-           "system_nano": 1586280558931850500
-         }
-       }	*/
-
-static void
-json_parser_stats (struct podman_varlink *pv, const char *id,
-		   container_stats_t * stats)
-{
-  const char *varlinkmethod = "io.podman.GetContainerStats";
-  char *errmsg = NULL, *json,
-    *keys[] = {
-      "block_input", "block_output",
-      "mem_limit", "mem_usage",
-      "name",
-      "net_input", "net_output",
-      "pids"
-    },
-    *vals[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
-    **block_input = &vals[0], **block_output = &vals[1],
-    **mem_limit = &vals[2], **mem_usage = &vals[3],
-    **name = &vals[4],
-    **net_input = &vals[5], **net_output = &vals[6],
-    ** pids = &vals[7],
-    *root_key = "container";
-  size_t i, ntoken, level = 0, keys_num = sizeof (keys) / sizeof (char *);
-  jsmntok_t *tokens;
-  int ret;
-
-  stats->block_input = 0;
-  stats->block_output = 0;
-  stats->mem_limit = 0;
-  stats->mem_usage = 0;
-  stats->net_input = 0;
-  stats->net_output = 0;
-  stats->name = NULL;
-  stats->pids = 0;
-
-#ifndef NPL_TESTING
-  varlink_object_set_string (pv->parameters, "name", id);
-  dbg ("%s: parameter \"{name: %s}\" will be passed to podman_varlink_get\n",
-       __func__,  id);
-#endif
-  ret = podman_varlink_get (pv, varlinkmethod, &json, &errmsg);
-  if (ret < 0)
-    {
-#ifndef NPL_TESTING
-      podman_varlink_unref (pv);
-      plugin_error (STATE_UNKNOWN, 0, "%s", errmsg);
-#else
-      plugin_error (STATE_UNKNOWN, 0, "podman_varlink_get has failed");
-#endif
-    }
-  dbg ("varlink %s returned: %s", varlinkmethod, json);
-
-  tokens = json_tokenise (json, &ntoken);
-  if (NULL == tokens)
-    plugin_error (STATE_UNKNOWN, 0, "invalid or corrupted JSON data");
-
-  for (i = 0; i < ntoken; i++)
-    {
-      jsmntok_t *t = &tokens[i];
-
-      // should never reach uninitialized tokens
-      assert (t->start != -1 && t->end != -1);
-
-      dbg ("[%lu] %s: \"%.*s\"\n", i,
-	   (t->type == JSMN_ARRAY) ? "JSMN_ARRAY" :
-	   ((t->type == JSMN_OBJECT) ? "JSMN_OBJECT" :
-	    ((t->type == JSMN_STRING) ? "JSMN_STRING" :
-	     ((t->type ==
-	       JSMN_UNDEFINED) ? "JSMN_UNDEFINED" : "JSMN_PRIMITIVE"))),
-	   t->end - t->start, json + t->start);
-
-      switch (t->type)
-	{
-	case JSMN_OBJECT:
-	  if (level < 2)
-	    level++;
-	  break;
-
-	case JSMN_STRING:
-	  if ((1 == level) && (0 != json_token_streq (json, t, root_key)))
-	    plugin_error (STATE_UNKNOWN, 0,
-			  "%s: expected string \"%s\" not found",
-			  __func__, root_key);
-	  for (size_t j = 0; j < keys_num; j++)
-	    {
-	      if (0 == json_token_streq (json, t, keys[j]))
-		{
-		  vals[j] = json_token_tostr (json, &tokens[++i]);
-		  dbg
-		    ("found token \"%s\" with value \"%s\" at position %d\n",
-		     keys[j], vals[j], t->start);
-		  break;
-		}
-	    }
-	  break;
-
-	default:
-	  if (0 == level)
-	    plugin_error (STATE_UNKNOWN, 0,
-			  "%s: root element must be an object", __func__);
-	}
-
-      /* all the numeric statistics are reported in bytes */
-      if (*block_input)
-	stats->block_input = strtol_or_err (
-	  *block_input, "failed to parse block_input counter");
-      if (*block_output)
-	stats->block_output = strtol_or_err (
-	  *block_output, "failed to parse bock_output counter");
-
-      if (*mem_limit)
-	stats->mem_limit = strtol_or_err (
-	  *mem_limit, "failed to parse mem_limit counter");
-      if (*mem_usage)
-	stats->mem_usage = strtol_or_err (
-	  *mem_usage, "failed to parse mem_usage counter");
-
-      if (*name)
-	stats->name = xstrdup (*name);
-
-      if (*net_input)
-	stats->net_input = strtol_or_err (
-	  *net_input, "failed to parse net_input counter");
-      if (*net_output)
-	stats->net_output = strtol_or_err (
-	  *net_output, "failed to parse net_output counter");
-
-      if (*pids)
-	stats->pids = strtol_or_err (
-	  *pids, "failed to parse pids counter");
-    }
-
-  assert (NULL != block_input);
-  assert (NULL != block_output);
-  assert (NULL != mem_limit);
-  assert (NULL != mem_usage);
-  assert (NULL != name);
-  assert (NULL != net_input);
-  assert (NULL != net_output);
-  assert (NULL != pids);
-
-  dbg ("%s: container block I/O: %ld/%ld\n", __func__,
-       stats->block_input, stats->block_output);
-  dbg ("%s: container memory: %ld/%ld\n", __func__, stats->mem_usage,
-       stats->mem_limit);
-  dbg ("%s: container name: %s\n", __func__, stats->name);
-  dbg ("%s: container network I/O: %ld/%ld\n", __func__,
-       stats->net_input, stats->net_output);
-  dbg ("%s: container pids: %ld\n", __func__, stats->pids);
-
-#ifndef NPL_TESTING
-  varlink_object_unref (pv->parameters);
-#endif
-  free (tokens);
-}
-
 /* parse the json stream and return a pointer to the hashtable containing
    the values of the discovered 'tokens', or return NULL if the data
    cannot be parsed;
@@ -392,10 +217,6 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
       char *shortid = hashtable->keys[j];
       container_stats_t stats;
 
-#ifdef NPL_TESTING
-      /* FIXME */
-      json_parser_stats (pv, shortid, &stats);
-#else
       char *errmsg = NULL;
       long ret = podman_varlink_stats (pv, shortid, &stats, &errmsg);
       if (ret < 0)
@@ -403,7 +224,6 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
 	  podman_varlink_unref (pv);
 	  plugin_error (STATE_UNKNOWN, 0, "varlink_varlink_stats: %s", errmsg);
 	}
-#endif
 
       switch (which_stats)
 	{
