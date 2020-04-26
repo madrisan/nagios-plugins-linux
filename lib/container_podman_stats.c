@@ -72,6 +72,7 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
 
   for (i = 0; i < count; i++)
     {
+      bool cnt_running;
       char shortid[PODMAN_SHORTID_LEN];
       const char *cnt_id, *cnt_image, *cnt_status;
       container_stats_t stats;
@@ -80,16 +81,18 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
       varlink_array_get_object (list, i, &state);
       varlink_object_get_string (state, "id", &cnt_id);
       varlink_object_get_string (state, "image", &cnt_image);
+      varlink_object_get_bool (state, "containerrunning", &cnt_running);
       varlink_object_get_string (state, "status", &cnt_status);
 
       podman_shortid (cnt_id, shortid);
 
       dbg ("podman container %s (%s)\n", cnt_id, shortid);
       dbg (" * container image: %s\n", cnt_image);
-      dbg (" * container status: %s\n", cnt_status);
+      dbg (" * container is running: %s (status: %s)\n",
+	   cnt_running ? "yes" : "no", cnt_status);
 
       /* discard non running containers */
-      if (STRNEQ (cnt_status, "running"))
+      if (!cnt_running)
 	continue;
       /* discard containers non running the selected image if any */
       if (image && STRNEQ (cnt_image, image))
