@@ -330,7 +330,7 @@ podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
   varlink_object_get_int (stats, "block_output", &cp->block_output);
   varlink_object_get_int (stats, "net_input", &cp->net_input);
   varlink_object_get_int (stats, "net_output", &cp->net_output);
-  //varlink_object_get_float (stats, "cpu", &cp->cpu);
+  varlink_object_get_float (stats, "cpu", &cp->cpu);
   varlink_object_get_int (stats, "mem_usage", &cp->mem_usage);
   varlink_object_get_int (stats, "mem_limit", &cp->mem_limit);
   varlink_object_get_int (stats, "pids", &cp->pids);
@@ -339,6 +339,7 @@ podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
 
   dbg ("%s: block I/O = %ld/%ld\n", __func__, cp->block_input,
        cp->block_output);
+  dbg ("%s: cpu = %.2lf%%\n", __func__, cp->cpu);
   dbg ("%s: network I/O = %ld/%ld\n", __func__, cp->net_input, cp->net_output);
   dbg ("%s: memory usage = %ld/%ld\n", __func__, cp->mem_usage, cp->mem_limit);
   dbg ("%s: pids = %ld\n", __func__, cp->pids);

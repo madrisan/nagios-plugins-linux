@@ -23,6 +23,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <unistd.h>
 #include <varlink.h>
 
 #include "common.h"
@@ -34,9 +35,8 @@
 
 void
 podman_stats (struct podman_varlink *pv, stats_type which_stats,
-	      bool report_perc, unsigned long long *total,
-	      unit_shift shift, const char *image,
-	      char **status, char **perfdata)
+	      bool report_perc, total_t *total, unit_shift shift,
+	      const char *image, char **status, char **perfdata)
 {
   char *errmsg = NULL, *total_str;
   long ret;
@@ -48,6 +48,7 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
   char const * which_stats_str[] = {
      "block input",
      "block output",
+     "cpu",
      "memory",
      "network input",
      "network output",
@@ -57,7 +58,10 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
 
   FILE *stream = open_memstream (perfdata, &size);
 
-  *total = 0;
+  if (which_stats == cpu_stats)
+    total->lf = 0.0;
+  else
+    total->llu = 0;
 
   ret = podman_varlink_list (pv, &list, &errmsg);
   if (ret < 0)
@@ -105,12 +109,16 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
 	  break;
 	case block_in_stats:
 	  fprintf (stream, "%s=%ldkB ", stats.name, (stats.block_input / 1000));
-	  *total += stats.block_input;
+	  total->llu += stats.block_input;
 	  break;
 	case block_out_stats:
 	  fprintf (stream, "%s=%ldkB ",
 		   stats.name, (stats.block_output / 1000));
-	  *total += stats.block_output;
+	  total->llu += stats.block_output;
+	  break;
+	case cpu_stats:
+	  fprintf (stream, "%s=%.2lf%% ", stats.name, stats.cpu);
+	  total->lf += stats.cpu;
 	  break;
 	case memory_stats:
 	  if (report_perc)
@@ -120,19 +128,19 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
 	  else
 	    fprintf (stream, "%s=%ldkB;;;0;%ld ", stats.name,
 		     (stats.mem_usage / 1000), (stats.mem_limit / 1000));
-	  *total += stats.mem_usage;
+	  total->llu += stats.mem_usage;
 	  break;
 	case network_in_stats:
 	  fprintf (stream, "%s=%ldB ", stats.name, stats.net_input);
-	  *total += stats.net_input;
+	  total->llu += stats.net_input;
 	  break;
 	case network_out_stats:
 	  fprintf (stream, "%s=%ldB ", stats.name, stats.net_output);
-	  *total += stats.net_output;
+	  total->llu += stats.net_output;
 	  break;
 	case pids_stats:
 	  fprintf (stream, "%s=%ld ", stats.name, stats.pids);
-	  *total += stats.pids;
+	  total->llu += stats.pids;
 	  break;
 	}
 
@@ -141,25 +149,27 @@ podman_stats (struct podman_varlink *pv, stats_type which_stats,
 
   fclose (stream);
 
-  if (pids_stats != which_stats)
+  if ((which_stats != pids_stats) && (which_stats != cpu_stats))
     switch (shift)
       {
       default:
       case b_shift:
-	total_str = xasprintf ("%lluB", *total);
+	total_str = xasprintf ("%lluB", total->llu);
 	break;
       case k_shift:
-	total_str = xasprintf ("%llukB", (*total) / 1000);
+	total_str = xasprintf ("%llukB", total->llu / 1000);
 	break;
       case m_shift:
-	total_str = xasprintf ("%gMB", (*total) / 1000000.0);
+	total_str = xasprintf ("%gMB", total->llu / 1000000.0);
 	break;
       case g_shift:
-	total_str = xasprintf ("%gGB", (*total) / 1000000000.0);
+	total_str = xasprintf ("%gGB", total->llu / 1000000000.0);
 	break;
       }
+  else if (which_stats == pids_stats)
+    total_str = xasprintf ("%llu", total->llu);
   else
-    total_str = xasprintf ("%llu", *total);
+    total_str = xasprintf ("%.2lf%%", total->lf);
 
   *status =
     xasprintf ("%s of %s used by %lu running container%s", total_str,

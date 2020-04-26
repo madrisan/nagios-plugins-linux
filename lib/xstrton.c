@@ -19,6 +19,24 @@
 #include "common.h"
 #include "messages.h"
 
+/* same as strtod(3) but exit on failure instead of returning crap */
+double
+strtod_or_err (const char *str, const char *errmesg)
+{
+  char *end = NULL;
+
+  if (str != NULL && *str != '\0')
+    {
+      errno = 0;
+      double num = strtod (str, &end);
+      if (errno == 0 && str != end && end != NULL && *end == '\0')
+	return num;
+    }
+
+  plugin_error (STATE_UNKNOWN, errno, "%s: '%s'", errmesg, str);
+  return 0;
+}
+
 /* same as strtol(3) but exit on failure instead of returning crap */
 long
 strtol_or_err (const char *str, const char *errmesg)
@@ -30,7 +48,7 @@ strtol_or_err (const char *str, const char *errmesg)
       errno = 0;
       long num = strtol (str, &end, 10);
       if (errno == 0 && str != end && end != NULL && *end == '\0')
-        return num;
+	return num;
     }
 
   plugin_error (STATE_UNKNOWN, errno, "%s: '%s'", errmesg, str);

@@ -47,7 +47,7 @@ libutils_a_SOURCES =  \
 	url_encode.c  \
 	xasprintf.c   \
 	xmalloc.c     \
-	xstrtol.c
+	xstrton.c
 
 if HAVE_LIBCURL
   libutils_a_SOURCES += \

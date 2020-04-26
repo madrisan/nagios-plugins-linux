@@ -36,7 +36,7 @@
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
-#include "xstrtol.h"
+#include "xstrton.h"
 
 #define MIN(a,b) \
   ({ __typeof__ (a) _a = (a); \

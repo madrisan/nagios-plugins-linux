@@ -46,7 +46,7 @@
 #include "system.h"
 #include "xalloc.h"
 #include "xasprintf.h"
-#include "xstrtol.h"
+#include "xstrton.h"
 
 static const char *program_copyright =
   "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
