@@ -36,7 +36,7 @@
 #include "progversion.h"
 #include "sysfsparser.h"
 #include "thresholds.h"
-#include "xstrtol.h"
+#include "xstrton.h"
 
 static const char *program_copyright =
   "Copyright (C) 2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";

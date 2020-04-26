@@ -39,6 +39,7 @@ static const char *program_copyright =
 static struct option const longopts[] = {
   {(char *) "block-in", no_argument, NULL, 'l'},
   {(char *) "block-out", no_argument, NULL, 'L'},
+  {(char *) "cpu", no_argument, NULL, 'C'},
   {(char *) "memory", no_argument, NULL, 'M'},
   {(char *) "memory-perc", no_argument, NULL, '%'},
   {(char *) "net-in", no_argument, NULL, 'n'},
@@ -72,6 +73,8 @@ usage (FILE * out)
 	   "[-w COUNTER] [-c COUNTER]\n", program_name);
   fprintf (out, "  %s --block-out [-b,-k,-m,-g] [--image IMAGE] "
 	   "[-w COUNTER] [-c COUNTER]\n", program_name);
+  fprintf (out, "  %s --cpu [--image IMAGE] [-w COUNTER] [-c COUNTER]\n",
+          program_name);
   fprintf (out, "  %s --memory [-b,-k,-m,-g] [--image IMAGE] [--perc] "
 	   "[-w COUNTER] [-c COUNTER]\n", program_name);
   fprintf (out, "  %s --net-in [-b,-k,-m,-g] [--image IMAGE] "
@@ -83,6 +86,7 @@ usage (FILE * out)
     ("  -i, --image IMAGE   limit the investigation only to the containers "
      "running IMAGE\n", out);
   fputs ("  -l, --block-in  return the block input metrics\n", out);
+  fputs ("  -C, --cpu       return the cpu percentage metrics\n", out);
   fputs ("  -L, --net-out   return the block output metrics\n", out);
   fputs ("  -M, --memory    return the runtime memory metrics\n", out);
   fputs ("  -n, --net-in    return the network input metrics\n", out);
@@ -109,6 +113,7 @@ usage (FILE * out)
   fprintf (out, "  %s -i \"docker.io/library/nginx:latest\" -c 5:\n",
 	   program_name);
   fprintf (out, "  %s --block-out -m\n", program_name);
+  fprintf (out, "  %s --cpu\n", program_name);
   fprintf (out, "  %s --memory -k --perc\n", program_name);
   fprintf (out, "  %s --memory -m --image \"docker.io/library/nginx:latest\"\n",
 	   program_name);
@@ -146,7 +151,7 @@ main (int argc, char **argv)
   struct podman_varlink *pv = NULL;
   thresholds *my_threshold = NULL;
   unsigned int containers;
-  unsigned long long total;
+  total_t total;
 
   set_program_name (argv[0]);
 
@@ -162,8 +167,8 @@ main (int argc, char **argv)
 	case 'i':
 	  image = optarg;
 	  break;
-	case 'M':
-	  which_stats = memory_stats;
+        case 'C':
+	  which_stats = cpu_stats;
 	  check_selected++;
 	  break;
 	case 'l':
@@ -172,6 +177,10 @@ main (int argc, char **argv)
 	  break;
 	case 'L':
 	  which_stats = block_out_stats;
+	  check_selected++;
+	  break;
+	case 'M':
+	  which_stats = memory_stats;
 	  check_selected++;
 	  break;
 	case 'n':
@@ -223,7 +232,10 @@ main (int argc, char **argv)
     {
       podman_stats (pv, which_stats, report_perc, &total, shift, image,
 		    &status_msg, &perfdata_msg);
-      status = get_status (total, my_threshold);
+      if (which_stats == cpu_stats)
+        status = get_status (total.lf, my_threshold);
+      else
+        status = get_status (total.llu, my_threshold);
       printf ("%s: %s | %s\n", program_name_short
 	      , status_msg
 	      , perfdata_msg);

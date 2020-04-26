@@ -1,4 +1,4 @@
-/* xstrtol.h -- string to long conversion with error checking
+/* xstrton.h -- string to double and long conversion with error checking
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,17 +13,18 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef XSTRTOL_H_
-# define XSTRTOL_H_
+#ifndef XSTRTON_H_
+# define XSTRTON_H_
 
 # ifdef __cplusplus
 extern "C" {
 # endif
 
+  double strtod_or_err (const char *str, const char *errmesg);
   long strtol_or_err (const char *str, const char *errmesg);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* XSTRTOL_H_ */
+#endif /* XSTRTON_H_ */

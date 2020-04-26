@@ -34,6 +34,7 @@ extern "C"
   {
     int64_t block_input;
     int64_t block_output;
+    double cpu;
     int64_t mem_limit;
     int64_t mem_usage;
     int64_t net_input;
@@ -42,12 +43,19 @@ extern "C"
     char *name;
   } container_stats_t;
 
+  typedef union total
+  {
+     unsigned long long llu;
+     double lf;
+  } total_t;
+
   typedef enum
   {
     unknown = -1,
     /* these enum variables must be non negative */
     block_in_stats = 0,
     block_out_stats,
+    cpu_stats,
     memory_stats,
     network_in_stats,
     network_out_stats,
@@ -94,9 +102,8 @@ extern "C"
 
   /* Report the containers statistics.  */
   void podman_stats (struct podman_varlink *pv, stats_type which_stats,
-		     bool report_perc, unsigned long long *total,
-		     unit_shift shift, const char *image_name,
-		     char **status, char **perfdata);
+		     bool report_perc, total_t *total, unit_shift shift,
+		     const char *image_name, char **status, char **perfdata);
 
   /* Return a string valid for Nagios performance data output.  */
   char* podman_image_name_normalize (const char *image);

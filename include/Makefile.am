@@ -52,4 +52,4 @@ noinst_HEADERS = \
 	vminfo.h \
 	xalloc.h \
 	xasprintf.h \
-	xstrtol.h
+	xstrton.h

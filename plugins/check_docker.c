@@ -36,7 +36,7 @@
 #include "units.h"
 #include "xalloc.h"
 #include "xasprintf.h"
-#include "xstrtol.h"
+#include "xstrton.h"
 
 static const char *program_copyright =
   "Copyright (C) 2018 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
