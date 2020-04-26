@@ -37,8 +37,6 @@
 #include "xalloc.h"
 #include "xasprintf.h"
 
-#ifndef NPL_TESTING
-
 long
 podman_varlink_error (long ret, const char *funcname, char **err)
 {
@@ -347,22 +345,6 @@ podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
 
   varlink_object_unref (reply);
   return 0;
-}
-
-#endif		/* NPL_TESTING */
-
-/* Return true if the array has all the element non NULL, false otherwise */
-
-bool
-podman_array_is_full (char *v[], size_t vsize)
-{
-  for (size_t i = 0; i < vsize && v; i++)
-    {
-      // dbg ("v[%lu] = %s\n", i, v[i]);
-      if (NULL == v[i])
-	return false;
-    }
-  return true;
 }
 
 /* Return a string valid for Nagios performance data output */

@@ -54,10 +54,6 @@ test_programs = \
 	tslibmessages \
 	tslibperfdata \
 	tsliburlencode
-if HAVE_LIBVARLINK
-test_programs += \
-	tslibcontainer_podman_count
-endif
 if !HAVE_LIBPROCPS
 test_programs += \
 	tslibvminfo
@@ -88,11 +84,6 @@ tslibcontainer_docker_count_LDADD = $(LDADDS)
 
 tslibcontainer_docker_memory_SOURCES = $(test_utils) tslibcontainer_docker_memory.c
 tslibcontainer_docker_memory_LDADD = $(LDADDS)
-
-if HAVE_LIBVARLINK
-tslibcontainer_podman_count_SOURCES = $(test_utils) tslibcontainer_podman_count.c
-tslibcontainer_podman_count_LDADD = $(LDADDS) $(LIBVARLINK_LIBS)
-endif
 
 tslibkernelver_SOURCES = $(test_utils) tslibkernelver.c
 tslibkernelver_LDADD = $(LDADDS)
@@ -160,7 +151,6 @@ TESTS = $(test_programs)
 
 dist_noinst_DATA = \
 	ts_container_docker.data \
-	ts_container_podman_GetContainersByStatus.data \
 	ts_container_podman_GetContainerStats.data \
 	ts_container_podman_ListContainers.data \
 	ts_procmeminfo.data \

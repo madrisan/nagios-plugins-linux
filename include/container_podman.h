@@ -108,9 +108,6 @@ extern "C"
   /* Return a string valid for Nagios performance data output.  */
   char* podman_image_name_normalize (const char *image);
 
-  /* Return true if the array has all the element non NULL, false otherwise.  */
-  bool podman_array_is_full (char *vals[], size_t vsize);
-
   /* Return the short ID in the 'shortid' buffer. This buffer must have a size
    * PODMAN_SHORTID_LEN.  */
   void podman_shortid (const char *id, char *shortid);
