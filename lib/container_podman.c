@@ -129,7 +129,7 @@ podman_varlink_callback (VarlinkConnection * connection,
  * Returns 0 if all went ok. Errors are returned as negative values. */
 
 int
-podman_varlink_new (struct podman_varlink **pv, char *varlinkaddr)
+podman_varlink_new (podman_varlink_t **pv, char *varlinkaddr)
 {
   long ret;
   struct podman_varlink *v;
@@ -158,8 +158,8 @@ podman_varlink_new (struct podman_varlink **pv, char *varlinkaddr)
   return 0;
 }
 
-struct podman_varlink *
-podman_varlink_unref (struct podman_varlink *pv)
+podman_varlink_t *
+podman_varlink_unref (podman_varlink_t *pv)
 {
   if (pv == NULL)
     return NULL;
