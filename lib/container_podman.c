@@ -172,41 +172,6 @@ podman_varlink_unref (struct podman_varlink *pv)
   return NULL;
 }
 
-long
-podman_varlink_get (struct podman_varlink *pv, const char *varlinkmethod,
-		    char **json, char **err)
-{
-  long ret;
-  VarlinkObject *out;
-
-  assert (pv->connection);
-  /*assert (pv->parameters);*/
-
-  ret =
-    varlink_connection_call (pv->connection, varlinkmethod, pv->parameters, 0,
-			     podman_varlink_callback, &out);
-  if (ret < 0)
-    {
-      *err =
-	xasprintf ("varlink_connection_call: %s",
-		   varlink_error_string (labs (ret)));
-      return ret;
-    }
-
-  ret = podman_varlink_check_event (pv->connection, err);
-  if (ret < 0)
-    return ret;
-
-  ret = varlink_object_to_json (out, json);
-  if (ret < 0)
-    {
-      varlink_object_unref (out);
-      return ret;
-    }
-
-  return 0;
-}
-
 /* Return the list of podman containers.
  * The format of the data in JSON format follows:
  *
