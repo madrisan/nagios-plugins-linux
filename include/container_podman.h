@@ -76,8 +76,6 @@ extern "C"
 				uint64_t flags, void *userdata);
   long podman_varlink_check_event (VarlinkConnection * connection,
 				   char **err);
-  long podman_varlink_get (podman_varlink_t *pv, const char *varlinkmethod,
-			   char **json, char **err);
   long podman_varlink_list (podman_varlink_t *pv, VarlinkArray **list,
 			    char **err);
   long podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
