@@ -88,18 +88,17 @@ extern "C"
 
   /* Allocates space for a new varlink object.
    * Returns 0 if all went ok. Errors are returned as negative values.  */
-  int podman_varlink_new (struct podman_varlink **pv, char *varlinkaddr);
+  int podman_varlink_new (podman_varlink_t **pv, char *varlinkaddr);
 
   /* Drop a reference of the varlink library context. If the refcount of
    * reaches zero, the resources of the context will be released.  */
-  struct podman_varlink *podman_varlink_unref (struct podman_varlink *pv);
+  podman_varlink_t *podman_varlink_unref (struct podman_varlink *pv);
 
-  int podman_running_containers (struct podman_varlink *pv,
-				 unsigned int *count, const char *image,
-				 char **perfdata);
+  int podman_running_containers (podman_varlink_t *pv, unsigned int *count,
+				 const char *image, char **perfdata);
 
   /* Report the containers statistics.  */
-  void podman_stats (struct podman_varlink *pv, stats_type which_stats,
+  void podman_stats (podman_varlink_t *pv, stats_type which_stats,
 		     bool report_perc, total_t *total, unit_shift shift,
 		     const char *image_name, char **status, char **perfdata);
 
