@@ -39,6 +39,8 @@ Some code and coding styles/ideas belong to the following open source projects:
  * util-linux      https://github.com/karelzak/util-linux
                    License: GPLv2
 
+ * pcp             https://github.com/performancecopilot/pcp
+                   License: LGPLv2.1+
 
 and also to Mickael Kerrisk of "The Linux Programming Interface":
 

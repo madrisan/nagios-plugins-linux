@@ -138,7 +138,7 @@ print_version (void)
 int
 main (int argc, char **argv)
 {
-  int c, err,
+  int c,
       check_selected = 0,
       shift = k_shift;
   bool report_perc = false;
@@ -147,11 +147,11 @@ main (int argc, char **argv)
   char *critical = NULL, *warning = NULL;
   char *status_msg, *perfdata_msg;
   nagstatus status = STATE_OK;
+  podman_varlink_t *pv = NULL;
   stats_type which_stats = unknown;
-  struct podman_varlink *pv = NULL;
   thresholds *my_threshold = NULL;
-  unsigned int containers;
   total_t total;
+  unsigned int containers;
 
   set_program_name (argv[0]);
 
@@ -224,9 +224,7 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  err = podman_varlink_new (&pv, varlink_address);
-  if (err < 0)
-    plugin_error (STATE_UNKNOWN, err, "memory exhausted");
+  podman_varlink_new (&pv, varlink_address);
 
   if (0 <= which_stats)
     {

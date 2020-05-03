@@ -30,7 +30,7 @@
 #include "xasprintf.h"
 
 void
-podman_stats (struct podman_varlink *pv, stats_type which_stats,
+podman_stats (podman_varlink_t *pv, stats_type which_stats,
 	      bool report_perc, total_t *total, unit_shift shift,
 	      const char *image, char **status, char **perfdata)
 {
