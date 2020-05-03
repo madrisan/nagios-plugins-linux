@@ -21,13 +21,13 @@
 #define _GNU_SOURCE		/* activate extra prototypes for glibc */
 #endif
 
-#define EPOLL_TIMEOUT 100
-
 #include <assert.h>
 #include <errno.h>
 #include <unistd.h>
+#include <signal.h>
 #include <string.h>
 #include <sys/epoll.h>
+#include <sys/signalfd.h>
 #include <varlink.h>
 
 #include "common.h"
@@ -36,6 +36,17 @@
 #include "messages.h"
 #include "xalloc.h"
 #include "xasprintf.h"
+
+static inline int
+epoll_control (int epfd, int op, int fd, uint32_t events, void *ptr)
+{
+  struct epoll_event event = {
+    .data = {.ptr = ptr},
+    .events = events
+  };
+
+  return epoll_ctl (epfd, op, fd, &event);
+}
 
 long
 podman_varlink_error (long ret, const char *funcname, char **err)
@@ -52,60 +63,61 @@ podman_varlink_error (long ret, const char *funcname, char **err)
 }
 
 long
-podman_varlink_check_event (VarlinkConnection * connection, char **err)
+podman_varlink_check_event (podman_varlink_t *pv)
 {
-  struct epoll_event events;
-  int epollfd;
-  long nfds;
-  long ret = 0;
+  int ret, timeout = -1;
+  struct epoll_event event;
 
-  epollfd = epoll_create1 (EPOLL_CLOEXEC);
-  if (epollfd == -1)
-    {
-      *err = xasprintf ("epoll_create1: %s (errno: %d)",
-			strerror (errno), errno);
-      return errno;
-    }
+  dbg ("executing varlink_connection_get_events...\n");
+  if ((ret = varlink_connection_get_events (pv->connection)) < 0)
+    return ret;
 
-  events.events = varlink_connection_get_events (connection);
-  events.data.ptr = connection;
+  dbg ("executing epoll_control...\n");
+  ret = epoll_control (pv->epoll_fd, EPOLL_CTL_ADD,
+		       varlink_connection_get_fd (pv->connection),
+		       varlink_connection_get_events (pv->connection),
+		       pv->connection);
+  if (ret < 0 && errno != EEXIST)
+    return ret;
 
-  ret = epoll_ctl (epollfd, EPOLL_CTL_ADD,
-		   varlink_connection_get_fd (connection), &events);
-  if (ret == -1)
-    {
-      *err =
-	xasprintf ("epoll_ctrl: %s (errno: %d)", strerror (errno), errno);
-      ret = errno;
-      goto free_fd;
-    }
-
+  dbg ("executing epoll wait loop...\n");
   for (;;)
     {
-      nfds = epoll_wait (epollfd, &events, 1, EPOLL_TIMEOUT);
-      if (nfds == -1)
+      ret = epoll_wait (pv->epoll_fd, &event, 1, timeout);
+      if (ret < 0)
 	{
-	  *err = xasprintf ("epoll_wait: %s (errno: %d)",
-			    strerror (errno), errno);
-	  ret = errno;
-	  break;
+	  if (EINTR == errno)
+	    continue;
+	  return -errno;
 	}
-      else if (!nfds)
-	continue;
-      else
+      if (ret == 0)
+	return -ETIMEDOUT;
+
+      if (event.data.ptr == pv->connection)
 	{
-	  ret = varlink_connection_process_events (connection, events.events);
-	  if (ret < 0)
-	    *err = xasprintf ("varlink_connection_process_events: %s",
-			      varlink_error_string (labs (ret)));
-	  break;
+	  epoll_control (pv->epoll_fd, EPOLL_CTL_MOD,
+			 varlink_connection_get_fd (pv->connection),
+			 varlink_connection_get_events (pv->connection),
+			 pv->connection);
+	  break;	/* ready */
+	}
+      if (NULL == event.data.ptr)
+	{
+	  struct signalfd_siginfo info;
+	  long size;
+
+	  size = read (pv->signal_fd, &info, sizeof (info));
+	  if (size != sizeof (info))
+	    continue;
+	  return -EINTR;
 	}
     }
 
-free_fd:
-  close (epollfd);
+  dbg ("processing varlink pending events...\n");
+  if ((ret = varlink_connection_process_events (pv->connection, 0)) != 0)
+    return ret;
 
-  return ret;
+  return 0;
 }
 
 long
@@ -132,29 +144,49 @@ int
 podman_varlink_new (podman_varlink_t **pv, char *varlinkaddr)
 {
   long ret;
-  struct podman_varlink *v;
-  VarlinkConnection *connection;
+  sigset_t mask;
+  podman_varlink_t *v;
 
   if (NULL == varlinkaddr)
     varlinkaddr = VARLINK_ADDRESS;
+  dbg ("varlink address is \"%s\"\n", varlinkaddr);
 
-  ret = varlink_connection_new (&connection, varlinkaddr);
+  dbg ("allocating memory for the \"podman_varlink_t\" structure...\n");
+  v = calloc (1, sizeof (podman_varlink_t));
+  if (!v)
+    plugin_error (STATE_UNKNOWN, 0, "podman_varlink_new: memory exhausted");
+
+  v->parameters = NULL;
+
+  dbg ("opening an epoll file descriptor and set the close-on-exec flag...\n");
+  if ((v->epoll_fd = epoll_create1 (EPOLL_CLOEXEC)) < 0)
+    plugin_error (STATE_UNKNOWN, errno, "epoll_create1: %s (errno: %d)",
+		  strerror (errno), errno);
+
+  dbg ("setting POSIX signals...\n");
+  sigemptyset (&mask);
+  sigaddset (&mask, SIGTERM);
+  sigaddset (&mask, SIGINT);
+  sigaddset (&mask, SIGPIPE);
+  sigprocmask (SIG_BLOCK, &mask, NULL);
+
+  dbg ("creating a file descriptor for accepting signals...\n");
+  v->signal_fd = signalfd (-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);
+  if (v->signal_fd < 0)
+    plugin_error (STATE_UNKNOWN, errno, "signalfd: %s (errno: %d)",
+		  strerror (errno), errno);
+
+  dbg ("add signal_fd to the interest list of the epoll...\n");
+  epoll_control (v->epoll_fd, EPOLL_CTL_ADD, v->signal_fd, EPOLLIN, NULL);
+
+  dbg ("create a new varlink client connection...\n");
+  ret = varlink_connection_new (&v->connection, varlinkaddr);
   if (ret < 0)
-    plugin_error (STATE_UNKNOWN, errno,
-		  "varlink_connection_new: %s",
+    plugin_error (STATE_UNKNOWN, errno, "varlink_connection_new: %s",
 		  varlink_error_string (labs (ret)));
 
-  v = calloc (1, sizeof (struct podman_varlink));
-  if (!v)
-    {
-      varlink_connection_free (connection);
-      return -ENOMEM;
-    }
-
-  v->connection = connection;
-  v->parameters = NULL;
   *pv = v;
-
+  dbg ("the varlink resources have been successfully initialized\n");
   return 0;
 }
 
@@ -164,11 +196,17 @@ podman_varlink_unref (podman_varlink_t *pv)
   if (pv == NULL)
     return NULL;
 
+  epoll_control (pv->epoll_fd, EPOLL_CTL_DEL,
+		 varlink_connection_get_fd (pv->connection), 0, NULL);
+
+  varlink_connection_close (pv->connection);
   varlink_connection_free (pv->connection);
+  pv->connection = NULL;
+
   if (pv->parameters)
     varlink_object_unref (pv->parameters);
-
   free (pv);
+
   return NULL;
 }
 
@@ -215,15 +253,16 @@ podman_varlink_list (podman_varlink_t *pv, VarlinkArray **list, char **err)
   long ret;
   VarlinkObject *reply;
 
-  dbg ("varlink method \"%s\"\n", varlinkmethod);
-  ret = varlink_connection_call (pv->connection, varlinkmethod,
-				 pv->parameters, 0, podman_varlink_callback,
-				 &reply);
+  assert (NULL != pv->connection);
+
+  dbg ("executing varlink_connection_call with method set to \"%s\"...\n",
+       varlinkmethod);
+  ret = varlink_connection_call (pv->connection, varlinkmethod, pv->parameters,
+				 0, podman_varlink_callback, &reply);
   if (ret < 0)
     return podman_varlink_error (ret, "varlink_connection_call", err);
 
-  ret = podman_varlink_check_event (pv->connection, err);
-  if (ret < 0)
+  if ((ret = podman_varlink_check_event (pv)) < 0)
     return podman_varlink_error (ret, NULL, err);
 
   ret = varlink_object_get_array (reply, "containers", list);
@@ -263,7 +302,7 @@ podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
   long ret;
   VarlinkObject *reply, *stats;
 
-  assert (pv->connection);
+  assert (NULL != pv->connection);
 
   dbg ("%s: parameter built from \"%s\" will be passed to varlink_call()\n",
        __func__, shortid);
@@ -281,8 +320,7 @@ podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
 
   varlink_object_unref (pv->parameters);
 
-  ret = podman_varlink_check_event (pv->connection, err);
-  if (ret < 0)
+  if ((ret = podman_varlink_check_event (pv)) < 0)
     return podman_varlink_error (ret, NULL, err);
 
   ret = varlink_object_get_object (reply, "container", &stats);

@@ -67,6 +67,8 @@ extern "C"
 
   typedef struct podman_varlink
   {
+    int epoll_fd;
+    int signal_fd;
     VarlinkConnection *connection;
     VarlinkObject *parameters;
   } podman_varlink_t;
@@ -74,8 +76,7 @@ extern "C"
   long podman_varlink_callback (VarlinkConnection * connection,
 				const char *error, VarlinkObject * parameters,
 				uint64_t flags, void *userdata);
-  long podman_varlink_check_event (VarlinkConnection * connection,
-				   char **err);
+  long podman_varlink_check_event (podman_varlink_t * pv);
   long podman_varlink_list (podman_varlink_t *pv, VarlinkArray **list,
 			    char **err);
   long podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
@@ -92,7 +93,7 @@ extern "C"
 
   /* Drop a reference of the varlink library context. If the refcount of
    * reaches zero, the resources of the context will be released.  */
-  podman_varlink_t *podman_varlink_unref (struct podman_varlink *pv);
+  podman_varlink_t *podman_varlink_unref (podman_varlink_t *pv);
 
   int podman_running_containers (podman_varlink_t *pv, unsigned int *count,
 				 const char *image, char **perfdata);
