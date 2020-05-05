@@ -1,3 +1,14 @@
+nagios-plugins-linux (26-1) stable; urgency=low
+  * Release 26 "Lockdown release":
+     - Fix build with musl by including limits.h when PATH_MAX is used.
+     - Fix build when '-fno-common' is added to CFLAGS.
+     - Fix travis CI build.
+     - New plugin check_podman for checking some runtime metrics of podman
+       containers.
+     - Add Fedora 32 and CentOS 8 to the supported distributions.
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Tue,  5 May 2020 18:33:03 +0200
+
 nagios-plugins-linux (25-1) stable; urgency=low
   * Release 25 "Gentoo release":
      - sysfsparser lib: fix debug messages in
