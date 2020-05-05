@@ -1,4 +1,81 @@
 
+    Major changes between "nagios-plugins-linux" versions 25 and 26
+                     -= Lockdown release =-
+
+-- Fixes:
+
+* Fix build with musl by including limits.h when PATH_MAX is used.
+  Bug reported and patched by Louis Sautier.
+  See also: https://bugs.gentoo.org/717038
+
+* The build fails when '-fno-common' is added to CFLAGS.
+
+    (.bss+0x8): multiple definition of `program_name'
+    (.bss+0x0): multiple definition of `program_name_short'
+
+  This flag will be apparently enabled by default in gcc 10.
+  Bug reported by Louis Sautier.
+
+* Fixed travis CI build by Louis Sautier.
+
+-- Enhancements / Changes
+
+* New plugin check_podman for checking some runtime metric of podman
+  containers.
+
+* Package creation:
+
+   * Add Fedora 32 and CentOS 8 to the supported distributions.
+
+ -- git diff --stat f5c0edc 6c41cc9
+
+ .travis.yml                                                       |   2 +-
+ AUTHORS                                                           |   2 +
+ README.md                                                         |  30 ++++++++---
+ configure.ac                                                      |  30 ++++++++++-
+ debian/copyright                                                  |   2 +-
+ include/Makefile.am                                               |   8 +--
+ include/collection.h                                              |   2 +-
+ include/{container.h => container_docker.h}                       |   8 +--
+ include/container_podman.h                                        | 117 ++++++++++++++++++++++++++++++++++++++++
+ include/{json.h => jsmn.h}                                        |   0
+ include/json_helpers.h                                            |  35 ++++++++++++
+ include/progname.h                                                |   4 +-
+ include/testutils.h                                               |  10 +++-
+ include/xalloc.h                                                  |   2 +
+ include/{xstrtol.h => xstrton.h}                                  |   9 ++--
+ lib/Makefile.am                                                   |  15 ++++--
+ lib/collection.c                                                  |  25 ++++++---
+ lib/{container_count.c => container_docker_count.c}               |  34 +++---------
+ lib/{container_memory.c => container_docker_memory.c}             |   2 +-
+ lib/container_podman.c                                            | 373 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ lib/container_podman_count.c                                      | 114 +++++++++++++++++++++++++++++++++++++++
+ lib/container_podman_stats.c                                      | 179 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ lib/json_helpers.c                                                |  66 +++++++++++++++++++++++
+ lib/processes.c                                                   |   1 +
+ lib/xmalloc.c                                                     |  17 ++++--
+ lib/{xstrtol.c => xstrton.c}                                      |  20 ++++++-
+ packages/Makefile.am                                              |   8 +--
+ packages/multibuild.sh                                            |  16 +++++-
+ packages/specs/nagios-plugins-linux.spec.in                       |   6 +++
+ plugins/Makefile.am                                               |  13 ++++-
+ plugins/check_clock.c                                             |   2 +-
+ plugins/check_cpu.c                                               |   2 +-
+ plugins/check_cswch.c                                             |   2 +-
+ plugins/check_docker.c                                            |   4 +-
+ plugins/check_fc.c                                                |   3 +-
+ plugins/check_intr.c                                              |   2 +-
+ plugins/check_podman.c                                            | 261 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/Makefile.am                                                 |  16 +++---
+ tests/{ts_container.data => ts_container_docker.data}             |   0
+ tests/ts_container_podman_GetContainerStats.data                  |   1 +
+ tests/ts_container_podman_ListContainers.data                     |   1 +
+ tests/{tslibcontainer_count.c => tslibcontainer_docker_count.c}   |   6 +--
+ tests/{tslibcontainer_memory.c => tslibcontainer_docker_memory.c} |   8 +--
+ 43 files changed, 1362 insertions(+), 96 deletions(-)
+
+======================================================================
+
     Major changes between "nagios-plugins-linux" versions 24 and 25
                       -= Gentoo release =-
 
