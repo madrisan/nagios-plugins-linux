@@ -22,7 +22,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
-#include <proc/procps.h>
+#include <proc/meminfo.h>
 
 typedef struct proc_sysmem
 {
