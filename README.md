@@ -147,7 +147,7 @@ The plugins are available [in the Gentoo tree](https://packages.gentoo.org/packa
 ```
 emerge -av net-analyzer/nagios-plugins-linux-madrisan
 ```
-The `curl` USE flag is required to build `check_docker`.
+The USE flags `curl` and `varlink` are required to respectively build `check_docker` and `check_podman`.
 
 ## Bugs
 
