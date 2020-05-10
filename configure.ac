@@ -321,10 +321,10 @@ AC_ARG_ENABLE([libprocps],
     [enable_libprocps=$enableval],[enable_libprocps=no])
 AS_IF([test "x$enable_libprocps" = "xyes"], [
   PKG_CHECK_EXISTS([libprocps],
-    [PKG_CHECK_MODULES(LIBPROCPS, [libprocps = UNKNOWN],
+    [PKG_CHECK_MODULES(LIBPROCPS, [libprocps >= 3.3.12],
       [AC_DEFINE(HAVE_LIBPROCPS, 1, [Define if libprocps is available])
        have_libprocps=yes],
-      AC_MSG_ERROR([*** libprocps version UNKNOWN not found]))])
+      AC_MSG_ERROR([*** libprocps version >= 3.3.12 not found]))])
   AC_SUBST(LIBPROCPS_LIBS)
   AC_SUBST(LIBPROCPS_CFLAGS)
   AS_IF([test "x$have_libprocps" = "xno" -a "x$enable_libprocps" = "xyes"],
@@ -520,6 +520,12 @@ echo "  CC                 = $CC"
 echo "  CFLAGS             = $CFLAGS"
 echo "  LDFLAGS            = $LDFLAGS"
 echo
+
+if test "$have_libprocps" = "yes"; then
+  echo "  LIBPROCPS_CFLAGS   = $LIBPROCPS_CFLAGS"
+  echo "  LIBPROCPS_LIBS     = $LIBPROCPS_LIBS"
+  echo
+fi
 
 if test "$libcurl_cv_lib_curl_usable" = "yes"; then
   echo "  LIBCURL_CPPFLAGS   = $LIBCURL_CPPFLAGS"
