@@ -112,12 +112,12 @@ if HAVE_LIBCURL
 check_docker_LDADD       = $(LDADD) $(LIBCURL) -lm
 endif
 if HAVE_PROC_MEMINFO
-check_memory_LDADD       = $(LDADD)
+check_memory_LDADD       = $(LDADD) $(LIBPROCPS_LIBS)
 endif
 check_nbprocs_LDADD      = $(LDADD)
 check_network_LDADD      = $(LDADD)
 check_multipath_LDADD    = $(LDADD)
-check_paging_LDADD       = $(LDADD)
+check_paging_LDADD       = $(LDADD) $(LIBPROCPS_LIBS)
 if HAVE_LIBVARLINK
 check_podman_LDADD       = $(LDADD) $(LIBVARLINK_LIBS)
 endif
