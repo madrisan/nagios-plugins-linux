@@ -49,7 +49,7 @@ rm -fr /tmp/procps-ng-newlib/usr/share
 rm -fr /tmp/procps-ng-newlib/usr/sbin
 rm -fr /tmp/procps-ng-newlib/usr/bin
 
-rm -f /usr/lib64/pkgconfig/libprocps-newlib.pc
+sudo rm -f /usr/lib64/pkgconfig/libprocps.pc
 
 find /tmp/procps-ng-newlib/ -type f
 ```
