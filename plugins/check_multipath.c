@@ -232,6 +232,8 @@ check_for_faulty_paths (char *buf, size_t bufsize)
 	}
     }
 
+  /* free memory allocated to the pattern buffer by regcomp() */
+  regfree (&regex);
   return faulty_paths;
 }
 
