@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2020 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A library for getting some network interfaces.statistics.
  *
@@ -37,9 +37,10 @@
 #include "string-macros.h"
 #include "messages.h"
 #include "netinfo.h"
+#include "system.h"
 #include "xalloc.h"
 
-static struct iflist* get_netinfo_snapshot (void)
+static struct iflist* get_netinfo_snapshot (bool ignore_loopback)
 {
   int family;
   struct ifaddrs *ifaddr, *ifa;
@@ -57,6 +58,12 @@ static struct iflist* get_netinfo_snapshot (void)
       family = ifa->ifa_addr->sa_family;
       if (family != AF_PACKET)
 	continue;
+
+      if (ignore_loopback && STREQ ("lo", ifa->ifa_name))
+	{
+	  dbg ("ignoring network interface '%s'...\n", ifa->ifa_name);
+	  continue;
+	}
 
       struct rtnl_link_stats *stats = ifa->ifa_data;
       ifl = xmalloc (sizeof (struct iflist));
@@ -85,22 +92,28 @@ static struct iflist* get_netinfo_snapshot (void)
   return iflhead;
 }
 
-struct iflist* netinfo (unsigned int seconds)
+struct iflist* netinfo (bool ignore_loopback, unsigned int seconds)
 {
-  struct iflist *iflhead = get_netinfo_snapshot ();
+  struct iflist *iflhead = get_netinfo_snapshot (ignore_loopback);
 
   if (seconds > 0)
    {
       sleep (seconds);
-      struct iflist *ifl, *ifl2, *iflhead2 = get_netinfo_snapshot ();
+      struct iflist *ifl, *ifl2, *iflhead2 =
+	get_netinfo_snapshot (ignore_loopback);
 
       for (ifl = iflhead, ifl2 = iflhead2; ifl != NULL && ifl2 != NULL;
 	   ifl = ifl->next, ifl2 = ifl2->next)
 	{
-	  dbg ("network interface '%s'\n", ifl->ifname);
 	  if (STRNEQ (ifl->ifname, ifl2->ifname))
 	    plugin_error (STATE_UNKNOWN, 0,
 			  "bug in netinfo(), please contact the developers");
+	  if (ignore_loopback && STREQ (ifl->ifname, "lo"))
+	    {
+	      dbg ("network interface '%s' (ignored)\n", ifl->ifname);
+	      continue;
+	    }
+	  dbg ("network interface '%s'\n", ifl->ifname);
 
 	  dbg ("\ttx_packets : %u %u\n", ifl->tx_packets, ifl2->tx_packets);
 	  ifl->tx_packets = (ifl2->tx_packets - ifl->tx_packets) / seconds;
