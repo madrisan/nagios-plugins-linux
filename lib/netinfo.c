@@ -21,6 +21,7 @@
 
 #include <errno.h>
 #include <getopt.h>
+#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,7 +41,8 @@
 #include "system.h"
 #include "xalloc.h"
 
-static struct iflist* get_netinfo_snapshot (bool ignore_loopback)
+static struct iflist *
+get_netinfo_snapshot (bool ignore_loopback, const regex_t *iface_regex)
 {
   int family;
   struct ifaddrs *ifaddr, *ifa;
@@ -59,7 +61,10 @@ static struct iflist* get_netinfo_snapshot (bool ignore_loopback)
       if (family != AF_PACKET)
 	continue;
 
-      if (ignore_loopback && STREQ ("lo", ifa->ifa_name))
+      bool skip_interface =
+	((ignore_loopback && STREQ ("lo", ifa->ifa_name)) ||
+	 (regexec (iface_regex, ifa->ifa_name, (size_t) 0, NULL, 0)));
+      if (skip_interface)
 	{
 	  dbg ("ignoring network interface '%s'...\n", ifa->ifa_name);
 	  continue;
@@ -92,15 +97,28 @@ static struct iflist* get_netinfo_snapshot (bool ignore_loopback)
   return iflhead;
 }
 
-struct iflist* netinfo (bool ignore_loopback, unsigned int seconds)
+struct iflist *
+netinfo (bool ignore_loopback, const char *ifname_regex, unsigned int seconds)
 {
-  struct iflist *iflhead = get_netinfo_snapshot (ignore_loopback);
+  int rc;
+  char msgbuf[256];
+  regex_t regex;
+  struct iflist *iflhead;
+
+  if ((rc =
+       regcomp (&regex, ifname_regex ? ifname_regex : ".*", REG_EXTENDED)))
+    {
+      regerror (rc, &regex, msgbuf, sizeof (msgbuf));
+      plugin_error (STATE_UNKNOWN, 0, "could not compile regex: %s", msgbuf);
+    }
+
+  iflhead = get_netinfo_snapshot (ignore_loopback, &regex);
 
   if (seconds > 0)
    {
       sleep (seconds);
       struct iflist *ifl, *ifl2, *iflhead2 =
-	get_netinfo_snapshot (ignore_loopback);
+	get_netinfo_snapshot (ignore_loopback, &regex);
 
       for (ifl = iflhead, ifl2 = iflhead2; ifl != NULL && ifl2 != NULL;
 	   ifl = ifl->next, ifl2 = ifl2->next)
@@ -148,10 +166,14 @@ struct iflist* netinfo (bool ignore_loopback, unsigned int seconds)
       freeiflist (iflhead2);
    }
 
+  /* Free memory allocated to the pattern buffer by regcomp() */
+  regfree (&regex);
+
   return iflhead;
 }
 
-void freeiflist (struct iflist *iflhead)
+void
+freeiflist (struct iflist *iflhead)
 {
   struct iflist *ifl = iflhead, *iflnext;
 

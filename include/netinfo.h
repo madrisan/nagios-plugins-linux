@@ -39,7 +39,8 @@ extern "C"
     struct iflist *next;
   } iflist_t;
 
-  struct iflist *netinfo (bool ignore_loopback, unsigned int seconds);
+  struct iflist *netinfo (bool ignore_loopback, const char *ifname_regex,
+			  unsigned int seconds);
   void freeiflist (struct iflist *iflhead);
 
 #ifdef __cplusplus
