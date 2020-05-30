@@ -16,6 +16,8 @@
 #ifndef _NETINFO_H
 #define _NETINFO_H
 
+#include "system.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -37,7 +39,7 @@ extern "C"
     struct iflist *next;
   } iflist_t;
 
-  struct iflist *netinfo (unsigned int seconds);
+  struct iflist *netinfo (bool ignore_loopback, unsigned int seconds);
   void freeiflist (struct iflist *iflhead);
 
 #ifdef __cplusplus

@@ -1,6 +1,6 @@
 /*
  * License: GPLv3+
- * Copyright (c) 2014,2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2015,2020 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that displays some network interfaces.statistics.
  *
@@ -35,11 +35,13 @@
 #include "netinfo.h"
 #include "progname.h"
 #include "progversion.h"
+#include "system.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014,2015,2020 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
+  {(char *) "no-loopback", no_argument, NULL, 'l'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -54,10 +56,12 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s\n", program_name);
   fputs (USAGE_OPTIONS, out);
+  fputs ("  -l, --no-loopback  skip the loopback interface\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
+  fprintf (out, "  %s --no-loopback\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -78,25 +82,28 @@ main (int argc, char **argv)
   int c;
   nagstatus status = STATE_OK;
   const unsigned int sleep_time = 1;
+  bool ignore_loopback = false;
 
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   GETOPT_HELP_VERSION_STRING,
+			   "l" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
 	{
 	default:
 	  usage (stderr);
-
+	case 'l':
+	  ignore_loopback = true;
+	  break;
 	case_GETOPT_HELP_CHAR
 	case_GETOPT_VERSION_CHAR
 
 	}
     }
 
-  struct iflist *ifl, *iflhead = netinfo (sleep_time);
+  struct iflist *ifl, *iflhead = netinfo (ignore_loopback, sleep_time);
   
   printf ("%s %s | ", program_name_short, state_text (status));
   for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
