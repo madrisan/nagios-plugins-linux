@@ -42,8 +42,8 @@ static const char *program_copyright =
   "Copyright (C) 2014,2015,2020 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
+  {(char *) "ifname", required_argument, NULL, 'i'},
   {(char *) "no-loopback", no_argument, NULL, 'l'},
-  {(char *) "ifname-regex", required_argument, NULL, 'i'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -58,16 +58,18 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s\n", program_name);
   fputs (USAGE_OPTIONS, out);
-  fputs ("  -i, --ifname-regex only display interfaces matching a regex\n", out);
+  fputs ("  -i, --ifname    only display interfaces matching a regular "
+	 "expression\n", out);
   fputs ("  -l, --no-loopback  skip the loopback interface\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_NOTE, out);
-  fputs ("  The option --ifname-regex supports POSIX Extended Regular "
-	 "Expression syntax.\n", out);
+  fputs ("  The option --ifname supports POSIX Extended Regular Expression "
+	 "syntax.\n", out);
+  fputs ("  See: https://man7.org/linux/man-pages/man7/regex.7.html\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
-  fprintf (out, "  %s --ifname-regex \"^(enp|wlp)\"\n", program_name);
+  fprintf (out, "  %s --ifname \"^(enp|wlp)\"\n", program_name);
   fprintf (out, "  %s --no-loopback\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
