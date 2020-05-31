@@ -55,7 +55,7 @@ get_netinfo_snapshot (bool ignore_loopback, const regex_t *iface_regex)
   for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
     {
       if (ifa->ifa_addr == NULL || ifa->ifa_data == NULL)
-        continue;
+	continue;
 
       family = ifa->ifa_addr->sa_family;
       if (family != AF_PACKET)
