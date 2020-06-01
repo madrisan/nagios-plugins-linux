@@ -21,17 +21,24 @@
 
 #include <errno.h>
 #include <getopt.h>
+#include <ifaddrs.h>
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <ifaddrs.h>
+#include <linux/ethtool.h>
+#include <linux/if.h>
 #ifdef HAVE_LINUX_IF_LINK_H
 # include <linux/if_link.h>
 #else
 # include <linux/rtnetlink.h>
 #endif
+#include <linux/sockios.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 #include "common.h"
 #include "logging.h"
@@ -41,14 +48,32 @@
 #include "system.h"
 #include "xalloc.h"
 
+static int
+check_link (int sock, const char *ifname, bool *up, bool *running)
+{
+  struct ifreq ifr;
+
+  STRNCPY_TERMINATED (ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
+  if (ioctl (sock, SIOCGIFFLAGS, &ifr) < 0)
+    return -1;
+
+  *up = (ifr.ifr_flags & IFF_UP);
+  *running = (ifr.ifr_flags & IFF_RUNNING);
+  return 0;
+}
+
 static struct iflist *
 get_netinfo_snapshot (bool ignore_loopback, const regex_t *iface_regex)
 {
-  int family;
+  int family, sock;
   struct ifaddrs *ifaddr, *ifa;
 
   if (getifaddrs (&ifaddr) == -1)
     plugin_error (STATE_UNKNOWN, errno, "getifaddrs() failed");
+
+  sock = socket (PF_INET, SOCK_DGRAM, IPPROTO_IP);
+  if (sock < 0)
+    plugin_error (STATE_UNKNOWN, errno, "socket() failed");
 
   struct iflist *iflhead = NULL, *iflprev = NULL, *ifl;
 
@@ -71,6 +96,8 @@ get_netinfo_snapshot (bool ignore_loopback, const regex_t *iface_regex)
 	}
 
       struct rtnl_link_stats *stats = ifa->ifa_data;
+      bool up, running;
+
       ifl = xmalloc (sizeof (struct iflist));
 
       ifl->ifname = xstrdup (ifa->ifa_name);
@@ -82,8 +109,17 @@ get_netinfo_snapshot (bool ignore_loopback, const regex_t *iface_regex)
       ifl->rx_errors  = stats->rx_errors;
       ifl->tx_dropped = stats->tx_dropped;
       ifl->rx_dropped = stats->rx_dropped;
-      ifl->multicast  = stats->multicast;
       ifl->collisions = stats->collisions;
+
+      if ((check_link (sock, ifa->ifa_name, &up, &running) < 0))
+	ifl->link_up = ifl->link_running = -1;
+      else
+	{
+	  ifl->link_up = up;
+	  ifl->link_running = running;
+	}
+
+      ifl->multicast  = stats->multicast;
       ifl->next = NULL;
 
       if (iflhead == NULL)
@@ -93,7 +129,9 @@ get_netinfo_snapshot (bool ignore_loopback, const regex_t *iface_regex)
       iflprev = ifl;
     }
 
+  close (sock);
   freeifaddrs (ifaddr);
+
   return iflhead;
 }
 
@@ -115,7 +153,7 @@ netinfo (bool ignore_loopback, const char *ifname_regex, unsigned int seconds)
   iflhead = get_netinfo_snapshot (ignore_loopback, &regex);
 
   if (seconds > 0)
-   {
+    {
       sleep (seconds);
       struct iflist *ifl, *ifl2, *iflhead2 =
 	get_netinfo_snapshot (ignore_loopback, &regex);
@@ -157,14 +195,24 @@ netinfo (bool ignore_loopback, const char *ifname_regex, unsigned int seconds)
 	  dbg ("\trx_dropped : %u %u\n", ifl->rx_dropped, ifl2->rx_dropped);
 	  ifl->rx_dropped = (ifl2->rx_dropped - ifl->rx_dropped) / seconds;
 
+	  dbg ("\tcollisions : %u %u\n", ifl->collisions, ifl2->collisions);
+	  ifl->collisions = (ifl2->collisions - ifl->collisions) / seconds;
+
 	  dbg ("\tmulticast  : %u %u\n", ifl->multicast, ifl2->multicast);
 	  ifl->multicast  = (ifl2->multicast  - ifl->multicast ) / seconds;
 
-	  dbg ("\tcollisions : %u %u\n", ifl->collisions, ifl2->collisions);
-	  ifl->collisions = (ifl2->collisions - ifl->collisions) / seconds;
+	  dbg ("\tlink status: %s %s\n",
+	       ifl->link_up < 0 ? "UNKNOWN" : (ifl->link_up ? "UP" : "DOWN"),
+	       ifl->link_running < 0 ? "UNKNOWN" :
+		 (ifl->link_running ? "RUNNING" : "NOT-RUNNING"));
+
+	  if (ifname_regex && !(ifl->link_up == 1 && ifl->link_running == 1))
+	    plugin_error (STATE_UNKNOWN, 0, "interface %s is not UP and RUNNING",
+			  ifl->ifname);
 	}
+
       freeiflist (iflhead2);
-   }
+  }
 
   /* Free memory allocated to the pattern buffer by regcomp() */
   regfree (&regex);
