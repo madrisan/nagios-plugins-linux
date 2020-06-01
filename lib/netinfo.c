@@ -207,8 +207,9 @@ netinfo (bool ignore_loopback, const char *ifname_regex, unsigned int seconds)
 		 (ifl->link_running ? "RUNNING" : "NOT-RUNNING"));
 
 	  if (ifname_regex && !(ifl->link_up == 1 && ifl->link_running == 1))
-	    plugin_error (STATE_UNKNOWN, 0, "interface %s is not UP and RUNNING",
-			  ifl->ifname);
+	    plugin_error (STATE_CRITICAL, 0,
+			  "%s matches the given regular expression "
+			  "but is not UP and RUNNING!", ifl->ifname);
 	}
 
       freeiflist (iflhead2);
