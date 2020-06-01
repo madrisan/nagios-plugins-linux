@@ -34,8 +34,10 @@ extern "C"
     unsigned int rx_errors;
     unsigned int tx_dropped;
     unsigned int rx_dropped;
-    unsigned int multicast;
     unsigned int collisions;
+    int link_up;
+    int link_running;
+    unsigned int multicast;
     struct iflist *next;
   } iflist_t;
 
