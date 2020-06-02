@@ -136,11 +136,12 @@ get_netinfo_snapshot (bool ignore_loopback, const regex_t *iface_regex)
 }
 
 struct iflist *
-netinfo (bool check_link, bool ignore_loopback, const char *ifname_regex,
-	 unsigned int seconds)
+netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
 {
-  int rc;
+  bool check_link = (options & CHECK_LINK),
+       ignore_loopback = (options & NO_LOOPBACK);
   char msgbuf[256];
+  int rc;
   regex_t regex;
   struct iflist *iflhead;
 
@@ -207,8 +208,7 @@ netinfo (bool check_link, bool ignore_loopback, const char *ifname_regex,
 	       ifl->link_running < 0 ? "UNKNOWN" :
 		 (ifl->link_running ? "RUNNING" : "NOT-RUNNING"));
 
-	  if (check_link && ifname_regex &&
-		!(ifl->link_up == 1 && ifl->link_running == 1))
+	  if (check_link && !(ifl->link_up == 1 && ifl->link_running == 1))
 	    plugin_error (STATE_CRITICAL, 0,
 			  "%s matches the given regular expression "
 			  "but is not UP and RUNNING!", ifl->ifname);

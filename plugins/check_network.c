@@ -94,9 +94,8 @@ main (int argc, char **argv)
   int c;
   nagstatus status = STATE_OK;
   const unsigned int sleep_time = 1;
-  bool check_link = false,
-       ignore_loopback = false;
   char *ifname_regex = NULL;
+  unsigned int options = 0;
 
   set_program_name (argv[0]);
 
@@ -112,10 +111,10 @@ main (int argc, char **argv)
 	  ifname_regex = xstrdup (optarg);
 	  break;
 	case 'k':
-	  check_link = true;
+	  options |= CHECK_LINK;
 	  break;
 	case 'l':
-	  ignore_loopback = true;
+	  options |= NO_LOOPBACK;
 	  break;
 	case_GETOPT_HELP_CHAR
 	case_GETOPT_VERSION_CHAR
@@ -124,7 +123,7 @@ main (int argc, char **argv)
     }
 
   struct iflist *ifl, *iflhead =
-    netinfo (check_link, ignore_loopback, ifname_regex, sleep_time);
+    netinfo (options, ifname_regex, sleep_time);
   
   printf ("%s %s | ", program_name_short, state_text (status));
   for (ifl = iflhead; ifl != NULL; ifl = ifl->next)

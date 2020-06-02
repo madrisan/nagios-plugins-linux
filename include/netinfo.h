@@ -23,6 +23,9 @@ extern "C"
 {
 #endif
 
+#define NO_LOOPBACK	(1 << 0)
+#define CHECK_LINK	(1 << 1)
+
   typedef struct iflist
   {
     char *ifname;
@@ -41,8 +44,8 @@ extern "C"
     struct iflist *next;
   } iflist_t;
 
-  struct iflist *netinfo (bool check_link, bool ignore_loopback,
-			  const char *ifname_regex, unsigned int seconds);
+  struct iflist *netinfo (unsigned int options, const char *ifname_regex,
+			  unsigned int seconds);
   void freeiflist (struct iflist *iflhead);
 
 #ifdef __cplusplus
