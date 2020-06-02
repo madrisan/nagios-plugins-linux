@@ -23,8 +23,9 @@ extern "C"
 {
 #endif
 
-#define NO_LOOPBACK	(1 << 0)
-#define CHECK_LINK	(1 << 1)
+#define CHECK_LINK	(1 << 0)
+#define NO_LOOPBACK	(1 << 1)
+#define NO_WIRELESS	(1 << 2)
 
   typedef struct iflist
   {
