@@ -45,6 +45,7 @@ static struct option const longopts[] = {
   {(char *) "check-link", no_argument, NULL, 'k'},
   {(char *) "ifname", required_argument, NULL, 'i'},
   {(char *) "no-loopback", no_argument, NULL, 'l'},
+  {(char *) "no-wireless", no_argument, NULL, 'W'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -64,6 +65,7 @@ usage (FILE * out)
   fputs ("  -k, --check-link   report an error if at least a link is down\n",
 	 out);
   fputs ("  -l, --no-loopback  skip the loopback interface\n", out);
+  fputs ("  -W, --no-wireless  skip the wireless interfaces\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_NOTE, out);
@@ -73,7 +75,7 @@ usage (FILE * out)
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
   fprintf (out, "  %s --check-link --ifname \"^(enp|eth)\"\n", program_name);
-  fprintf (out, "  %s --no-loopback\n", program_name);
+  fprintf (out, "  %s --no-loopback --no-wireless\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -100,7 +102,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "i:kl" GETOPT_HELP_VERSION_STRING,
+			   "i:klW" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -115,6 +117,9 @@ main (int argc, char **argv)
 	  break;
 	case 'l':
 	  options |= NO_LOOPBACK;
+	  break;
+	case 'W':
+	  options |= NO_WIRELESS;
 	  break;
 	case_GETOPT_HELP_CHAR
 	case_GETOPT_VERSION_CHAR

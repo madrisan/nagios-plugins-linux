@@ -35,6 +35,7 @@
 # include <linux/rtnetlink.h>
 #endif
 #include <linux/sockios.h>
+#include <linux/wireless.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -62,9 +63,29 @@ check_link (int sock, const char *ifname, bool *up, bool *running)
   return 0;
 }
 
-static struct iflist *
-get_netinfo_snapshot (bool ignore_loopback, const regex_t *iface_regex)
+static bool
+wireless_interface (int sock, const char *ifname)
 {
+  struct iwreq pwrq;
+  memset (&pwrq, 0, sizeof (pwrq));
+  STRNCPY_TERMINATED (pwrq.ifr_name, ifname, IFNAMSIZ);
+
+  // int sock = socket (AF_INET, SOCK_STREAM, 0);
+  if (ioctl (sock, SIOCGIWNAME, &pwrq) != -1)
+    {
+      dbg ("wireless interface detected (%s): '%s'\n",
+	   pwrq.u.name, ifname);
+      return true;
+    }
+
+  return false;
+}
+
+static struct iflist *
+get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
+{
+  bool opt_ignore_loopback = (options & NO_LOOPBACK),
+       opt_ignore_wireless = (options & NO_WIRELESS);
   int family, sock;
   struct ifaddrs *ifaddr, *ifa;
 
@@ -86,9 +107,11 @@ get_netinfo_snapshot (bool ignore_loopback, const regex_t *iface_regex)
       if (family != AF_PACKET)
 	continue;
 
+      bool is_wireless = wireless_interface (sock, ifa->ifa_name);
       bool skip_interface =
-	((ignore_loopback && STREQ ("lo", ifa->ifa_name)) ||
-	 (regexec (iface_regex, ifa->ifa_name, (size_t) 0, NULL, 0)));
+	((opt_ignore_loopback && STREQ ("lo", ifa->ifa_name))
+	 || (is_wireless && opt_ignore_wireless)
+	 || (regexec (iface_regex, ifa->ifa_name, (size_t) 0, NULL, 0)));
       if (skip_interface)
 	{
 	  dbg ("ignoring network interface '%s'...\n", ifa->ifa_name);
@@ -138,8 +161,7 @@ get_netinfo_snapshot (bool ignore_loopback, const regex_t *iface_regex)
 struct iflist *
 netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
 {
-  bool check_link = (options & CHECK_LINK),
-       ignore_loopback = (options & NO_LOOPBACK);
+  bool opt_check_link = (options & CHECK_LINK);
   char msgbuf[256];
   int rc;
   regex_t regex;
@@ -152,13 +174,16 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
       plugin_error (STATE_UNKNOWN, 0, "could not compile regex: %s", msgbuf);
     }
 
-  iflhead = get_netinfo_snapshot (ignore_loopback, &regex);
+  dbg ("getting network informations...\n");
+  iflhead = get_netinfo_snapshot (options, &regex);
 
   if (seconds > 0)
     {
       sleep (seconds);
+
+      dbg ("getting network informations again (after %us)...\n", seconds);
       struct iflist *ifl, *ifl2, *iflhead2 =
-	get_netinfo_snapshot (ignore_loopback, &regex);
+	get_netinfo_snapshot (options, &regex);
 
       for (ifl = iflhead, ifl2 = iflhead2; ifl != NULL && ifl2 != NULL;
 	   ifl = ifl->next, ifl2 = ifl2->next)
@@ -166,11 +191,7 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
 	  if (STRNEQ (ifl->ifname, ifl2->ifname))
 	    plugin_error (STATE_UNKNOWN, 0,
 			  "bug in netinfo(), please contact the developers");
-	  if (ignore_loopback && STREQ (ifl->ifname, "lo"))
-	    {
-	      dbg ("network interface '%s' (ignored)\n", ifl->ifname);
-	      continue;
-	    }
+
 	  dbg ("network interface '%s'\n", ifl->ifname);
 
 	  dbg ("\ttx_packets : %u %u\n", ifl->tx_packets, ifl2->tx_packets);
@@ -208,7 +229,7 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
 	       ifl->link_running < 0 ? "UNKNOWN" :
 		 (ifl->link_running ? "RUNNING" : "NOT-RUNNING"));
 
-	  if (check_link && !(ifl->link_up == 1 && ifl->link_running == 1))
+	  if (opt_check_link && !(ifl->link_up == 1 && ifl->link_running == 1))
 	    plugin_error (STATE_CRITICAL, 0,
 			  "%s matches the given regular expression "
 			  "but is not UP and RUNNING!", ifl->ifname);
