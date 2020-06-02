@@ -42,6 +42,7 @@ static const char *program_copyright =
   "Copyright (C) 2014,2015,2020 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
+  {(char *) "check-link", no_argument, NULL, 'k'},
   {(char *) "ifname", required_argument, NULL, 'i'},
   {(char *) "no-loopback", no_argument, NULL, 'l'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
@@ -60,6 +61,8 @@ usage (FILE * out)
   fputs (USAGE_OPTIONS, out);
   fputs ("  -i, --ifname    only display interfaces matching a regular "
 	 "expression\n", out);
+  fputs ("  -k, --check-link   report an error if at least a link is down\n",
+	 out);
   fputs ("  -l, --no-loopback  skip the loopback interface\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
@@ -69,7 +72,7 @@ usage (FILE * out)
   fputs ("  See: https://man7.org/linux/man-pages/man7/regex.7.html\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
-  fprintf (out, "  %s --ifname \"^(enp|wlp)\"\n", program_name);
+  fprintf (out, "  %s --check-link --ifname \"^(enp|eth)\"\n", program_name);
   fprintf (out, "  %s --no-loopback\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
@@ -91,13 +94,14 @@ main (int argc, char **argv)
   int c;
   nagstatus status = STATE_OK;
   const unsigned int sleep_time = 1;
-  bool ignore_loopback = false;
+  bool check_link = false,
+       ignore_loopback = false;
   char *ifname_regex = NULL;
 
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "i:l" GETOPT_HELP_VERSION_STRING,
+			   "i:kl" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -106,6 +110,9 @@ main (int argc, char **argv)
 	  usage (stderr);
 	case 'i':
 	  ifname_regex = xstrdup (optarg);
+	  break;
+	case 'k':
+	  check_link = true;
 	  break;
 	case 'l':
 	  ignore_loopback = true;
@@ -117,7 +124,7 @@ main (int argc, char **argv)
     }
 
   struct iflist *ifl, *iflhead =
-    netinfo (ignore_loopback, ifname_regex, sleep_time);
+    netinfo (check_link, ignore_loopback, ifname_regex, sleep_time);
   
   printf ("%s %s | ", program_name_short, state_text (status));
   for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
