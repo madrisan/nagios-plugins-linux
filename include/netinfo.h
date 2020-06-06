@@ -42,6 +42,7 @@ extern "C"
     int link_up;
     int link_running;
     unsigned int multicast;
+    unsigned long long speed;
     struct iflist *next;
   } iflist_t;
 
