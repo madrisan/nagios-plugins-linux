@@ -50,9 +50,11 @@
 #include "xalloc.h"
 
 static int
-check_link (int sock, const char *ifname, bool *up, bool *running)
+check_link (int sock, const char *ifname, bool *up, bool *running,
+	    unsigned long long *speed)
 {
   struct ifreq ifr;
+  struct ethtool_cmd ecmd;
 
   STRNCPY_TERMINATED (ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
   if (ioctl (sock, SIOCGIFFLAGS, &ifr) < 0)
@@ -60,6 +62,68 @@ check_link (int sock, const char *ifname, bool *up, bool *running)
 
   *up = (ifr.ifr_flags & IFF_UP);
   *running = (ifr.ifr_flags & IFF_RUNNING);
+  *speed = 0;
+
+  ecmd.cmd = ETHTOOL_GSET;
+  memset (&ifr, 0, sizeof (ifr));
+  strcpy (ifr.ifr_name, ifname);
+  ifr.ifr_data = (caddr_t) &ecmd;
+
+  dbg ("network interface '%s'\n", ifname);
+  if (ioctl (sock, SIOCETHTOOL, &ifr) == 0)
+    {
+      if (ecmd.supported & SUPPORTED_TP)
+	dbg (" twisted pair\n");
+      if (ecmd.supported & SUPPORTED_10baseT_Half)
+	dbg (" 10Mbit/s\n");
+      if (ecmd.supported & SUPPORTED_10baseT_Full)
+	dbg (" 10Mbit/s (full duplex)\n");
+      if (ecmd.supported & SUPPORTED_100baseT_Half)
+	dbg (" 100Mbit/s\n");
+      if (ecmd.supported & SUPPORTED_100baseT_Full)
+	dbg (" 100Mbit/s (full duplex)\n");
+      if (ecmd.supported & SUPPORTED_1000baseT_Half)
+	dbg (" 1Gbit/s\n");
+      if (ecmd.supported & SUPPORTED_1000baseT_Full)
+	dbg (" 1Gbit/s (full duplex)\n");
+      if (ecmd.supported & SUPPORTED_10000baseT_Full)
+	dbg (" 10Gbit/s (full duplex)\n");
+      if (ecmd.supported & SUPPORTED_Autoneg)
+	dbg (" auto-negotiation\n");
+
+      switch (ecmd.speed)
+	{
+	case SPEED_10:
+	  dbg (" speed: 10Mbit/s\n");
+	  *speed = 10000000ULL;
+	  break;
+	case SPEED_100:
+	  dbg (" speed: 100Mbit/s\n");
+	  *speed = 100000000ULL;
+	  break;
+	case SPEED_1000:
+	  dbg (" speed: 1Gbit/s\n");
+	  *speed = 1000000000ULL;
+	  break;
+	case SPEED_10000:
+	  dbg (" speed: 10Gbit/s\n");
+	  *speed = 10000000000ULL;
+	  break;
+	}
+      if (*speed > 0)
+	dbg (" max supported speed: %llu\n", *speed);
+
+      switch (ecmd.duplex)
+	{
+	case DUPLEX_HALF:
+	  dbg (" half duplex\n");
+	  break;
+	case DUPLEX_FULL:
+	  dbg (" full duplex\n");
+	  break;
+	}
+    }
+
   return 0;
 }
 
@@ -120,6 +184,7 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 
       struct rtnl_link_stats *stats = ifa->ifa_data;
       bool up, running;
+      unsigned long long speed = 0ULL;
 
       ifl = xmalloc (sizeof (struct iflist));
 
@@ -134,15 +199,15 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
       ifl->rx_dropped = stats->rx_dropped;
       ifl->collisions = stats->collisions;
 
-      if ((check_link (sock, ifa->ifa_name, &up, &running) < 0))
+      if ((check_link (sock, ifa->ifa_name, &up, &running, &speed) < 0))
 	ifl->link_up = ifl->link_running = -1;
       else
 	{
 	  ifl->link_up = up;
 	  ifl->link_running = running;
 	}
-
-      ifl->multicast  = stats->multicast;
+      ifl->speed = speed;
+      ifl->multicast = stats->multicast;
       ifl->next = NULL;
 
       if (iflhead == NULL)
@@ -228,6 +293,9 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
 	       ifl->link_up < 0 ? "UNKNOWN" : (ifl->link_up ? "UP" : "DOWN"),
 	       ifl->link_running < 0 ? "UNKNOWN" :
 		 (ifl->link_running ? "RUNNING" : "NOT-RUNNING"));
+
+	  if (ifl->speed > 0)
+	    dbg ("\tspeed      : %llu\n", ifl->speed);
 
 	  if (opt_check_link && !(ifl->link_up == 1 && ifl->link_running == 1))
 	    plugin_error (STATE_CRITICAL, 0,
