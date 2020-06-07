@@ -37,6 +37,7 @@
 #include "progversion.h"
 #include "system.h"
 #include "xalloc.h"
+#include "xstrton.h"
 
 static const char *program_copyright =
   "Copyright (C) 2014,2015,2020 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
@@ -58,7 +59,8 @@ usage (FILE * out)
   fputs ("This plugin displays some network interfaces.statistics.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s\n", program_name);
+  fprintf (out, "  %s [-klW] [-i <ifname-regex>] [delay]\n",
+	   program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -i, --ifname    only display interfaces matching a regular "
 	 "expression\n", out);
@@ -68,14 +70,16 @@ usage (FILE * out)
   fputs ("  -W, --no-wireless  skip the wireless interfaces\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
+  fprintf (out, "  delay is the delay between the two network snapshots "
+	   "in seconds (default: %dsec)\n", DELAY_DEFAULT);
   fputs (USAGE_NOTE, out);
   fputs ("  The option --ifname supports POSIX Extended Regular Expression "
 	 "syntax.\n", out);
   fputs ("  See: https://man7.org/linux/man-pages/man7/regex.7.html\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
-  fprintf (out, "  %s --check-link --ifname \"^(enp|eth)\"\n", program_name);
-  fprintf (out, "  %s --no-loopback --no-wireless\n", program_name);
+  fprintf (out, "  %s --check-link --ifname \"^(enp|eth)\" 5\n", program_name);
+  fprintf (out, "  %s --no-loopback --no-wireless 3\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -95,9 +99,9 @@ main (int argc, char **argv)
 {
   int c;
   nagstatus status = STATE_OK;
-  const unsigned int sleep_time = 1;
   char *ifname_regex = NULL;
   unsigned int options = 0;
+  unsigned long delay;
 
   set_program_name (argv[0]);
 
@@ -127,8 +131,20 @@ main (int argc, char **argv)
 	}
     }
 
+  delay = DELAY_DEFAULT;
+  if (optind < argc)
+    {
+      delay = strtol_or_err (argv[optind++], "failed to parse argument");
+
+      if (delay < 1)
+        plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
+      else if (DELAY_MAX < delay)
+        plugin_error (STATE_UNKNOWN, 0,
+                      "too large delay value (greater than %d)", DELAY_MAX);
+    }
+
   struct iflist *ifl, *iflhead =
-    netinfo (options, ifname_regex, sleep_time);
+    netinfo (options, ifname_regex, delay);
   
   printf ("%s %s | ", program_name_short, state_text (status));
   for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
