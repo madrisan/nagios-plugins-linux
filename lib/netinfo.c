@@ -37,6 +37,7 @@
 #endif
 #include <linux/sockios.h>
 #include <linux/wireless.h>
+#include <math.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -51,11 +52,9 @@
 #include "xalloc.h"
 
 static int
-check_link (int sock, const char *ifname, bool *up, bool *running,
-	    unsigned long long *speed)
+check_link (int sock, const char *ifname, bool *up, bool *running)
 {
   struct ifreq ifr;
-  struct ethtool_cmd ecmd;
 
   STRNCPY_TERMINATED (ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
   if (ioctl (sock, SIOCGIFFLAGS, &ifr) < 0)
@@ -63,11 +62,20 @@ check_link (int sock, const char *ifname, bool *up, bool *running,
 
   *up = (ifr.ifr_flags & IFF_UP);
   *running = (ifr.ifr_flags & IFF_RUNNING);
-  *speed = 0;
+
+  return 0;
+}
+
+static unsigned long long
+check_link_speed (int sock, const char *ifname)
+{
+  struct ifreq ifr;
+  struct ethtool_cmd ecmd;
+  unsigned long long speed = 0ULL;
 
   ecmd.cmd = ETHTOOL_GSET;
   memset (&ifr, 0, sizeof (ifr));
-  strcpy (ifr.ifr_name, ifname);
+  STRNCPY_TERMINATED (ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
   ifr.ifr_data = (caddr_t) &ecmd;
 
   dbg ("network interface '%s'\n", ifname);
@@ -96,23 +104,23 @@ check_link (int sock, const char *ifname, bool *up, bool *running,
 	{
 	case SPEED_10:
 	  dbg (" speed: 10Mbit/s\n");
-	  *speed = 10000000ULL;
+	  speed = 10000000ULL;
 	  break;
 	case SPEED_100:
 	  dbg (" speed: 100Mbit/s\n");
-	  *speed = 100000000ULL;
+	  speed = 100000000ULL;
 	  break;
 	case SPEED_1000:
 	  dbg (" speed: 1Gbit/s\n");
-	  *speed = 1000000000ULL;
+	  speed = 1000000000ULL;
 	  break;
 	case SPEED_10000:
 	  dbg (" speed: 10Gbit/s\n");
-	  *speed = 10000000000ULL;
+	  speed = 10000000000ULL;
 	  break;
 	}
-      if (*speed > 0)
-	dbg (" max supported speed: %llu\n", *speed);
+      if (speed > 0)
+	dbg (" max supported speed: %llu\n", speed);
 
       switch (ecmd.duplex)
 	{
@@ -125,7 +133,7 @@ check_link (int sock, const char *ifname, bool *up, bool *running,
 	}
     }
 
-  return 0;
+  return speed;
 }
 
 static bool
@@ -185,7 +193,6 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 
       struct rtnl_link_stats *stats = ifa->ifa_data;
       bool up, running;
-      unsigned long long speed = 0ULL;
 
       ifl = xmalloc (sizeof (struct iflist));
 
@@ -200,14 +207,14 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
       ifl->rx_dropped = stats->rx_dropped;
       ifl->collisions = stats->collisions;
 
-      if ((check_link (sock, ifa->ifa_name, &up, &running, &speed) < 0))
+      if ((check_link (sock, ifa->ifa_name, &up, &running) < 0))
 	ifl->link_up = ifl->link_running = -1;
       else
 	{
 	  ifl->link_up = up;
 	  ifl->link_running = running;
 	}
-      ifl->speed = speed;
+      ifl->speed = check_link_speed (sock, ifa->ifa_name);
       ifl->multicast = stats->multicast;
       ifl->next = NULL;
 
@@ -258,35 +265,37 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
 
       dbg ("network interface '%s'\n", ifl->ifname);
 
+#define DIV(a, b) ceil (((b) - (a)) / (double)seconds)
       dbg ("\ttx_packets : %u %u\n", ifl->tx_packets, ifl2->tx_packets);
-      ifl->tx_packets = (ifl2->tx_packets - ifl->tx_packets) / seconds;
+      ifl->tx_packets = DIV (ifl->tx_packets, ifl2->tx_packets);
 
       dbg ("\trx_packets : %u %u\n", ifl->rx_packets, ifl2->rx_packets);
-      ifl->rx_packets = (ifl2->rx_packets - ifl->rx_packets) / seconds;
+      ifl->rx_packets = DIV (ifl->rx_packets, ifl2->rx_packets);
 
       dbg ("\ttx_bytes   : %u %u\n", ifl->tx_bytes, ifl2->tx_bytes);
-      ifl->tx_bytes   = (ifl2->tx_bytes   - ifl->tx_bytes  ) / seconds;
+      ifl->tx_bytes   = DIV (ifl->tx_bytes, ifl2->tx_bytes);
 
       dbg ("\trx_bytes   : %u %u\n", ifl->rx_bytes, ifl2->rx_bytes);
-      ifl->rx_bytes   = (ifl2->rx_bytes   - ifl->rx_bytes  ) / seconds;
+      ifl->rx_bytes   = DIV (ifl->rx_bytes, ifl2->rx_bytes);
 
       dbg ("\ttx_errors  : %u %u\n", ifl->tx_errors, ifl2->tx_errors);
-      ifl->tx_errors  = (ifl2->tx_errors  - ifl->tx_errors ) / seconds;
+      ifl->tx_errors  = DIV (ifl->tx_errors, ifl2->tx_errors);
 
       dbg ("\trx_errors  : %u %u\n", ifl->rx_errors, ifl2->rx_errors);
-      ifl->rx_errors  = (ifl2->rx_errors  - ifl->rx_errors ) / seconds;
+      ifl->rx_errors  = DIV (ifl->rx_errors, ifl2->rx_errors);
 
-      ifl->tx_dropped = (ifl2->tx_dropped - ifl->tx_dropped) / seconds;
       dbg ("\ttx_dropped : %u %u\n", ifl->tx_dropped, ifl2->tx_dropped);
+      ifl->tx_dropped = DIV (ifl->tx_dropped, ifl2->tx_dropped);
 
       dbg ("\trx_dropped : %u %u\n", ifl->rx_dropped, ifl2->rx_dropped);
-      ifl->rx_dropped = (ifl2->rx_dropped - ifl->rx_dropped) / seconds;
+      ifl->rx_dropped = DIV (ifl->rx_dropped, ifl2->rx_dropped);
 
       dbg ("\tcollisions : %u %u\n", ifl->collisions, ifl2->collisions);
-      ifl->collisions = (ifl2->collisions - ifl->collisions) / seconds;
+      ifl->collisions = DIV (ifl->collisions, ifl2->collisions);
 
       dbg ("\tmulticast  : %u %u\n", ifl->multicast, ifl2->multicast);
-      ifl->multicast  = (ifl2->multicast  - ifl->multicast ) / seconds;
+      ifl->multicast  = DIV (ifl->multicast, ifl2->multicast);
+#undef DIV
 
       dbg ("\tlink status: %s %s\n",
 	   ifl->link_up < 0 ? "UNKNOWN" : (ifl->link_up ? "UP" : "DOWN"),
