@@ -19,6 +19,7 @@
  *
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <getopt.h>
 #include <ifaddrs.h>
@@ -230,7 +231,7 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
   char msgbuf[256];
   int rc;
   regex_t regex;
-  struct iflist *iflhead;
+  struct iflist *iflhead, *ifl, *iflhead2, *ifl2;
 
   if ((rc =
        regcomp (&regex, ifname_regex ? ifname_regex : ".*", REG_EXTENDED)))
@@ -242,69 +243,66 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
   dbg ("getting network informations...\n");
   iflhead = get_netinfo_snapshot (options, &regex);
 
-  if (seconds > 0)
+  assert (seconds > 0);
+  sleep (seconds);
+
+  dbg ("getting network informations again (after %us)...\n", seconds);
+  iflhead2 = get_netinfo_snapshot (options, &regex);
+
+  for (ifl = iflhead, ifl2 = iflhead2; ifl != NULL && ifl2 != NULL;
+       ifl = ifl->next, ifl2 = ifl2->next)
     {
-      sleep (seconds);
+      if (STRNEQ (ifl->ifname, ifl2->ifname))
+	plugin_error (STATE_UNKNOWN, 0,
+		      "bug in netinfo(), please contact the developers");
 
-      dbg ("getting network informations again (after %us)...\n", seconds);
-      struct iflist *ifl, *ifl2, *iflhead2 =
-	get_netinfo_snapshot (options, &regex);
+      dbg ("network interface '%s'\n", ifl->ifname);
 
-      for (ifl = iflhead, ifl2 = iflhead2; ifl != NULL && ifl2 != NULL;
-	   ifl = ifl->next, ifl2 = ifl2->next)
-	{
-	  if (STRNEQ (ifl->ifname, ifl2->ifname))
-	    plugin_error (STATE_UNKNOWN, 0,
-			  "bug in netinfo(), please contact the developers");
+      dbg ("\ttx_packets : %u %u\n", ifl->tx_packets, ifl2->tx_packets);
+      ifl->tx_packets = (ifl2->tx_packets - ifl->tx_packets) / seconds;
 
-	  dbg ("network interface '%s'\n", ifl->ifname);
+      dbg ("\trx_packets : %u %u\n", ifl->rx_packets, ifl2->rx_packets);
+      ifl->rx_packets = (ifl2->rx_packets - ifl->rx_packets) / seconds;
 
-	  dbg ("\ttx_packets : %u %u\n", ifl->tx_packets, ifl2->tx_packets);
-	  ifl->tx_packets = (ifl2->tx_packets - ifl->tx_packets) / seconds;
+      dbg ("\ttx_bytes   : %u %u\n", ifl->tx_bytes, ifl2->tx_bytes);
+      ifl->tx_bytes   = (ifl2->tx_bytes   - ifl->tx_bytes  ) / seconds;
 
-	  dbg ("\trx_packets : %u %u\n", ifl->rx_packets, ifl2->rx_packets);
-	  ifl->rx_packets = (ifl2->rx_packets - ifl->rx_packets) / seconds;
+      dbg ("\trx_bytes   : %u %u\n", ifl->rx_bytes, ifl2->rx_bytes);
+      ifl->rx_bytes   = (ifl2->rx_bytes   - ifl->rx_bytes  ) / seconds;
 
-	  dbg ("\ttx_bytes   : %u %u\n", ifl->tx_bytes, ifl2->tx_bytes);
-	  ifl->tx_bytes   = (ifl2->tx_bytes   - ifl->tx_bytes  ) / seconds;
+      dbg ("\ttx_errors  : %u %u\n", ifl->tx_errors, ifl2->tx_errors);
+      ifl->tx_errors  = (ifl2->tx_errors  - ifl->tx_errors ) / seconds;
 
-	  dbg ("\trx_bytes   : %u %u\n", ifl->rx_bytes, ifl2->rx_bytes);
-	  ifl->rx_bytes   = (ifl2->rx_bytes   - ifl->rx_bytes  ) / seconds;
+      dbg ("\trx_errors  : %u %u\n", ifl->rx_errors, ifl2->rx_errors);
+      ifl->rx_errors  = (ifl2->rx_errors  - ifl->rx_errors ) / seconds;
 
-	  dbg ("\ttx_errors  : %u %u\n", ifl->tx_errors, ifl2->tx_errors);
-	  ifl->tx_errors  = (ifl2->tx_errors  - ifl->tx_errors ) / seconds;
+      ifl->tx_dropped = (ifl2->tx_dropped - ifl->tx_dropped) / seconds;
+      dbg ("\ttx_dropped : %u %u\n", ifl->tx_dropped, ifl2->tx_dropped);
 
-	  dbg ("\trx_errors  : %u %u\n", ifl->rx_errors, ifl2->rx_errors);
-	  ifl->rx_errors  = (ifl2->rx_errors  - ifl->rx_errors ) / seconds;
+      dbg ("\trx_dropped : %u %u\n", ifl->rx_dropped, ifl2->rx_dropped);
+      ifl->rx_dropped = (ifl2->rx_dropped - ifl->rx_dropped) / seconds;
 
-	  ifl->tx_dropped = (ifl2->tx_dropped - ifl->tx_dropped) / seconds;
-	  dbg ("\ttx_dropped : %u %u\n", ifl->tx_dropped, ifl2->tx_dropped);
+      dbg ("\tcollisions : %u %u\n", ifl->collisions, ifl2->collisions);
+      ifl->collisions = (ifl2->collisions - ifl->collisions) / seconds;
 
-	  dbg ("\trx_dropped : %u %u\n", ifl->rx_dropped, ifl2->rx_dropped);
-	  ifl->rx_dropped = (ifl2->rx_dropped - ifl->rx_dropped) / seconds;
+      dbg ("\tmulticast  : %u %u\n", ifl->multicast, ifl2->multicast);
+      ifl->multicast  = (ifl2->multicast  - ifl->multicast ) / seconds;
 
-	  dbg ("\tcollisions : %u %u\n", ifl->collisions, ifl2->collisions);
-	  ifl->collisions = (ifl2->collisions - ifl->collisions) / seconds;
+      dbg ("\tlink status: %s %s\n",
+	   ifl->link_up < 0 ? "UNKNOWN" : (ifl->link_up ? "UP" : "DOWN"),
+	   ifl->link_running < 0 ? "UNKNOWN" :
+	     (ifl->link_running ? "RUNNING" : "NOT-RUNNING"));
 
-	  dbg ("\tmulticast  : %u %u\n", ifl->multicast, ifl2->multicast);
-	  ifl->multicast  = (ifl2->multicast  - ifl->multicast ) / seconds;
+      if (ifl->speed > 0)
+	dbg ("\tspeed      : %llu\n", ifl->speed);
 
-	  dbg ("\tlink status: %s %s\n",
-	       ifl->link_up < 0 ? "UNKNOWN" : (ifl->link_up ? "UP" : "DOWN"),
-	       ifl->link_running < 0 ? "UNKNOWN" :
-		 (ifl->link_running ? "RUNNING" : "NOT-RUNNING"));
+      if (opt_check_link && !(ifl->link_up == 1 && ifl->link_running == 1))
+	plugin_error (STATE_CRITICAL, 0,
+		      "%s matches the given regular expression "
+		      "but is not UP and RUNNING!", ifl->ifname);
+    }
 
-	  if (ifl->speed > 0)
-	    dbg ("\tspeed      : %llu\n", ifl->speed);
-
-	  if (opt_check_link && !(ifl->link_up == 1 && ifl->link_running == 1))
-	    plugin_error (STATE_CRITICAL, 0,
-			  "%s matches the given regular expression "
-			  "but is not UP and RUNNING!", ifl->ifname);
-	}
-
-      freeiflist (iflhead2);
-  }
+  freeiflist (iflhead2);
 
   /* Free memory allocated to the pattern buffer by regcomp() */
   regfree (&regex);
