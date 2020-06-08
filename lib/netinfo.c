@@ -66,12 +66,12 @@ check_link (int sock, const char *ifname, bool *up, bool *running)
   return 0;
 }
 
-static unsigned long long
-check_link_speed (int sock, const char *ifname)
+static int
+check_link_speed (int sock, const char *ifname, unsigned long long *speed,
+		  int *duplex)
 {
   struct ifreq ifr;
   struct ethtool_cmd ecmd;
-  unsigned long long speed = 0ULL;
 
   ecmd.cmd = ETHTOOL_GSET;
   memset (&ifr, 0, sizeof (ifr));
@@ -102,38 +102,48 @@ check_link_speed (int sock, const char *ifname)
 
       switch (ecmd.speed)
 	{
+	default:
+	  dbg (" speed: UNKNOWN\n");
+	  *speed = 0ULL;
+	  break;
 	case SPEED_10:
 	  dbg (" speed: 10Mbit/s\n");
-	  speed = 10000000ULL;
+	  *speed = 10000000ULL;
 	  break;
 	case SPEED_100:
 	  dbg (" speed: 100Mbit/s\n");
-	  speed = 100000000ULL;
+	  *speed = 100000000ULL;
 	  break;
 	case SPEED_1000:
 	  dbg (" speed: 1Gbit/s\n");
-	  speed = 1000000000ULL;
+	  *speed = 1000000000ULL;
 	  break;
 	case SPEED_10000:
 	  dbg (" speed: 10Gbit/s\n");
-	  speed = 10000000000ULL;
+	  *speed = 10000000000ULL;
 	  break;
 	}
-      if (speed > 0)
-	dbg (" max supported speed: %llu\n", speed);
+      if (*speed > 0)
+	dbg (" max supported speed: %llu\n", *speed);
 
       switch (ecmd.duplex)
 	{
+	default:
+	  dbg (" duplex: UNKNOWN\n");
+	  *duplex = DUPLEX_UNKNOWN;
+	  break;
 	case DUPLEX_HALF:
-	  dbg (" half duplex\n");
+	  dbg (" duplex: half\n");
+	  *duplex = DUPLEX_HALF;
 	  break;
 	case DUPLEX_FULL:
-	  dbg (" full duplex\n");
+	  dbg (" duplex: full\n");
+	  *duplex = DUPLEX_FULL;
 	  break;
 	}
     }
 
-  return speed;
+  return 0;
 }
 
 static bool
@@ -214,7 +224,9 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 	  ifl->link_up = up;
 	  ifl->link_running = running;
 	}
-      ifl->speed = check_link_speed (sock, ifa->ifa_name);
+
+      check_link_speed (sock, ifa->ifa_name, &(ifl->speed), &(ifl->duplex));
+
       ifl->multicast = stats->multicast;
       ifl->next = NULL;
 

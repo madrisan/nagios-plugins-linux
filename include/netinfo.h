@@ -16,6 +16,7 @@
 #ifndef _NETINFO_H
 #define _NETINFO_H
 
+#include <sys/types.h>
 #include "system.h"
 
 #ifdef __cplusplus
@@ -43,6 +44,7 @@ extern "C"
     int link_running;
     unsigned int multicast;
     unsigned long long speed;
+    int duplex;
     struct iflist *next;
   } iflist_t;
 
