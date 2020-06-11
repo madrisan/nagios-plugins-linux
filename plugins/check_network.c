@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ifaddrs.h>
+#include <linux/ethtool.h>
 #ifdef HAVE_LINUX_IF_LINK_H
 # include <linux/if_link.h>
 #else
@@ -37,6 +38,7 @@
 #include "progversion.h"
 #include "system.h"
 #include "xalloc.h"
+#include "xasprintf.h"
 #include "xstrton.h"
 
 static const char *program_copyright =
@@ -145,18 +147,33 @@ main (int argc, char **argv)
 
   struct iflist *ifl, *iflhead =
     netinfo (options, ifname_regex, delay);
-  
+
+  /* performance data format:
+   * 'label'=value[UOM];[warn];[crit];[min];[max] */
   printf ("%s %s | ", program_name_short, state_text (status));
   for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
-    printf ("%s_txpck/s=%u %s_rxpck/s=%u %s_txbyte/s=%u %s_rxbyte/s=%u "
-	    "%s_txerr/s=%u %s_rxerr/s=%u %s_txdrop/s=%u %s_rxdrop/s=%u "
-	    "%s_mcast/s=%u %s_coll/s=%u ",
-	    ifl->ifname, ifl->tx_packets, ifl->ifname, ifl->rx_packets,
-	    ifl->ifname, ifl->tx_bytes,   ifl->ifname, ifl->rx_bytes,
-	    ifl->ifname, ifl->tx_errors,  ifl->ifname, ifl->rx_errors,
-            ifl->ifname, ifl->tx_dropped, ifl->ifname, ifl->rx_dropped,
-            ifl->ifname, ifl->multicast,  ifl->ifname, ifl->collisions
-    );
+    {
+      unsigned long long speed = (ifl->speed > 0) ? ifl->speed * 1000*1000/8 : 0;
+      if (DUPLEX_HALF == ifl->duplex)
+	speed /= 2;
+
+      char *perf_max = (ifl->speed > 0) ? xasprintf (";%llu", speed) : "";
+      printf ("%s_txpck/s=%u %s_rxpck/s=%u "
+	      "%s_txbyte/s=%u;;;0%s %s_rxbyte/s=%u;;;0%s "
+	      "%s_txerr/s=%u %s_rxerr/s=%u %s_txdrop/s=%u %s_rxdrop/s=%u "
+	      "%s_mcast/s=%u %s_coll/s=%u"
+	      , ifl->ifname, ifl->tx_packets
+	      , ifl->ifname, ifl->rx_packets
+	      , ifl->ifname, ifl->tx_bytes, perf_max
+	      , ifl->ifname, ifl->rx_bytes, perf_max
+	      , ifl->ifname, ifl->tx_errors
+	      , ifl->ifname, ifl->rx_errors
+	      , ifl->ifname, ifl->tx_dropped
+	      , ifl->ifname, ifl->rx_dropped
+	      , ifl->ifname, ifl->multicast
+	      , ifl->ifname, ifl->collisions
+      );
+    }
   putchar ('\n');
 
   freeiflist (iflhead);

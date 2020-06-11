@@ -43,7 +43,7 @@ extern "C"
     int link_up;
     int link_running;
     unsigned int multicast;
-    unsigned long long speed;
+    unsigned int speed;		/* the link speed in Mbps */
     int duplex;
     struct iflist *next;
   } iflist_t;
