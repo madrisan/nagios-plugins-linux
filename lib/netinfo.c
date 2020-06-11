@@ -77,13 +77,27 @@ static const struct link_speed
   { SPEED_2500,    "2.5Gbps" },
   { SPEED_5000,    "5Gbps"   },
   { SPEED_10000,   "10Gbps"  },
+#if defined (SPEED_14000)
   { SPEED_14000,   "14Gbps"  },
+#endif
+#if defined (SPEED_20000)
   { SPEED_20000,   "20Gbps"  },
+#endif
+#if defined (SPEED_25000)
   { SPEED_25000,   "25Gbps"  },
+#endif
+#if defined (SPEED_40000)
   { SPEED_40000,   "40Gbps"  },
+#endif
+#if defined (SPEED_50000)
   { SPEED_50000,   "50Gbps"  },
+#endif
+#if defined (SPEED_56000)
   { SPEED_56000,   "56Gbps"  },
+#endif
+#if defined (SPEED_100000)
   { SPEED_100000,  "100Gbps" },
+#endif
   { SPEED_UNKNOWN, "unknown" }
 };
 static const int link_speed_size =
