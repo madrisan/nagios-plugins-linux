@@ -66,8 +66,56 @@ check_link (int sock, const char *ifname, bool *up, bool *running)
   return 0;
 }
 
+static const struct link_speed
+{
+  long phy_speed;
+  const char *phy_speed_str;
+} phy_speed_to_str[] = {
+  { SPEED_10,      "10Mbps"  },
+  { SPEED_100,     "100Mbps" },
+  { SPEED_1000,    "1Gbps"   },
+  { SPEED_2500,    "2.5Gbps" },
+  { SPEED_5000,    "5Gbps"   },
+  { SPEED_10000,   "10Gbps"  },
+#if defined (SPEED_14000)
+  { SPEED_14000,   "14Gbps"  },
+#endif
+#if defined (SPEED_20000)
+  { SPEED_20000,   "20Gbps"  },
+#endif
+#if defined (SPEED_25000)
+  { SPEED_25000,   "25Gbps"  },
+#endif
+#if defined (SPEED_40000)
+  { SPEED_40000,   "40Gbps"  },
+#endif
+#if defined (SPEED_50000)
+  { SPEED_50000,   "50Gbps"  },
+#endif
+#if defined (SPEED_56000)
+  { SPEED_56000,   "56Gbps"  },
+#endif
+#if defined (SPEED_100000)
+  { SPEED_100000,  "100Gbps" },
+#endif
+  { SPEED_UNKNOWN, "unknown" }
+};
+static const int link_speed_size =
+  sizeof (phy_speed_to_str) / sizeof (phy_speed_to_str[0]);
+
+const char* map_speed_value_for_key (const struct link_speed * map,
+				     long phy_speed)
+{
+  const char* ret = NULL;
+  for (size_t i = 0 ; i < link_speed_size && ret == NULL; i++)
+    if (map[i].phy_speed == phy_speed)
+      ret = map[i].phy_speed_str;
+
+  return ret;
+}
+
 static int
-check_link_speed (int sock, const char *ifname, unsigned long long *speed,
+check_link_speed (int sock, const char *ifname, unsigned int *speed,
 		  int *duplex)
 {
   struct ifreq ifr;
@@ -100,36 +148,26 @@ check_link_speed (int sock, const char *ifname, unsigned long long *speed,
       if (ecmd.supported & SUPPORTED_Autoneg)
 	dbg (" auto-negotiation\n");
 
-      switch (ecmd.speed)
+      const char *speed_str =
+	map_speed_value_for_key (phy_speed_to_str, ecmd.speed);
+      if (NULL != speed_str)
 	{
-	default:
-	  dbg (" speed: UNKNOWN\n");
-	  *speed = 0ULL;
-	  break;
-	case SPEED_10:
-	  dbg (" speed: 10Mbit/s\n");
-	  *speed = 10000000ULL;
-	  break;
-	case SPEED_100:
-	  dbg (" speed: 100Mbit/s\n");
-	  *speed = 100000000ULL;
-	  break;
-	case SPEED_1000:
-	  dbg (" speed: 1Gbit/s\n");
-	  *speed = 1000000000ULL;
-	  break;
-	case SPEED_10000:
-	  dbg (" speed: 10Gbit/s\n");
-	  *speed = 10000000000ULL;
-	  break;
+	  dbg (" speed: %s\n", speed_str);
+	  *speed = ecmd.speed;
 	}
+      else
+	{
+	  dbg (" speed: unknown/unsupported\n");
+	  *speed = 0;
+	}
+
       if (*speed > 0)
-	dbg (" max supported speed: %llu\n", *speed);
+	dbg (" max supported speed: %uMbps\n", *speed);
 
       switch (ecmd.duplex)
 	{
 	default:
-	  dbg (" duplex: UNKNOWN\n");
+	  dbg (" duplex: unknown\n");
 	  *duplex = DUPLEX_UNKNOWN;
 	  break;
 	case DUPLEX_HALF:
@@ -147,7 +185,7 @@ check_link_speed (int sock, const char *ifname, unsigned long long *speed,
 }
 
 static bool
-wireless_interface (int sock, const char *ifname)
+link_wireless (int sock, const char *ifname)
 {
   struct iwreq pwrq;
   memset (&pwrq, 0, sizeof (pwrq));
@@ -190,7 +228,7 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
       if (family != AF_PACKET)
 	continue;
 
-      bool is_wireless = wireless_interface (sock, ifa->ifa_name);
+      bool is_wireless = link_wireless (sock, ifa->ifa_name);
       bool skip_interface =
 	((opt_ignore_loopback && STREQ ("lo", ifa->ifa_name))
 	 || (is_wireless && opt_ignore_wireless)
@@ -315,7 +353,7 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
 	     (ifl->link_running ? "RUNNING" : "NOT-RUNNING"));
 
       if (ifl->speed > 0)
-	dbg ("\tspeed      : %llu\n", ifl->speed);
+	dbg ("\tspeed      : %uMbit/s\n", ifl->speed);
 
       if (opt_check_link && !(ifl->link_up == 1 && ifl->link_running == 1))
 	plugin_error (STATE_CRITICAL, 0,
