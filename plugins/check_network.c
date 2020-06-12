@@ -157,15 +157,16 @@ main (int argc, char **argv)
       if (DUPLEX_HALF == ifl->duplex)
 	speed /= 2;
 
-      char *perf_max = (ifl->speed > 0) ? xasprintf (";%llu", speed) : "";
+      char *perfdata_bytes =
+	(ifl->speed > 0) ? xasprintf (";;;0;%llu", speed) : "";
       printf ("%s_txpck/s=%u %s_rxpck/s=%u "
-	      "%s_txbyte/s=%u;;;0%s %s_rxbyte/s=%u;;;0%s "
+	      "%s_txbyte/s=%u%s %s_rxbyte/s=%u%s "
 	      "%s_txerr/s=%u %s_rxerr/s=%u %s_txdrop/s=%u %s_rxdrop/s=%u "
 	      "%s_mcast/s=%u %s_coll/s=%u"
 	      , ifl->ifname, ifl->tx_packets
 	      , ifl->ifname, ifl->rx_packets
-	      , ifl->ifname, ifl->tx_bytes, perf_max
-	      , ifl->ifname, ifl->rx_bytes, perf_max
+	      , ifl->ifname, ifl->tx_bytes, perfdata_bytes
+	      , ifl->ifname, ifl->rx_bytes, perfdata_bytes
 	      , ifl->ifname, ifl->tx_errors
 	      , ifl->ifname, ifl->rx_errors
 	      , ifl->ifname, ifl->tx_dropped
