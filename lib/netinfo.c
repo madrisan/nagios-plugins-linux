@@ -209,6 +209,7 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
        opt_ignore_wireless = (options & NO_WIRELESS);
   int family, sock;
   struct ifaddrs *ifaddr, *ifa;
+  struct iflist *iflhead = NULL, *iflprev = NULL, *ifl;
 
   if (getifaddrs (&ifaddr) == -1)
     plugin_error (STATE_UNKNOWN, errno, "getifaddrs() failed");
@@ -217,16 +218,12 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
   if (sock < 0)
     plugin_error (STATE_UNKNOWN, errno, "socket() failed");
 
-  struct iflist *iflhead = NULL, *iflprev = NULL, *ifl;
-
   for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
     {
-      if (ifa->ifa_addr == NULL || ifa->ifa_data == NULL)
+      if (ifa->ifa_addr == NULL)
 	continue;
 
       family = ifa->ifa_addr->sa_family;
-      if (family != AF_PACKET)
-	continue;
 
       bool is_wireless = link_wireless (sock, ifa->ifa_name);
       bool skip_interface =
@@ -235,39 +232,46 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 	 || (regexec (iface_regex, ifa->ifa_name, (size_t) 0, NULL, 0)));
       if (skip_interface)
 	{
-	  dbg ("ignoring network interface '%s'...\n", ifa->ifa_name);
+	  dbg ("skipping network interface '%s'...\n", ifa->ifa_name);
 	  continue;
 	}
 
-      struct rtnl_link_stats *stats = ifa->ifa_data;
-      bool up, running;
-
       ifl = xmalloc (sizeof (struct iflist));
 
-      ifl->ifname = xstrdup (ifa->ifa_name);
-      ifl->tx_packets = stats->tx_packets;
-      ifl->rx_packets = stats->rx_packets;
-      ifl->tx_bytes   = stats->tx_bytes; 
-      ifl->rx_bytes   = stats->rx_bytes;
-      ifl->tx_errors  = stats->tx_errors;
-      ifl->rx_errors  = stats->rx_errors;
-      ifl->tx_dropped = stats->tx_dropped;
-      ifl->rx_dropped = stats->rx_dropped;
-      ifl->collisions = stats->collisions;
+      if (family == AF_INET || family == AF_INET6)
+	{
+	  ifl->ifname = xstrdup (ifa->ifa_name);
+	}
+      else if (family == AF_PACKET && ifa->ifa_data != NULL)
+	{
+	  struct rtnl_link_stats *stats = ifa->ifa_data;
 
+	  ifl->ifname = xstrdup (ifa->ifa_name);
+	  ifl->tx_packets = stats->tx_packets;
+	  ifl->rx_packets = stats->rx_packets;
+	  ifl->tx_bytes   = stats->tx_bytes;
+	  ifl->rx_bytes   = stats->rx_bytes;
+	  ifl->tx_errors  = stats->tx_errors;
+	  ifl->rx_errors  = stats->rx_errors;
+	  ifl->tx_dropped = stats->tx_dropped;
+	  ifl->rx_dropped = stats->rx_dropped;
+	  ifl->collisions = stats->collisions;
+	  ifl->multicast = stats->multicast;
+	}
+
+      bool up, running;
       if ((check_link (sock, ifa->ifa_name, &up, &running) < 0))
 	ifl->link_up = ifl->link_running = -1;
       else
 	{
 	  ifl->link_up = up;
 	  ifl->link_running = running;
+	  dbg ("the interface '%s' is UP and RUNNING...\n", ifa->ifa_name);
 	}
 
       check_link_speed (sock, ifa->ifa_name, &(ifl->speed), &(ifl->duplex));
 
-      ifl->multicast = stats->multicast;
       ifl->next = NULL;
-
       if (iflhead == NULL)
 	iflhead = ifl;
       else
