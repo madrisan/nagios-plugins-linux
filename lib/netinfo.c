@@ -52,6 +52,24 @@
 #include "xalloc.h"
 
 static int
+get_ctl_fd (void)
+{
+  int fd;
+  int s_errno;
+
+  if ((fd = socket (PF_INET, SOCK_DGRAM, 0)) >= 0)
+    return fd;
+  s_errno = errno;
+  if ((fd = socket (PF_PACKET, SOCK_DGRAM, 0)) >= 0)
+    return fd;
+  if ((fd = socket (PF_INET6, SOCK_DGRAM, 0)) >= 0)
+    return fd;
+
+  errno = s_errno;
+  return -1;
+}
+
+static int
 check_link (int sock, const char *ifname, bool *up, bool *running)
 {
   struct ifreq ifr;
@@ -115,9 +133,9 @@ const char* map_speed_value_for_key (const struct link_speed * map,
 }
 
 static int
-check_link_speed (int sock, const char *ifname, unsigned int *speed,
-		  int *duplex)
+check_link_speed (const char *ifname, unsigned int *speed, int *duplex)
 {
+  int sock;
   struct ifreq ifr;
   struct ethtool_cmd ecmd;
 
@@ -127,6 +145,10 @@ check_link_speed (int sock, const char *ifname, unsigned int *speed,
   ifr.ifr_data = (caddr_t) &ecmd;
 
   dbg ("network interface '%s'\n", ifname);
+
+  if ((sock = get_ctl_fd ()) < 0)
+    plugin_error (STATE_UNKNOWN, errno, "socket() failed");
+
   if (ioctl (sock, SIOCETHTOOL, &ifr) == 0)
     {
       if (ecmd.supported & SUPPORTED_TP)
@@ -181,25 +203,32 @@ check_link_speed (int sock, const char *ifname, unsigned int *speed,
 	}
     }
 
+  close (sock);
   return 0;
 }
 
 static bool
-link_wireless (int sock, const char *ifname)
+link_wireless (const char *ifname)
 {
+  bool is_wireless = false;
+  int sock;
   struct iwreq pwrq;
+
+  if ((sock = socket (AF_INET, SOCK_STREAM, 0)) < 0)
+    plugin_error (STATE_UNKNOWN, errno, "socket() failed");
+
   memset (&pwrq, 0, sizeof (pwrq));
   STRNCPY_TERMINATED (pwrq.ifr_name, ifname, IFNAMSIZ);
 
-  // int sock = socket (AF_INET, SOCK_STREAM, 0);
   if (ioctl (sock, SIOCGIWNAME, &pwrq) != -1)
     {
       dbg ("wireless interface detected (%s): '%s'\n",
 	   pwrq.u.name, ifname);
-      return true;
+      is_wireless = true;
     }
 
-  return false;
+  close (sock);
+  return is_wireless;
 }
 
 static struct iflist *
@@ -214,8 +243,7 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
   if (getifaddrs (&ifaddr) == -1)
     plugin_error (STATE_UNKNOWN, errno, "getifaddrs() failed");
 
-  sock = socket (PF_INET, SOCK_DGRAM, IPPROTO_IP);
-  if (sock < 0)
+  if ((sock = get_ctl_fd ()) < 0)
     plugin_error (STATE_UNKNOWN, errno, "socket() failed");
 
   for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
@@ -225,7 +253,7 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 
       family = ifa->ifa_addr->sa_family;
 
-      bool is_wireless = link_wireless (sock, ifa->ifa_name);
+      bool is_wireless = link_wireless (ifa->ifa_name);
       bool skip_interface =
 	((opt_ignore_loopback && STREQ ("lo", ifa->ifa_name))
 	 || (is_wireless && opt_ignore_wireless)
@@ -269,7 +297,7 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 	  dbg ("the interface '%s' is UP and RUNNING...\n", ifa->ifa_name);
 	}
 
-      check_link_speed (sock, ifa->ifa_name, &(ifl->speed), &(ifl->duplex));
+      check_link_speed (ifa->ifa_name, &(ifl->speed), &(ifl->duplex));
 
       ifl->next = NULL;
       if (iflhead == NULL)
