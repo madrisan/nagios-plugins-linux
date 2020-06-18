@@ -28,6 +28,14 @@ extern "C"
 #define NO_LOOPBACK	(1 << 1)
 #define NO_WIRELESS	(1 << 2)
 
+  enum duplex
+  {
+    DUP_HALF = DUPLEX_HALF,
+    DUP_FULL = DUPLEX_FULL,
+    _DUP_MAX,
+    _DUP_UNKNOWN = DUPLEX_UNKNOWN
+  };
+
   typedef struct iflist
   {
     char *ifname;
@@ -43,8 +51,8 @@ extern "C"
     int link_up;
     int link_running;
     unsigned int multicast;
-    unsigned int speed;		/* the link speed in Mbps */
-    int duplex;
+    __u32 speed;	/* the link speed in Mbps */
+    __u8 duplex;	/* the duplex as defined in <linux/ethtool.h> */
     struct iflist *next;
   } iflist_t;
 
