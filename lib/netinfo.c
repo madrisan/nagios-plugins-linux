@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
 #include <linux/ethtool.h>
 #include <linux/if.h>
 #ifdef HAVE_LINUX_IF_LINK_H
@@ -84,6 +85,11 @@ check_link (int sock, const char *ifname, bool *up, bool *running)
   return 0;
 }
 
+static const char *const duplex_table[_DUP_MAX] = {
+  [DUPLEX_HALF] = "half",
+  [DUPLEX_FULL] = "full"
+};
+
 static const struct link_speed
 {
   long phy_speed;
@@ -116,7 +122,7 @@ static const struct link_speed
 #if defined (SPEED_100000)
   { SPEED_100000,  "100Gbps" },
 #endif
-  { SPEED_UNKNOWN, "unknown" }
+  { SPEED_UNKNOWN, "unknown!" }
 };
 static const int link_speed_size =
   sizeof (phy_speed_to_str) / sizeof (phy_speed_to_str[0]);
@@ -129,82 +135,54 @@ const char* map_speed_value_for_key (const struct link_speed * map,
     if (map[i].phy_speed == phy_speed)
       ret = map[i].phy_speed_str;
 
-  return ret;
+  return ret ? ret : "unknown!";
 }
 
+/* FIXME: ETHTOOL_GSET is obsolete.
+ *        We should switch to ETHTOOL_GLINKSETTINGS instead.	*/
+
 static int
-check_link_speed (const char *ifname, unsigned int *speed, int *duplex)
+check_link_speed (const char *ifname, __u32 *speed, __u8 *duplex)
 {
-  int sock;
+  int fd, ret;
   struct ifreq ifr;
-  struct ethtool_cmd ecmd;
+  struct ethtool_cmd ecmd = {
+    .cmd = ETHTOOL_GSET
+  };
 
-  ecmd.cmd = ETHTOOL_GSET;
-  memset (&ifr, 0, sizeof (ifr));
-  STRNCPY_TERMINATED (ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
-  ifr.ifr_data = (caddr_t) &ecmd;
+  *duplex = DUPLEX_UNKNOWN;
+  *speed = 0;	/* SPEED_UNKNOWN */
 
-  dbg ("network interface '%s'\n", ifname);
-
-  if ((sock = get_ctl_fd ()) < 0)
+  if ((fd = get_ctl_fd ()) < 0)
     plugin_error (STATE_UNKNOWN, errno, "socket() failed");
 
-  if (ioctl (sock, SIOCETHTOOL, &ifr) == 0)
-    {
-      if (ecmd.supported & SUPPORTED_TP)
-	dbg (" twisted pair\n");
-      if (ecmd.supported & SUPPORTED_10baseT_Half)
-	dbg (" 10Mbit/s\n");
-      if (ecmd.supported & SUPPORTED_10baseT_Full)
-	dbg (" 10Mbit/s (full duplex)\n");
-      if (ecmd.supported & SUPPORTED_100baseT_Half)
-	dbg (" 100Mbit/s\n");
-      if (ecmd.supported & SUPPORTED_100baseT_Full)
-	dbg (" 100Mbit/s (full duplex)\n");
-      if (ecmd.supported & SUPPORTED_1000baseT_Half)
-	dbg (" 1Gbit/s\n");
-      if (ecmd.supported & SUPPORTED_1000baseT_Full)
-	dbg (" 1Gbit/s (full duplex)\n");
-      if (ecmd.supported & SUPPORTED_10000baseT_Full)
-	dbg (" 10Gbit/s (full duplex)\n");
-      if (ecmd.supported & SUPPORTED_Autoneg)
-	dbg (" auto-negotiation\n");
+  memset (&ifr, 0, sizeof (ifr));
+  STRNCPY_TERMINATED (ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
 
-      const char *speed_str =
-	map_speed_value_for_key (phy_speed_to_str, ecmd.speed);
-      if (NULL != speed_str)
+  ifr.ifr_data = (void *) &ecmd;
+  if ((ret = ioctl (fd, SIOCETHTOOL, &ifr)) == 0)
+    {
+      *duplex = ecmd.duplex;
+      *speed = ecmd.speed;
+
+      dbg ("%s: duplex %s (%d), speed is %s (%u)\n"
+	   , ifname
+	   , *duplex == _DUP_UNKNOWN ? "invalid" : duplex_table[*duplex]
+	   , *duplex
+	   , map_speed_value_for_key (phy_speed_to_str, *speed)
+	   , *speed);
+      /* normalize the unknown speed values */
+      if (*speed == (uint16_t)(-1) || *speed == (uint32_t)(-1))
 	{
-	  dbg (" speed: %s\n", speed_str);
-	  *speed = ecmd.speed;
-	}
-      else
-	{
-	  dbg (" speed: unknown/unsupported\n");
+	  dbg ("%s: normalizing the unknown speed to zero...\n", ifname);
 	  *speed = 0;
 	}
-
-      if (*speed > 0)
-	dbg (" max supported speed: %uMbps\n", *speed);
-
-      switch (ecmd.duplex)
-	{
-	default:
-	  dbg (" duplex: unknown\n");
-	  *duplex = DUPLEX_UNKNOWN;
-	  break;
-	case DUPLEX_HALF:
-	  dbg (" duplex: half\n");
-	  *duplex = DUPLEX_HALF;
-	  break;
-	case DUPLEX_FULL:
-	  dbg (" duplex: full\n");
-	  *duplex = DUPLEX_FULL;
-	  break;
-	}
     }
+  else
+    dbg ("%s: no link speed associated to this interface\n", ifname);
 
-  close (sock);
-  return 0;
+  close (fd);
+  return ret;
 }
 
 static bool
@@ -222,8 +200,9 @@ link_wireless (const char *ifname)
 
   if (ioctl (sock, SIOCGIWNAME, &pwrq) != -1)
     {
-      dbg ("wireless interface detected (%s): '%s'\n",
-	   pwrq.u.name, ifname);
+      dbg ("%s: wireless interface (%s)\n"
+	   , ifname
+	   , pwrq.u.name);
       is_wireless = true;
     }
 
@@ -232,16 +211,14 @@ link_wireless (const char *ifname)
 }
 
 static struct iflist *
-get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
+get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex,
+		      struct ifaddrs *ifaddr)
 {
   bool opt_ignore_loopback = (options & NO_LOOPBACK),
        opt_ignore_wireless = (options & NO_WIRELESS);
   int family, sock;
-  struct ifaddrs *ifaddr, *ifa;
+  struct ifaddrs *ifa;
   struct iflist *iflhead = NULL, *iflprev = NULL, *ifl;
-
-  if (getifaddrs (&ifaddr) == -1)
-    plugin_error (STATE_UNKNOWN, errno, "getifaddrs() failed");
 
   if ((sock = get_ctl_fd ()) < 0)
     plugin_error (STATE_UNKNOWN, errno, "socket() failed");
@@ -252,6 +229,13 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 	continue;
 
       family = ifa->ifa_addr->sa_family;
+
+      dbg ("%s: address family %d%s\n", ifa->ifa_name, family,
+	   (family == AF_PACKET) ? " (AF_PACKET)" :
+	   (family == AF_INET)   ? " (AF_INET) ... skip"   :
+	   (family == AF_INET6)  ? " (AF_INET6) ... skip"  : "");
+      if (family == AF_INET || family == AF_INET6)
+	continue;
 
       bool is_wireless = link_wireless (ifa->ifa_name);
       bool skip_interface =
@@ -264,17 +248,12 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 	  continue;
 	}
 
-      ifl = xmalloc (sizeof (struct iflist));
-
-      if (family == AF_INET || family == AF_INET6)
-	{
-	  ifl->ifname = xstrdup (ifa->ifa_name);
-	}
-      else if (family == AF_PACKET && ifa->ifa_data != NULL)
+      if (family == AF_PACKET && ifa->ifa_data != NULL)
 	{
 	  struct rtnl_link_stats *stats = ifa->ifa_data;
 
-	  ifl->ifname = xstrdup (ifa->ifa_name);
+	  ifl = xmalloc (sizeof (struct iflist));
+	  ifl->ifname     = xstrdup (ifa->ifa_name);
 	  ifl->tx_packets = stats->tx_packets;
 	  ifl->rx_packets = stats->rx_packets;
 	  ifl->tx_bytes   = stats->tx_bytes;
@@ -284,7 +263,12 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 	  ifl->tx_dropped = stats->tx_dropped;
 	  ifl->rx_dropped = stats->rx_dropped;
 	  ifl->collisions = stats->collisions;
-	  ifl->multicast = stats->multicast;
+	  ifl->multicast  = stats->multicast;
+	}
+      else
+	{
+	  dbg ("skipping unknown interface %s\n", ifa->ifa_name);
+	  continue;
 	}
 
       bool up, running;
@@ -294,7 +278,6 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 	{
 	  ifl->link_up = up;
 	  ifl->link_running = running;
-	  dbg ("the interface '%s' is UP and RUNNING...\n", ifa->ifa_name);
 	}
 
       check_link_speed (ifa->ifa_name, &(ifl->speed), &(ifl->duplex));
@@ -308,7 +291,6 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
     }
 
   close (sock);
-  freeifaddrs (ifaddr);
 
   return iflhead;
 }
@@ -320,6 +302,7 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
   char msgbuf[256];
   int rc;
   regex_t regex;
+  struct ifaddrs *ifaddr;
   struct iflist *iflhead, *ifl, *iflhead2, *ifl2;
 
   if ((rc =
@@ -328,15 +311,17 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
       regerror (rc, &regex, msgbuf, sizeof (msgbuf));
       plugin_error (STATE_UNKNOWN, 0, "could not compile regex: %s", msgbuf);
     }
+  if (getifaddrs (&ifaddr) == -1)
+    plugin_error (STATE_UNKNOWN, errno, "getifaddrs() failed");
 
   dbg ("getting network informations...\n");
-  iflhead = get_netinfo_snapshot (options, &regex);
+  iflhead = get_netinfo_snapshot (options, &regex, ifaddr);
 
   assert (seconds > 0);
   sleep (seconds);
 
   dbg ("getting network informations again (after %us)...\n", seconds);
-  iflhead2 = get_netinfo_snapshot (options, &regex);
+  iflhead2 = get_netinfo_snapshot (options, &regex, ifaddr);
 
   for (ifl = iflhead, ifl2 = iflhead2; ifl != NULL && ifl2 != NULL;
        ifl = ifl->next, ifl2 = ifl2->next)
@@ -393,6 +378,7 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
 		      "but is not UP and RUNNING!", ifl->ifname);
     }
 
+  freeifaddrs (ifaddr);
   freeiflist (iflhead2);
 
   /* Free memory allocated to the pattern buffer by regcomp() */

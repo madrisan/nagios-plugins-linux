@@ -162,7 +162,7 @@ main (int argc, char **argv)
       printf ("%s_txpck/s=%u %s_rxpck/s=%u "
 	      "%s_txbyte/s=%u%s %s_rxbyte/s=%u%s "
 	      "%s_txerr/s=%u %s_rxerr/s=%u %s_txdrop/s=%u %s_rxdrop/s=%u "
-	      "%s_mcast/s=%u %s_coll/s=%u"
+	      "%s_mcast/s=%u %s_coll/s=%u "
 	      , ifl->ifname, ifl->tx_packets
 	      , ifl->ifname, ifl->rx_packets
 	      , ifl->ifname, ifl->tx_bytes, perfdata_bytes
