@@ -57,7 +57,7 @@ extern "C"
   } iflist_t;
 
   struct iflist *netinfo (unsigned int options, const char *ifname_regex,
-			  unsigned int seconds);
+			  unsigned int seconds, unsigned int *ninterfaces);
   void freeiflist (struct iflist *iflhead);
 
 #ifdef __cplusplus
