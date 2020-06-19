@@ -145,12 +145,16 @@ main (int argc, char **argv)
                       "too large delay value (greater than %d)", DELAY_MAX);
     }
 
+  unsigned int ninterfaces;
   struct iflist *ifl, *iflhead =
-    netinfo (options, ifname_regex, delay);
+    netinfo (options, ifname_regex, delay, &ninterfaces);
 
   /* performance data format:
    * 'label'=value[UOM];[warn];[crit];[min];[max] */
-  printf ("%s %s | ", program_name_short, state_text (status));
+  printf ("%s %s - found %u interface(s) | "
+	  , program_name_short
+	  , state_text (status)
+	  , ninterfaces);
   for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
     {
       unsigned long long speed = (ifl->speed > 0) ? ifl->speed * 1000*1000/8 : 0;

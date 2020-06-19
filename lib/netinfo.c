@@ -296,7 +296,8 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex,
 }
 
 struct iflist *
-netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
+netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds,
+	 unsigned int *ninterfaces)
 {
   bool opt_check_link = (options & CHECK_LINK);
   char msgbuf[256];
@@ -323,6 +324,7 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
   dbg ("getting network informations again (after %us)...\n", seconds);
   iflhead2 = get_netinfo_snapshot (options, &regex, ifaddr);
 
+  *ninterfaces = 0;
   for (ifl = iflhead, ifl2 = iflhead2; ifl != NULL && ifl2 != NULL;
        ifl = ifl->next, ifl2 = ifl2->next)
     {
@@ -376,6 +378,7 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds)
 	plugin_error (STATE_CRITICAL, 0,
 		      "%s matches the given regular expression "
 		      "but is not UP and RUNNING!", ifl->ifname);
+      (*ninterfaces)++;
     }
 
   freeifaddrs (ifaddr);
