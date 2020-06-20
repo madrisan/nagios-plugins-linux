@@ -149,6 +149,9 @@ main (int argc, char **argv)
   struct iflist *ifl, *iflhead =
     netinfo (options, ifname_regex, delay, &ninterfaces);
 
+  if (ninterfaces < 1)
+    status = STATE_UNKNOWN;
+
   /* performance data format:
    * 'label'=value[UOM];[warn];[crit];[min];[max] */
   printf ("%s %s - found %u interface(s) | "
