@@ -71,7 +71,7 @@ usage (FILE * out)
   fputs ("This plugin displays some network interfaces.statistics.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-klW] [-i <ifname-regex>] [delay]\n",
+  fprintf (out, "  %s [-klW] [-bCdemp] [-i <ifname-regex>] [delay]\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -i, --ifname         only display interfaces matching a regular "
@@ -86,7 +86,7 @@ usage (FILE * out)
 	 "select a subset:\n", out);
   fputs ("  -b  --no-bytes       omit the rx/tx bytes counter from perfdata\n",
 	 out);
-  fputs ("  -c, --no-collisions  omit the collisions counter from perfdata\n",
+  fputs ("  -C, --no-collisions  omit the collisions counter from perfdata\n",
 	 out);
   fputs ("  -d  --no-drops       omit the rx/tx drop counters from perfdata\n",
 	 out);
@@ -106,6 +106,8 @@ usage (FILE * out)
   fprintf (out, "  %s\n", program_name);
   fprintf (out, "  %s --check-link --ifname \"^(enp|eth)\" 5\n", program_name);
   fprintf (out, "  %s --no-loopback --no-wireless 3\n", program_name);
+  fprintf (out, "  %s --no-loopback -bCdmp 3   "
+	   "# only report tx/rx errors in the perfdata\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
