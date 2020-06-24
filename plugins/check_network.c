@@ -59,6 +59,7 @@ static struct option const longopts[] = {
   {(char *) "no-multicast", no_argument, NULL, 'm'},
   {(char *) "no-packets", no_argument, NULL, 'p'},
   {(char *) "no-wireless", no_argument, NULL, 'W'},
+  {(char *) "perc", no_argument, NULL, '%'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -96,6 +97,8 @@ usage (FILE * out)
 	 out);
   fputs ("  -p, --no-packets     omit the rx/tx packets counter from "
 	 "perfdata\n", out);
+  fputs ("  -%, --perc           return percentage metrics if possible\n",
+	 out);
   fprintf (out, "  delay is the delay between the two network snapshots "
 	   "in seconds (default: %dsec)\n", DELAY_DEFAULT);
   fputs (USAGE_NOTE, out);
@@ -105,6 +108,7 @@ usage (FILE * out)
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
   fprintf (out, "  %s --check-link --ifname \"^(enp|eth)\" 5\n", program_name);
+  fprintf (out, "  %s --perc --ifname \"^(enp|eth)\" 5\n", program_name);
   fprintf (out, "  %s --no-loopback --no-wireless 3\n", program_name);
   fprintf (out, "  %s --no-loopback -bCdmp 3   "
 	   "# only report tx/rx errors in the perfdata\n", program_name);
@@ -122,6 +126,26 @@ print_version (void)
   exit (STATE_OK);
 }
 
+static inline char *
+fmt_perfdata_bytes (const char *ifname, const char* label,
+		    unsigned int counter, unsigned long long speed, bool perc)
+{
+  char *perfdata;
+
+  if (perc && (speed > 0))
+    {
+      float counter_perc = 100.0 * counter / speed;
+      perfdata =
+	xasprintf ("%s_%s/s=%.1f%%;;;0;100.0", ifname, label, counter_perc);
+    }
+  else if (!perc && (speed > 0))
+    perfdata = xasprintf("%s_%s/s=%u;;;0;%llu", ifname, label, counter, speed);
+  else
+    perfdata = xasprintf ("%s_%s/s=%u", ifname, label, counter);
+
+  return perfdata;
+}
+
 int
 main (int argc, char **argv)
 {
@@ -132,7 +156,8 @@ main (int argc, char **argv)
        pd_drops = true,
        pd_errors = true,
        pd_multicast = true,
-       pd_packets = true;
+       pd_packets = true,
+       report_perc = false;
   char *bp, *ifname_regex = NULL;
   size_t size;
   unsigned int options = 0;
@@ -142,7 +167,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "Cbdei:klmpW" GETOPT_HELP_VERSION_STRING,
+			   "Cbdei:klmpW%" GETOPT_HELP_VERSION_STRING,
 			   longopts, &option_index)) != -1)
     {
       switch (c)
@@ -185,6 +210,9 @@ main (int argc, char **argv)
 	case 'W':
 	  options |= NO_WIRELESS;
 	  break;
+	case '%':
+	  report_perc = true;
+	  break;
 	case_GETOPT_HELP_CHAR
 	case_GETOPT_VERSION_CHAR
 
@@ -221,14 +249,29 @@ main (int argc, char **argv)
       if (DUPLEX_HALF == ifl->duplex)
 	speed /= 2;
 
+/*
       char *perfdata_bytes =
-	(ifl->speed > 0) ? xasprintf (";;;0;%llu", speed) : "";
+	(ifl->speed > 0) ?
+	  xasprintf (";;;0;%llu", report_perc ? 100 : speed) : "";
 
       if (pd_bytes)
 	fprintf (perfdata
 		, "%s_txbyte/s=%u%s %s_rxbyte/s=%u%s "
 		, ifl->ifname, ifl->tx_bytes, perfdata_bytes
 		, ifl->ifname, ifl->rx_bytes, perfdata_bytes);
+*/
+      if (pd_bytes)
+	{
+	  char *perfdata_txbyte =
+	    fmt_perfdata_bytes (ifl->ifname, "txbyte", ifl->tx_bytes,
+				speed, report_perc);
+	  char *perfdata_rxbyte =
+	    fmt_perfdata_bytes (ifl->ifname, "rxbyte", ifl->rx_bytes,
+				speed, report_perc);
+	  fprintf (perfdata, "%s %s ", perfdata_txbyte, perfdata_rxbyte);
+	  free (perfdata_txbyte);
+	  free (perfdata_rxbyte);
+	}
       if (pd_errors)
 	fprintf (perfdata
 		, "%s_txerr/s=%u %s_rxerr/s=%u "
