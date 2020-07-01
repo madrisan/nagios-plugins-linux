@@ -211,17 +211,19 @@ link_wireless (const char *ifname)
 }
 
 static struct iflist *
-get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex,
-		      struct ifaddrs *ifaddr)
+get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 {
   bool opt_ignore_loopback = (options & NO_LOOPBACK),
        opt_ignore_wireless = (options & NO_WIRELESS);
   int family, sock;
-  struct ifaddrs *ifa;
+  struct ifaddrs *ifa, *ifaddr;
   struct iflist *iflhead = NULL, *iflprev = NULL, *ifl;
 
   if ((sock = get_ctl_fd ()) < 0)
     plugin_error (STATE_UNKNOWN, errno, "socket() failed");
+
+  if (getifaddrs (&ifaddr) == -1)
+    plugin_error (STATE_UNKNOWN, errno, "getifaddrs() failed");
 
   for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
     {
@@ -291,6 +293,7 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex,
     }
 
   close (sock);
+  freeifaddrs (ifaddr);
 
   return iflhead;
 }
@@ -303,7 +306,6 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds,
   char msgbuf[256];
   int rc;
   regex_t regex;
-  struct ifaddrs *ifaddr;
   struct iflist *iflhead, *ifl, *iflhead2, *ifl2;
 
   if ((rc =
@@ -312,17 +314,15 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds,
       regerror (rc, &regex, msgbuf, sizeof (msgbuf));
       plugin_error (STATE_UNKNOWN, 0, "could not compile regex: %s", msgbuf);
     }
-  if (getifaddrs (&ifaddr) == -1)
-    plugin_error (STATE_UNKNOWN, errno, "getifaddrs() failed");
 
   dbg ("getting network informations...\n");
-  iflhead = get_netinfo_snapshot (options, &regex, ifaddr);
+  iflhead = get_netinfo_snapshot (options, &regex);
 
   assert (seconds > 0);
   sleep (seconds);
 
   dbg ("getting network informations again (after %us)...\n", seconds);
-  iflhead2 = get_netinfo_snapshot (options, &regex, ifaddr);
+  iflhead2 = get_netinfo_snapshot (options, &regex);
 
   *ninterfaces = 0;
   for (ifl = iflhead, ifl2 = iflhead2; ifl != NULL && ifl2 != NULL;
@@ -381,7 +381,6 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds,
       (*ninterfaces)++;
     }
 
-  freeifaddrs (ifaddr);
   freeiflist (iflhead2);
 
   /* Free memory allocated to the pattern buffer by regcomp() */
