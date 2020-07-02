@@ -273,17 +273,6 @@ main (int argc, char **argv)
       if (DUPLEX_HALF == ifl->duplex)
 	speed /= 2;
 
-/*
-      char *perfdata_bytes =
-	(ifl->speed > 0) ?
-	  xasprintf (";;;0;%llu", report_perc ? 100 : speed) : "";
-
-      if (pd_bytes)
-	fprintf (perfdata
-		, "%s_txbyte/s=%u%s %s_rxbyte/s=%u%s "
-		, ifl->ifname, ifl->tx_bytes, perfdata_bytes
-		, ifl->ifname, ifl->rx_bytes, perfdata_bytes);
-*/
       if (pd_bytes)
 	{
 	  char *perfdata_txbyte =
