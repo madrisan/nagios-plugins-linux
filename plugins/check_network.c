@@ -134,9 +134,9 @@ fmt_perfdata_bytes (const char *ifname, const char* label,
 
   if (perc && (speed > 0))
     {
-      float counter_perc = 100.0 * counter / speed;
+      float counter_perc = (100.0 / speed) * counter;
       perfdata =
-	xasprintf ("%s_%s/s=%.1f%%;;;0;100.0", ifname, label, counter_perc);
+	xasprintf ("%s_%s/s=%.2f%%;;;0;100.0", ifname, label, counter_perc);
     }
   else if (!perc && (speed > 0))
     perfdata = xasprintf("%s_%s/s=%u;;;0;%llu", ifname, label, counter, speed);
