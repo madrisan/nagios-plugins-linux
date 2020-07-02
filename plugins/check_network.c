@@ -51,6 +51,7 @@ static const char *program_copyright =
 static struct option const longopts[] = {
   {(char *) "check-link", no_argument, NULL, 'k'},
   {(char *) "ifname", required_argument, NULL, 'i'},
+  {(char *) "ifname-debug", no_argument, NULL, 0},
   {(char *) "no-bytes", no_argument, NULL, 'b'},
   {(char *) "no-collisions", no_argument, NULL, 'C'},
   {(char *) "no-drops", no_argument, NULL, 'd'},
@@ -77,6 +78,8 @@ usage (FILE * out)
   fputs (USAGE_OPTIONS, out);
   fputs ("  -i, --ifname         only display interfaces matching a regular "
 	 "expression\n", out);
+  fputs ("      --ifname-debug   display the list of metric keys and exit\n",
+	 out);
   fputs ("  -k, --check-link     report an error if at least a link is down\n",
 	 out);
   fputs ("  -l, --no-loopback    skip the loopback interface\n", out);
@@ -108,6 +111,8 @@ usage (FILE * out)
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
   fprintf (out, "  %s --check-link --ifname \"^(enp|eth)\" 5\n", program_name);
+  fprintf (out, "  %s --ifname \"^(enp|wlp)\" --ifname-debug -Cdm",
+	   program_name);
   fprintf (out, "  %s --perc --ifname \"^(enp|eth)\" 5\n", program_name);
   fprintf (out, "  %s --no-loopback --no-wireless 3\n", program_name);
   fprintf (out, "  %s --no-loopback -bCdmp 3   "
@@ -151,7 +156,8 @@ main (int argc, char **argv)
 {
   int c, i, option_index = 0;
   nagstatus status = STATE_OK;
-  bool pd_bytes = true,
+  bool ifname_debug = false,
+       pd_bytes = true,
        pd_collisions = true,
        pd_drops = true,
        pd_errors = true,
@@ -174,12 +180,10 @@ main (int argc, char **argv)
 	{
 	default:
 	  usage (stderr);
-/*
 	case 0:
-	  if (STREQ (longopts[option_index].name, "no-packets"))
-	    pd_packets = false;
+	  if (STREQ (longopts[option_index].name, "ifname-debug"))
+	    ifname_debug = true;
 	  break;
-*/
 	case 'b':
 	  pd_bytes = false;
 	  break;
@@ -237,6 +241,26 @@ main (int argc, char **argv)
 
   if (ninterfaces < 1)
     status = STATE_UNKNOWN;
+
+  if (ifname_debug)
+    {
+      for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
+	{
+	  if (pd_bytes)
+	    printf ("%s_{tx,rx}byte/s\n", ifl->ifname);
+	  if (pd_errors)
+	    printf ("%s_{tx,rx}err/s\n", ifl->ifname);
+	  if (pd_drops)
+	    printf ("%s_{tx,rx}drop/s\n", ifl->ifname);
+	  if (pd_packets)
+	    printf ("%s_{tx,rx}pck/s\n", ifl->ifname);
+	  if (pd_collisions)
+	    printf ("%s_coll/s\n", ifl->ifname);
+	  if (pd_multicast)
+	    printf ("%s_mcast/s\n", ifl->ifname);
+	}
+      exit (STATE_UNKNOWN);
+    }
 
   perfdata = open_memstream (&bp, &size);
 
