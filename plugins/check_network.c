@@ -111,7 +111,7 @@ usage (FILE * out)
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
   fprintf (out, "  %s --check-link --ifname \"^(enp|eth)\" 5\n", program_name);
-  fprintf (out, "  %s --ifname \"^(enp|wlp)\" --ifname-debug -Cdm",
+  fprintf (out, "  %s --ifname \"^(enp|wlp)\" --ifname-debug -Cdm\n",
 	   program_name);
   fprintf (out, "  %s --perc --ifname \"^(enp|eth)\" 5\n", program_name);
   fprintf (out, "  %s --no-loopback --no-wireless 3\n", program_name);
