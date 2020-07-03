@@ -75,6 +75,8 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [-klW] [-bCdemp] [-i <ifname-regex>] [delay]\n",
 	   program_name);
+  fprintf (out, "  %s [-klW] [-bCdemp] [-i <ifname-regex>] --ifname-debug\n",
+	   program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -i, --ifname         only display interfaces matching a regular "
 	 "expression\n", out);
@@ -223,15 +225,17 @@ main (int argc, char **argv)
 	}
     }
 
-  delay = DELAY_DEFAULT;
+  delay = ifname_debug ? 0 : DELAY_DEFAULT;
   if (optind < argc)
     {
-      delay = strtol_or_err (argv[optind++], "failed to parse argument");
+      if (ifname_debug)
+	usage (stderr);
 
+      delay = strtol_or_err (argv[optind++], "failed to parse argument");
       if (delay < 1)
-        plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
+	plugin_error (STATE_UNKNOWN, 0, "delay must be positive integer");
       else if (DELAY_MAX < delay)
-        plugin_error (STATE_UNKNOWN, 0,
+	plugin_error (STATE_UNKNOWN, 0,
                       "too large delay value (greater than %d)", DELAY_MAX);
     }
 
@@ -242,25 +246,36 @@ main (int argc, char **argv)
   if (ninterfaces < 1)
     status = STATE_UNKNOWN;
 
+#define __printf_tx_rx__(metric) \
+  do                                                 \
+    {                                                \
+      printf (" - %s_tx%s\t ", ifl->ifname, metric); \
+      printf ("%s_rx%s\n", ifl->ifname, metric);     \
+    }                                                \
+  while (0)
+
   if (ifname_debug)
     {
       for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
 	{
+	  printf ("%s\n", ifl->ifname);
 	  if (pd_bytes)
-	    printf ("%s_{tx,rx}byte/s\n", ifl->ifname);
+	    __printf_tx_rx__ ("byte/s");
 	  if (pd_errors)
-	    printf ("%s_{tx,rx}err/s\n", ifl->ifname);
+	    __printf_tx_rx__ ("err/s");
 	  if (pd_drops)
-	    printf ("%s_{tx,rx}drop/s\n", ifl->ifname);
+	    __printf_tx_rx__ ("drop/s");
 	  if (pd_packets)
-	    printf ("%s_{tx,rx}pck/s\n", ifl->ifname);
+	    __printf_tx_rx__ ("pck/s");
 	  if (pd_collisions)
-	    printf ("%s_coll/s\n", ifl->ifname);
+	    printf (" - %s_coll/s\n", ifl->ifname);
 	  if (pd_multicast)
-	    printf ("%s_mcast/s\n", ifl->ifname);
+	    printf (" - %s_mcast/s\n", ifl->ifname);
 	}
       exit (STATE_UNKNOWN);
     }
+
+#undef __printf_tx_rx__
 
   perfdata = open_memstream (&bp, &size);
 

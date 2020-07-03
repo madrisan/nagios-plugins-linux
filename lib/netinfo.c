@@ -318,7 +318,7 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds,
   dbg ("getting network informations...\n");
   iflhead = get_netinfo_snapshot (options, &regex);
 
-  assert (seconds > 0);
+  assert (seconds >= 0);
   sleep (seconds);
 
   dbg ("getting network informations again (after %us)...\n", seconds);
