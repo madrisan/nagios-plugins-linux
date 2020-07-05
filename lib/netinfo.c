@@ -318,69 +318,72 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds,
   dbg ("getting network informations...\n");
   iflhead = get_netinfo_snapshot (options, &regex);
 
-  sleep (seconds);
-
-  dbg ("getting network informations again (after %us)...\n", seconds);
-  iflhead2 = get_netinfo_snapshot (options, &regex);
-
-  *ninterfaces = 0;
-  for (ifl = iflhead, ifl2 = iflhead2; ifl != NULL && ifl2 != NULL;
-       ifl = ifl->next, ifl2 = ifl2->next)
+  if (seconds > 0)
     {
-      if (STRNEQ (ifl->ifname, ifl2->ifname))
-	plugin_error (STATE_UNKNOWN, 0,
-		      "bug in netinfo(), please contact the developers");
+      sleep (seconds);
 
-      dbg ("network interface '%s'\n", ifl->ifname);
+      dbg ("getting network informations again (after %us)...\n", seconds);
+      iflhead2 = get_netinfo_snapshot (options, &regex);
+
+      *ninterfaces = 0;
+      for (ifl = iflhead, ifl2 = iflhead2; ifl != NULL && ifl2 != NULL;
+	   ifl = ifl->next, ifl2 = ifl2->next)
+	{
+	  if (STRNEQ (ifl->ifname, ifl2->ifname))
+	    plugin_error (STATE_UNKNOWN, 0,
+			  "bug in netinfo(), please contact the developers");
+
+	  dbg ("network interface '%s'\n", ifl->ifname);
 
 #define DIV(a, b) ceil (((b) - (a)) / (double)seconds)
-      dbg ("\ttx_packets : %u %u\n", ifl->tx_packets, ifl2->tx_packets);
-      ifl->tx_packets = DIV (ifl->tx_packets, ifl2->tx_packets);
+	  dbg ("\ttx_packets : %u %u\n", ifl->tx_packets, ifl2->tx_packets);
+	  ifl->tx_packets = DIV (ifl->tx_packets, ifl2->tx_packets);
 
-      dbg ("\trx_packets : %u %u\n", ifl->rx_packets, ifl2->rx_packets);
-      ifl->rx_packets = DIV (ifl->rx_packets, ifl2->rx_packets);
+	  dbg ("\trx_packets : %u %u\n", ifl->rx_packets, ifl2->rx_packets);
+	  ifl->rx_packets = DIV (ifl->rx_packets, ifl2->rx_packets);
 
-      dbg ("\ttx_bytes   : %u %u\n", ifl->tx_bytes, ifl2->tx_bytes);
-      ifl->tx_bytes   = DIV (ifl->tx_bytes, ifl2->tx_bytes);
+	  dbg ("\ttx_bytes   : %u %u\n", ifl->tx_bytes, ifl2->tx_bytes);
+	  ifl->tx_bytes   = DIV (ifl->tx_bytes, ifl2->tx_bytes);
 
-      dbg ("\trx_bytes   : %u %u\n", ifl->rx_bytes, ifl2->rx_bytes);
-      ifl->rx_bytes   = DIV (ifl->rx_bytes, ifl2->rx_bytes);
+	  dbg ("\trx_bytes   : %u %u\n", ifl->rx_bytes, ifl2->rx_bytes);
+	  ifl->rx_bytes   = DIV (ifl->rx_bytes, ifl2->rx_bytes);
 
-      dbg ("\ttx_errors  : %u %u\n", ifl->tx_errors, ifl2->tx_errors);
-      ifl->tx_errors  = DIV (ifl->tx_errors, ifl2->tx_errors);
+	  dbg ("\ttx_errors  : %u %u\n", ifl->tx_errors, ifl2->tx_errors);
+	  ifl->tx_errors  = DIV (ifl->tx_errors, ifl2->tx_errors);
 
-      dbg ("\trx_errors  : %u %u\n", ifl->rx_errors, ifl2->rx_errors);
-      ifl->rx_errors  = DIV (ifl->rx_errors, ifl2->rx_errors);
+	  dbg ("\trx_errors  : %u %u\n", ifl->rx_errors, ifl2->rx_errors);
+	  ifl->rx_errors  = DIV (ifl->rx_errors, ifl2->rx_errors);
 
-      dbg ("\ttx_dropped : %u %u\n", ifl->tx_dropped, ifl2->tx_dropped);
-      ifl->tx_dropped = DIV (ifl->tx_dropped, ifl2->tx_dropped);
+	  dbg ("\ttx_dropped : %u %u\n", ifl->tx_dropped, ifl2->tx_dropped);
+	  ifl->tx_dropped = DIV (ifl->tx_dropped, ifl2->tx_dropped);
 
-      dbg ("\trx_dropped : %u %u\n", ifl->rx_dropped, ifl2->rx_dropped);
-      ifl->rx_dropped = DIV (ifl->rx_dropped, ifl2->rx_dropped);
+	  dbg ("\trx_dropped : %u %u\n", ifl->rx_dropped, ifl2->rx_dropped);
+	  ifl->rx_dropped = DIV (ifl->rx_dropped, ifl2->rx_dropped);
 
-      dbg ("\tcollisions : %u %u\n", ifl->collisions, ifl2->collisions);
-      ifl->collisions = DIV (ifl->collisions, ifl2->collisions);
+	  dbg ("\tcollisions : %u %u\n", ifl->collisions, ifl2->collisions);
+	  ifl->collisions = DIV (ifl->collisions, ifl2->collisions);
 
-      dbg ("\tmulticast  : %u %u\n", ifl->multicast, ifl2->multicast);
-      ifl->multicast  = DIV (ifl->multicast, ifl2->multicast);
+	  dbg ("\tmulticast  : %u %u\n", ifl->multicast, ifl2->multicast);
+	  ifl->multicast  = DIV (ifl->multicast, ifl2->multicast);
 #undef DIV
 
-      dbg ("\tlink status: %s %s\n",
-	   ifl->link_up < 0 ? "UNKNOWN" : (ifl->link_up ? "UP" : "DOWN"),
-	   ifl->link_running < 0 ? "UNKNOWN" :
-	     (ifl->link_running ? "RUNNING" : "NOT-RUNNING"));
+	  dbg ("\tlink status: %s %s\n",
+	       ifl->link_up < 0 ? "UNKNOWN" : (ifl->link_up ? "UP" : "DOWN"),
+	       ifl->link_running < 0 ? "UNKNOWN" :
+		 (ifl->link_running ? "RUNNING" : "NOT-RUNNING"));
 
-      if (ifl->speed > 0)
-	dbg ("\tspeed      : %uMbit/s\n", ifl->speed);
+	  if (ifl->speed > 0)
+	    dbg ("\tspeed      : %uMbit/s\n", ifl->speed);
 
-      if (opt_check_link && !(ifl->link_up == 1 && ifl->link_running == 1))
-	plugin_error (STATE_CRITICAL, 0,
-		      "%s matches the given regular expression "
-		      "but is not UP and RUNNING!", ifl->ifname);
-      (*ninterfaces)++;
+	  if (opt_check_link && !(ifl->link_up == 1 && ifl->link_running == 1))
+	    plugin_error (STATE_CRITICAL, 0,
+			  "%s matches the given regular expression "
+			  "but is not UP and RUNNING!", ifl->ifname);
+	  (*ninterfaces)++;
+	}
+
+      freeiflist (iflhead2);
     }
-
-  freeiflist (iflhead2);
 
   /* Free memory allocated to the pattern buffer by regcomp() */
   regfree (&regex);
