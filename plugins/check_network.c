@@ -39,6 +39,7 @@
 #include "progversion.h"
 #include "string-macros.h"
 #include "system.h"
+#include "thresholds.h"
 #include "xalloc.h"
 #include "xasprintf.h"
 #include "xstrton.h"
@@ -104,6 +105,9 @@ usage (FILE * out)
 	 "perfdata\n", out);
   fputs ("  -%, --perc           return percentage metrics if possible\n",
 	 out);
+  fputs ("  -w, --warning COUNTER   warning threshold (for rx_bytes)\n", out);
+  fputs ("  -c, --critical COUNTER   critical threshold (for rx_bytes)\n",
+	 out);
   fprintf (out, "  delay is the delay between the two network snapshots "
 	   "in seconds (default: %dsec)\n", DELAY_DEFAULT);
   fputs (USAGE_NOTE, out);
@@ -113,6 +117,7 @@ usage (FILE * out)
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
   fprintf (out, "  %s --check-link --ifname \"^(enp|eth)\" 5\n", program_name);
+  fprintf (out, "  %s --check-link --ifname ^wlp --warning 645120 5\n", program_name);
   fprintf (out, "  %s --ifname \"^(enp|wlp)\" --ifname-debug -Cdm\n",
 	   program_name);
   fprintf (out, "  %s --perc --ifname \"^(enp|eth)\" 5\n", program_name);
@@ -157,7 +162,7 @@ int
 main (int argc, char **argv)
 {
   int c, i, option_index = 0;
-  nagstatus status = STATE_OK;
+  nagstatus status = STATE_OK, iface_status;
   bool ifname_debug = false,
        pd_bytes = true,
        pd_collisions = true,
@@ -166,16 +171,18 @@ main (int argc, char **argv)
        pd_multicast = true,
        pd_packets = true,
        report_perc = false;
-  char *bp, *ifname_regex = NULL;
+  char *critical = NULL, *warning = NULL,
+       *bp, *ifname_regex = NULL;
   size_t size;
   unsigned int options = 0;
   unsigned long delay;
   FILE *perfdata;
+  thresholds *my_threshold = NULL;
 
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "Cbdei:klmpW%" GETOPT_HELP_VERSION_STRING,
+			   "Cc:bdei:klmpWw:%" GETOPT_HELP_VERSION_STRING,
 			   longopts, &option_index)) != -1)
     {
       switch (c)
@@ -191,6 +198,9 @@ main (int argc, char **argv)
 	  break;
 	case 'C':
 	  pd_collisions = false;
+	  break;
+	case 'c':
+	  critical = optarg;
 	  break;
 	case 'd':
 	  pd_drops = false;
@@ -215,6 +225,9 @@ main (int argc, char **argv)
 	  break;
 	case 'W':
 	  options |= NO_WIRELESS;
+	  break;
+	case 'w':
+	  warning = optarg;
 	  break;
 	case '%':
 	  report_perc = true;
@@ -242,9 +255,6 @@ main (int argc, char **argv)
   unsigned int ninterfaces;
   struct iflist *ifl, *iflhead =
     netinfo (options, ifname_regex, delay, &ninterfaces);
-
-  if (ninterfaces < 1)
-    status = STATE_UNKNOWN;
 
 #define __printf_tx_rx__(metric) \
   do                                                 \
@@ -277,6 +287,10 @@ main (int argc, char **argv)
 
 #undef __printf_tx_rx__
 
+  status = set_thresholds (&my_threshold, warning, critical);
+  if (status == NP_RANGE_UNPARSEABLE)
+    usage (stderr);
+
   perfdata = open_memstream (&bp, &size);
 
   /* performance data format:
@@ -299,6 +313,10 @@ main (int argc, char **argv)
 	  fprintf (perfdata, "%s %s ", perfdata_txbyte, perfdata_rxbyte);
 	  free (perfdata_txbyte);
 	  free (perfdata_rxbyte);
+
+	  iface_status = get_status (ifl->rx_bytes, my_threshold);
+	  if (iface_status > status)
+	    status = iface_status;
 	}
       if (pd_errors)
 	fprintf (perfdata
@@ -325,6 +343,9 @@ main (int argc, char **argv)
 
   fclose (perfdata);
 
+  if (ninterfaces < 1)
+    status = STATE_UNKNOWN;
+
   printf ("%s %s - found %u interface(s) ("
 	  , program_name_short
 	  , state_text (status)
@@ -340,6 +361,7 @@ main (int argc, char **argv)
   printf (") | %s\n", bp);
 
   freeiflist (iflhead);
+  free (my_threshold);
 
   return status;
 }
