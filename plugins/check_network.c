@@ -138,8 +138,10 @@ print_version (void)
   exit (STATE_OK);
 }
 
+/* performance data format:
+ * 'label'=value[UOM];[warn];[crit];[min];[max] */
 static inline char *
-fmt_perfdata_bytes (const char *ifname, const char* label,
+fmt_perfdata_bytes (const char *ifname, const char *label,
 		    unsigned int counter, unsigned long long speed, bool perc)
 {
   char *perfdata;
@@ -162,7 +164,7 @@ int
 main (int argc, char **argv)
 {
   int c, i, option_index = 0;
-  nagstatus status = STATE_OK, iface_status;
+  nagstatus status;
   bool ifname_debug = false,
        pd_bytes = true,
        pd_collisions = true,
@@ -292,13 +294,26 @@ main (int argc, char **argv)
     usage (stderr);
 
   perfdata = open_memstream (&bp, &size);
+  status = STATE_OK;
 
-  /* performance data format:
-   * 'label'=value[UOM];[warn];[crit];[min];[max] */
   for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
     {
       unsigned long long speed =
  	(ifl->speed > 0) ? ifl->speed * 1000*1000/8 : 0;
+
+      /* If the output in percentages is selected and a thresholds has been
+       * set, but the interface is down or its physical speed is not
+       * available, make the plugin exit with an unknown state.
+       * Otherwise the thresholds will be used for percentages and counters
+       * which does not make sense.	*/
+      if (report_perc && (warning || critical) && !(speed > 0))
+	plugin_error (STATE_UNKNOWN, 0,
+		      "metrics of %s cannot be converted into percentages%s"
+		      , ifl->ifname
+		      , (ifl->link_up && ifl->link_running) ?
+			  (0 == speed ?
+			     ": physical speed is not available" : "")
+			  : ": link is not UP/RUNNING");
       if (DUPLEX_HALF == ifl->duplex)
 	speed /= 2;
 
@@ -314,7 +329,7 @@ main (int argc, char **argv)
 	  free (perfdata_txbyte);
 	  free (perfdata_rxbyte);
 
-	  iface_status = get_status (ifl->rx_bytes, my_threshold);
+	  nagstatus iface_status = get_status (ifl->rx_bytes, my_threshold);
 	  if (iface_status > status)
 	    status = iface_status;
 	}
