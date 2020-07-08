@@ -96,8 +96,8 @@ usage (FILE * out)
   fputs (USAGE_VERSION, out);
   fprintf (out, "  delay is the delay between the two network snapshots "
 	   "in seconds (default: %dsec)\n", DELAY_DEFAULT);
-  fputs ("  By default all the counter are reported but it's possible to "
-	 "select a subset:\n", out);
+  fputs ("  By default all the counters are reported in the output but it's "
+	 "possible to select a subset of them:\n", out);
   fputs ("  -b  --no-bytes       omit the rx/tx bytes counter from perfdata\n",
 	 out);
   fputs ("  -C, --no-collisions  omit the collisions counter from perfdata\n",
@@ -111,7 +111,7 @@ usage (FILE * out)
   fputs ("  -p, --no-packets     omit the rx/tx packets counter from "
 	 "perfdata\n", out);
   fputs (USAGE_NOTE, out);
-  fputs ("  The option --ifname supports POSIX Extended Regular Expression "
+  fputs ("  The option --ifname supports the POSIX Extended Regular Expression "
 	 "syntax.\n", out);
   fputs ("  See: https://man7.org/linux/man-pages/man7/regex.7.html\n", out);
   fputs (USAGE_EXAMPLES, out);
