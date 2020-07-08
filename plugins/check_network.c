@@ -87,8 +87,15 @@ usage (FILE * out)
 	 out);
   fputs ("  -l, --no-loopback    skip the loopback interface\n", out);
   fputs ("  -W, --no-wireless    skip the wireless interfaces\n", out);
+  fputs ("  -%, --perc           return percentage metrics if possible\n",
+	 out);
+  fputs ("  -w, --warning COUNTER   warning threshold (for rx_bytes)\n", out);
+  fputs ("  -c, --critical COUNTER   critical threshold (for rx_bytes)\n",
+	 out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
+  fprintf (out, "  delay is the delay between the two network snapshots "
+	   "in seconds (default: %dsec)\n", DELAY_DEFAULT);
   fputs ("  By default all the counter are reported but it's possible to "
 	 "select a subset:\n", out);
   fputs ("  -b  --no-bytes       omit the rx/tx bytes counter from perfdata\n",
@@ -103,13 +110,6 @@ usage (FILE * out)
 	 out);
   fputs ("  -p, --no-packets     omit the rx/tx packets counter from "
 	 "perfdata\n", out);
-  fputs ("  -%, --perc           return percentage metrics if possible\n",
-	 out);
-  fputs ("  -w, --warning COUNTER   warning threshold (for rx_bytes)\n", out);
-  fputs ("  -c, --critical COUNTER   critical threshold (for rx_bytes)\n",
-	 out);
-  fprintf (out, "  delay is the delay between the two network snapshots "
-	   "in seconds (default: %dsec)\n", DELAY_DEFAULT);
   fputs (USAGE_NOTE, out);
   fputs ("  The option --ifname supports POSIX Extended Regular Expression "
 	 "syntax.\n", out);
