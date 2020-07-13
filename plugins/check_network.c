@@ -62,10 +62,22 @@ static struct option const longopts[] = {
   {(char *) "no-packets", no_argument, NULL, 'p'},
   {(char *) "no-wireless", no_argument, NULL, 'W'},
   {(char *) "perc", no_argument, NULL, '%'},
+  {(char *) "rx-only", no_argument, NULL, 'r'},
+  {(char *) "tx-only", no_argument, NULL, 't'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
 };
+
+typedef enum network_check
+{
+  CHECK_BYTES,
+  CHECK_DEFAULT = CHECK_BYTES,
+  CHECK_COLLISIONS,
+  CHECK_DROPPED,
+  CHECK_ERRORS,
+  CHECK_MULTICAST
+} network_check;
 
 static _Noreturn void
 usage (FILE * out)
@@ -89,9 +101,8 @@ usage (FILE * out)
   fputs ("  -W, --no-wireless    skip the wireless interfaces\n", out);
   fputs ("  -%, --perc           return percentage metrics if possible\n",
 	 out);
-  fputs ("  -w, --warning COUNTER   warning threshold (for rx_bytes)\n", out);
-  fputs ("  -c, --critical COUNTER   critical threshold (for rx_bytes)\n",
-	 out);
+  fputs ("  -w, --warning COUNTER   warning threshold\n", out);
+  fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fprintf (out, "  delay is the delay between the two network snapshots "
@@ -110,20 +121,26 @@ usage (FILE * out)
 	 out);
   fputs ("  -p, --no-packets     omit the rx/tx packets counter from "
 	 "perfdata\n", out);
+  fputs ("  -r, --rx-only        consider the received traffic only in "
+	 "the thresholods\n", out);
+  fputs ("  -t, --tx-only        consider the transmitted traffic only in "
+	 "the thresholds\n", out);
   fputs (USAGE_NOTE, out);
   fputs ("  The option --ifname supports the POSIX Extended Regular Expression "
 	 "syntax.\n", out);
   fputs ("  See: https://man7.org/linux/man-pages/man7/regex.7.html\n", out);
+  fputs ("  You cannot select both the options r/rx-only and t/tx-only.\n",
+	 out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
-  fprintf (out, "  %s --check-link --ifname \"^(enp|eth)\" 5\n", program_name);
-  fprintf (out, "  %s --check-link --ifname ^wlp --warning 645120 5\n", program_name);
+  fprintf (out, "  %s --check-link --ifname \"^(enp|eth)\" 15\n", program_name);
+  fprintf (out, "  %s --check-link --ifname ^wlp --warning 645120 15\n",
+	   program_name);
   fprintf (out, "  %s --ifname \"^(enp|wlp)\" --ifname-debug -Cdm\n",
 	   program_name);
-  fprintf (out, "  %s --perc --ifname \"^(enp|eth)\" 5\n", program_name);
-  fprintf (out, "  %s --no-loopback --no-wireless 3\n", program_name);
-  fprintf (out, "  %s --no-loopback -bCdmp 3   "
-	   "# only report tx/rx errors in the perfdata\n", program_name);
+  fprintf (out, "  %s --perc --ifname \"^(enp|eth)\" -w 80%% 15\n",
+	   program_name);
+  fprintf (out, "  %s --no-loopback --no-wireless 15\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -136,6 +153,14 @@ print_version (void)
   fputs (GPLv3_DISCLAIMER, stdout);
 
   exit (STATE_OK);
+}
+
+static inline unsigned int
+get_threshold_metric (unsigned int tx, unsigned int rx,
+		      bool tx_only, bool rx_only)
+{
+  return (tx_only ? 0 : rx)
+	   + (rx_only ? 0 : tx);
 }
 
 /* performance data format:
@@ -172,13 +197,17 @@ main (int argc, char **argv)
        pd_errors = true,
        pd_multicast = true,
        pd_packets = true,
-       report_perc = false;
-  char *critical = NULL, *warning = NULL,
+       report_perc = false,
+       rx_only = false,
+       tx_only = false;
+  char *p = NULL, *plugin_progname,
+       *critical = NULL, *warning = NULL,
        *bp, *ifname_regex = NULL;
   size_t size;
   unsigned int options = 0;
-  unsigned long delay;
+  unsigned long delay, len;
   FILE *perfdata;
+  network_check check = CHECK_DEFAULT;
   thresholds *my_threshold = NULL;
 
   set_program_name (argv[0]);
@@ -225,6 +254,12 @@ main (int argc, char **argv)
 	case 'p':
 	  pd_packets = false;
 	  break;
+	case 'r':
+	  rx_only = true;
+	  break;
+	case 't':
+	  tx_only = true;
+	  break;
 	case 'W':
 	  options |= NO_WIRELESS;
 	  break;
@@ -253,6 +288,47 @@ main (int argc, char **argv)
 	plugin_error (STATE_UNKNOWN, 0,
                       "too large delay value (greater than %d)", DELAY_MAX);
     }
+
+  if (tx_only && rx_only)
+    usage (stderr);
+
+  len = strlen (program_name);
+  if (len > 6 && STRPREFIX (program_name, "check_"))
+    p = (char *) program_name + 6;
+  else
+    plugin_error (STATE_UNKNOWN, 0,
+		  "bug: the plugin does not have a standard name");
+
+  if (STRPREFIX (p, "network_collisions"))
+    {
+      check = CHECK_COLLISIONS;
+      if (!pd_collisions)
+	usage (stderr);
+      plugin_progname = xstrdup ("network collisions");
+    }
+  else if (STRPREFIX (p, "network_dropped"))
+    {
+      check = CHECK_DROPPED;
+      if (!pd_drops)
+	usage (stderr);
+      plugin_progname = xstrdup ("network dropped");
+    }
+  else if (STRPREFIX (p, "network_errors"))
+    {
+      check = CHECK_ERRORS;
+      if (!pd_errors)
+	usage (stderr);
+      plugin_progname = xstrdup ("network errors");
+    }
+  else if (STRPREFIX (p, "network_multicast"))
+    {
+      check = CHECK_MULTICAST;
+      if (!pd_multicast)
+	usage (stderr);
+      plugin_progname = xstrdup ("network multicast");
+    }
+  else
+    plugin_progname = xstrdup ("network");
 
   unsigned int ninterfaces;
   struct iflist *ifl, *iflhead =
@@ -298,8 +374,10 @@ main (int argc, char **argv)
 
   for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
     {
+      unsigned int counter;
       unsigned long long speed =
  	(ifl->speed > 0) ? ifl->speed * 1000*1000/8 : 0;
+      nagstatus iface_status;
 
       /* If the output in percentages is selected and a thresholds has been
        * set, but the interface is down or its physical speed is not
@@ -317,6 +395,32 @@ main (int argc, char **argv)
       if (DUPLEX_HALF == ifl->duplex)
 	speed /= 2;
 
+      switch (check)
+	{
+	default:
+	  counter = get_threshold_metric (ifl->tx_bytes, ifl->rx_bytes,
+					  tx_only, rx_only);
+	  break;
+	case CHECK_COLLISIONS:
+	  counter = ifl->collisions;
+	  break;
+	case CHECK_DROPPED:
+	  counter = get_threshold_metric (ifl->tx_dropped, ifl->rx_dropped,
+					  tx_only, rx_only);
+	  break;
+	case CHECK_ERRORS:
+	  counter = get_threshold_metric (ifl->tx_errors, ifl->rx_errors,
+					  tx_only, rx_only);
+	  break;
+	case CHECK_MULTICAST:
+	  counter = ifl->multicast;
+	  break;
+	}
+
+      iface_status = get_status (counter, my_threshold);
+      if (iface_status > status)
+	status = iface_status;
+
       if (pd_bytes)
 	{
 	  char *perfdata_txbyte =
@@ -328,10 +432,6 @@ main (int argc, char **argv)
 	  fprintf (perfdata, "%s %s ", perfdata_txbyte, perfdata_rxbyte);
 	  free (perfdata_txbyte);
 	  free (perfdata_rxbyte);
-
-	  nagstatus iface_status = get_status (ifl->rx_bytes, my_threshold);
-	  if (iface_status > status)
-	    status = iface_status;
 	}
       if (pd_errors)
 	fprintf (perfdata
@@ -362,7 +462,7 @@ main (int argc, char **argv)
     status = STATE_UNKNOWN;
 
   printf ("%s %s - found %u interface(s) ("
-	  , program_name_short
+	  , plugin_progname
 	  , state_text (status)
 	  , ninterfaces);
   for (ifl = iflhead, i=0; ifl != NULL; ifl = ifl->next, i++)

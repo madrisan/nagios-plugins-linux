@@ -27,6 +27,11 @@ AM_LDFLAGS = $(LIBPROCPS_LIBS)
 LN_S=@LN_S@
 
 check_cpu_programs = check_iowait
+check_network_programs = \
+	check_network_collisions \
+	check_network_dropped    \
+	check_network_errors     \
+	check_network_multicast
 
 libexec_PROGRAMS =        \
 	check_clock       \
@@ -130,11 +135,15 @@ check_temperature_LDADD  = $(LDADD)
 check_uptime_LDADD       = $(LDADD)
 check_users_LDADD        = $(LDADD)
 
-all-local: $(check_cpu_programs)
+all-local: $(check_cpu_programs) $(check_network_programs)
 
 $(check_cpu_programs): check_cpu
 	rm -f $@
 	$(LN_S) -s check_cpu $@
+
+$(check_network_programs): check_network
+	rm -f $@
+	$(LN_S) -s check_network $@
 
 install-exec-hook:
 	cd $(DESTDIR)$(libexecdir) && \
