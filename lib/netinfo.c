@@ -127,8 +127,8 @@ static const struct link_speed
 static const int link_speed_size =
   sizeof (phy_speed_to_str) / sizeof (phy_speed_to_str[0]);
 
-const char* map_speed_value_for_key (const struct link_speed * map,
-				     long phy_speed)
+const char *
+map_speed_value_for_key (const struct link_speed * map, long phy_speed)
 {
   const char* ret = NULL;
   for (size_t i = 0 ; i < link_speed_size && ret == NULL; i++)
@@ -138,48 +138,98 @@ const char* map_speed_value_for_key (const struct link_speed * map,
   return ret ? ret : "unknown!";
 }
 
-/* FIXME: ETHTOOL_GSET is obsolete.
- *        We should switch to ETHTOOL_GLINKSETTINGS instead.	*/
+/* Determines network interface speed from ETHTOOL_GLINKSETTINGS
+ * (requires Linux kernel 4.9+).
+ * In case of failure revert to obsolete ETHTOOL_GSET. */
 
 static int
 check_link_speed (const char *ifname, __u32 *speed, __u8 *duplex)
 {
-  int fd, ret;
-  struct ifreq ifr;
+  int fd, ret = -1;
+  struct ifreq ifr = {};
   struct ethtool_cmd ecmd = {
     .cmd = ETHTOOL_GSET
   };
-
-  *duplex = DUPLEX_UNKNOWN;
-  *speed = 0;	/* SPEED_UNKNOWN */
+#ifdef ETHTOOL_GLINKSETTINGS
+# define ETHTOOL_LINK_MODE_MASK_MAX_KERNEL_NU32  (SCHAR_MAX)
+  struct elinkset {
+    struct ethtool_link_settings req;
+    __u32 link_mode_data[3 * ETHTOOL_LINK_MODE_MASK_MAX_KERNEL_NU32];
+  } elinkset;
+#endif
 
   if ((fd = get_ctl_fd ()) < 0)
     plugin_error (STATE_UNKNOWN, errno, "socket() failed");
 
-  memset (&ifr, 0, sizeof (ifr));
+  *duplex = DUPLEX_UNKNOWN;
+  *speed = 0;	/* SPEED_UNKNOWN */
   STRNCPY_TERMINATED (ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
 
-  ifr.ifr_data = (void *) &ecmd;
-  if ((ret = ioctl (fd, SIOCETHTOOL, &ifr)) == 0)
-    {
-      *duplex = ecmd.duplex;
-      *speed = ecmd.speed;
+#ifdef ETHTOOL_GLINKSETTINGS
 
-      dbg ("%s: duplex %s (%d), speed is %s (%u)\n"
-	   , ifname
-	   , *duplex == _DUP_UNKNOWN ? "invalid" : duplex_table[*duplex]
-	   , *duplex
-	   , map_speed_value_for_key (phy_speed_to_str, *speed)
-	   , *speed);
-      /* normalize the unknown speed values */
-      if (*speed == (uint16_t)(-1) || *speed == (uint32_t)(-1))
-	{
-	  dbg ("%s: normalizing the unknown speed to zero...\n", ifname);
-	  *speed = 0;
-	}
+  /* The interaction user/kernel via the new API requires a small
+   * ETHTOOL_GLINKSETTINGS handshake first to agree on the length
+   * of the link mode bitmaps. If kernel doesn't agree with user,
+   * it returns the bitmap length it is expecting from user as a
+   * negative length (and cmd field is 0). When kernel and user
+   * agree, kernel returns valid info in all fields (ie. link mode
+   * length > 0 and cmd is ETHTOOL_GLINKSETTINGS). Based on
+   * https://github.com/torvalds/linux/commit/3f1ac7a700d039c61d8d8b99f28d605d489a60cf
+   */
+
+  dbg ("ETHTOOL_GLINKSETTINGS is defined\n");
+  memset (&elinkset, 0, sizeof (elinkset));
+  elinkset.req.cmd = ETHTOOL_GLINKSETTINGS;
+  ifr.ifr_data = (void *) &elinkset;
+
+  ret = ioctl (fd, SIOCETHTOOL, &ifr);
+  /* see above: we expect a strictly negative value from kernel. */
+  if (ret >= 0 && (elinkset.req.link_mode_masks_nwords < 0))
+    {
+      elinkset.req.cmd = ETHTOOL_GLINKSETTINGS;
+      elinkset.req.link_mode_masks_nwords = -elinkset.req.link_mode_masks_nwords;
+
+      ret = ioctl (fd, SIOCETHTOOL, &ifr);
+      if (ret < 0 || elinkset.req.link_mode_masks_nwords <= 0
+	  || elinkset.req.cmd != ETHTOOL_GLINKSETTINGS)
+	ret = -ENOTSUP;
     }
+
+#endif
+
+  if (ret < 0)
+    {
+      dbg ("%s: revert to the obsolete ETHTOOL_GSET...\n", ifname);
+      ifr.ifr_data = (void *) &ecmd;
+      if ((ret = ioctl (fd, SIOCETHTOOL, &ifr)) == 0)
+	{
+	  *duplex = ecmd.duplex;
+	  *speed = ecmd.speed;
+	}
+      else
+	dbg ("%s: no link speed associated to this interface\n", ifname);
+    }
+#ifdef ETHTOOL_GLINKSETTINGS
   else
-    dbg ("%s: no link speed associated to this interface\n", ifname);
+    {
+      *duplex = elinkset.req.duplex;
+      *speed = elinkset.req.speed;
+    }
+#endif
+
+  dbg ("%s: duplex %s (%d), speed is %s (%u)\n"
+       , ifname
+       , *duplex == _DUP_UNKNOWN ? "invalid" : duplex_table[*duplex]
+       , *duplex
+       , map_speed_value_for_key (phy_speed_to_str, *speed)
+       , *speed);
+
+  /* normalize the unknown speed values */
+  if (*speed == (uint16_t)(-1) || *speed == (uint32_t)(-1))
+    {
+      dbg ("%s: normalizing the unknown speed to zero...\n", ifname);
+      *speed = 0;
+    }
 
   close (fd);
   return ret;
