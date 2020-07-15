@@ -335,18 +335,24 @@ main (int argc, char **argv)
     netinfo (options, ifname_regex, delay, &ninterfaces);
 
 #define __printf_tx_rx__(metric) \
-  do                                                 \
-    {                                                \
-      printf (" - %s_tx%s\t ", ifl->ifname, metric); \
-      printf ("%s_rx%s\n", ifl->ifname, metric);     \
-    }                                                \
+  do                                                          \
+    {                                                         \
+      fprintf (stdout, " - %s_tx%s\t ", ifl->ifname, metric); \
+      fprintf (stdout, "%s_rx%s\n", ifl->ifname, metric);     \
+    }                                                         \
   while (0)
 
   if (ifname_debug)
     {
       for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
 	{
-	  printf ("%s\n", ifl->ifname);
+	  bool if_up = if_flags_UP (ifl->flags),
+	       if_running = if_flags_RUNNING (ifl->flags);
+	  printf ("%s %s\n"
+		  , ifl->ifname
+		  , if_up && !if_running ? "(NO-CARRIER)"
+					 : if_up ? "" : "(DOWN)");
+
 	  if (pd_bytes)
 	    __printf_tx_rx__ ("byte/s");
 	  if (pd_errors)
@@ -356,9 +362,9 @@ main (int argc, char **argv)
 	  if (pd_packets)
 	    __printf_tx_rx__ ("pck/s");
 	  if (pd_collisions)
-	    printf (" - %s_coll/s\n", ifl->ifname);
+	    fprintf (stdout, " - %s_coll/s\n", ifl->ifname);
 	  if (pd_multicast)
-	    printf (" - %s_mcast/s\n", ifl->ifname);
+	    fprintf (stdout, " - %s_mcast/s\n", ifl->ifname);
 	}
       exit (STATE_UNKNOWN);
     }
@@ -388,7 +394,8 @@ main (int argc, char **argv)
 	plugin_error (STATE_UNKNOWN, 0,
 		      "metrics of %s cannot be converted into percentages%s"
 		      , ifl->ifname
-		      , (ifl->link_up && ifl->link_running) ?
+		      , if_flags_UP (ifl->flags)
+			  &&if_flags_RUNNING (ifl->flags) ?
 			  (0 == speed ?
 			     ": physical speed is not available" : "")
 			  : ": link is not UP/RUNNING");

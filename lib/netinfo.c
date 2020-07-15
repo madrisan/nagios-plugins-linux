@@ -70,21 +70,6 @@ get_ctl_fd (void)
   return -1;
 }
 
-static int
-check_link (int sock, const char *ifname, bool *up, bool *running)
-{
-  struct ifreq ifr;
-
-  STRNCPY_TERMINATED (ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
-  if (ioctl (sock, SIOCGIFFLAGS, &ifr) < 0)
-    return -1;
-
-  *up = (ifr.ifr_flags & IFF_UP);
-  *running = (ifr.ifr_flags & IFF_RUNNING);
-
-  return 0;
-}
-
 static const char *const duplex_table[_DUP_MAX] = {
   [DUPLEX_HALF] = "half",
   [DUPLEX_FULL] = "full"
@@ -127,7 +112,7 @@ static const struct link_speed
 static const int link_speed_size =
   sizeof (phy_speed_to_str) / sizeof (phy_speed_to_str[0]);
 
-const char *
+static const char *
 map_speed_value_for_key (const struct link_speed * map, long phy_speed)
 {
   const char* ret = NULL;
@@ -289,9 +274,10 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
       if (family == AF_INET || family == AF_INET6)
 	continue;
 
+      bool is_loopback = if_flags_LOOPBACK (ifa->ifa_flags);
       bool is_wireless = link_wireless (ifa->ifa_name);
       bool skip_interface =
-	((opt_ignore_loopback && (ifa->ifa_flags & IFF_LOOPBACK))
+	((is_loopback && opt_ignore_loopback)
 	 || (is_wireless && opt_ignore_wireless)
 	 || (regexec (iface_regex, ifa->ifa_name, (size_t) 0, NULL, 0)));
       if (skip_interface)
@@ -305,6 +291,7 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 	  struct rtnl_link_stats *stats = ifa->ifa_data;
 
 	  ifl = xmalloc (sizeof (struct iflist));
+	  ifl->flags      = ifa->ifa_flags;
 	  ifl->ifname     = xstrdup (ifa->ifa_name);
 	  ifl->tx_packets = stats->tx_packets;
 	  ifl->rx_packets = stats->rx_packets;
@@ -321,15 +308,6 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 	{
 	  dbg ("skipping unknown interface %s\n", ifa->ifa_name);
 	  continue;
-	}
-
-      bool up, running;
-      if ((check_link (sock, ifa->ifa_name, &up, &running) < 0))
-	ifl->link_up = ifl->link_running = -1;
-      else
-	{
-	  ifl->link_up = up;
-	  ifl->link_running = running;
 	}
 
       check_link_speed (ifa->ifa_name, &(ifl->speed), &(ifl->duplex));
@@ -385,6 +363,9 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds,
 
 	  dbg ("network interface '%s'\n", ifl->ifname);
 
+	  bool if_up = if_flags_UP (ifl->flags),
+	       if_running = if_flags_RUNNING (ifl->flags);
+
 #define DIV(a, b) ceil (((b) - (a)) / (double)seconds)
 	  dbg ("\ttx_packets : %u %u\n", ifl->tx_packets, ifl2->tx_packets);
 	  ifl->tx_packets = DIV (ifl->tx_packets, ifl2->tx_packets);
@@ -417,15 +398,13 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds,
 	  ifl->multicast  = DIV (ifl->multicast, ifl2->multicast);
 #undef DIV
 
-	  dbg ("\tlink status: %s %s\n",
-	       ifl->link_up < 0 ? "UNKNOWN" : (ifl->link_up ? "UP" : "DOWN"),
-	       ifl->link_running < 0 ? "UNKNOWN" :
-		 (ifl->link_running ? "RUNNING" : "NOT-RUNNING"));
+	  dbg ("\tlink UP: %s\n", if_up ? "true" : "false");
+	  dbg ("\tlink RUNNING: %s\n", if_running ? "true" : "false");
 
 	  if (ifl->speed > 0)
 	    dbg ("\tspeed      : %uMbit/s\n", ifl->speed);
 
-	  if (opt_check_link && !(ifl->link_up == 1 && ifl->link_running == 1))
+	  if (opt_check_link && !(if_up && if_running))
 	    plugin_error (STATE_CRITICAL, 0,
 			  "%s matches the given regular expression "
 			  "but is not UP and RUNNING!", ifl->ifname);
@@ -454,3 +433,12 @@ freeiflist (struct iflist *iflhead)
       ifl = iflnext;
     }
 }
+
+/* helper functions for parsing interface flags */
+#define ifa_flags_parser(arg) \
+bool if_flags_ ## arg (unsigned int flags) \
+  { return flags & IFF_ ## arg; }
+
+ifa_flags_parser (LOOPBACK);
+ifa_flags_parser (RUNNING);
+ifa_flags_parser (UP);
