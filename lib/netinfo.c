@@ -291,7 +291,7 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 
       bool is_wireless = link_wireless (ifa->ifa_name);
       bool skip_interface =
-	((opt_ignore_loopback && STREQ ("lo", ifa->ifa_name))
+	((opt_ignore_loopback && (ifa->ifa_flags & IFF_LOOPBACK))
 	 || (is_wireless && opt_ignore_wireless)
 	 || (regexec (iface_regex, ifa->ifa_name, (size_t) 0, NULL, 0)));
       if (skip_interface)
