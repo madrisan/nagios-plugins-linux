@@ -48,8 +48,7 @@ extern "C"
     unsigned int tx_dropped;
     unsigned int rx_dropped;
     unsigned int collisions;
-    int link_up;
-    int link_running;
+    unsigned int flags;
     unsigned int multicast;
     __u32 speed;	/* the link speed in Mbps */
     __u8 duplex;	/* the duplex as defined in <linux/ethtool.h> */
@@ -59,6 +58,11 @@ extern "C"
   struct iflist *netinfo (unsigned int options, const char *ifname_regex,
 			  unsigned int seconds, unsigned int *ninterfaces);
   void freeiflist (struct iflist *iflhead);
+
+  /* helper functions for parsing and priting interface flags */
+  bool if_flags_LOOPBACK (unsigned int flags);
+  bool if_flags_RUNNING (unsigned int flags);
+  bool if_flags_UP (unsigned int flags);
 
 #ifdef __cplusplus
 }
