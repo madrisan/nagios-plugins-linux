@@ -33,6 +33,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "logging.h"
 #include "messages.h"
 #include "netinfo.h"
 #include "progname.h"
@@ -159,12 +160,23 @@ static inline unsigned int
 get_threshold_metric (unsigned int tx, unsigned int rx,
 		      bool tx_only, bool rx_only)
 {
+  dbg ("call to get_threshold_metric "
+       "with tx:%u rx:%u, tx_only:%s, rx_only:%s\n"
+       , tx, rx
+       , tx_only ? "true" : "false"
+       , rx_only ? "true" : "false");
   return (tx_only ? 0 : rx)
 	   + (rx_only ? 0 : tx);
 }
 
 /* performance data format:
  * 'label'=value[UOM];[warn];[crit];[min];[max] */
+static inline double
+ratio_over_speed (unsigned int counter, unsigned long long speed)
+{
+  return (double)(100.0 / speed) * counter;
+}
+
 static inline char *
 fmt_perfdata_bytes (const char *ifname, const char *label,
 		    unsigned int counter, unsigned long long speed, bool perc)
@@ -173,7 +185,7 @@ fmt_perfdata_bytes (const char *ifname, const char *label,
 
   if (perc && (speed > 0))
     {
-      float counter_perc = (100.0 / speed) * counter;
+      double counter_perc = ratio_over_speed (counter, speed);
       perfdata =
 	xasprintf ("%s_%s/s=%.2f%%;;;0;100.0", ifname, label, counter_perc);
     }
@@ -380,7 +392,7 @@ main (int argc, char **argv)
 
   for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
     {
-      unsigned int counter;
+      double counter;
       unsigned long long speed =
  	(ifl->speed > 0) ? ifl->speed * 1000*1000/8 : 0;
       nagstatus iface_status;
@@ -407,6 +419,8 @@ main (int argc, char **argv)
 	default:
 	  counter = get_threshold_metric (ifl->tx_bytes, ifl->rx_bytes,
 					  tx_only, rx_only);
+	  if (report_perc && speed > 0)
+	    counter = ratio_over_speed (counter, speed);
 	  break;
 	case CHECK_COLLISIONS:
 	  counter = ifl->collisions;
@@ -423,6 +437,10 @@ main (int argc, char **argv)
 	  counter = ifl->multicast;
 	  break;
 	}
+      dbg ("threshold counter: %g with w:%s c:%s\n"
+	   , counter
+	   , warning ? warning : "unset"
+	   , critical ? critical : "unset");
 
       iface_status = get_status (counter, my_threshold);
       if (iface_status > status)
