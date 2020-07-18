@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* mountlist.h -- a library for getting informations about filesystems
 
    This program is free software: you can redistribute it and/or modify

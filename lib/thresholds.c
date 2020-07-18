@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPL
  * Copyright (c) 2006 Nagios Plugins Development Team

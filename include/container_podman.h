@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* container_podman.h -- a library for checking Podman containes via varlink
 
    This program is free software: you can redistribute it and/or modify

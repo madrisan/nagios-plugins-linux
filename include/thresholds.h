@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* thresholds.h -- nagios thresholds
 
    This program is free software: you can redistribute it and/or modify
