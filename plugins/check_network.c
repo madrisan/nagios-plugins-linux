@@ -347,12 +347,16 @@ main (int argc, char **argv)
   struct iflist *ifl, *iflhead =
     netinfo (options, ifname_regex, delay, &ninterfaces);
 
-#define __printf_tx_rx__(metric) \
-  do                                                          \
-    {                                                         \
-      fprintf (stdout, " - %s_tx%s\t ", ifl->ifname, metric); \
-      fprintf (stdout, "%s_rx%s\n", ifl->ifname, metric);     \
-    }                                                         \
+#define __printf_tx_rx__(metric, tx_only, rx_only)           \
+  do                                                         \
+    {                                                        \
+      fprintf (stdout, " - ");                               \
+      if (!rx_only)                                          \
+	fprintf (stdout, "%s_tx%s\t ", ifl->ifname, metric); \
+      if (!tx_only)                                          \
+	fprintf (stdout, "%s_rx%s", ifl->ifname, metric);    \
+      fprintf (stdout, "\n");                                \
+    }                                                        \
   while (0)
 
   if (ifname_debug)
@@ -372,13 +376,13 @@ main (int argc, char **argv)
 		  , ifspeed ? ifspeed : "");
 
 	  if (pd_bytes)
-	    __printf_tx_rx__ ("byte/s");
+	    __printf_tx_rx__ ("byte/s", tx_only, rx_only);
 	  if (pd_errors)
-	    __printf_tx_rx__ ("err/s");
+	    __printf_tx_rx__ ("err/s", tx_only, rx_only);
 	  if (pd_drops)
-	    __printf_tx_rx__ ("drop/s");
+	    __printf_tx_rx__ ("drop/s", tx_only, rx_only);
 	  if (pd_packets)
-	    __printf_tx_rx__ ("pck/s");
+	    __printf_tx_rx__ ("pck/s", tx_only, rx_only);
 	  if (pd_collisions)
 	    fprintf (stdout, " - %s_coll/s\n", ifl->ifname);
 	  if (pd_multicast)
