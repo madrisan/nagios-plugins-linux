@@ -361,10 +361,15 @@ main (int argc, char **argv)
 	{
 	  bool if_up = if_flags_UP (ifl->flags),
 	       if_running = if_flags_RUNNING (ifl->flags);
-	  printf ("%s %s\n"
+	  char *ifspeed = NULL;
+
+	  if (ifl->speed > 0)
+	    ifspeed = xasprintf (" link-speed:%uMbps", ifl->speed);
+	  printf ("%s%s%s\n"
 		  , ifl->ifname
-		  , if_up && !if_running ? "(NO-CARRIER)"
-					 : if_up ? "" : "(DOWN)");
+		  , if_up && !if_running ? " (NO-CARRIER)"
+					 : if_up ? "" : " (DOWN)"
+		  , ifspeed ? ifspeed : "");
 
 	  if (pd_bytes)
 	    __printf_tx_rx__ ("byte/s");
