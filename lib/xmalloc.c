@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* xmalloc.c -- malloc with out of memory checking
  *
  * Copyright (C) 1990-2000, 2002-2006, 2008-2012 Free Software Foundation, Inc.

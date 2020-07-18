@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* processes.h -- get informations about running processes
 
    This program is free software: you can redistribute it and/or modify

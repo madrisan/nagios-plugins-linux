@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* xasprintf.h -- asprintf with out-of-memory checking.
 
    This program is free software: you can redistribute it and/or modify

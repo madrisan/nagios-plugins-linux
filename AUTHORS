@@ -5,7 +5,8 @@ External libraries:
    Jsmn (pronounced like 'jasmine'), a world fastest JSON parser/tokenizer
      * Author: Serge Zaitsev
      * Git repository: https://github.com/zserge/jsmn
-     * Files: include/json.h
+     * Files: include/jsmn.h
+     * SPDX-License-Identifier: MIT
 
 Contributors:
    flexdev - https://github.com/flexdev
@@ -16,33 +17,33 @@ Contributors:
 Some code and coding styles/ideas belong to the following open source projects:
 
  * cpufrequtils    https://www.kernel.org/pub/linux/utils/kernel/cpufreq/
-                   License: GPLv2
+                   SPDX-License-Identifier: GPL-2.0-only
 
  * gnulib          http://git.savannah.gnu.org/gitweb/?p=gnulib.git
-                   License: GPLv2
+                   SPDX-License-Identifier: GPL-3.0-or-later / LGPL-3.0-or-later
 
  * kmod            http://git.kernel.org/cgit/utils/kernel/kmod/kmod.git
-                   License: GPLv2
+                   SPDX-License-Identifier: GPL-2.0-only
 
  * libabc          https://git.kernel.org/cgit/linux/kernel/git/kay/libabc.git
-                   License: LGPLv2 (with an unrestricted usage clause)
+                   SPDX-License-Identifier: GPL-2.0-only (with an unrestricted usage clause)
 
  * libvirt         http://libvirt.org/
-                   License: GPLv2, LGPLv2
+                   SPDX-License-Identifier: GPL-2.1-only / LGPL-2.1-only
 
  * nagios plugins  https://github.com/nagios-plugins/nagios-plugins
-                   License: GPLv3
+                   SPDX-License-Identifier: GPL-3.0-or-later
 
- * procps          https://gitorious.org/procps
-                   License: GPLv2, LGPLv2 (libprocps)
+ * procps          https://gitlab.com/procps-ng/procps/
+                   SPDX-License-Identifier: GPL-2.0-only / LGPL-2.0-only (libprocps)
 
  * util-linux      https://github.com/karelzak/util-linux
-                   License: GPLv2
+                   SPDX-License-Identifier: GPL-2.0-only
 
  * pcp             https://github.com/performancecopilot/pcp
-                   License: LGPLv2.1+
+                   SPDX-License-Identifier: LGPL-2.1-or-later
 
 and also to Mickael Kerrisk of "The Linux Programming Interface":
 
  * tlpi            http://man7.org/tlpi/code/
-                   License: GNU Affero GPLv3
+                   SPDX-License-Identifier: AGPL-3.0

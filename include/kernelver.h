@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /*  kernelver.h -- get the version of a running Linux kernel
 
     This program is free software: you can redistribute it and/or modify

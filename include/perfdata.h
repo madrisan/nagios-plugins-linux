@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* perfdata.h -- a library for managing the Nagios perfdata
 
    This program is free software: you can redistribute it and/or modify
