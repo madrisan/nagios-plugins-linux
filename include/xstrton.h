@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* xstrton.h -- string to double and long conversion with error checking
 
    This program is free software: you can redistribute it and/or modify

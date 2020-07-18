@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* testutils.h -- a simple framework for unit testing
 
    This program is free software: you can redistribute it and/or modify

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* progname.h -- a library for setting the name of each plugin module
 
    This program is free software: you can redistribute it and/or modify

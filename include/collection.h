@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /*  collection.h -- dictionary for counting hashable objects (strings)
 
     This program is free software: you can redistribute it and/or modify

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* container_docker.h -- a library for checking sysfs for Docker exposed metrics
 
    This program is free software: you can redistribute it and/or modify

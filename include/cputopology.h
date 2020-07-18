@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* cputopology.h -- a library for checking the CPU topology
 
    This program is free software: you can redistribute it and/or modify

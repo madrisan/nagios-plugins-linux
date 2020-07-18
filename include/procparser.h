@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* procparser.h -- a parser for /proc files, /proc/meminfo, and /proc/vmstat
 
    This program is free software: you can redistribute it and/or modify
