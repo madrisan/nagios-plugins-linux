@@ -133,7 +133,7 @@ tsuptime_LDADD = $(LDADDS)
 tstemperature_SOURCES = $(test_utils) tstemperature.c
 tstemperature_LDADD = $(LDADDS)
 
-tstestutils_SOURCES = $(test_utils) tststestutils.c
+tstestutils_SOURCES = $(test_utils) tstestutils.c
 tstestutils_LDADD = $(LDADDS)
 
 tslib_uname_la_SOURCES = tslib_uname.c
