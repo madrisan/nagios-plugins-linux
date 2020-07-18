@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* getenv.h -- this header file just provides an alias for getenv_secure ()
 
    This program is free software: you can redistribute it and/or modify

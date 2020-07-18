@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* sysfsparser -- get informations from sysfs
 
    This program is free software: you can redistribute it and/or modify

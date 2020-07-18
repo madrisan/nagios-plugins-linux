@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* tcpinfo -- library for getting TCP network and socket informations
 
    This program is free software: you can redistribute it and/or modify

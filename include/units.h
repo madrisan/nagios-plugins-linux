@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* units.h -- a library for converting between memory units
 
    This program is free software: you can redistribute it and/or modify

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* json_helpers.h -- Helper function for parsing data in JSON format
 
    This program is free software: you can redistribute it and/or modify

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* netinfo.h -- a library foe getting network interfaces statistics
 
    This program is free software: you can redistribute it and/or modify

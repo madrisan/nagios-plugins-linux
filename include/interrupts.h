@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* interrupts.h -- a library for checking the system interrupts
 
    This program is free software: you can redistribute it and/or modify

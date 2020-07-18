@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* system.h -- system and compiler specific stuff
 
    This program is free software: you can redistribute it and/or modify

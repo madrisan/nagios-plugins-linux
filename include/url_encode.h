@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /*  url_encode.h -- encode a string representing an URL
 
     This program is free software: you can redistribute it and/or modify
