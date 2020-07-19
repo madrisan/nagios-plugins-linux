@@ -52,24 +52,7 @@
 #include "netinfo.h"
 #include "system.h"
 #include "xalloc.h"
-
-static int
-get_ctl_fd (void)
-{
-  int fd;
-  int s_errno;
-
-  if ((fd = socket (PF_INET, SOCK_DGRAM, 0)) >= 0)
-    return fd;
-  s_errno = errno;
-  if ((fd = socket (PF_PACKET, SOCK_DGRAM, 0)) >= 0)
-    return fd;
-  if ((fd = socket (PF_INET6, SOCK_DGRAM, 0)) >= 0)
-    return fd;
-
-  errno = s_errno;
-  return -1;
-}
+#include "xasprintf.h"
 
 static const char *const duplex_table[_DUP_MAX] = {
   [DUPLEX_HALF] = "half",
@@ -112,6 +95,24 @@ static const struct link_speed
 };
 static const int link_speed_size =
   sizeof (phy_speed_to_str) / sizeof (phy_speed_to_str[0]);
+
+static int
+get_ctl_fd (void)
+{
+  int fd;
+  int s_errno;
+
+  if ((fd = socket (PF_INET, SOCK_DGRAM, 0)) >= 0)
+    return fd;
+  s_errno = errno;
+  if ((fd = socket (PF_PACKET, SOCK_DGRAM, 0)) >= 0)
+    return fd;
+  if ((fd = socket (PF_INET6, SOCK_DGRAM, 0)) >= 0)
+    return fd;
+
+  errno = s_errno;
+  return -1;
+}
 
 static const char *
 map_speed_value_for_key (const struct link_speed * map, long phy_speed)
@@ -419,6 +420,60 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds,
   regfree (&regex);
 
   return iflhead;
+}
+
+void print_ifname_debug (struct iflist *iflhead, unsigned int options)
+{
+  bool pd_bytes      = (options & NO_BYTES) != NO_BYTES,
+       pd_collisions = (options & NO_COLLISIONS) != NO_COLLISIONS,
+       pd_drops      = (options & NO_DROPS) != NO_DROPS,
+       pd_errors     = (options & NO_ERRORS) != NO_ERRORS,
+       pd_multicast  = (options & NO_MULTICAST) != NO_MULTICAST,
+       pd_packets    = (options & NO_PACKETS) != NO_PACKETS,
+       rx_only       = options & RX_ONLY,
+       tx_only       = options & TX_ONLY;
+  struct iflist *ifl;
+
+#define __printf_tx_rx__(metric, tx_only, rx_only)           \
+  do                                                         \
+    {                                                        \
+      fprintf (stdout, " - ");                               \
+      if (!rx_only)                                          \
+        fprintf (stdout, "%s_tx%s\t ", ifl->ifname, metric); \
+      if (!tx_only)                                          \
+        fprintf (stdout, "%s_rx%s", ifl->ifname, metric);    \
+      fprintf (stdout, "\n");                                \
+    }                                                        \
+  while (0)
+
+  for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
+    {
+      bool if_up = if_flags_UP (ifl->flags),
+	   if_running = if_flags_RUNNING (ifl->flags);
+      char *ifspeed = NULL;
+
+      if (ifl->speed > 0)
+	ifspeed = xasprintf (" link-speed:%uMbps", ifl->speed);
+      printf ("%s%s%s\n"
+	      , ifl->ifname
+	      , if_up && !if_running ? " (NO-CARRIER)"
+				     : if_up ? "" : " (DOWN)"
+	      , ifspeed ? ifspeed : "");
+
+      if (pd_bytes)
+	__printf_tx_rx__ ("byte/s", tx_only, rx_only);
+      if (pd_errors)
+	__printf_tx_rx__ ("err/s", tx_only, rx_only);
+      if (pd_drops)
+	__printf_tx_rx__ ("drop/s", tx_only, rx_only);
+      if (pd_packets)
+	__printf_tx_rx__ ("pck/s", tx_only, rx_only);
+      if (pd_collisions)
+	fprintf (stdout, " - %s_coll/s\n", ifl->ifname);
+      if (pd_multicast)
+	fprintf (stdout, " - %s_mcast/s\n", ifl->ifname);
+    }
+#undef __printf_tx_rx__
 }
 
 void
