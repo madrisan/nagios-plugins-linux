@@ -25,9 +25,21 @@ extern "C"
 {
 #endif
 
-#define CHECK_LINK	(1 << 0)
-#define NO_LOOPBACK	(1 << 1)
-#define NO_WIRELESS	(1 << 2)
+  enum
+  {
+    /* command-line options */
+    CHECK_LINK		= (1 << 0),
+    NO_LOOPBACK		= (1 << 1),
+    NO_WIRELESS		= (1 << 2),
+    NO_BYTES		= (1 << 3),
+    NO_COLLISIONS	= (1 << 4),
+    NO_DROPS		= (1 << 4),
+    NO_ERRORS		= (1 << 5),
+    NO_MULTICAST	= (1 << 6),
+    NO_PACKETS		= (1 << 7),
+    RX_ONLY		= (1 << 8),
+    TX_ONLY		= (1 << 9)
+  };
 
   enum duplex
   {
@@ -58,6 +70,7 @@ extern "C"
 
   struct iflist *netinfo (unsigned int options, const char *ifname_regex,
 			  unsigned int seconds, unsigned int *ninterfaces);
+  void print_ifname_debug (struct iflist *iflhead, unsigned int options);
   void freeiflist (struct iflist *iflhead);
 
   /* helper functions for parsing and priting interface flags */

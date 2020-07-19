@@ -238,18 +238,22 @@ main (int argc, char **argv)
 	    ifname_debug = true;
 	  break;
 	case 'b':
+	  options |= NO_BYTES;
 	  pd_bytes = false;
 	  break;
 	case 'C':
+	  options |= NO_COLLISIONS;
 	  pd_collisions = false;
 	  break;
 	case 'c':
 	  critical = optarg;
 	  break;
 	case 'd':
+	  options |= NO_DROPS;
 	  pd_drops = false;
 	  break;
 	case 'e':
+	  options |= NO_ERRORS;
 	  pd_errors = false;
 	  break;
 	case 'i':
@@ -262,15 +266,19 @@ main (int argc, char **argv)
 	  options |= NO_LOOPBACK;
 	  break;
 	case 'm':
+	  options |= NO_MULTICAST;
 	  pd_multicast = false;
 	  break;
 	case 'p':
+	  options |= NO_PACKETS;
 	  pd_packets = false;
 	  break;
 	case 'r':
+	  options |= RX_ONLY;
 	  rx_only = true;
 	  break;
 	case 't':
+	  options |= TX_ONLY;
 	  tx_only = true;
 	  break;
 	case 'W':
@@ -347,51 +355,12 @@ main (int argc, char **argv)
   struct iflist *ifl, *iflhead =
     netinfo (options, ifname_regex, delay, &ninterfaces);
 
-#define __printf_tx_rx__(metric, tx_only, rx_only)           \
-  do                                                         \
-    {                                                        \
-      fprintf (stdout, " - ");                               \
-      if (!rx_only)                                          \
-	fprintf (stdout, "%s_tx%s\t ", ifl->ifname, metric); \
-      if (!tx_only)                                          \
-	fprintf (stdout, "%s_rx%s", ifl->ifname, metric);    \
-      fprintf (stdout, "\n");                                \
-    }                                                        \
-  while (0)
-
+  /* just print the list of matching interfaces and exit */
   if (ifname_debug)
     {
-      for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
-	{
-	  bool if_up = if_flags_UP (ifl->flags),
-	       if_running = if_flags_RUNNING (ifl->flags);
-	  char *ifspeed = NULL;
-
-	  if (ifl->speed > 0)
-	    ifspeed = xasprintf (" link-speed:%uMbps", ifl->speed);
-	  printf ("%s%s%s\n"
-		  , ifl->ifname
-		  , if_up && !if_running ? " (NO-CARRIER)"
-					 : if_up ? "" : " (DOWN)"
-		  , ifspeed ? ifspeed : "");
-
-	  if (pd_bytes)
-	    __printf_tx_rx__ ("byte/s", tx_only, rx_only);
-	  if (pd_errors)
-	    __printf_tx_rx__ ("err/s", tx_only, rx_only);
-	  if (pd_drops)
-	    __printf_tx_rx__ ("drop/s", tx_only, rx_only);
-	  if (pd_packets)
-	    __printf_tx_rx__ ("pck/s", tx_only, rx_only);
-	  if (pd_collisions)
-	    fprintf (stdout, " - %s_coll/s\n", ifl->ifname);
-	  if (pd_multicast)
-	    fprintf (stdout, " - %s_mcast/s\n", ifl->ifname);
-	}
+      print_ifname_debug (iflhead, options);
       exit (STATE_UNKNOWN);
     }
-
-#undef __printf_tx_rx__
 
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
