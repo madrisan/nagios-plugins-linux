@@ -17,6 +17,7 @@
 #ifndef _NETINFO_H
 #define _NETINFO_H
 
+#include <stdint.h>
 #include <sys/types.h>
 #include "system.h"
 
@@ -49,27 +50,31 @@ extern "C"
     _DUP_UNKNOWN = DUPLEX_UNKNOWN
   };
 
-  typedef struct iflist
-  {
-    char *ifname;
-    unsigned int tx_packets;
-    unsigned int rx_packets;
-    unsigned int tx_bytes;
-    unsigned int rx_bytes;
-    unsigned int tx_errors;
-    unsigned int rx_errors;
-    unsigned int tx_dropped;
-    unsigned int rx_dropped;
-    unsigned int collisions;
-    unsigned int flags;
-    unsigned int multicast;
-    __u32 speed;	/* the link speed in Mbps */
-    __u8 duplex;	/* the duplex as defined in <linux/ethtool.h> */
-    struct iflist *next;
-  } iflist_t;
+  struct iflist;
 
   struct iflist *netinfo (unsigned int options, const char *ifname_regex,
 			  unsigned int seconds, unsigned int *ninterfaces);
+  struct iflist *iflist_get_next (struct iflist *ifentry);
+#define iflist_foreach(list_entry, list) \
+	for (list_entry = list; list_entry != NULL; \
+	     list_entry = iflist_get_next(list_entry))
+
+  /* Accessing the values from struct iflist */
+  const char *iflist_get_ifname (struct iflist *ifentry);
+  uint8_t iflist_get_duplex (struct iflist *ifentry);
+  uint32_t iflist_get_speed (struct iflist *ifentry);
+  unsigned int iflist_get_tx_packets (struct iflist *ifentry);
+  unsigned int iflist_get_rx_packets (struct iflist *ifentry);
+  unsigned int iflist_get_tx_bytes (struct iflist *ifentry);
+  unsigned int iflist_get_rx_bytes (struct iflist *ifentry);
+  unsigned int iflist_get_tx_errors (struct iflist *ifentry);
+  unsigned int iflist_get_rx_errors (struct iflist *ifentry);
+  unsigned int iflist_get_tx_dropped (struct iflist *ifentry);
+  unsigned int iflist_get_rx_dropped (struct iflist *ifentry);
+  unsigned int iflist_get_collisions (struct iflist *ifentry);
+  unsigned int iflist_get_flags (struct iflist *ifentry);
+  unsigned int iflist_get_multicast (struct iflist *ifentry);
+
   void print_ifname_debug (struct iflist *iflhead, unsigned int options);
   void freeiflist (struct iflist *iflhead);
 

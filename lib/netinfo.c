@@ -25,6 +25,7 @@
 #include <getopt.h>
 #include <ifaddrs.h>
 #include <regex.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,6 +54,25 @@
 #include "system.h"
 #include "xalloc.h"
 #include "xasprintf.h"
+
+typedef struct iflist
+{
+  char *ifname;
+  unsigned int tx_packets;
+  unsigned int rx_packets;
+  unsigned int tx_bytes;
+  unsigned int rx_bytes;
+  unsigned int tx_errors;
+  unsigned int rx_errors;
+  unsigned int tx_dropped;
+  unsigned int rx_dropped;
+  unsigned int collisions;
+  unsigned int flags;
+  unsigned int multicast;
+  uint32_t speed;        /* the link speed in Mbps */
+  uint8_t duplex;        /* the duplex as defined in <linux/ethtool.h> */
+  struct iflist *next;
+} iflist_t;
 
 static const char *const duplex_table[_DUP_MAX] = {
   [DUPLEX_HALF] = "half",
@@ -130,7 +150,7 @@ map_speed_value_for_key (const struct link_speed * map, long phy_speed)
  * In case of failure revert to obsolete ETHTOOL_GSET. */
 
 static int
-check_link_speed (const char *ifname, __u32 *speed, __u8 *duplex)
+check_link_speed (const char *ifname, uint32_t *speed, uint8_t *duplex)
 {
   int fd, ret = -1;
   struct ifreq ifr = {};
@@ -141,7 +161,7 @@ check_link_speed (const char *ifname, __u32 *speed, __u8 *duplex)
 # define ETHTOOL_LINK_MODE_MASK_MAX_KERNEL_NU32  (SCHAR_MAX)
   struct elinkset {
     struct ethtool_link_settings req;
-    __u32 link_mode_data[3 * ETHTOOL_LINK_MODE_MASK_MAX_KERNEL_NU32];
+    uint32_t link_mode_data[3 * ETHTOOL_LINK_MODE_MASK_MAX_KERNEL_NU32];
   } elinkset;
 #endif
 
@@ -422,6 +442,51 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds,
   return iflhead;
 }
 
+struct iflist *
+iflist_get_next (struct iflist *ifentry)
+{
+  return ifentry->next;
+}
+
+/* Accessing the values from struct iflist */
+
+const char *
+iflist_get_ifname (struct iflist *ifentry)
+{
+  return ifentry->ifname;
+}
+
+uint8_t
+iflist_get_duplex (struct iflist *ifentry)
+{
+  return ifentry->duplex;
+}
+
+uint32_t
+iflist_get_speed (struct iflist *ifentry)
+{
+  return ifentry->speed;
+}
+
+#define __iflist_get__(arg) \
+unsigned int iflist_get_ ## arg (struct iflist *ifentry) \
+  { return ifentry->arg; }
+
+__iflist_get__(collisions)
+__iflist_get__(flags)
+__iflist_get__(multicast)
+__iflist_get__(tx_packets)
+__iflist_get__(rx_packets)
+__iflist_get__(tx_bytes)
+__iflist_get__(rx_bytes)
+__iflist_get__(tx_errors)
+__iflist_get__(rx_errors)
+__iflist_get__(tx_dropped)
+__iflist_get__(rx_dropped)
+#undef __iflist_get__
+
+/* Print the list of network interfaces (for debug) */
+
 void print_ifname_debug (struct iflist *iflhead, unsigned int options)
 {
   bool pd_bytes      = (options & NO_BYTES) != NO_BYTES,
@@ -450,15 +515,19 @@ void print_ifname_debug (struct iflist *iflhead, unsigned int options)
     {
       bool if_up = if_flags_UP (ifl->flags),
 	   if_running = if_flags_RUNNING (ifl->flags);
-      char *ifspeed = NULL;
+      char *ifduplex = NULL,
+	   *ifspeed = NULL;
 
       if (ifl->speed > 0)
 	ifspeed = xasprintf (" link-speed:%uMbps", ifl->speed);
-      printf ("%s%s%s\n"
+      if (ifl->duplex != _DUP_UNKNOWN)
+	ifduplex = xasprintf (" %s-duplex", duplex_table[ifl->duplex]);
+      printf ("%s%s%s%s\n"
 	      , ifl->ifname
 	      , if_up && !if_running ? " (NO-CARRIER)"
 				     : if_up ? "" : " (DOWN)"
-	      , ifspeed ? ifspeed : "");
+	      , ifspeed ? ifspeed : ""
+	      , ifduplex ? ifduplex : "");
 
       if (pd_bytes)
 	__printf_tx_rx__ ("byte/s", tx_only, rx_only);
