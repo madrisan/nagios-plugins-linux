@@ -201,7 +201,7 @@ fmt_perfdata_bytes (const char *ifname, const char *label,
 int
 main (int argc, char **argv)
 {
-  int c, i, option_index = 0;
+  int c, option_index = 0;
   nagstatus status;
   bool ifname_debug = false,
        pd_bytes = true,
@@ -369,11 +369,12 @@ main (int argc, char **argv)
   perfdata = open_memstream (&bp, &size);
   status = STATE_OK;
 
-  for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
+  iflist_foreach (ifl, iflhead)
     {
+      const char *ifname = iflist_get_ifname (ifl);
       double counter;
       unsigned long long speed =
- 	(ifl->speed > 0) ? ifl->speed * 1000*1000/8 : 0;
+	(iflist_get_speed (ifl) > 0) ? iflist_get_speed (ifl) * 1000*1000/8 : 0;
       nagstatus iface_status;
 
       /* If the output in percentages is selected and a thresholds has been
@@ -384,36 +385,39 @@ main (int argc, char **argv)
       if (report_perc && (warning || critical) && !(speed > 0))
 	plugin_error (STATE_UNKNOWN, 0,
 		      "metrics of %s cannot be converted into percentages%s"
-		      , ifl->ifname
-		      , if_flags_UP (ifl->flags)
-			  &&if_flags_RUNNING (ifl->flags) ?
+		      , ifname
+		      , if_flags_UP (iflist_get_flags (ifl))
+			  && if_flags_RUNNING (iflist_get_flags (ifl)) ?
 			  (0 == speed ?
 			     ": physical speed is not available" : "")
 			  : ": link is not UP/RUNNING");
-      if (DUPLEX_HALF == ifl->duplex)
+      if (DUPLEX_HALF == iflist_get_duplex (ifl))
 	speed /= 2;
 
       switch (check)
 	{
 	default:
-	  counter = get_threshold_metric (ifl->tx_bytes, ifl->rx_bytes,
+	  counter = get_threshold_metric (iflist_get_tx_bytes (ifl),
+					  iflist_get_rx_bytes (ifl),
 					  tx_only, rx_only);
 	  if (report_perc && speed > 0)
 	    counter = ratio_over_speed (counter, speed);
 	  break;
 	case CHECK_COLLISIONS:
-	  counter = ifl->collisions;
+	  counter = iflist_get_collisions (ifl);
 	  break;
 	case CHECK_DROPPED:
-	  counter = get_threshold_metric (ifl->tx_dropped, ifl->rx_dropped,
+	  counter = get_threshold_metric (iflist_get_tx_dropped (ifl),
+					  iflist_get_rx_dropped (ifl),
 					  tx_only, rx_only);
 	  break;
 	case CHECK_ERRORS:
-	  counter = get_threshold_metric (ifl->tx_errors, ifl->rx_errors,
+	  counter = get_threshold_metric (iflist_get_tx_errors (ifl),
+					  iflist_get_rx_errors (ifl),
 					  tx_only, rx_only);
 	  break;
 	case CHECK_MULTICAST:
-	  counter = ifl->multicast;
+	  counter = iflist_get_multicast (ifl);
 	  break;
 	}
       dbg ("threshold counter: %g with w:%s c:%s\n"
@@ -428,10 +432,10 @@ main (int argc, char **argv)
       if (pd_bytes)
 	{
 	  char *perfdata_txbyte =
-	    fmt_perfdata_bytes (ifl->ifname, "txbyte", ifl->tx_bytes,
+	    fmt_perfdata_bytes (ifname, "txbyte", iflist_get_tx_bytes (ifl),
 				speed, report_perc);
 	  char *perfdata_rxbyte =
-	    fmt_perfdata_bytes (ifl->ifname, "rxbyte", ifl->rx_bytes,
+	    fmt_perfdata_bytes (ifname, "rxbyte", iflist_get_rx_bytes (ifl),
 				speed, report_perc);
 	  fprintf (perfdata, "%s %s ", perfdata_txbyte, perfdata_rxbyte);
 	  free (perfdata_txbyte);
@@ -440,24 +444,24 @@ main (int argc, char **argv)
       if (pd_errors)
 	fprintf (perfdata
 		, "%s_txerr/s=%u %s_rxerr/s=%u "
-		, ifl->ifname, ifl->tx_errors
-		, ifl->ifname, ifl->rx_errors);
+		, ifname, iflist_get_tx_errors (ifl)
+		, ifname, iflist_get_rx_errors (ifl));
       if (pd_drops)
 	fprintf (perfdata
 		, "%s_txdrop/s=%u %s_rxdrop/s=%u "
-		, ifl->ifname, ifl->tx_dropped
-		, ifl->ifname, ifl->rx_dropped);
+		, ifname, iflist_get_tx_dropped (ifl)
+		, ifname, iflist_get_rx_dropped (ifl));
       if (pd_packets)
         fprintf (perfdata
-		 , "%s_rxpck/s=%u %s_txpck/s=%u "
-		 , ifl->ifname, ifl->rx_packets
-		 , ifl->ifname, ifl->tx_packets);
+		 , "%s_txpck/s=%u %s_rxpck/s=%u "
+		 , ifname, iflist_get_tx_packets (ifl)
+		 , ifname, iflist_get_rx_packets (ifl));
       if (pd_collisions)
         fprintf (perfdata, "%s_coll/s=%u "
-		 , ifl->ifname, ifl->collisions);
+		 , ifname, iflist_get_collisions (ifl));
       if (pd_multicast)
         fprintf (perfdata, "%s_mcast/s=%u "
-		 , ifl->ifname, ifl->multicast);
+		 , ifname, iflist_get_multicast (ifl));
     }
 
   fclose (perfdata);
@@ -465,13 +469,14 @@ main (int argc, char **argv)
   if (ninterfaces < 1)
     status = STATE_UNKNOWN;
 
+  int i = 0;
   printf ("%s %s - found %u interface(s) ("
 	  , plugin_progname
 	  , state_text (status)
 	  , ninterfaces);
-  for (ifl = iflhead, i=0; ifl != NULL; ifl = ifl->next, i++)
-    if (i < MAX_PRINTED_INTERFACES)
-      printf ("%s%s", i < 1 ? "" : ",", ifl->ifname);
+  iflist_foreach (ifl, iflhead)
+    if (i++ < MAX_PRINTED_INTERFACES)
+      printf ("%s%s", i < 2 ? "" : ",", iflist_get_ifname (ifl));
     else
       {
 	printf (",...");
