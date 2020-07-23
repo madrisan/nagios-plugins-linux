@@ -38,6 +38,7 @@ libutils_a_SOURCES =  \
 	messages.c    \
 	mountlist.c   \
 	netinfo.c     \
+	netinfo-private.c \
 	perfdata.c    \
 	processes.c   \
 	procparser.c  \

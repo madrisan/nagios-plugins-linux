@@ -19,6 +19,8 @@
 
 #include <stdint.h>
 #include <sys/types.h>
+
+#include "netinfo-private.h"
 #include "system.h"
 
 #ifdef __cplusplus
@@ -49,8 +51,6 @@ extern "C"
     _DUP_MAX,
     _DUP_UNKNOWN = DUPLEX_UNKNOWN
   };
-
-  struct iflist;
 
   struct iflist *netinfo (unsigned int options, const char *ifname_regex,
 			  unsigned int seconds, unsigned int *ninterfaces);

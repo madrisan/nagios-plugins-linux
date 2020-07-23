@@ -36,6 +36,7 @@ noinst_HEADERS = \
 	mountlist.h \
 	messages.h \
 	netinfo.h \
+	netinfo-private.h \
 	perfdata.h \
 	processes.h \
 	procparser.h \
