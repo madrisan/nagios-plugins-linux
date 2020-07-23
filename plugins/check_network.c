@@ -20,11 +20,8 @@
  *
  */
 
-#include <errno.h>
 #include <getopt.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <ifaddrs.h>
 #include <linux/ethtool.h>
 #ifdef HAVE_LINUX_IF_LINK_H
 # include <linux/if_link.h>
