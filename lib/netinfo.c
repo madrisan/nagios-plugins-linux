@@ -24,6 +24,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <linux/ethtool.h>
+#include <linux/if.h>
 #include <linux/wireless.h>
 #include <math.h>
 
