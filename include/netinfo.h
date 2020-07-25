@@ -30,6 +30,10 @@ extern "C"
 
   enum
   {
+    /* list of address families */
+    IF_AF_PACKET	= (1 << 0),
+    IF_AF_INET		= (1 << 1),
+    IF_AF_INET6		= (1 << 2),
     /* command-line options */
     CHECK_LINK		= (1 << 0),
     NO_LOOPBACK		= (1 << 1),
@@ -61,6 +65,7 @@ extern "C"
 
   /* Accessing the values from struct iflist */
   const char *iflist_get_ifname (struct iflist *ifentry);
+  uint8_t iflist_get_addr_family (struct iflist *ifentry);
   uint8_t iflist_get_duplex (struct iflist *ifentry);
   uint32_t iflist_get_speed (struct iflist *ifentry);
   unsigned int iflist_get_tx_packets (struct iflist *ifentry);
