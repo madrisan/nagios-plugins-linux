@@ -27,6 +27,7 @@
 #include <linux/if.h>
 #include <linux/wireless.h>
 #include <math.h>
+#include <sys/socket.h>
 
 #include "common.h"
 #include "logging.h"
