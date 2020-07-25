@@ -23,11 +23,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
+#include <sys/socket.h>
 #include <linux/ethtool.h>
 #include <linux/if.h>
 #include <linux/wireless.h>
-#include <math.h>
-#include <sys/socket.h>
 
 #include "common.h"
 #include "logging.h"
