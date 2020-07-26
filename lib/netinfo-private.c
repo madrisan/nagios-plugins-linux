@@ -235,6 +235,20 @@ link_wireless (const char *ifname)
   return is_wireless;
 }
 
+/* lookup to ifl list checking for an existing entry
+ * return a pointer to the entry if found, NULL otherwise  */
+
+static struct iflist *
+ifl_lookup (struct iflist *iflhead, const char *ifa_name)
+{
+  struct iflist *ifl = iflhead;
+
+  for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
+    if STREQ (ifl->ifname, ifa_name)
+      return ifl;
+  return NULL;
+}
+
 struct iflist *
 get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 {
@@ -242,7 +256,7 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
        opt_ignore_wireless = (options & NO_WIRELESS);
   int family, sock;
   struct ifaddrs *ifa, *ifaddr;
-  struct iflist *iflhead = NULL, *iflprev = NULL, *ifl;
+  struct iflist *iflhead = NULL, *iflprev = NULL, *ifl, *ifl2;
 
   if ((sock = get_ctl_fd ()) < 0)
     plugin_error (STATE_UNKNOWN, errno, "socket() failed");
@@ -259,10 +273,8 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 
       dbg ("%s: address family %d%s\n", ifa->ifa_name, family,
 	   (family == AF_PACKET) ? " (AF_PACKET)" :
-	   (family == AF_INET)   ? " (AF_INET) ... skip"   :
-	   (family == AF_INET6)  ? " (AF_INET6) ... skip"  : "");
-      if (family == AF_INET || family == AF_INET6)
-	continue;
+	   (family == AF_INET)   ? " (AF_INET)"   :
+	   (family == AF_INET6)  ? " (AF_INET6)"  : "");
 
       bool is_loopback = if_flags_LOOPBACK (ifa->ifa_flags);
       bool is_wireless = link_wireless (ifa->ifa_name);
@@ -276,38 +288,54 @@ get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
 	  continue;
 	}
 
-      if (family == AF_PACKET && ifa->ifa_data != NULL)
+      ifl2 = ifl_lookup (iflhead, ifa->ifa_name);
+      if (NULL == ifl2)
+	{
+	  ifl = xmalloc (sizeof (struct iflist));
+	  ifl->addr_family = 0;
+	  ifl->duplex = DUPLEX_UNKNOWN;
+	  ifl->ifname = xstrdup (ifa->ifa_name);
+	  ifl->flags = ifa->ifa_flags;
+	  ifl->next = NULL;
+	  ifl->speed = 0;
+	  ifl->stats = NULL;
+
+	  if (NULL == iflhead)
+	    iflhead = ifl;
+	  else
+	    iflprev->next = ifl;
+	  iflprev = ifl;
+	}
+      else
+	ifl = ifl2;
+
+      dbg ("%s: ifa_data is %sset for this interface\n"
+	   , ifa->ifa_name
+	   , ifa->ifa_data ? "" : "un");
+	
+      if (AF_PACKET == family && ifa->ifa_data != NULL)
 	{
 	  struct rtnl_link_stats *stats = ifa->ifa_data;
+	  ifl->addr_family |= IF_AF_PACKET;
 
-	  ifl = xmalloc (sizeof (struct iflist));
-	  ifl->flags      = ifa->ifa_flags;
-	  ifl->ifname     = xstrdup (ifa->ifa_name);
-	  ifl->tx_packets = stats->tx_packets;
-	  ifl->rx_packets = stats->rx_packets;
-	  ifl->tx_bytes   = stats->tx_bytes;
-	  ifl->rx_bytes   = stats->rx_bytes;
-	  ifl->tx_errors  = stats->tx_errors;
-	  ifl->rx_errors  = stats->rx_errors;
-	  ifl->tx_dropped = stats->tx_dropped;
-	  ifl->rx_dropped = stats->rx_dropped;
-	  ifl->collisions = stats->collisions;
-	  ifl->multicast  = stats->multicast;
+	  ifl->stats = xmalloc (sizeof (struct ifstats));
+	  ifl->stats->collisions = stats->collisions;
+	  ifl->stats->multicast  = stats->multicast;
+	  ifl->stats->tx_packets = stats->tx_packets;
+	  ifl->stats->rx_packets = stats->rx_packets;
+	  ifl->stats->tx_bytes   = stats->tx_bytes;
+	  ifl->stats->rx_bytes   = stats->rx_bytes;
+	  ifl->stats->tx_errors  = stats->tx_errors;
+	  ifl->stats->rx_errors  = stats->rx_errors;
+	  ifl->stats->tx_dropped = stats->tx_dropped;
+	  ifl->stats->rx_dropped = stats->rx_dropped;
+
+	  check_link_speed (ifa->ifa_name, &(ifl->speed), &(ifl->duplex));
 	}
-      else
-	{
-	  dbg ("skipping unknown interface %s\n", ifa->ifa_name);
-	  continue;
-	}
-
-      check_link_speed (ifa->ifa_name, &(ifl->speed), &(ifl->duplex));
-
-      ifl->next = NULL;
-      if (iflhead == NULL)
-	iflhead = ifl;
-      else
-	iflprev->next = ifl;
-      iflprev = ifl;
+      else if (AF_INET == family)
+	ifl->addr_family |= IF_AF_INET;
+      else if (AF_INET6 == family)
+	ifl->addr_family |= IF_AF_INET6;
     }
 
   close (sock);

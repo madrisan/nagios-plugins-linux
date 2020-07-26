@@ -23,9 +23,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <linux/ethtool.h>
-#include <linux/wireless.h>
 #include <math.h>
+#include <sys/socket.h>
+#include <linux/ethtool.h>
+#include <linux/if.h>
+#include <linux/wireless.h>
 
 #include "common.h"
 #include "logging.h"
@@ -78,37 +80,60 @@ netinfo (unsigned int options, const char *ifname_regex, unsigned int seconds,
 	  bool if_up = if_flags_UP (ifl->flags),
 	       if_running = if_flags_RUNNING (ifl->flags);
 
+	  if (ifl->stats)
+	    {
 #define DIV(a, b) ceil (((b) - (a)) / (double)seconds)
-	  dbg ("\ttx_packets : %u %u\n", ifl->tx_packets, ifl2->tx_packets);
-	  ifl->tx_packets = DIV (ifl->tx_packets, ifl2->tx_packets);
+	      dbg ("\ttx_packets : %u %u\n",
+		   ifl->stats->tx_packets, ifl2->stats->tx_packets);
+	      ifl->stats->tx_packets = DIV (ifl->stats->tx_packets,
+					    ifl2->stats->tx_packets);
 
-	  dbg ("\trx_packets : %u %u\n", ifl->rx_packets, ifl2->rx_packets);
-	  ifl->rx_packets = DIV (ifl->rx_packets, ifl2->rx_packets);
+	      dbg ("\trx_packets : %u %u\n",
+		   ifl->stats->rx_packets, ifl2->stats->rx_packets);
+	      ifl->stats->rx_packets = DIV (ifl->stats->rx_packets,
+					    ifl2->stats->rx_packets);
 
-	  dbg ("\ttx_bytes   : %u %u\n", ifl->tx_bytes, ifl2->tx_bytes);
-	  ifl->tx_bytes   = DIV (ifl->tx_bytes, ifl2->tx_bytes);
+	      dbg ("\ttx_bytes   : %u %u\n",
+		   ifl->stats->tx_bytes, ifl2->stats->tx_bytes);
+	      ifl->stats->tx_bytes   = DIV (ifl->stats->tx_bytes,
+					    ifl2->stats->tx_bytes);
 
-	  dbg ("\trx_bytes   : %u %u\n", ifl->rx_bytes, ifl2->rx_bytes);
-	  ifl->rx_bytes   = DIV (ifl->rx_bytes, ifl2->rx_bytes);
+	      dbg ("\trx_bytes   : %u %u\n",
+		   ifl->stats->rx_bytes, ifl2->stats->rx_bytes);
+	      ifl->stats->rx_bytes   = DIV (ifl->stats->rx_bytes,
+					    ifl2->stats->rx_bytes);
 
-	  dbg ("\ttx_errors  : %u %u\n", ifl->tx_errors, ifl2->tx_errors);
-	  ifl->tx_errors  = DIV (ifl->tx_errors, ifl2->tx_errors);
+	      dbg ("\ttx_errors  : %u %u\n",
+		   ifl->stats->tx_errors, ifl2->stats->tx_errors);
+	      ifl->stats->tx_errors  = DIV (ifl->stats->tx_errors,
+					    ifl2->stats->tx_errors);
 
-	  dbg ("\trx_errors  : %u %u\n", ifl->rx_errors, ifl2->rx_errors);
-	  ifl->rx_errors  = DIV (ifl->rx_errors, ifl2->rx_errors);
+	      dbg ("\trx_errors  : %u %u\n",
+		   ifl->stats->rx_errors, ifl2->stats->rx_errors);
+	      ifl->stats->rx_errors  = DIV (ifl->stats->rx_errors,
+					    ifl2->stats->rx_errors);
 
-	  dbg ("\ttx_dropped : %u %u\n", ifl->tx_dropped, ifl2->tx_dropped);
-	  ifl->tx_dropped = DIV (ifl->tx_dropped, ifl2->tx_dropped);
+	      dbg ("\ttx_dropped : %u %u\n",
+		   ifl->stats->tx_dropped, ifl2->stats->tx_dropped);
+	      ifl->stats->tx_dropped = DIV (ifl->stats->tx_dropped,
+					    ifl2->stats->tx_dropped);
 
-	  dbg ("\trx_dropped : %u %u\n", ifl->rx_dropped, ifl2->rx_dropped);
-	  ifl->rx_dropped = DIV (ifl->rx_dropped, ifl2->rx_dropped);
+	      dbg ("\trx_dropped : %u %u\n",
+		   ifl->stats->rx_dropped, ifl2->stats->rx_dropped);
+	      ifl->stats->rx_dropped = DIV (ifl->stats->rx_dropped,
+					    ifl2->stats->rx_dropped);
 
-	  dbg ("\tcollisions : %u %u\n", ifl->collisions, ifl2->collisions);
-	  ifl->collisions = DIV (ifl->collisions, ifl2->collisions);
+	      dbg ("\tcollisions : %u %u\n",
+		   ifl->stats->collisions, ifl2->stats->collisions);
+	      ifl->stats->collisions = DIV (ifl->stats->collisions,
+					    ifl2->stats->collisions);
 
-	  dbg ("\tmulticast  : %u %u\n", ifl->multicast, ifl2->multicast);
-	  ifl->multicast  = DIV (ifl->multicast, ifl2->multicast);
+	      dbg ("\tmulticast  : %u %u\n",
+		   ifl->stats->multicast, ifl2->stats->multicast);
+	      ifl->stats->multicast  = DIV (ifl->stats->multicast,
+					    ifl2->stats->multicast);
 #undef DIV
+	    }
 
 	  dbg ("\tlink UP: %s\n", if_up ? "true" : "false");
 	  dbg ("\tlink RUNNING: %s\n", if_running ? "true" : "false");
@@ -147,6 +172,12 @@ iflist_get_ifname (struct iflist *ifentry)
 }
 
 uint8_t
+iflist_get_addr_family (struct iflist *ifentry)
+{
+  return ifentry->addr_family;
+}
+
+uint8_t
 iflist_get_duplex (struct iflist *ifentry)
 {
   return ifentry->duplex;
@@ -158,12 +189,20 @@ iflist_get_speed (struct iflist *ifentry)
   return ifentry->speed;
 }
 
+unsigned int
+iflist_get_flags (struct iflist *ifentry)
+{
+  return ifentry->flags;
+}
+
+/* FIXME: should perhaps not return 0 if the interface stats are not available
+ *        but this seems to be the behaviour of the commands "ifconfig" and
+ *        "ip -s link"  */
 #define __iflist_get__(arg) \
 unsigned int iflist_get_ ## arg (struct iflist *ifentry) \
-  { return ifentry->arg; }
+  { return ifentry->stats ? ifentry->stats->arg : 0; }
 
 __iflist_get__(collisions)
-__iflist_get__(flags)
 __iflist_get__(multicast)
 __iflist_get__(tx_packets)
 __iflist_get__(rx_packets)
@@ -219,18 +258,21 @@ void print_ifname_debug (struct iflist *iflhead, unsigned int options)
 	      , ifspeed ? ifspeed : ""
 	      , ifduplex ? ifduplex : "");
 
-      if (pd_bytes)
-	__printf_tx_rx__ ("byte/s", tx_only, rx_only);
-      if (pd_errors)
-	__printf_tx_rx__ ("err/s", tx_only, rx_only);
-      if (pd_drops)
-	__printf_tx_rx__ ("drop/s", tx_only, rx_only);
-      if (pd_packets)
-	__printf_tx_rx__ ("pck/s", tx_only, rx_only);
-      if (pd_collisions)
-	fprintf (stdout, " - %s_coll/s\n", ifl->ifname);
-      if (pd_multicast)
-	fprintf (stdout, " - %s_mcast/s\n", ifl->ifname);
+      if (ifl->stats)
+	{
+	  if (pd_bytes)
+	    __printf_tx_rx__ ("byte/s", tx_only, rx_only);
+	  if (pd_errors)
+	    __printf_tx_rx__ ("err/s", tx_only, rx_only);
+	  if (pd_drops)
+	    __printf_tx_rx__ ("drop/s", tx_only, rx_only);
+	  if (pd_packets)
+	    __printf_tx_rx__ ("pck/s", tx_only, rx_only);
+	  if (pd_collisions)
+	    fprintf (stdout, " - %s_coll/s\n", ifl->ifname);
+	  if (pd_multicast)
+	    fprintf (stdout, " - %s_mcast/s\n", ifl->ifname);
+	}
     }
 #undef __printf_tx_rx__
 }
