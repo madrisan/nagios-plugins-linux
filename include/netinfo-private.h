@@ -25,9 +25,8 @@ extern "C"
 {
 #endif
 
-  typedef struct iflist
+  typedef struct ifstats
   {
-    char *ifname;
     unsigned int tx_packets;
     unsigned int rx_packets;
     unsigned int tx_bytes;
@@ -37,10 +36,17 @@ extern "C"
     unsigned int tx_dropped;
     unsigned int rx_dropped;
     unsigned int collisions;
-    unsigned int flags;
     unsigned int multicast;
-    uint32_t speed;        /* the link speed in Mbps */
-    uint8_t duplex;        /* the duplex as defined in <linux/ethtool.h> */
+  } ifstats_t;
+
+  typedef struct iflist
+  {
+    char *ifname;
+    uint8_t addr_family;
+    uint8_t duplex;	   /* the duplex as defined in <linux/ethtool.h> */
+    uint32_t speed;	   /* the link speed in Mbps */
+    unsigned int flags;
+    struct ifstats *stats;
     struct iflist *next;
   } iflist_t;
 
