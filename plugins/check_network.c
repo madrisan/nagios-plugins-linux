@@ -467,7 +467,7 @@ main (int argc, char **argv)
     status = STATE_UNKNOWN;
 
   int i = 0;
-  printf ("%s %s - found %u interface(s) ("
+  printf ("%s %s - found %u interface(s): "
 	  , plugin_progname
 	  , state_text (status)
 	  , ninterfaces);
@@ -479,7 +479,7 @@ main (int argc, char **argv)
 	printf (",...");
 	break;
       }
-  printf (") | %s\n", bp);
+  printf (" | %s\n", bp);
 
   freeiflist (iflhead);
   free (my_threshold);
