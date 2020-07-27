@@ -42,7 +42,6 @@ extern "C"
   typedef struct iflist
   {
     char *ifname;
-    uint8_t addr_family;
     uint8_t duplex;	   /* the duplex as defined in <linux/ethtool.h> */
     uint32_t speed;	   /* the link speed in Mbps */
     unsigned int flags;
