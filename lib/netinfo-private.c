@@ -22,30 +22,26 @@
 
 #include <errno.h>
 #include <ifaddrs.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <linux/ethtool.h>
 #ifdef HAVE_LINUX_IF_LINK_H
 # include <linux/if_link.h>
-#else
-# include <linux/rtnetlink.h>
 #endif
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <linux/sockios.h>
 #include <linux/wireless.h>
-#include <stdlib.h>
-#include <sys/ioctl.h>
 
 #include "common.h"
 #include "logging.h"
-#include "string-macros.h"
 #include "messages.h"
 #include "netinfo.h"
+#include "string-macros.h"
 #include "system.h"
 #include "xalloc.h"
-
-#define IFLIST_REPLY_BUFFER	8192
 
 typedef struct nl_req_s
 {
@@ -325,6 +321,8 @@ parse_rtattr (struct rtattr *tb[], int max, struct rtattr *rta, int len)
   return 0;
 }
 
+#define IFLIST_REPLY_BUFFER	8192
+
 struct iflist *
 get_netinfo_snapshot (unsigned int options, const regex_t *if_regex)
 {
@@ -452,3 +450,5 @@ get_netinfo_snapshot (unsigned int options, const regex_t *if_regex)
   close (fd);
   return iflhead;
 }
+
+#undef IFLIST_REPLY_BUFFER
