@@ -65,7 +65,6 @@ extern "C"
 
   /* Accessing the values from struct iflist */
   const char *iflist_get_ifname (struct iflist *ifentry);
-  uint8_t iflist_get_addr_family (struct iflist *ifentry);
   uint8_t iflist_get_duplex (struct iflist *ifentry);
   uint32_t iflist_get_speed (struct iflist *ifentry);
   unsigned int iflist_get_tx_packets (struct iflist *ifentry);

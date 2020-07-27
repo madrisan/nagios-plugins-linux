@@ -172,12 +172,6 @@ iflist_get_ifname (struct iflist *ifentry)
 }
 
 uint8_t
-iflist_get_addr_family (struct iflist *ifentry)
-{
-  return ifentry->addr_family;
-}
-
-uint8_t
 iflist_get_duplex (struct iflist *ifentry)
 {
   return ifentry->duplex;
