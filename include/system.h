@@ -34,8 +34,4 @@
 #define TEST_ASSERT_EQUAL_NUMERIC(A, B) \
   do { if ((A) != (B)) ret = -1; } while (0)
 
-#ifdef __cplusplus
-}
-#endif
-
 #endif			/* _NPL_SYSTEM_H_ */
