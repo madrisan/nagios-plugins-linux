@@ -237,6 +237,16 @@ AC_CHECK_HEADERS(linux/if_link.h, [], [],
 #endif
 ])
 
+dnl check for headers required by the netinfo* libraries
+AC_CHECK_HEADERS([ \
+  linux/ethtool.h \
+  linux/if.h \
+  linux/netlink.h \
+  linux/rtnetlink.h \
+  linux/sockios.h \
+  linux/wireless.h], [],
+  [AC_MSG_ERROR([please install linux network headers])])
+
 dnl Checks for functions and libraries
 
 AC_CHECK_FUNCS([asprintf])
