@@ -13,7 +13,7 @@ plugins:
   gnu-complexity:
     enabled: true
     config:
-      threshold: 20
+      threshold: 30
   shellcheck:
     enabled: true
 exclude_patterns:

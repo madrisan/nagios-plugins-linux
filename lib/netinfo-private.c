@@ -30,8 +30,11 @@
 #else
 # include <linux/rtnetlink.h>
 #endif
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
 #include <linux/sockios.h>
 #include <linux/wireless.h>
+#include <stdlib.h>
 #include <sys/ioctl.h>
 
 #include "common.h"
@@ -41,6 +44,14 @@
 #include "netinfo.h"
 #include "system.h"
 #include "xalloc.h"
+
+#define IFLIST_REPLY_BUFFER	8192
+
+typedef struct nl_req_s
+{
+  struct nlmsghdr hdr;
+  struct rtgenmsg gen;
+} nl_req_t;
 
 const char *const duplex_table[_DUP_MAX] = {
   [DUPLEX_HALF] = "half",
@@ -221,7 +232,7 @@ link_wireless (const char *ifname)
     plugin_error (STATE_UNKNOWN, errno, "socket() failed");
 
   memset (&pwrq, 0, sizeof (pwrq));
-  STRNCPY_TERMINATED (pwrq.ifr_name, ifname, IFNAMSIZ);
+  strncpy (pwrq.ifr_name, ifname, IFNAMSIZ);
 
   if (ioctl (sock, SIOCGIWNAME, &pwrq) != -1)
     {
@@ -235,111 +246,209 @@ link_wireless (const char *ifname)
   return is_wireless;
 }
 
-/* lookup to ifl list checking for an existing entry
- * return a pointer to the entry if found, NULL otherwise  */
-
-static struct iflist *
-ifl_lookup (struct iflist *iflhead, const char *ifa_name)
+/* Get the RTNL socket */
+static int
+get_rtnl_fd ()
 {
-  struct iflist *ifl = iflhead;
+  int fd;
+  union
+  {
+    struct sockaddr addr;
+    struct sockaddr_nl local;   /* local (user space) addr struct */
+  } u;
 
-  for (ifl = iflhead; ifl != NULL; ifl = ifl->next)
-    if STREQ (ifl->ifname, ifa_name)
-      return ifl;
-  return NULL;
+  fd = socket (AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+  if (fd < 0)
+    plugin_error (STATE_UNKNOWN, errno, "failed to create netlink socket");
+
+  memset (&u.local, 0, sizeof (u.local));
+  u.local.nl_family = AF_NETLINK;
+  u.local.nl_groups = 0;
+  u.local.nl_pid = getpid ();
+
+  if (bind (fd, &u.addr, sizeof (u.addr)) < 0)
+    {
+      close (fd);
+      plugin_error (STATE_UNKNOWN, errno, "failed to bind netlink socket");
+    }
+
+  return fd;
+}
+
+/* Prepare and send the RTNL request for dumping the network links
+ * configuration */
+static int
+sendmsg_rtnl_links_dump (int fd, struct iovec *iov, struct sockaddr_nl *kernel)
+{
+  nl_req_t req;                 /* structure that describes the rtnetlink packet itself */
+  struct msghdr rtnl_msg;       /* generic msghdr struct for use with sendmsg */
+
+  memset (&rtnl_msg, 0, sizeof (rtnl_msg));
+  memset (kernel, 0, sizeof (*kernel));
+  memset (&req, 0, sizeof (req));
+
+  kernel->nl_family = AF_NETLINK;
+
+  req.hdr.nlmsg_len = NLMSG_LENGTH (sizeof (struct rtgenmsg));
+  req.hdr.nlmsg_type = RTM_GETLINK;
+  req.hdr.nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
+  req.hdr.nlmsg_seq = 1;
+  req.hdr.nlmsg_pid = getpid ();
+  /* no preferred AF, we will get all interfaces */
+  req.gen.rtgen_family = AF_PACKET;
+
+  iov->iov_base = &req;
+  iov->iov_len = req.hdr.nlmsg_len;
+  rtnl_msg.msg_iov = iov;
+  rtnl_msg.msg_iovlen = 1;
+  rtnl_msg.msg_name = kernel;
+  rtnl_msg.msg_namelen = sizeof (*kernel);
+
+  if (sendmsg (fd, (struct msghdr *) &rtnl_msg, 0) < 0)
+    return errno;
+
+  return 0;
+}
+
+static int
+parse_rtattr (struct rtattr *tb[], int max, struct rtattr *rta, int len)
+{
+  memset (tb, 0, sizeof (struct rtattr *) * (max + 1));
+
+  while (RTA_OK (rta, len))
+    {
+      if (rta->rta_type <= max)
+	tb[rta->rta_type] = rta;
+      rta = RTA_NEXT (rta,len);
+    }
+
+  return 0;
 }
 
 struct iflist *
-get_netinfo_snapshot (unsigned int options, const regex_t *iface_regex)
+get_netinfo_snapshot (unsigned int options, const regex_t *if_regex)
 {
-  bool opt_ignore_loopback = (options & NO_LOOPBACK),
+  bool msg_done = false,
+       opt_ignore_loopback = (options & NO_LOOPBACK),
        opt_ignore_wireless = (options & NO_WIRELESS);
-  int family, sock;
-  struct ifaddrs *ifa, *ifaddr;
-  struct iflist *iflhead = NULL, *iflprev = NULL, *ifl, *ifl2;
+  char reply[IFLIST_REPLY_BUFFER];
+  int fd, ret;
+  struct iflist *iflhead = NULL, *iflprev = NULL;
 
-  if ((sock = get_ctl_fd ()) < 0)
-    plugin_error (STATE_UNKNOWN, errno, "socket() failed");
+  /* netlink structures */
+  struct iovec iov;             /* IO vector for sendmsg */
+  /* the remote (kernel space) side of the communication */
+  struct sockaddr_nl kernel;
 
-  if (getifaddrs (&ifaddr) == -1)
-    plugin_error (STATE_UNKNOWN, errno, "getifaddrs() failed");
+  fd = get_rtnl_fd ();
+  ret = sendmsg_rtnl_links_dump (fd, &iov, &kernel);
+  if (ret != 0)
+    plugin_error (STATE_UNKNOWN, ret, "error in sendmsg");
 
-  for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+  while (!msg_done)
     {
-      if (ifa->ifa_addr == NULL)
-	continue;
+      /* parse reply */
+      int len;
+      struct nlmsghdr *h;
+      struct msghdr rtnl_reply;
+      struct iovec io_reply;
 
-      family = ifa->ifa_addr->sa_family;
+      memset (&io_reply, 0, sizeof (io_reply));
+      memset (&rtnl_reply, 0, sizeof (rtnl_reply));
 
-      dbg ("%s: address family %d%s\n", ifa->ifa_name, family,
-	   (family == AF_PACKET) ? " (AF_PACKET)" :
-	   (family == AF_INET)   ? " (AF_INET)"   :
-	   (family == AF_INET6)  ? " (AF_INET6)"  : "");
+      iov.iov_base = reply;
+      iov.iov_len = IFLIST_REPLY_BUFFER;
+      rtnl_reply.msg_iov = &iov;
+      rtnl_reply.msg_iovlen = 1;
+      rtnl_reply.msg_name = &kernel;
+      rtnl_reply.msg_namelen = sizeof (kernel);
 
-      bool is_loopback = if_flags_LOOPBACK (ifa->ifa_flags);
-      bool is_wireless = link_wireless (ifa->ifa_name);
-      bool skip_interface =
-	((is_loopback && opt_ignore_loopback)
-	 || (is_wireless && opt_ignore_wireless)
-	 || (regexec (iface_regex, ifa->ifa_name, (size_t) 0, NULL, 0)));
-      if (skip_interface)
+      /* read as much data as fits in the receive buffer */
+      if ((len = recvmsg (fd, &rtnl_reply, MSG_DONTWAIT)) < 0)
 	{
-	  dbg ("skipping network interface '%s'...\n", ifa->ifa_name);
+	  usleep (250000);		/* sleep for a while */
 	  continue;
 	}
 
-      ifl2 = ifl_lookup (iflhead, ifa->ifa_name);
-      if (NULL == ifl2)
+      char name[IFNAMSIZ];
+      int attr_len;
+      struct iflist *ifl;
+      struct ifinfomsg *ifi;
+      struct rtattr *tb[IFLA_MAX+1];
+      struct rtnl_link_stats *stats;
+
+      for (h = (struct nlmsghdr *) reply;
+	   NLMSG_OK (h, len); h = NLMSG_NEXT (h, len))
 	{
-	  ifl = xmalloc (sizeof (struct iflist));
-	  ifl->addr_family = 0;
-	  ifl->duplex = DUPLEX_UNKNOWN;
-	  ifl->ifname = xstrdup (ifa->ifa_name);
-	  ifl->flags = ifa->ifa_flags;
-	  ifl->next = NULL;
-	  ifl->speed = 0;
-	  ifl->stats = NULL;
+	  switch (h->nlmsg_type)
+	    {
+	    /* this is the special meaning NLMSG_DONE message we asked for
+	     * by using NLM_F_DUMP flag  */
+	    case NLMSG_DONE:
+	      msg_done = true;
+	      break;
+	    case RTM_NEWLINK:
+	      ifi = NLMSG_DATA (h);
+	      attr_len = h->nlmsg_len - NLMSG_LENGTH (sizeof (*ifi));
 
-	  if (NULL == iflhead)
-	    iflhead = ifl;
-	  else
-	    iflprev->next = ifl;
-	  iflprev = ifl;
+	      parse_rtattr (tb, IFLA_MAX, IFLA_RTA (ifi), attr_len);
+	      if (NULL == tb[IFLA_IFNAME])
+		plugin_error (STATE_UNKNOWN, 0,
+			      "BUG: nil ifname returned by parse_rtattr()");
+
+	      strcpy (name, (char *) RTA_DATA (tb[IFLA_IFNAME]));
+
+	      bool is_loopback = if_flags_LOOPBACK (ifi->ifi_flags);
+	      bool is_wireless = link_wireless (name);
+	      bool skip_interface =
+		     ((is_loopback && opt_ignore_loopback)
+		      || (is_wireless && opt_ignore_wireless)
+		      || (regexec (if_regex, name, (size_t) 0, NULL, 0)));
+	      if (skip_interface)
+		{
+		  dbg ("skipping network interface '%s'...\n", name);
+		  continue;
+		}
+
+	      /* create a new list structure 'ifl' and initialize
+	       * all the members, except stats-related ones  */
+	      ifl = xmalloc (sizeof (struct iflist));
+	      ifl->ifname = xstrdup (name);
+	      ifl->flags = ifi->ifi_flags;
+	      check_link_speed (name, &(ifl->speed), &(ifl->duplex));
+
+	      ifl->next = NULL;
+	      ifl->stats = NULL;
+
+	      if (NULL == iflhead)
+		iflhead = ifl;
+	      else
+		iflprev->next = ifl;
+	      iflprev = ifl;
+
+	      stats = (struct rtnl_link_stats *) RTA_DATA (tb[IFLA_STATS]);
+	      if (stats)
+		{
+		  /* copy the link statistics into the list structure 'ifl' */
+		  ifl->stats = xmalloc (sizeof (struct ifstats));
+		  ifl->stats->collisions = stats->collisions;
+		  ifl->stats->multicast  = stats->multicast;
+		  ifl->stats->tx_packets = stats->tx_packets;
+		  ifl->stats->rx_packets = stats->rx_packets;
+		  ifl->stats->tx_bytes   = stats->tx_bytes;
+		  ifl->stats->rx_bytes   = stats->rx_bytes;
+		  ifl->stats->tx_errors  = stats->tx_errors;
+		  ifl->stats->rx_errors  = stats->rx_errors;
+		  ifl->stats->tx_dropped = stats->tx_dropped;
+		  ifl->stats->rx_dropped = stats->rx_dropped;
+		}
+	      else
+		dbg ("no network interface stats for '%s'...\n", name);
+	      break;
+	    }
 	}
-      else
-	ifl = ifl2;
-
-      dbg ("%s: ifa_data is %sset for this interface\n"
-	   , ifa->ifa_name
-	   , ifa->ifa_data ? "" : "un");
-	
-      if (AF_PACKET == family && ifa->ifa_data != NULL)
-	{
-	  struct rtnl_link_stats *stats = ifa->ifa_data;
-	  ifl->addr_family |= IF_AF_PACKET;
-
-	  ifl->stats = xmalloc (sizeof (struct ifstats));
-	  ifl->stats->collisions = stats->collisions;
-	  ifl->stats->multicast  = stats->multicast;
-	  ifl->stats->tx_packets = stats->tx_packets;
-	  ifl->stats->rx_packets = stats->rx_packets;
-	  ifl->stats->tx_bytes   = stats->tx_bytes;
-	  ifl->stats->rx_bytes   = stats->rx_bytes;
-	  ifl->stats->tx_errors  = stats->tx_errors;
-	  ifl->stats->rx_errors  = stats->rx_errors;
-	  ifl->stats->tx_dropped = stats->tx_dropped;
-	  ifl->stats->rx_dropped = stats->rx_dropped;
-
-	  check_link_speed (ifa->ifa_name, &(ifl->speed), &(ifl->duplex));
-	}
-      else if (AF_INET == family)
-	ifl->addr_family |= IF_AF_INET;
-      else if (AF_INET6 == family)
-	ifl->addr_family |= IF_AF_INET6;
     }
 
-  close (sock);
-  freeifaddrs (ifaddr);
-
+  close (fd);
   return iflhead;
 }
