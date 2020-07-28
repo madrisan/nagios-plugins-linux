@@ -227,7 +227,10 @@ AC_CHECK_HEADERS([ \
   sys/swap.h \
   utmpx.h])
 
-AC_CHECK_HEADERS(linux/if_link.h, [], [],
+AC_CHECK_HEADERS([ \
+  linux/if_link.h \
+  linux/if.h \
+  linux/wireless.h], [], [],
 [
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -240,11 +243,9 @@ AC_CHECK_HEADERS(linux/if_link.h, [], [],
 dnl check for headers required by the netinfo* libraries
 AC_CHECK_HEADERS([ \
   linux/ethtool.h \
-  linux/if.h \
   linux/netlink.h \
   linux/rtnetlink.h \
-  linux/sockios.h \
-  linux/wireless.h], [],
+  linux/sockios.h], [],
   [AC_MSG_ERROR([please install linux network headers])])
 
 dnl Checks for functions and libraries
