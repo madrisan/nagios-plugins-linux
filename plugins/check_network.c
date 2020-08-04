@@ -125,10 +125,10 @@ usage (FILE * out)
   fputs ("  -t, --tx-only        consider the transmitted traffic only in "
 	 "the thresholds\n", out);
   fputs (USAGE_NOTE, out);
-  fputs ("  The option --ifname supports the POSIX Extended Regular Expression "
+  fputs ("  - The option --ifname supports the POSIX Extended Regular Expression "
 	 "syntax.\n", out);
-  fputs ("  See: https://man7.org/linux/man-pages/man7/regex.7.html\n", out);
-  fputs ("  You cannot select both the options r/rx-only and t/tx-only.\n",
+  fputs ("    See: https://man7.org/linux/man-pages/man7/regex.7.html\n", out);
+  fputs ("  - You cannot select both the options r/rx-only and t/tx-only.\n",
 	 out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s\n", program_name);
