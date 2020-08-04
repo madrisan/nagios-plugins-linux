@@ -6,3 +6,4 @@ missing linguist-vendored
 test-driver linguist-vendored
 ltmain.sh linguist-vendored
 libtool linguist-vendored
+*.psd filter=lfs diff=lfs merge=lfs -text
