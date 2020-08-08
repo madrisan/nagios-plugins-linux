@@ -1,5 +1,5 @@
 ## Version 27 ("Polish Landscapes")
-### TBD
+### Aug 8th, 2020
 
 #### FIXES
 
