@@ -1,3 +1,10 @@
+nagios-plugins-linux (27-1) stable; urgency=low
+  * Release 27 "Polish Landscapes":
+     - Enhanced plugin check_network (using rtnetlink).
+     - Fixed experimental support to libprocps-ng:newlib.
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Sat,  8 May 2020 10:45:45 +0200
+
 nagios-plugins-linux (26-1) stable; urgency=low
   * Release 26 "Lockdown release":
      - Fix build with musl by including limits.h when PATH_MAX is used.
