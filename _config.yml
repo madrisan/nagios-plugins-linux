@@ -1,0 +1,8 @@
+title: Nagios Plugins for Linux
+description: Nagios Plugins for Linux
+google_analytics: UA-68961523-1
+show_downloads: true
+theme: jekyll-theme-midnight
+
+gems:
+  - jekyll-mentions
