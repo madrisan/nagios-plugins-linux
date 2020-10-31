@@ -124,20 +124,21 @@ CentOS 8           | `make -C packages centos-8`
 Debian 8 (Jessie)  | `make -C packages debian-jessie`
 Debian 9 (Stretch) | `make -C packages debian-stretch`
 Debian 10 (Buster) | `make -C packages debian-buster`
-Fedora 30          | `make -C packages fedora-30`
 Fedora 31          | `make -C packages fedora-31`
 Fedora 32          | `make -C packages fedora-32`
+Fedora 33          | `make -C packages fedora-33`
 Fedora Rawhide     | `make -C packages fedora-rawhide`
 
 in the root source folder.
 The building process requires the _Docker_ software containerization platform running on your system, and an internet connection to download the Docker images of the operating systems you want to build the packages for.
 
-On *Fedora 31* and *Fedora 32* you can use the native *Podman* pod manager along with the Docker CLI emulation script:
+On *Fedora* you can use the native *Podman* pod manager along with the Docker CLI emulation script:
 
     sudo install dnf podman podman-docker
 
 _Note_: the previous make commands can end with a `permission denied` error if *selinux* is configured in enforcing mode.
-In this case you can temporarily disable *selinux* by executing as root the command `setenforce 0`.
+In this case you can temporarily disable *selinux* by executing as root the command `setenforce 0`
+(or maybe share a better solution!).
 
 ## Gentoo Package
 
