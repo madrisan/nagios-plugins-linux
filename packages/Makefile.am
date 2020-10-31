@@ -34,11 +34,11 @@ MULTIBUILD_OPTS = \
 
 TARGETS_REDHAT = \
 	centos-5 centos-6 centos-7 centos-8 \
-	fedora-30 fedora-31 fedora-32 \
+	fedora-31 fedora-32 fedora-33 \
 	fedora-rawhide
 
 centos-latest: centos-8
-fedora-latest: fedora-32
+fedora-latest: fedora-33
 
 TARGETS_DEBIAN = \
 	debian-jessie debian-stretch debian-buster
