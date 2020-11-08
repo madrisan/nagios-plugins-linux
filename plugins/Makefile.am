@@ -45,6 +45,7 @@ libexec_PROGRAMS =        \
 	check_nbprocs     \
 	check_network     \
 	check_paging      \
+	check_pressure    \
 	check_readonlyfs  \
 	check_temperature \
 	check_tcpcount    \
@@ -92,6 +93,7 @@ check_paging_SOURCES     = check_paging.c
 if HAVE_LIBVARLINK
 check_podman_SOURCES     = check_podman.c
 endif
+check_pressure_SOURCES   = check_pressure.c
 check_readonlyfs_SOURCES = check_readonlyfs.c
 if HAVE_PROC_MEMINFO
 check_swap_SOURCES       = check_swap.c

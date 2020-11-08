@@ -40,6 +40,7 @@ libutils_a_SOURCES =  \
 	netinfo.c     \
 	netinfo-private.c \
 	perfdata.c    \
+	pressure.c    \
 	processes.c   \
 	procparser.c  \
 	progname.c    \
