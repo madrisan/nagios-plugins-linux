@@ -88,7 +88,7 @@ const struct link_speed
 #endif
   { SPEED_UNKNOWN, "unknown!" }
 };
-static const int link_speed_size =
+static const size_t link_speed_size =
   sizeof (phy_speed_to_str) / sizeof (phy_speed_to_str[0]);
 
 static int
