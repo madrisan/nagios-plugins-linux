@@ -38,6 +38,7 @@ noinst_HEADERS = \
 	netinfo.h \
 	netinfo-private.h \
 	perfdata.h \
+	pressure.h \
 	processes.h \
 	procparser.h \
 	progname.h \
