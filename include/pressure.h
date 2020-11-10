@@ -38,18 +38,18 @@ extern "C"
   /* Structure for pressure-stall cpu statistics.
    *  - avg* fields: percentage of time in the last 10, 60 and 300 seconds
    *           respectively that processes were starved of CPU,
-   *  - total: total time in microseconds that processes were starved for CPU.
+   *  - total: total time in microseconds that processes were starved of CPU.
    */
   struct proc_psi_oneline
   {
     unsigned long long total;
-    unsigned long long starved_nsecs_per_second;
     double avg10;
     double avg60;
     double avg300;
   };
 
-  /* Structure for pressure-stall io and memory statistics */
+  /* Structure for pressure-stall io and memory statistics
+   */
   struct proc_psi_twolines
   {
     unsigned long long some_total;
@@ -62,7 +62,8 @@ extern "C"
     double full_avg300;
   };
 
-  int proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu);
+  int proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu,
+			 unsigned long long *starvation);
   int proc_psi_read_io (struct proc_psi_twolines **psi_io);
   int proc_psi_read_memory (struct proc_psi_twolines **psi_memory);
 
