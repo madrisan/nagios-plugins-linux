@@ -26,6 +26,7 @@
 #include "logging.h"
 #include "messages.h"
 #include "pressure.h"
+#include "string-macros.h"
 #include "xalloc.h"
 
 static int
@@ -46,9 +47,9 @@ proc_psi_parser (struct proc_psi_oneline *psi_stat,
     {
       dbg ("line: %s", line);
       label_len = strlen (label);
-      if (!strncmp (line, label, label_len))
+      if (STREQLEN (line, label, label_len))
 	{
-	  dbg ("line is matching label \"%s\"\n", label);
+	  dbg (" \\ matching label \"%s\"\n", label);
 	  rc =
 	    sscanf (line + label_len + 1,
 		    "avg10=%32lf avg60=%32lf avg300=%32lf total=%llu",
@@ -59,6 +60,7 @@ proc_psi_parser (struct proc_psi_oneline *psi_stat,
 	  dbg (" \\ avg10=%g avg60=%g avg300=%g total=%llu\n",
 	       psi_stat->avg10, psi_stat->avg60, psi_stat->avg300,
 	       psi_stat->total);
+	  break;
 	}
     }
 
@@ -102,15 +104,44 @@ proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu,
 }
 
 int
-proc_psi_read_io (struct proc_psi_twolines **psi_io)
+proc_psi_read_io (struct proc_psi_twolines **psi_io,
+		  unsigned long long *starvation)
 {
   struct proc_psi_oneline psi;
+  struct proc_psi_twolines *stats = *psi_io;
+  unsigned long long total;
 
-  if (!proc_psi_parser (&psi, PATH_PSI_PROC_IO, "some"))
-    return -1;
+  if (NULL == stats)
+    {
+      stats = xmalloc (sizeof (struct proc_psi_twolines));
+      *psi_io = stats;
+    }
 
-  if (!proc_psi_parser (&psi, PATH_PSI_PROC_IO, "full"))
-    return -1;
+  proc_psi_parser (&psi, PATH_PSI_PROC_IO, "some");
+  stats->some_avg10 = psi.avg10;
+  stats->some_avg60 = psi.avg60;
+  stats->some_avg300 = psi.avg300;
+  total = psi.total;
+
+  sleep (1);
+
+  proc_psi_parser (&psi, PATH_PSI_PROC_IO, "some");
+  *starvation = psi.total - total;
+  dbg ("delta (over 1sec) form some: %llu (%llu - %llu)\n",
+       *starvation, psi.total, total);
+
+  proc_psi_parser (&psi, PATH_PSI_PROC_IO, "full");
+  stats->full_avg10 = psi.avg10;
+  stats->full_avg60 = psi.avg60;
+  stats->full_avg300 = psi.avg300;
+  total = psi.total;
+
+  sleep (1);
+
+  proc_psi_parser (&psi, PATH_PSI_PROC_IO, "full");
+  *(starvation + 1) = psi.total - total;
+  dbg ("delta (over 1sec) for full: %llu (%llu - %llu)\n",
+       *(starvation + 1), psi.total, total);
 
   return 0;
 }
