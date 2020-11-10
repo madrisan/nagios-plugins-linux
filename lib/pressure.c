@@ -41,11 +41,14 @@ proc_psi_parser (struct proc_psi_oneline *psi_stat,
   if ((fp = fopen (procpath, "r")) == NULL)
     plugin_error (STATE_UNKNOWN, errno, "error opening %s", procpath);
 
+  dbg ("reading file %s\n", procpath);
   while ((chread = getline (&line, &len, fp)) != -1)
     {
+      dbg ("line: %s", line);
       label_len = strlen (label);
       if (!strncmp (line, label, label_len))
 	{
+	  dbg ("line is matching label \"%s\"\n", label);
 	  rc =
 	    sscanf (line + label_len + 1,
 		    "avg10=%32lf avg60=%32lf avg300=%32lf total=%llu",
@@ -53,9 +56,8 @@ proc_psi_parser (struct proc_psi_oneline *psi_stat,
 		    &psi_stat->avg60,
 		    &psi_stat->avg300,
 		    &psi_stat->total);
-	  dbg ("line: %s", line);
-          dbg (" \\ %s >> avg10=%g avg60=%g avg300=%g total=%llu\n",
-	       label, psi_stat->avg10, psi_stat->avg60, psi_stat->avg300,
+	  dbg (" \\ avg10=%g avg60=%g avg300=%g total=%llu\n",
+	       psi_stat->avg10, psi_stat->avg60, psi_stat->avg300,
 	       psi_stat->total);
 	}
     }
@@ -70,11 +72,11 @@ proc_psi_parser (struct proc_psi_oneline *psi_stat,
 }
 
 int
-proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu)
+proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu,
+		   unsigned long long *starvation)
 {
   struct proc_psi_oneline psi, *stats = *psi_cpu;
-
-  proc_psi_parser (&psi, PATH_PSI_PROC_CPU, "some");
+  unsigned long long total;
 
   if (NULL == stats)
     {
@@ -82,14 +84,19 @@ proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu)
       *psi_cpu = stats;
     }
 
+  proc_psi_parser (&psi, PATH_PSI_PROC_CPU, "some");
   stats->avg10 = psi.avg10;
   stats->avg60 = psi.avg60;
   stats->avg300 = psi.avg300;
-  stats->total = psi.total;
+  total = psi.total;
 
+  /* calculate the starvation (in microseconds) per second */
   sleep (1);
+
   proc_psi_parser (&psi, PATH_PSI_PROC_CPU, "some");
-  stats->starved_nsecs_per_second = psi.total - stats->total;
+  *starvation = psi.total - total;
+  dbg ("delta (over 1sec): %llu (%llu - %llu)\n",
+       *starvation, psi.total, total);
 
   return 0;
 }

@@ -93,8 +93,8 @@ main (int argc, char **argv)
   int c;
   char *critical = NULL, *warning = NULL,
        *status_msg, *perfdata_mem_msg;
-  double threshold = .0;
   enum linux_psi_id pressure_mode = LINUX_PSI_NONE;
+  unsigned long long starvation;
   struct proc_psi_oneline *psi_cpu = NULL;
   struct proc_psi_twolines *psi_io = NULL, *psi_memory = NULL;
   nagstatus status = STATE_OK;
@@ -144,20 +144,20 @@ main (int argc, char **argv)
     default:
       usage (stderr);
     case LINUX_PSI_CPU:
-      proc_psi_read_cpu (&psi_cpu);
+      proc_psi_read_cpu (&psi_cpu, &starvation);
 
-      threshold = psi_cpu->starved_nsecs_per_second;
-      status = get_status (threshold, my_threshold);
+      status = get_status (starvation, my_threshold);
 
       status_msg =
 	xasprintf ("%s (CPU starvation) %s: %llu microsecs/s",
-		   program_name_short, state_text (status),
-		   psi_cpu->starved_nsecs_per_second);
+		   program_name_short, state_text (status), starvation);
       perfdata_mem_msg =
-	xasprintf ("cpu_avg10=%2.2lf%% cpu_avg60=%2.2lf%% cpu_avg300=%2.2lf%%"
+	xasprintf ("cpu_avg10=%2.2lf%% cpu_avg60=%2.2lf%% cpu_avg300=%2.2lf%% "
+		   "cpu_starvation=%llu"
 		   , psi_cpu->avg10
 		   , psi_cpu->avg60
-		   , psi_cpu->avg300);
+		   , psi_cpu->avg300
+		   , starvation);
       break;
     case LINUX_PSI_IO:
       proc_psi_read_io (&psi_io);
@@ -171,7 +171,7 @@ main (int argc, char **argv)
     printf ("%s | %s\n", status_msg, perfdata_mem_msg);
   else
     {
-      status = get_status (threshold, my_threshold);
+      status = get_status (starvation, my_threshold);
       printf ("%s %s - FIXME: not implemented yet |\n",
 	      program_name_short, state_text (status));
     }
