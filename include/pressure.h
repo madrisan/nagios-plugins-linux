@@ -49,6 +49,14 @@ extern "C"
   };
 
   /* Structure for pressure-stall io and memory statistics
+   *
+   * For memory, large numbers in 'full' means no runnable/non-idle process
+   * was able to run and the CPU was busy doing housekeeping work related
+   * to paging.  Even small numbers clearly indicate workloads that are
+   * being starved of RAM.  So, while the numbers in 'some' indicate that
+   * while the system is strained of resources and some runnable processes
+   * are starved, it does mean that other processes continue to run and
+   * real work is getting done.
    */
   struct proc_psi_twolines
   {
@@ -64,7 +72,8 @@ extern "C"
 
   int proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu,
 			 unsigned long long *starvation);
-  int proc_psi_read_io (struct proc_psi_twolines **psi_io);
+  int proc_psi_read_io (struct proc_psi_twolines **psi_io,
+			unsigned long long *starvation);
   int proc_psi_read_memory (struct proc_psi_twolines **psi_memory);
 
 #ifdef __cplusplus
