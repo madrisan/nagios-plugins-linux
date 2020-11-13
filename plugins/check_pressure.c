@@ -55,13 +55,13 @@ usage (FILE * out)
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s --cpu [-w COUNTER] [-c COUNTER]\n", program_name);
-//  fprintf (out, "  %s --io [-w COUNTER] [-c COUNTER]\n", program_name);
-//  fprintf (out, "  %s --memory [-w COUNTER] [-c COUNTER]\n", program_name);
-//  fputs (USAGE_OPTIONS, out);
+  fprintf (out, "  %s --io [-w COUNTER] [-c COUNTER]\n", program_name);
+  fprintf (out, "  %s --memory [-w COUNTER] [-c COUNTER]\n", program_name);
+  fputs (USAGE_OPTIONS, out);
   fputs ("  -C, --cpu       return the cpu pressure metrics\n", out);
-//  fputs ("  -i, --io        return the io (block layer/filesystems) pressure "
-//	 "metrics\n", out);
-//  fputs ("  -m, --memory    return the memory pressure metrics\n", out);
+  fputs ("  -i, --io        return the io (block layer/filesystems) pressure "
+	 "metrics\n", out);
+  fputs ("  -m, --memory    return the memory pressure metrics\n", out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs (USAGE_HELP, out);
@@ -72,8 +72,8 @@ usage (FILE * out)
          "  /proc/pressure folder.\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s --cpu\n", program_name);
-//  fprintf (out, "  %s --io\n", program_name);
-//  fprintf (out, "  %s --memory\n", program_name);
+  fprintf (out, "  %s --io\n", program_name);
+  fprintf (out, "  %s --memory\n", program_name);
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
 
@@ -92,13 +92,15 @@ main (int argc, char **argv)
 {
   int c;
   char *critical = NULL, *warning = NULL,
-       *status_msg, *perfdata_mem_msg;
+       *status_msg, *perfdata_mem_msg, *prefix = NULL;
   enum linux_psi_id pressure_mode = LINUX_PSI_NONE;
   unsigned long long starvation[2];
   struct proc_psi_oneline *psi_cpu = NULL;
-  struct proc_psi_twolines *psi_io = NULL, *psi_memory = NULL;
+  struct proc_psi_twolines *psi = NULL;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
+  int (*proc_psi_read) (struct proc_psi_twolines **,
+		        unsigned long long *) = NULL;
 
   set_program_name (argv[0]);
 
@@ -117,10 +119,14 @@ main (int argc, char **argv)
 	  critical = optarg;
 	  break;
 	case 'i':
+	  prefix = "io";
 	  pressure_mode = LINUX_PSI_IO;
+	  proc_psi_read = &proc_psi_read_io;
 	  break;
 	case 'm':
+	  prefix = "mem";
 	  pressure_mode = LINUX_PSI_MEMORY;
+	  proc_psi_read = &proc_psi_read_memory;
 	  break;
 	case 'w':
 	  warning = optarg;
@@ -160,41 +166,33 @@ main (int argc, char **argv)
 		   , starvation[0]);
       break;
     case LINUX_PSI_IO:
-      proc_psi_read_io (&psi_io, &starvation[0]);
+    case LINUX_PSI_MEMORY:
+      proc_psi_read (&psi, &starvation[0]);
       status = get_status (starvation[0], my_threshold);
 
       status_msg =
-	xasprintf ("%s (IO starvation) %s: some:%llu full:%llu microsecs/s",
-		   program_name_short, state_text (status),
-		   starvation[0], starvation[1]);
+	xasprintf ("%s (%s starvation) %s: some:%llu full:%llu microsecs/s"
+		   , program_name_short
+		   , pressure_mode == LINUX_PSI_IO ? "IO" : "Memory"
+		   , state_text (status)
+		   , starvation[0], starvation[1]);
       perfdata_mem_msg =
-	xasprintf ("io_some_avg10=%2.2lf%% io_some_avg60=%2.2lf%% "
-		   "io_some_avg300=%2.2lf%% io_some_starvation/s=%llu "
-		   "io_full_avg10=%2.2lf%% io_full_avg60=%2.2lf%% "
-		   "io_full_avg300=%2.2lf%% io_full_starvation/s=%llu "
-		   , psi_io->some_avg10
-		   , psi_io->some_avg60
-		   , psi_io->some_avg300
-		   , starvation[0]
-		   , psi_io->full_avg10
-		   , psi_io->full_avg60
-		   , psi_io->full_avg300
-		   , starvation[1]);
-      break;
-    case LINUX_PSI_MEMORY:
-      proc_psi_read_memory (&psi_memory);
+	xasprintf ("%s_some_avg10=%2.2lf%% %s_some_avg60=%2.2lf%% "
+		   "%s_some_avg300=%2.2lf%% %s_some_starvation/s=%llu "
+		   "%s_full_avg10=%2.2lf%% %s_full_avg60=%2.2lf%% "
+		   "%s_full_avg300=%2.2lf%% %s_full_starvation/s=%llu "
+		   , prefix, psi->some_avg10
+		   , prefix, psi->some_avg60
+		   , prefix, psi->some_avg300
+		   , prefix, starvation[0]
+		   , prefix, psi->full_avg10
+		   , prefix, psi->full_avg60
+		   , prefix, psi->full_avg300
+		   , prefix, starvation[1]);
       break;
   }
 
-  if (LINUX_PSI_MEMORY != pressure_mode)
-    printf ("%s | %s\n", status_msg, perfdata_mem_msg);
-  else
-    {
-      status = get_status (0, my_threshold);
-      printf ("%s %s - FIXME: not implemented yet |\n",
-	      program_name_short, state_text (status));
-    }
-
+  printf ("%s | %s\n", status_msg, perfdata_mem_msg);
   free (my_threshold);
 
   return status;

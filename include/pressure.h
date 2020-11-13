@@ -74,7 +74,8 @@ extern "C"
 			 unsigned long long *starvation);
   int proc_psi_read_io (struct proc_psi_twolines **psi_io,
 			unsigned long long *starvation);
-  int proc_psi_read_memory (struct proc_psi_twolines **psi_memory);
+  int proc_psi_read_memory (struct proc_psi_twolines **psi_memory,
+			    unsigned long long *starvation);
 
 #ifdef __cplusplus
 }

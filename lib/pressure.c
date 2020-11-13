@@ -103,9 +103,9 @@ proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu,
   return 0;
 }
 
-int
-proc_psi_read_io (struct proc_psi_twolines **psi_io,
-		  unsigned long long *starvation)
+static int
+proc_psi_read (struct proc_psi_twolines **psi_io,
+	       unsigned long long *starvation, char *procfile)
 {
   struct proc_psi_oneline psi;
   struct proc_psi_twolines *stats = *psi_io;
@@ -117,7 +117,7 @@ proc_psi_read_io (struct proc_psi_twolines **psi_io,
       *psi_io = stats;
     }
 
-  proc_psi_parser (&psi, PATH_PSI_PROC_IO, "some");
+  proc_psi_parser (&psi, procfile, "some");
   stats->some_avg10 = psi.avg10;
   stats->some_avg60 = psi.avg60;
   stats->some_avg300 = psi.avg300;
@@ -125,12 +125,12 @@ proc_psi_read_io (struct proc_psi_twolines **psi_io,
 
   sleep (1);
 
-  proc_psi_parser (&psi, PATH_PSI_PROC_IO, "some");
+  proc_psi_parser (&psi, procfile, "some");
   *starvation = psi.total - total;
   dbg ("delta (over 1sec) form some: %llu (%llu - %llu)\n",
        *starvation, psi.total, total);
 
-  proc_psi_parser (&psi, PATH_PSI_PROC_IO, "full");
+  proc_psi_parser (&psi, procfile, "full");
   stats->full_avg10 = psi.avg10;
   stats->full_avg60 = psi.avg60;
   stats->full_avg300 = psi.avg300;
@@ -138,7 +138,7 @@ proc_psi_read_io (struct proc_psi_twolines **psi_io,
 
   sleep (1);
 
-  proc_psi_parser (&psi, PATH_PSI_PROC_IO, "full");
+  proc_psi_parser (&psi, procfile, "full");
   *(starvation + 1) = psi.total - total;
   dbg ("delta (over 1sec) for full: %llu (%llu - %llu)\n",
        *(starvation + 1), psi.total, total);
@@ -147,15 +147,15 @@ proc_psi_read_io (struct proc_psi_twolines **psi_io,
 }
 
 int
-proc_psi_read_memory (struct proc_psi_twolines **psi_memory)
+proc_psi_read_io (struct proc_psi_twolines **psi_io,
+		  unsigned long long *starvation)
 {
-  struct proc_psi_oneline psi;
+  return proc_psi_read (psi_io, starvation, PATH_PSI_PROC_IO);
+}
 
-  if (!proc_psi_parser (&psi, PATH_PSI_PROC_MEMORY, "some"))
-    return -1;
-
-  if (!proc_psi_parser (&psi, PATH_PSI_PROC_MEMORY, "full"))
-    return -1;
-
-  return 0;
+int
+proc_psi_read_memory (struct proc_psi_twolines **psi_memory,
+		      unsigned long long *starvation)
+{
+  return proc_psi_read (psi_memory, starvation, PATH_PSI_PROC_MEMORY);
 }
