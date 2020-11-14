@@ -1,17 +1,24 @@
-name: Ubuntu build check
+name: Build check
 
 on:
   push:
     paths-ignore:
-      - '**.md'
+    - '**.md'
   pull_request:
-    types:
-      - opened
+    types: [assigned, edited, opened, synchronize, reopened]
+
+strategy:
+    matrix:
+        os:
+        - alpine_latest
+        - buster
+        - fedora_latest
+        - ubuntu-latest
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
