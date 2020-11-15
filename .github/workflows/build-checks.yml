@@ -3,36 +3,57 @@ name: Build check
 on:
   push:
     paths-ignore:
-    - '**.md'
+      - '**.md'
   pull_request:
     types: [assigned, edited, opened, synchronize, reopened]
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: [buster, fedora_latest, ubuntu-latest, alpine_latest]
-        include:
-        - os: buster
-          COMPILER: gcc
-          LINKER: gcc
+        container:
+          - 'centos:8'
+          - 'debian:buster'
+          - 'fedora:33'
+          - 'ubuntu:18.04'
+#         - 'alpine:3.12'
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: configure
-      run: |
-        autoreconf --install
-        ./configure
+      - id: install_deps
+        run: |
+          case "${{ matrix.container }}" in
+            alpine*)
+              apk update
+              apk add autoconf automake bzip2 curl-dev file gcc libtool linux-headers make m4 musl-dev xz
+            ;;
+            debian*|ubuntu*)
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update -q
+              apt-get install -q -y --no-install-recommends autoconf automake bzip2 gcc libcurl4-gnutls-dev libtool m4 make pkg-config xz-utils
+            ;;
+            centos*)
+              dnf -y update
+              dnf -y install autoconf automake bzip2 gcc glibc-devel libcurl-devel libtool make m4 xz
+            ;;
+            fedora*)
+              dnf -y update
+              dnf -y install autoconf automake bzip2 gcc glibc-devel libcurl-devel libvarlink-devel libtool make m4 xz
+            ;;
+          esac
 
-    - name: make
-      run: make
+      - id: configure
+        run: |
+          autoreconf --install
+          ./configure
 
-    - name: make check
-      run: make check
-
-    - name: make distcheck
-      run: make distcheck
+      - id: make
+        run: |
+          make
+          make check
+          make distcheck
