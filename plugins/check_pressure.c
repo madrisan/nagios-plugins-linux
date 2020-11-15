@@ -29,6 +29,7 @@
 #include "pressure.h"
 #include "progname.h"
 #include "progversion.h"
+#include "system.h"
 #include "thresholds.h"
 #include "xasprintf.h"
 
@@ -37,6 +38,7 @@ static const char *program_copyright =
 
 static struct option const longopts[] = {
   {(char *) "cpu", no_argument, NULL, 'C'},
+  {(char *) "full", no_argument, NULL, 'f'},
   {(char *) "io", no_argument, NULL, 'i'},
   {(char *) "memory", no_argument, NULL, 'm'},
   {(char *) "critical", required_argument, NULL, 'c'},
@@ -55,15 +57,21 @@ usage (FILE * out)
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s --cpu [-w COUNTER] [-c COUNTER]\n", program_name);
-  fprintf (out, "  %s --io [-w COUNTER] [-c COUNTER]\n", program_name);
-  fprintf (out, "  %s --memory [-w COUNTER] [-c COUNTER]\n", program_name);
+  fprintf (out, "  %s --io [--full] [-w COUNTER] [-c COUNTER]\n", program_name);
+  fprintf (out, "  %s --memory [--full] [-w COUNTER] [-c COUNTER]\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -C, --cpu       return the cpu pressure metrics\n", out);
   fputs ("  -i, --io        return the io (block layer/filesystems) pressure "
 	 "metrics\n", out);
   fputs ("  -m, --memory    return the memory pressure metrics\n", out);
-  fputs ("  -w, --warning COUNTER   warning threshold\n", out);
-  fputs ("  -c, --critical COUNTER   critical threshold\n", out);
+  fputs ("  -f, --full      select the data labeled \"full\" to calculate "
+	 "thresholds\n", out);
+  fputs ("                  instead of the one with \"some\" "
+	 "(io and memory only)\n", out);
+  fputs ("  -w, --warning COUNTER   warning threshold (in microseconds/s)\n",
+	 out);
+  fputs ("  -c, --critical COUNTER   critical threshold (in microseconds/s)\n",
+	 out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_NOTE, out);
@@ -73,7 +81,7 @@ usage (FILE * out)
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s --cpu\n", program_name);
   fprintf (out, "  %s --io\n", program_name);
-  fprintf (out, "  %s --memory\n", program_name);
+  fprintf (out, "  %s --memory --full 100\n", program_name);
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
 
@@ -90,6 +98,7 @@ print_version (void)
 int
 main (int argc, char **argv)
 {
+  bool threshold_full = false;
   int c;
   char *critical = NULL, *warning = NULL,
        *status_msg, *perfdata_mem_msg, *prefix = NULL;
@@ -105,7 +114,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "Cimc:w:v" GETOPT_HELP_VERSION_STRING,
+			   "Cimfc:w:v" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -117,6 +126,9 @@ main (int argc, char **argv)
 	  break;
 	case 'c':
 	  critical = optarg;
+	  break;
+	case 'f':
+	  threshold_full = true;
 	  break;
 	case 'i':
 	  prefix = "io";
@@ -138,7 +150,8 @@ main (int argc, char **argv)
 	}
     }
 
-  if (LINUX_PSI_NONE == pressure_mode)
+  if ((LINUX_PSI_NONE == pressure_mode) ||
+      (LINUX_PSI_CPU == pressure_mode && threshold_full))
     usage (stderr);
 
   status = set_thresholds (&my_threshold, warning, critical);
@@ -168,8 +181,8 @@ main (int argc, char **argv)
     case LINUX_PSI_IO:
     case LINUX_PSI_MEMORY:
       proc_psi_read (&psi, &starvation[0]);
-      status = get_status (starvation[0], my_threshold);
-
+      status = get_status (threshold_full ? starvation[1] : starvation[0],
+			   my_threshold);
       status_msg =
 	xasprintf ("%s (%s starvation) %s: some:%llu full:%llu microsecs/s"
 		   , program_name_short
