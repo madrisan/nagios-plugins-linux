@@ -31,7 +31,4 @@
 # define __bool_true_false_are_defined 1
 #endif
 
-#define TEST_ASSERT_EQUAL_NUMERIC(A, B) \
-  do { if ((A) != (B)) ret = -1; } while (0)
-
 #endif			/* _NPL_SYSTEM_H_ */
