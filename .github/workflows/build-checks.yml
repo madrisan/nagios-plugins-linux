@@ -10,13 +10,11 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.experimental }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: [buster, fedora_latest, ubuntu-latest]
-        experimental: [alpine_latest]
+        os: [buster, fedora_latest, ubuntu-latest, alpine_latest]
         include:
         - os: buster
           COMPILER: gcc
