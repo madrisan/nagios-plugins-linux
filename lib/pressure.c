@@ -29,6 +29,29 @@
 #include "string-macros.h"
 #include "xalloc.h"
 
+#ifdef NPL_TESTING
+static const char *
+get_path_proc_pressure (enum linux_psi_id psi_id)
+{
+  const char *env_procpressure = NULL;
+
+  switch (psi_id)
+  {
+    default:
+      break;
+    case LINUX_PSI_CPU:
+      env_procpressure = secure_getenv ("NPL_TEST_PATH_PROCPRESSURE_CPU");
+      break;
+    case LINUX_PSI_IO:
+    case LINUX_PSI_MEMORY:
+      env_procpressure = secure_getenv ("NPL_TEST_PATH_PROCPRESSURE_IO");
+      break;
+  }
+
+  return env_procpressure ? env_procpressure : NULL;
+}
+#endif
+
 static int
 proc_psi_parser (struct proc_psi_oneline *psi_stat,
 		 const char *procpath, char *label)
@@ -77,6 +100,11 @@ int
 proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu,
 		   unsigned long long *starvation)
 {
+#ifdef NPL_TESTING
+  const char *procpath = get_path_proc_pressure (LINUX_PSI_CPU);
+#else
+  const char *procpath = PATH_PSI_PROC_CPU;
+#endif
   struct proc_psi_oneline psi, *stats = *psi_cpu;
   unsigned long long total;
 
@@ -86,16 +114,16 @@ proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu,
       *psi_cpu = stats;
     }
 
-  proc_psi_parser (&psi, PATH_PSI_PROC_CPU, "some");
+  proc_psi_parser (&psi, procpath, "some");
   stats->avg10 = psi.avg10;
   stats->avg60 = psi.avg60;
   stats->avg300 = psi.avg300;
-  total = psi.total;
+  stats->total = total = psi.total;
 
   /* calculate the starvation (in microseconds) per second */
   sleep (1);
 
-  proc_psi_parser (&psi, PATH_PSI_PROC_CPU, "some");
+  proc_psi_parser (&psi, procpath, "some");
   *starvation = psi.total - total;
   dbg ("delta (over 1sec): %llu (%llu - %llu)\n",
        *starvation, psi.total, total);
@@ -105,7 +133,7 @@ proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu,
 
 static int
 proc_psi_read (struct proc_psi_twolines **psi_io,
-	       unsigned long long *starvation, char *procfile)
+	       unsigned long long *starvation, const char *procfile)
 {
   struct proc_psi_oneline psi;
   struct proc_psi_twolines *stats = *psi_io;
@@ -121,7 +149,7 @@ proc_psi_read (struct proc_psi_twolines **psi_io,
   stats->some_avg10 = psi.avg10;
   stats->some_avg60 = psi.avg60;
   stats->some_avg300 = psi.avg300;
-  total = psi.total;
+  stats->some_total = total = psi.total;
 
   sleep (1);
 
@@ -134,7 +162,7 @@ proc_psi_read (struct proc_psi_twolines **psi_io,
   stats->full_avg10 = psi.avg10;
   stats->full_avg60 = psi.avg60;
   stats->full_avg300 = psi.avg300;
-  total = psi.total;
+  stats->full_total = total = psi.total;
 
   sleep (1);
 
@@ -150,12 +178,22 @@ int
 proc_psi_read_io (struct proc_psi_twolines **psi_io,
 		  unsigned long long *starvation)
 {
-  return proc_psi_read (psi_io, starvation, PATH_PSI_PROC_IO);
+#ifdef NPL_TESTING
+  const char *procpath = get_path_proc_pressure (LINUX_PSI_IO);
+#else
+  const char *procpath = PATH_PSI_PROC_IO;
+#endif
+  return proc_psi_read (psi_io, starvation, procpath);
 }
 
 int
 proc_psi_read_memory (struct proc_psi_twolines **psi_memory,
 		      unsigned long long *starvation)
 {
-  return proc_psi_read (psi_memory, starvation, PATH_PSI_PROC_MEMORY);
+#ifdef NPL_TESTING
+  const char *procpath = get_path_proc_pressure (LINUX_PSI_MEMORY);
+#else
+  const char *procpath = PATH_PSI_PROC_MEMORY;
+#endif
+  return proc_psi_read (psi_memory, starvation, procpath);
 }

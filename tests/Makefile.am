@@ -53,6 +53,7 @@ test_programs = \
 	tslibmeminfo_procparser \
 	tslibmessages \
 	tslibperfdata \
+	tslibpressure \
 	tsliburlencode
 if !HAVE_LIBPROCPS
 test_programs += \
@@ -102,6 +103,9 @@ tslibmessages_LDADD = $(LDADDS)
 
 tslibperfdata_SOURCES = $(test_utils) tslibperfdata.c
 tslibperfdata_LDADD = $(LDADDS)
+
+tslibpressure_SOURCES = $(test_utils) tslibpressure.c
+tslibpressure_LDADD = $(LDADDS)
 
 tsliburlencode_SOURCES = $(test_utils) tsliburlencode.c
 tsliburlencode_LDADD = $(LDADDS)
@@ -154,6 +158,8 @@ dist_noinst_DATA = \
 	ts_container_podman_GetContainerStats.data \
 	ts_container_podman_ListContainers.data \
 	ts_procmeminfo.data \
+	ts_procpressurecpu.data \
+	ts_procpressureio.data \
 	ts_procstat.data \
 	ts_procvmstat.data \
 	ts_sysdockermemstat.data
