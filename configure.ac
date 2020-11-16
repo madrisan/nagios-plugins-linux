@@ -64,6 +64,18 @@ if test "$cross_compiling" = no; then
   fi
 fi
 
+# Linux Alpine shipis with musl libc
+AC_MSG_CHECKING(for musl libc)
+dumpmachine=`$CC -dumpmachine`
+case "$dumpmachine" in
+*-musl)
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([LIBC_MUSL], [1], [Define to 1 if libc is musl])
+  ;;
+*)
+  AC_MSG_RESULT([no]) ;;
+esac
+
 dnl Check for variable-length arrays support
 AC_MSG_CHECKING(for variable-lenght arrays)
 AC_COMPILE_IFELSE(
@@ -219,6 +231,7 @@ AC_CHECK_HEADERS([ \
   netinet/in.h \
   sys/mount.h \
   sys/param.h \
+  sys/resource.h \
   sys/socket.h \
   sys/sysctl.h \
   sys/sysinfo.h \
