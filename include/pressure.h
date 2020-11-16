@@ -22,10 +22,10 @@ extern "C"
 {
 #endif
 
-#define PATH_PROC_PRESSURE	"/proc/pressure"
-#define PATH_PSI_PROC_CPU     PATH_PROC_PRESSURE "/cpu"
-#define PATH_PSI_PROC_IO	PATH_PROC_PRESSURE "/io"
-#define PATH_PSI_PROC_MEMORY  PATH_PROC_PRESSURE "/memory"
+#define PATH_PROC_PRESSURE   "/proc/pressure"
+#define PATH_PSI_PROC_CPU      PATH_PROC_PRESSURE "/cpu"
+#define PATH_PSI_PROC_IO       PATH_PROC_PRESSURE "/io"
+#define PATH_PSI_PROC_MEMORY   PATH_PROC_PRESSURE "/memory"
 
   enum linux_psi_id		/* Linux PSI modes */
   {

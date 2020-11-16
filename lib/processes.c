@@ -153,7 +153,11 @@ procs_list_node_add (uid_t uid, unsigned long inc,
     new->rlimit_nproc_soft = new->rlimit_nproc_hard = RLIM_INFINITY;
   else
     {
+#ifdef LIBC_MUSL
+      dbg (" - with rlimits: %llu %llu\n", rlim.rlim_cur, rlim.rlim_max);
+#else
       dbg (" - with rlimits: %lu %lu\n", rlim.rlim_cur, rlim.rlim_max);
+#endif
       new->rlimit_nproc_soft = rlim.rlim_cur;
       new->rlimit_nproc_hard = rlim.rlim_max;
     }
