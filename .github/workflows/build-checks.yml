@@ -30,7 +30,7 @@ jobs:
           case "${{ matrix.container }}" in
             alpine*)
               apk update
-              apk add autoconf automake bzip2 curl-dev file gcc libtool linux-headers make m4 musl-dev xz
+              apk add autoconf automake bzip2 curl-dev file gcc libtool linux-headers make m4 musl-dev tar xz
             ;;
             debian*|ubuntu*)
               export DEBIAN_FRONTEND=noninteractive
