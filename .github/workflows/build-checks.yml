@@ -16,11 +16,11 @@ jobs:
       fail-fast: false
       matrix:
         container:
+          - 'alpine:3.12'
           - 'centos:8'
           - 'debian:buster'
           - 'fedora:33'
           - 'ubuntu:18.04'
-#         - 'alpine:3.12'
 
     steps:
       - uses: actions/checkout@v2
@@ -50,7 +50,7 @@ jobs:
       - id: configure
         run: |
           autoreconf --install
-          ./configure
+          ./configure --enable-debug
 
       - id: make
         run: |
