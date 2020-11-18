@@ -17,7 +17,6 @@
 
 ![alt tag](https://madrisan.files.wordpress.com/2015/11/nagios-plugins-linux-logo-256.png)
 
-
 ## About
 
 This package contains several `nagios plugins` for monitoring Linux boxes.
@@ -25,28 +24,29 @@ Nagios is an open source computer system monitoring, network monitoring and infr
 
 Here is the list of the available plugins:
 
-* **check_clock** - returns the number of seconds elapsed between local time and Nagios server time 
-* **check_cpu** - checks the CPU (user mode) utilization 
+* **check_clock** - returns the number of seconds elapsed between local time and Nagios server time
+* **check_cpu** - checks the CPU (user mode) utilization
 * **check_cpufreq** - displays the CPU frequency characteristics
 * **check_cswch** - checks the total number of context switches across all CPUs
-* **check_docker** - checks the number of running docker containers :new: (:warning: *alpha*, requires *libcurl* version 7.40.0+)
+* **check_docker** - checks the number of running docker containers (:warning: *alpha*, requires *libcurl* version 7.40.0+)
 * **check_fc** - monitors the status of the fiber status ports
 * **check_ifmountfs** - checks whether the given filesystems are mounted
 * **check_intr** - monitors the total number of system interrupts
-* **check_iowait** - monitors the I/O wait bottlenecks 
-* **check_load** - checks the current system load average 
-* **check_memory** - checks the memory usage 
-* **check_multipath** - checks the multipath topology status 
-* **check_nbprocs** - displays the number of running processes per user 
-* **check_network** - displays some network interfaces statistics 
-* **check_paging** - checks the memory and swap paging 
-* **check_podman** - monitor the status of podman containers :new: (:warning: *beta*, requires *libvarlink*)
-* **check_readonlyfs** - checks for readonly filesystems 
-* **check_swap** - checks the swap usage 
-* **check_tcpcount** - checks the tcp network usage 
-* **check_temperature** - monitors the hardware's temperature 
-* **check_uptime** - checks how long the system has been running 
-* **check_users** - displays the number of users that are currently logged on 
+* **check_iowait** - monitors the I/O wait bottlenecks
+* **check_load** - checks the current system load average
+* **check_memory** - checks the memory usage
+* **check_multipath** - checks the multipath topology status
+* **check_nbprocs** - displays the number of running processes per user
+* **check_network** - displays some network interfaces statistics
+* **check_paging** - checks the memory and swap paging
+* **check_pressure** - checks Linux Pressure Stall Information (PSI) data :new:
+* **check_podman** - monitor the status of podman containers (:warning: *beta*, requires *libvarlink*)
+* **check_readonlyfs** - checks for readonly filesystems
+* **check_swap** - checks the swap usage
+* **check_tcpcount** - checks the tcp network usage
+* **check_temperature** - monitors the hardware's temperature
+* **check_uptime** - checks how long the system has been running
+* **check_users** - displays the number of users that are currently logged on
 
 ## Full documentation
 
@@ -92,24 +92,28 @@ the API of the library `libprocps.so.5`
 This library is still under active development and no stable version has
 been released yet. 
 
-## Supported Platforms
+## Supported Platforms and Linux distributions
 
 This package is written in plain C, making as few assumptions as possible, and
-sticking closely to ANSI C/POSIX. 
+sticking closely to ANSI C/POSIX.
 A C99-compliant compiler is required anyway.
 
 This package is known to compile with:
 * gcc 4.1 (RHEL 5 / CentOS 5),
 * gcc 4.4 (RHEL6 / CentOS 6),
 * gcc 4.8 (RHEL7 / CentOS 7),
-* gcc 3.x, 5.1, 5.3, 6.3, 7.x, 8.x, 9.x, 10.x (openmamba GNU/Linux, Debian 8+, Fedora 25+),
-* clang 3.7, 3.8, 4.9, 5.x, 6.x, 7.0, 8.0, 10.0.0 (openmamba GNU/Linux, Fedora 25+),
+* gcc 3.x, 5.1, 5.3, 6.3, 7, 8, 9, 10 (openmamba GNU/Linux, Debian 8+, Fedora 25+),
+* clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10, 11 (openmamba GNU/Linux, Fedora 25+),
 
 List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,
 * 3.10, 3.14, 3.18,
 * 4.2, 4.4, 4,9, 4.14, 4.15, 4.16, 4.19
-* 5.6, 5.7
+* 5.6, 5.7, 5.8
+
+The Nagios Plugins Linux are regularly tested on
+ * Alpine Linux (musl libc),
+ * Debian, CentOS, Fedora, and Gentoo (GNU C Library (glibc)).
 
 ## CentOS/RHEL, Debian, and Fedora Packages
 
