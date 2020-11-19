@@ -45,8 +45,8 @@ test_init ()
   if (setenv (env_variable_io, NPL_TEST_PATH_PROCPRESSURE_IO, 1) < 0)
     return EXIT_AM_HARDFAIL;
 
-  proc_psi_read_cpu (&psi_oneline, &starvation[0]);
-  proc_psi_read_io (&psi_twolines, &starvation[0]);
+  proc_psi_read_cpu (&psi_oneline, &starvation[0], 1);
+  proc_psi_read_io (&psi_twolines, &starvation[0], 1);
 
   unsetenv (env_variable_cpu);
   unsetenv (env_variable_io);
