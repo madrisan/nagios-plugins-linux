@@ -82,7 +82,7 @@ static _Noreturn void
 usage (FILE * out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
-  fputs ("This plugin displays some network interfaces.statistics.\n", out);
+  fputs ("This plugin displays some network interfaces statistics.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [-klW] [-bCdemp] [-i <ifname-regex>] [delay]\n",
