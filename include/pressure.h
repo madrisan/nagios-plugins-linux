@@ -71,11 +71,12 @@ extern "C"
   };
 
   int proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu,
-			 unsigned long long *starvation);
+			 unsigned long long *starvation, unsigned long delay);
   int proc_psi_read_io (struct proc_psi_twolines **psi_io,
-			unsigned long long *starvation);
+			unsigned long long *starvation, unsigned long delay);
   int proc_psi_read_memory (struct proc_psi_twolines **psi_memory,
-			    unsigned long long *starvation);
+			    unsigned long long *starvation,
+			    unsigned long delay);
 
 #ifdef __cplusplus
 }
