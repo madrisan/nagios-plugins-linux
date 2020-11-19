@@ -113,7 +113,7 @@ List of the Linux kernels that have been successfully tested:
 
 The Nagios Plugins Linux are regularly tested on
  * Alpine Linux (musl libc),
- * Debian, CentOS, Fedora, and Gentoo (GNU C Library (glibc)).
+ * Debian, CentOS, Fedora, Gentoo, and Ubuntu (GNU C Library (glibc)).
 
 ## CentOS/RHEL, Debian, and Fedora Packages
 
