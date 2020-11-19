@@ -37,7 +37,11 @@ Here is the list of the available plugins:
 * **check_memory** - checks the memory usage
 * **check_multipath** - checks the multipath topology status
 * **check_nbprocs** - displays the number of running processes per user
-* **check_network** - displays some network interfaces statistics
+* **check_network** - displays some network interfaces statistics. The following plugins are symlinks to *check_network*:
+  * check_network_collisions
+  * check_network_dropped
+  * check_network_errors
+  * check_network_multicast
 * **check_paging** - checks the memory and swap paging
 * **check_pressure** - checks Linux Pressure Stall Information (PSI) data :new:
 * **check_podman** - monitor the status of podman containers (:warning: *beta*, requires *libvarlink*)
