@@ -32,21 +32,23 @@ MULTIBUILD_OPTS = \
 	--uid $(UID) \
 	--pckver $(PACKAGE_VERSION)
 
-TARGETS_REDHAT = \
-	centos-5 centos-6 centos-7 centos-8 \
-	fedora-31 fedora-32 fedora-33 \
-	fedora-rawhide
-
-centos-latest: centos-8
-fedora-latest: fedora-33
+TARGETS_ALPINE = \
+	alpine-3.12
+alpine-latest: alpine-3.12
 
 TARGETS_DEBIAN = \
 	debian-jessie debian-stretch debian-buster
-
 debian-8: debian-jessie
 debian-9: debian-stretch
 debian-10: debian-buster
 debian-latest: debian-buster
+
+TARGETS_REDHAT = \
+	centos-5 centos-6 centos-7 centos-8 \
+	fedora-31 fedora-32 fedora-33 \
+	fedora-rawhide
+centos-latest: centos-8
+fedora-latest: fedora-33
 
 .PHONY: specfile
 specfile:
@@ -56,15 +58,21 @@ specfile:
 source-archive:
 	@cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) dist
 
-$(TARGETS_REDHAT): specfile source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
+$(TARGETS_ALPINE): source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
-	   --spec $(multibuilddir)/specs/$(SPECFILE) \
+	   --spec $(multibuilddir)/specs/APKBUILD \
 	   --os $$distr --target pcks/$@
 
 $(TARGETS_DEBIAN): source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`-slim; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
+	   --os $$distr --target pcks/$@
+
+$(TARGETS_REDHAT): specfile source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
+	@distr=`echo $@ | sed s/-/:/`; \
+	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
+	   --spec $(multibuilddir)/specs/$(SPECFILE) \
 	   --os $$distr --target pcks/$@
 
 EXTRA_DIST = docker-shell-helpers multibuild.sh

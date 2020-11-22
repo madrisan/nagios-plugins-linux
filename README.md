@@ -125,6 +125,7 @@ The `.rpm` and `.deb` packages for CentOS/RHEL, Debian, and Fedora can be built 
 
 Command            | Distribution
 ------------------ | ------------
+Alpine 3.12        | `make -C packages alpine-3.12`
 CentOS 5           | `make -C packages centos-5`
 CentOS 6           | `make -C packages centos-6`
 CentOS 7           | `make -C packages centos-7`

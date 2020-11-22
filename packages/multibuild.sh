@@ -129,6 +129,13 @@ ipaddr="$(container_property --ipaddr "$container")"
 os="$(container_property --os "$container")"
 
 case "$os" in
+   alpine-*)
+      pck_format="apk"
+      pck_install="apk add"
+      pcks_dev="alpine-sdk curl-dev"
+      have_libcurl="1"
+      have_libvarlink="0"
+   ;;
    centos-*)
       pck_format="rpm"
       pck_install="yum install -y"
@@ -182,8 +189,17 @@ esac
 $pck_install $pcks_dev
 
 # create a non-root user for building the software (developer) ...
-groupadd -g $usr_gid developers
-useradd -m -g $usr_gid -u $usr_uid -c Developer -s /bin/bash developer
+case "$os" in
+   alpine-*)
+      addgroup -g 1000 developers
+      adduser -D -G developers -u 1000 -s /bin/sh developer
+      addgroup developer abuild
+      #abuild-keygen -a -i
+   ;;
+   *) groupadd -g $usr_gid developers
+      useradd -m -g $usr_gid -u $usr_uid -s /bin/bash developer
+   ;;
+esac
 
 # ... and switch to this user
 su - developer -c '
@@ -191,7 +207,28 @@ msg () { echo \"*** info: \$1\"; }
 
 mkdir -p $targetdir
 
-if [ \"'$pck_format'\" = rpm ] && [ \"'$specfile'\" ]; then
+if [ \"'$pck_format'\" = apk ]; then
+   mkdir -p ~/${pckname}
+   cp -p $shared_disk_container/${pckname}*.tar.* ~/${pckname}
+   cp -p $shared_disk_container/$specfile ~/${pckname}
+
+   msg \"creating the required abuild certificates ...\"
+   abuild-keygen -n -a
+   cat .abuild/abuild.conf
+   echo
+   find /home/developer/.abuild/ -name \"*rsa*\" -exec cat {} \\;
+   echo
+
+   msg \"creating the apk packages ...\"
+   cd ~/${pckname}
+   abuild checksum
+   abuild -r
+
+   if [ \"'$targetdir'\" ]; then
+      msg \"copying the apk packages to the target folder ...\"
+      cp -p ../packages/developer/$(arch)/*.apk $targetdir
+   fi
+elif [ \"'$pck_format'\" = rpm ] && [ \"'$specfile'\" ]; then
    mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
    cp -p $shared_disk_container/$specfile ~/rpmbuild/SPECS/
    cp -p $shared_disk_container/${pckname}*.tar.* ~/rpmbuild/SOURCES/
