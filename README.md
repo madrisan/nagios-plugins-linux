@@ -61,8 +61,11 @@ in the GitHub [wiki page](https://github.com/madrisan/nagios-plugins-linux/wiki)
 
 This package uses `GNU autotools` for configuration and installation.
 
-If you have cloned the git repository then you will need to run
-`autoreconf --install` to generate the required files.
+If you have cloned the git repository
+
+        git clone --recurvise https://github.com/madrisan/nagios-plugins-linux.git
+
+then you will need to run `autoreconf --install` to generate the required files.
 
 Run `./configure --help` to see a list of available install options.
 The plugin will be installed by default into `LIBEXECDIR`.

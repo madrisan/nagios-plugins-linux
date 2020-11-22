@@ -189,7 +189,7 @@ esac
 $pck_install $pcks_dev
 
 # create a non-root user for building the software (developer) ...
-case "$os" in
+case $os in
    alpine-*)
       addgroup -g 1000 developers
       adduser -D -G developers -u 1000 -s /bin/sh developer
