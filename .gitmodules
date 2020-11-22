@@ -1,0 +1,3 @@
+[submodule "packages/docker-shell-helpers"]
+	path = packages/docker-shell-helpers
+	url = https://github.com/madrisan/docker-shell-helpers
