@@ -63,7 +63,7 @@ container_exec_command() {
    # doc.desc: run a command (or a sequence of commands) inside a container
    # doc.args: container name
    __validate_input "${FUNCNAME[0]}" "$1"
-   sudo docker exec -it "$1" /bin/bash -c "$2"
+   sudo docker exec -it "$1" /bin/sh -c "$2"
 }
 
 container_property() {
@@ -113,7 +113,9 @@ container_exec_command "$container_name" "\
       cat /etc/debian_version
    fi")"
           set -- $container_os
-          if [ "$1" = "CentOS" ]; then
+	  if [ "$1" = "alpine" ]; then
+             os="alpine-${2}"
+          elif [ "$1" = "CentOS" ]; then
              [ "$2" = "Linux" ] && os="centos-${4}" || os="centos-${3}"
           elif [ "$1" = "Fedora" ]; then
              os="fedora-${3}"
@@ -157,7 +159,7 @@ container_create() {
 
    if ! (container_exists "$name" ||
       sudo docker run -itd --name="$name" ${disk:+-v $disk} "$os" \
-         "/bin/bash" >/dev/null); then
+         "/bin/sh" >/dev/null); then
       __die "${FUNCNAME[0]}: cannot instantiate the container $name"
    fi
    echo "$name"
