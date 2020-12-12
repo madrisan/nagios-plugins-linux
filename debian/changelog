@@ -1,9 +1,16 @@
+nagios-plugins-linux (28-1) stable; urgency=low
+  * Release 28 "Alpine Hike":
+     - New plugin check_pressure for checking Linux PSI.
+     - Sparse Clang and GCC warning fixes.
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Sat, 12 Dec 2020 14:14:00 +0200
+
 nagios-plugins-linux (27-1) stable; urgency=low
   * Release 27 "Polish Landscapes":
      - Enhanced plugin check_network (using rtnetlink).
      - Fixed experimental support to libprocps-ng:newlib.
 
- -- Davide Madrisan <davide.madrisan@gmail.com>  Sat,  8 May 2020 10:45:45 +0200
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Sat,  8 Aug 2020 10:45:45 +0200
 
 nagios-plugins-linux (26-1) stable; urgency=low
   * Release 26 "Lockdown release":
