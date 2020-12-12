@@ -15,7 +15,7 @@
 
 ---------------
 
-![alt tag](https://madrisan.files.wordpress.com/2015/11/nagios-plugins-linux-logo-256.png)
+![alt tag](nagios-plugins-linux-logo-256.png)
 
 ## About
 
@@ -122,7 +122,7 @@ The Nagios Plugins Linux are regularly tested on
  * Alpine Linux (musl libc),
  * Debian, CentOS, Fedora, Gentoo, and Ubuntu (GNU C Library (glibc)).
 
-## CentOS/RHEL, Debian, and Fedora Packages
+## Alpine, CentOS/RHEL, Debian, and Fedora Packages
 
 The `.rpm` and `.deb` packages for CentOS/RHEL, Debian, and Fedora can be built using the following commands
 
