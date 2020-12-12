@@ -1,3 +1,74 @@
+## Version 28 ("Alpine Hike")
+### Dec 12th, 2020
+
+#### FIXES
+
+A few Clang and GCC warnings have been fixed.
+
+#### ENHANCEMENTS
+
+##### Plugin check_pressure
+
+New plugin `check_pressure` that reports the Linux Pressure Stall Information (PSI) exported by Linux kernels 4.20+ (in the `/proc/pressure/` folder).
+
+    check_pressure --cpu      return the cpu pressure metrics
+    check_pressure --io       return the io (block layer/filesystems) pressure metrics
+    check_pressure --memory   return the memory pressure metrics
+
+##### Build system
+
+Here are some notable news:
+
+ * Integrate *Nagios Plugins for Linux* with *GitHub Workflow* tests;
+ * Add [Linux Alpine](https://alpinelinux.org/) and [Ubuntu](https://ubuntu.com/)
+   to the list of supported and automatically tested Linux distributions;
+ * Update the list of supported platforms by adding Alpine 3.12 and Fedora 33;
+ * Make the `packages/docker-shell-helpers` folder a git submodule.
+
+##### Package creation
+
+Create also the native package for Alpine 3.12.
+
+### GIT DIFF
+```
+$ git diff --stat bef83bc ee0fbd5
+ .github/ISSUE_TEMPLATE/bug_report.md                  |  17 +++++-----
+ .github/ISSUE_TEMPLATE/feature_request.md             |  22 +++++++++++++
+ .github/workflows/build-checks.yml                    |  59 ++++++++++++++++++++++++++++++++++
+ .gitmodules                                           |   3 ++
+ NEWS.md                                               | 230 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++------------------------------------------------------------------
+ README.md                                             |  69 ++++++++++++++++++++++++----------------
+ configure.ac                                          |  14 ++++++++
+ include/Makefile.am                                   |   1 +
+ include/pressure.h                                    |  85 +++++++++++++++++++++++++++++++++++++++++++++++++
+ include/system.h                                      |   3 --
+ include/testutils.h                                   |   2 ++
+ lib/Makefile.am                                       |   1 +
+ lib/netinfo-private.c                                 |   4 +--
+ lib/pressure.c                                        | 198 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ lib/processes.c                                       |   4 +++
+ packages/Makefile.am                                  |  28 ++++++++++------
+ packages/docker-shell-helpers                         |   1 +
+ packages/docker-shell-helpers/LICENSE                 | 201 ------------------------------------------------------------------------------------------------------------------
+ packages/docker-shell-helpers/README.md               |  74 ------------------------------------------
+ packages/docker-shell-helpers/__generate-doc.sh       |  26 ---------------
+ packages/docker-shell-helpers/docker-shell-helpers.sh | 183 --------------------------------------------------------------------------------------------------------
+ packages/docker-shell-helpers/images/docker.png       | Bin 28288 -> 0 bytes
+ packages/multibuild.sh                                |  51 +++++++++++++++++++++++++----
+ packages/specs/APKBUILD.in                            |  44 +++++++++++++++++++++++++
+ packages/specs/Makefile.am                            |   2 +-
+ plugins/Makefile.am                                   |   2 ++
+ plugins/check_multipath.c                             |   1 +
+ plugins/check_network.c                               |   2 +-
+ plugins/check_pressure.c                              | 230 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/Makefile.am                                     |   6 ++++
+ tests/ts_procpressurecpu.data                         |   1 +
+ tests/ts_procpressureio.data                          |   2 ++
+ tests/tslib_uname.c                                   |  14 ++++++++
+ tests/tslibpressure.c                                 | 125 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 34 files changed, 1046 insertions(+), 659 deletions(-)
+```
+
 ## Version 27 ("Polish Landscapes")
 ### Aug 8th, 2020
 
