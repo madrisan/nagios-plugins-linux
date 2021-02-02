@@ -33,8 +33,9 @@ MULTIBUILD_OPTS = \
 	--pckver $(PACKAGE_VERSION)
 
 TARGETS_ALPINE = \
-	alpine-3.12
-alpine-latest: alpine-3.12
+	alpine-3.12 \
+	alpine-3.13
+alpine-latest: alpine-3.13
 
 TARGETS_DEBIAN = \
 	debian-jessie debian-stretch debian-buster
