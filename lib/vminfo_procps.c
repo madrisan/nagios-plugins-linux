@@ -23,7 +23,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
-#include <proc/vmstat.h>
+#include <procps/vmstat.h>
 
 typedef struct proc_vmem
 {

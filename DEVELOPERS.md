@@ -12,7 +12,7 @@ cd /var/tmp
 git clone --single-branch --branch newlib https://gitlab.com/procps-ng/procps procps-ng-newlib
 cd procps-ng-newlib/
 
-PROCPSNG_VERSION="$(cat /var/tmp/procps-ng-newlib/.version)"
+PROCPSNG_VERSION="$(misc/git-version-gen .tarball-version)"
 
 cat <<EOF >/tmp/libprocps-newlib.pc
 prefix=/usr
@@ -63,6 +63,6 @@ git clone https://github.com/madrisan/nagios-plugins-linux.git
 cd nagios-plugins-linux
 ./configure --enable-libprocps \
     CFLAGS="-O -I/tmp/procps-ng-newlib/usr/include" \
-    LIBPROCPS_LIBS="-L/tmp/procps-ng-newlib/usr/lib64/ -lprocps"
+    LIBPROCPS_LIBS="-L/tmp/procps-ng-newlib/usr/lib64/ -lproc-2"
 make
 ```
