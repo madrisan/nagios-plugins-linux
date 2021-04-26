@@ -63,7 +63,7 @@ This package uses `GNU autotools` for configuration and installation.
 
 If you have cloned the git repository
 
-        git clone --recurvise https://github.com/madrisan/nagios-plugins-linux.git
+        git clone --recursive https://github.com/madrisan/nagios-plugins-linux.git
 
 then you will need to run `autoreconf --install` to generate the required files.
 
