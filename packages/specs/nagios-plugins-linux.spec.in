@@ -43,6 +43,7 @@ Requires: nagios-plugins-linux-paging
 %if 0%{?!have_libvarlink}
 Requires: nagios-plugins-linux-podman
 %endif
+Requires: nagios-plugins-linux-pressure
 Requires: nagios-plugins-linux-readonlyfs
 Requires: nagios-plugins-linux-swap
 Requires: nagios-plugins-linux-tcpcount
@@ -168,6 +169,13 @@ Group: Applications/System
 %description podman
 This Nagios plugin returns some runtime metrics of Podman containers.
 %endif
+
+%package pressure
+Summary: Nagios plugins for Linux - check_pressure
+Group: Applications/System
+
+%description pressure
+This Nagios plugin checks the Linux Pressure Stall Information (PSI) data.
 
 %package readonlyfs
 Summary: Nagios plugins for Linux - check_readonlyfs
@@ -297,6 +305,10 @@ make DESTDIR=%{buildroot} install
 %defattr(-,root,root)
 %{_libdir}/nagios/plugins/check_podman
 %endif
+
+%files pressure
+%defattr(-,root,root)
+%{_libdir}/nagios/plugins/check_pressure
 
 %files readonlyfs
 %defattr(-,root,root)

@@ -109,8 +109,8 @@ This package is known to compile with:
 * gcc 4.1 (RHEL 5 / CentOS 5),
 * gcc 4.4 (RHEL6 / CentOS 6),
 * gcc 4.8 (RHEL7 / CentOS 7),
-* gcc 3.x, 5.1, 5.3, 6.3, 7, 8, 9, 10 (openmamba GNU/Linux, Debian 8+, Fedora 25+),
-* clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10, 11 (openmamba GNU/Linux, Fedora 25+),
+* gcc 3.x, 5.1, 5.3, 6.3, 7, 8, 9, 10, 11 (openmamba GNU/Linux, Debian 8+, Fedora 25+),
+* clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10, 11, 12 (openmamba GNU/Linux, Fedora 25+),
 
 List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,
@@ -124,7 +124,7 @@ The Nagios Plugins Linux are regularly tested on
 
 ## Alpine, CentOS/RHEL, Debian, and Fedora Packages
 
-The `.rpm` and `.deb` packages for CentOS/RHEL, Debian, and Fedora can be built using the following commands
+The `.apk`, `.rpm` and `.deb` packages for Alpine, CentOS/RHEL, Debian, and Fedora can be built using the following commands
 
 Command            | Distribution
 ------------------ | ------------
@@ -137,9 +137,9 @@ CentOS 8           | `make -C packages centos-8`
 Debian 8 (Jessie)  | `make -C packages debian-jessie`
 Debian 9 (Stretch) | `make -C packages debian-stretch`
 Debian 10 (Buster) | `make -C packages debian-buster`
-Fedora 31          | `make -C packages fedora-31`
 Fedora 32          | `make -C packages fedora-32`
 Fedora 33          | `make -C packages fedora-33`
+Fedora 34          | `make -C packages fedora-34`
 Fedora Rawhide     | `make -C packages fedora-rawhide`
 
 in the root source folder.
