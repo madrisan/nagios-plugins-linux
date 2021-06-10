@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Davide Madrisan <davide.madrisan@gmail.com>
 Build-Depends: debhelper (>= 8)
 Homepage: https://github.com/madrisan/nagios-plugins-linux
-Standards-Version: 3.9.2
+Standards-Version: 4.3.0
 
 Package: nagios-plugins-linux
 Architecture: any
