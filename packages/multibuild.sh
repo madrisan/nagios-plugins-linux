@@ -151,7 +151,7 @@ case "$os" in
 export DEBIAN_FRONTEND=noninteractive;
 apt-get update && apt-get -y --no-install-recommends install"
       pcks_dev="\
-build-essential bzip2 debhelper fakeroot make gcc xz-utils devscripts"
+build-essential bzip2 debhelper devscripts fakeroot gcc make pkg-config xz-utils"
       pcks_dev="$pcks_dev libcurl4-gnutls-dev" ;;
    fedora-*)
       pck_format="rpm"
