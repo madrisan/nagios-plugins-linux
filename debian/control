@@ -1,6 +1,6 @@
 Source: nagios-plugins-linux
 Section: net
-Priority: extra
+Priority: optional
 Maintainer: Davide Madrisan <davide.madrisan@gmail.com>
 Build-Depends: debhelper (>= 8)
 Homepage: https://github.com/madrisan/nagios-plugins-linux
