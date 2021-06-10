@@ -2,7 +2,7 @@ Source: nagios-plugins-linux
 Section: net
 Priority: optional
 Maintainer: Davide Madrisan <davide.madrisan@gmail.com>
-Build-Depends: debhelper (>= 8)
+Build-Depends: debhelper (>= 10), pkg-config
 Homepage: https://github.com/madrisan/nagios-plugins-linux
 Standards-Version: 4.3.0
 
