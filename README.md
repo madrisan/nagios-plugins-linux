@@ -128,6 +128,7 @@ The `.apk`, `.rpm` and `.deb` packages for Alpine, CentOS/RHEL, Debian, and Fedo
 
 Command            | Distribution
 ------------------ | ------------
+Alpine 3.14        | `make -C packages alpine-3.14`
 Alpine 3.13        | `make -C packages alpine-3.13`
 Alpine 3.12        | `make -C packages alpine-3.12`
 CentOS 5           | `make -C packages centos-5`
@@ -145,7 +146,7 @@ Fedora Rawhide     | `make -C packages fedora-rawhide`
 in the root source folder.
 The building process requires the _Docker_ software containerization platform running on your system, and an internet connection to download the Docker images of the operating systems you want to build the packages for.
 
-On *Fedora* you can use the native *Podman* pod manager along with the Docker CLI emulation script:
+On *Fedora* (and all the distributions shipping *Podman*) you can use the native *Podman* pod manager along with the Docker CLI emulation script:
 
     sudo install dnf podman podman-docker
 
