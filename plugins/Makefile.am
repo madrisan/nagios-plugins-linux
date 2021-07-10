@@ -141,15 +141,16 @@ all-local: $(check_cpu_programs) $(check_network_programs)
 
 $(check_cpu_programs): check_cpu
 	rm -f $@
-	$(LN_S) -s check_cpu $@
+	$(LN_S) check_cpu $@
 
 $(check_network_programs): check_network
 	rm -f $@
-	$(LN_S) -s check_network $@
+	$(LN_S) check_network $@
 
 install-exec-hook:
 	cd $(DESTDIR)$(libexecdir) && \
-	for i in $(check_cpu_programs) ; do rm -f $$i; ln -s check_cpu $$i ; done
+	for i in $(check_cpu_programs) ; do rm -f $$i; ln -s check_cpu $$i ; done && \
+	for i in $(check_network_programs) ; do rm -f $$i; ln -s check_network $$i ; done
 
 clean-local:
 	rm -f $(check_cpu_programs)
