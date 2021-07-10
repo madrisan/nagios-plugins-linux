@@ -8,7 +8,229 @@ Standards-Version: 4.3.0
 
 Package: nagios-plugins-linux
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Suggests: nagios3 | icinga
-Description: Linux monitoring program plugins for Nagios
+Depends: ${misc:Depends},
+         nagios-plugins-linux-clock,
+         nagios-plugins-linux-cpufreq,
+         nagios-plugins-linux-cpu,
+         nagios-plugins-linux-cswch,
+         nagios-plugins-linux-fc,
+         nagios-plugins-linux-ifmountfs,
+         nagios-plugins-linux-intr,
+         nagios-plugins-linux-iowait,
+         nagios-plugins-linux-load,
+         nagios-plugins-linux-memory,
+         nagios-plugins-linux-multipath,
+         nagios-plugins-linux-nbprocs,
+         nagios-plugins-linux-network,
+         nagios-plugins-linux-paging,
+         nagios-plugins-linux-pressure,
+         nagios-plugins-linux-readonlyfs,
+         nagios-plugins-linux-swap,
+         nagios-plugins-linux-tcpcount,
+         nagios-plugins-linux-temperature,
+         nagios-plugins-linux-uptime,
+         nagios-plugins-linux-users
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ Plugins for nagios compatible monitoring systems like Naemon and Icinga. It
+ contains the following plugins:
+ .
+  check_clock, check_cpufreq, check_cpu, check_cswch, check_fc, check_ifmountfs,
+  check_intr, check_iowait, check_load, check_memory, check_multipath,
+  check_nbprocs, check_network, check_paging, check_pressure, check_readonlyfs,
+  check_swap, check_tcpcount, check_temperature, check_uptime, check_users
+ .
+ This package provides the suite of plugins that are most likely to be
+ useful on a central monitoring host.
+
+Package: nagios-plugins-linux-clock
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
  A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin returns the number of seconds elapsed between local time and
+ central monitoring host time.
+
+Package: nagios-plugins-linux-cpu
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks the CPU (user mode) utilization.
+
+Package: nagios-plugins-linux-cpufreq
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin displays the CPU frequency characteristics.
+
+Package: nagios-plugins-linux-cswch
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin monitors the total number of context switches per second across all CPUs.
+
+Package: nagios-plugins-linux-fc
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin monitors the status of the fiber status ports.
+
+Package: nagios-plugins-linux-ifmountfs
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks whether the given filesystems are mounted.
+
+Package: nagios-plugins-linux-intr
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin monitors the interrupts serviced per second, including unnumbered
+ architecture specific interrupts.
+
+Package: nagios-plugins-linux-iowait
+Architecture: any
+Depends: ${misc:Depends},
+         nagios-plugins-linux-cpu
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin monitors the I/O wait bottlenecks.
+
+Package: nagios-plugins-linux-load
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks the current system load average.
+
+Package: nagios-plugins-linux-memory
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks the memory usage.
+
+Package: nagios-plugins-linux-multipath
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks the multipath topology status.
+
+Package: nagios-plugins-linux-nbprocs
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin displays the number of running processes per user.
+
+Package: nagios-plugins-linux-network
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin displays some network interfaces statistics.
+
+Package: nagios-plugins-linux-paging
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks the memory and swap paging.
+
+Package: nagios-plugins-linux-pressure
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks the Linux Pressure Stall Information (PSI) data.
+
+Package: nagios-plugins-linux-readonlyfs
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks for readonly filesystems.
+
+Package: nagios-plugins-linux-swap
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks the swap usage.
+
+Package: nagios-plugins-linux-tcpcount
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks the tcp network usage.
+
+Package: nagios-plugins-linux-temperature
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin monitors the hardware's temperature.
+
+Package: nagios-plugins-linux-uptime
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks how long the system has been running.
+
+Package: nagios-plugins-linux-users
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin displays the number of users that are currently logged on.
