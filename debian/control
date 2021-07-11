@@ -2,7 +2,11 @@ Source: nagios-plugins-linux
 Section: net
 Priority: optional
 Maintainer: Davide Madrisan <davide.madrisan@gmail.com>
-Build-Depends: debhelper (>= 10), pkg-config
+Build-Depends: autotools-dev,
+               debhelper (>= 10),
+               libcurl4-gnutls-dev,
+               make (>= 3.81),
+               pkg-config
 Homepage: https://github.com/madrisan/nagios-plugins-linux
 Standards-Version: 4.3.0
 
@@ -43,6 +47,20 @@ Description: Linux plugins for nagios compatible monitoring systems
  This package provides the suite of plugins that are most likely to be
  useful on a central monitoring host.
 
+Package: nagios-plugins-linux-experimental
+Architecture: any
+Depends: ${misc:Depends},
+         nagios-plugins-linux-docker
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ Experimental plugins for nagios compatible monitoring systems like Naemon and
+ Icinga. It contains the following plugins:
+ .
+  check_docker
+ .
+ This package provides some experimental plugins that are most likely to be
+ useful on a central monitoring host.
+
 Package: nagios-plugins-linux-clock
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
@@ -79,6 +97,15 @@ Description: Linux plugins for nagios compatible monitoring systems
  A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
  .
  This plugin monitors the total number of context switches per second across all CPUs.
+
+Package: nagios-plugins-linux-docker
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks the number of running docker containers.
 
 Package: nagios-plugins-linux-fc
 Architecture: any
@@ -234,3 +261,4 @@ Description: Linux plugins for nagios compatible monitoring systems
  A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
  .
  This plugin displays the number of users that are currently logged on.
+

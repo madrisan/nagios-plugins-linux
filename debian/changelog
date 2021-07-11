@@ -1,3 +1,10 @@
+nagios-plugins-linux (28-2) stable; urgency=low
+  * Rework packaging framework for Debian
+     - Build a Debian multi-package
+     - Build the (optional) plugin check_docker
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Sun, 11 Jul 2021 12:44:55 +0200
+
 nagios-plugins-linux (28-1) stable; urgency=low
   * Release 28 "Alpine Hike":
      - New plugin check_pressure for checking Linux PSI.
