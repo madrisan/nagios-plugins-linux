@@ -134,7 +134,7 @@ check_swap_LDADD         = $(LDADD)
 endif
 check_tcpcount_LDADD     = $(LDADD)
 check_temperature_LDADD  = $(LDADD)
-check_uptime_LDADD       = $(LDADD)
+check_uptime_LDADD       = $(LDADD) $(CLOCK_LIBS)
 check_users_LDADD        = $(LDADD)
 
 all-local: $(check_cpu_programs) $(check_network_programs)

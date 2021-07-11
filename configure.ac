@@ -273,6 +273,7 @@ AC_CHECK_FUNCS([ \
 
 dnl Check for clock_gettime CLOCK_MONOTONIC
 dnl wanted by: plugins/check_uptime.c
+LIBS_SAVE="$LIBS"
 AC_CHECK_LIB([rt], [clock_gettime])
 AC_MSG_CHECKING([for clock_gettime with clock CLOCK_MONOTONIC])
 AC_COMPILE_IFELSE(
@@ -285,6 +286,9 @@ AC_COMPILE_IFELSE(
   ],
   [ac_cv_clock_gettime_monotonic=no])
 AC_MSG_RESULT([$ac_cv_clock_gettime_monotonic])
+CLOCK_LIBS="$LIBS"
+AC_SUBST([CLOCK_LIBS])
+LIBS="$LIBS_SAVE"
 
 dnl suggestions from autoscan
 AC_CHECK_FUNCS([getmntent])  dnl wanted by: lib/mountlist.c
