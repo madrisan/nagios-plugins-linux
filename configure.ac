@@ -271,6 +271,18 @@ AC_CHECK_FUNCS([ \
   secure_getenv\
 ])
 
+dnl Check for ceil (some platforms use libm for the math functions
+dnl instead of the C library
+dnl wanted by lib/netinfo.c
+
+LIBS_SAVE="$LIBS"
+AC_SEARCH_LIBS([ceil], [m], [], [
+  AC_MSG_ERROR([unable to find the ceil() function])
+])
+CEIL_LIBS="$LIBS"
+AC_SUBST([CEIL_LIBS])
+LIBS="$LIBS_SAVE"
+
 dnl Check for clock_gettime CLOCK_MONOTONIC
 dnl wanted by: plugins/check_uptime.c
 LIBS_SAVE="$LIBS"
