@@ -122,7 +122,7 @@ if HAVE_PROC_MEMINFO
 check_memory_LDADD       = $(LDADD) $(LIBPROCPS_LIBS)
 endif
 check_nbprocs_LDADD      = $(LDADD)
-check_network_LDADD      = $(LDADD)
+check_network_LDADD      = $(LDADD) $(CEIL_LIBS)
 check_multipath_LDADD    = $(LDADD)
 check_paging_LDADD       = $(LDADD) $(LIBPROCPS_LIBS)
 if HAVE_LIBVARLINK
