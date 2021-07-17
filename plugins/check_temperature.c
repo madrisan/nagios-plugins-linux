@@ -80,6 +80,10 @@ usage (FILE * out)
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
+  fputs (USAGE_NOTE, out);
+  fputs ("  If the option '-t|--thermal_zone' is not specified, then the"
+	 " data of the\n"
+	 "  thermal zone with the highest temperature is displayed.\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -w 80 -c 90\n", program_name);
   fprintf (out, "  %s -t 0 -w 80 -c 90\n", program_name);
@@ -181,7 +185,7 @@ main (int argc, char **argv)
   status = get_status (real_temp, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - %.1f%s (thermal zone: %u [%s], type: \"%s\") | temp=%u%c",
+  printf ("%s %s - +%.1f%s (thermal zone: %u [%s], type: \"%s\") | temp=%u%c",
 	  program_name_short, state_text (status), real_temp, scale,
 	  thermal_zone, sysfsparser_thermal_get_device (thermal_zone),
 	  type ? type : "n/a", (unsigned int) real_temp,
@@ -191,7 +195,7 @@ main (int argc, char **argv)
   /* check for the related critical temperature, if any */
   int crit_temp =
     sysfsparser_thermal_get_critical_temperature (thermal_zone) / 1000;
-  if (crit_temp > 0)
+  if (crit_temp > 0 && ALL_THERMAL_ZONES != selected_thermal_zone)
     printf (";0;%d", crit_temp);
 
   putchar ('\n');
