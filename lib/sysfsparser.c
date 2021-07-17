@@ -342,6 +342,12 @@ sysfsparser_thermal_kernel_support ()
   return true;
 }
 
+const char *
+sysfsparser_thermal_sysfs_path ()
+{
+  return PATH_SYS_ACPI_THERMAL;
+}
+
 int
 sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone)
 {
@@ -379,6 +385,19 @@ sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone)
     }
 
   return crit_temp;
+}
+
+const char *
+sysfsparser_thermal_get_device (unsigned int thermal_zone)
+{
+  char *device;
+  device = sysfsparser_getline (PATH_SYS_ACPI_THERMAL
+				"/thermal_zone%u/device/path",
+				thermal_zone);
+  if (NULL == device)
+    return "Virtual device";
+
+  return STRTRIMPREFIX (device, "\\_TZ_.");
 }
 
 int
