@@ -181,7 +181,7 @@ main (int argc, char **argv)
   status = get_status (real_temp, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - %.1f%s (thermal zone: %u [%s], type: \"%s\") | temp=%u%c",
+  printf ("%s %s - +%.1f%s (thermal zone: %u [%s], type: \"%s\") | temp=%u%c",
 	  program_name_short, state_text (status), real_temp, scale,
 	  thermal_zone, sysfsparser_thermal_get_device (thermal_zone),
 	  type ? type : "n/a", (unsigned int) real_temp,
