@@ -65,9 +65,11 @@ extern "C"
 # define ALL_THERMAL_ZONES   UINT_MAX
 
   bool sysfsparser_thermal_kernel_support (void);
+  const char *sysfsparser_thermal_sysfs_path ();
   int sysfsparser_thermal_get_temperature (unsigned int selected_zone,
 					   unsigned int *zone, char **type);
   int sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone);
+  const char *sysfsparser_thermal_get_device (unsigned int thermal_zone);
 
 #ifdef __cplusplus
 }

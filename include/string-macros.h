@@ -26,6 +26,8 @@
 # define STRNEQLEN(a, b, n) (strncmp(a, b, n) != 0)
 # define STRPREFIX(a, b) (strncmp(a, b, strlen(b)) == 0)
 
+# define STRTRIMPREFIX(a, b) STRPREFIX(a, b) ? a + strlen(b) : a
+
 /* Use strncpy with N-1 and ensure the string is terminated.  */
 #define STRNCPY_TERMINATED(DEST, SRC, N) \
   do { \

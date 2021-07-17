@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2021 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that monitors the hardware's temperature.
  *
@@ -48,7 +48,7 @@ enum
 };
 
 static const char *program_copyright =
-  "Copyright (C) 2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014-2021 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "fahrenheit", required_argument, NULL, 'f'},
@@ -66,6 +66,8 @@ usage (FILE * out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
   fputs ("This plugin monitors the hardware's temperature.\n", out);
+  fprintf (out, "It requires the sysfs tree %s to be mounted and readable.\n",
+           sysfsparser_thermal_sysfs_path ());
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [-f|-k] [-t <thermal_zone_num>] "
@@ -104,16 +106,16 @@ get_real_temp (unsigned long temperature, char **scale, int temp_units)
   switch (temp_units)
     {
     case TEMP_CELSIUS:
-      *scale = "degrees C";
+      *scale = "°C";
       break;
     case TEMP_FAHRENHEIT:
       real_temp = (real_temp * 1.8) + 32;
-      *scale = "degrees F";
+      *scale = "°F";
       break;
     case TEMP_KELVIN:
     default:
       real_temp += absolute_zero;
-      *scale = "kelvin";
+      *scale = "°K";
       break;
     }
 
@@ -179,9 +181,10 @@ main (int argc, char **argv)
   status = get_status (real_temp, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - %.1f %s (thermal zone: %u, type: \"%s\") | temp=%u%c",
+  printf ("%s %s - %.1f%s (thermal zone: %u [%s], type: \"%s\") | temp=%u%c",
 	  program_name_short, state_text (status), real_temp, scale,
-	  thermal_zone, type ? type : "n/a", (unsigned int) real_temp,
+	  thermal_zone, sysfsparser_thermal_get_device (thermal_zone),
+	  type ? type : "n/a", (unsigned int) real_temp,
 	  (temperature_unit == TEMP_KELVIN) ? 'K' :
 	  (temperature_unit == TEMP_FAHRENHEIT) ? 'F' : 'C');
 
