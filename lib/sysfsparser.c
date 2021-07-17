@@ -441,16 +441,13 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
 
       /* If a thermal zone is not asked by user, get the highest temperature
        * reported by sysfs */
-      if (temp >= 0)
+      dbg ("thermal information found: %.2f°C, zone: %u, type: %s\n",
+	   (float) (temp / 1000.0), thermal_zone, *type);
+      found_data = true;
+      if (max_temp < temp || 0 == max_temp)
 	{
-	  found_data = true;
-	  dbg ("thermal information found: %.2f°C, zone: %u, type: %s\n",
-	       (float) (temp / 1000.0), thermal_zone, *type);
-	  if (max_temp < temp || 0 == max_temp)
-	    {
-	      max_temp = temp;
-	      *zone = thermal_zone;
-	    }
+	  max_temp = temp;
+	  *zone = thermal_zone;
 	}
     }
   closedir (d);
