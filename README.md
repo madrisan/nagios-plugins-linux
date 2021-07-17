@@ -5,7 +5,7 @@
 
 ![Release Status](https://img.shields.io/badge/status-stable-brightgreen.svg)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://spdx.org/licenses/GPL-3.0.html)
-[![Download Latest Release](https://img.shields.io/badge/download-latest--tarball-blue.svg)](https://github.com/madrisan/nagios-plugins-linux/releases/download/v28/nagios-plugins-linux-28.tar.xz)
+[![Download Latest Release](https://img.shields.io/badge/download-latest--tarball-blue.svg)](https://github.com/madrisan/nagios-plugins-linux/releases/download/v29/nagios-plugins-linux-29.tar.xz)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/davide.madrisan@gmail.com)
 
 [![Build Status](https://travis-ci.org/madrisan/nagios-plugins-linux.svg?branch=master)](https://travis-ci.org/madrisan/nagios-plugins-linux)
@@ -115,7 +115,7 @@ List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,
 * 3.10, 3.14, 3.18,
 * 4.2, 4.4, 4,9, 4.14, 4.15, 4.16, 4.19
-* 5.6, 5.7, 5.8
+* 5.6, 5.7, 5.8, 5.12
 
 The Nagios Plugins Linux are regularly tested on
  * Alpine Linux (musl libc),
