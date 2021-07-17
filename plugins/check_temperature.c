@@ -80,6 +80,10 @@ usage (FILE * out)
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
+  fputs (USAGE_NOTE, out);
+  fputs ("  If the option '-t|--thermal_zone' is not specified, then the"
+	 " data of the\n"
+	 "  thermal zone with the highest temperature is displayed.\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -w 80 -c 90\n", program_name);
   fprintf (out, "  %s -t 0 -w 80 -c 90\n", program_name);
