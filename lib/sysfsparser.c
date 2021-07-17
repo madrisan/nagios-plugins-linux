@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014,2019 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2021 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A library for parsing the sysfs filesystem
  *
@@ -439,14 +439,14 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
       *type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
 				   de->d_name);
 
-      /* If a thermal zone is not set by user, get the highest temperature
+      /* If a thermal zone is not asked by user, get the highest temperature
        * reported by sysfs */
-      if (temp > 0)
+      if (temp >= 0)
 	{
 	  found_data = true;
-	  dbg ("thermal information found: %.2f degrees C, zone: %u, type: %s\n",
+	  dbg ("thermal information found: %.2f°C, zone: %u, type: %s\n",
 	       (float) (temp / 1000.0), thermal_zone, *type);
-	  if (max_temp < temp)
+	  if (max_temp < temp || 0 == max_temp)
 	    {
 	      max_temp = temp;
 	      *zone = thermal_zone;
