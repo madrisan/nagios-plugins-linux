@@ -195,7 +195,7 @@ main (int argc, char **argv)
   /* check for the related critical temperature, if any */
   int crit_temp =
     sysfsparser_thermal_get_critical_temperature (thermal_zone) / 1000;
-  if (crit_temp > 0)
+  if (crit_temp > 0 && ALL_THERMAL_ZONES != selected_thermal_zone)
     printf (";0;%d", crit_temp);
 
   putchar ('\n');
