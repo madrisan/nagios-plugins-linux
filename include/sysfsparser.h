@@ -70,6 +70,7 @@ extern "C"
 					   unsigned int *zone, char **type);
   int sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone);
   const char *sysfsparser_thermal_get_device (unsigned int thermal_zone);
+  void sysfsparser_thermal_listall ();
 
 #ifdef __cplusplus
 }

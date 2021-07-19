@@ -53,6 +53,7 @@ static const char *program_copyright =
 static struct option const longopts[] = {
   {(char *) "fahrenheit", required_argument, NULL, 'f'},
   {(char *) "kelvin", required_argument, NULL, 'k'},
+  {(char *) "list", no_argument, NULL, 'l'},
   {(char *) "thermal_zone", required_argument, NULL, 't'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
@@ -75,6 +76,8 @@ usage (FILE * out)
   fputs (USAGE_OPTIONS, out);
   fputs ("  -f, --fahrenheit  use fahrenheit as the temperature unit\n", out);
   fputs ("  -k, --kelvin      use kelvin as the temperature unit\n", out);
+  fputs ("  -l, --list        list all the thermal sensors reported by the"
+	 " kernel\n", out);
   fputs ("  -t, --thermal_zone    only consider a specific thermal zone\n", out);
   fputs ("  -w, --warning COUNTER   warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
@@ -82,9 +85,12 @@ usage (FILE * out)
   fputs (USAGE_VERSION, out);
   fputs (USAGE_NOTE, out);
   fputs ("  If the option '-t|--thermal_zone' is not specified, then the"
-	 " data of the\n"
-	 "  thermal zone with the highest temperature is displayed.\n", out);
+	 " thermal zone\n"
+	 "  with the highest temperature is selected. Note that this zone"
+	 " may change\n"
+	 "  at each plugin execution.\n", out);
   fputs (USAGE_EXAMPLES, out);
+  fprintf (out, "  %s --list\n", program_name);
   fprintf (out, "  %s -w 80 -c 90\n", program_name);
   fprintf (out, "  %s -t 0 -w 80 -c 90\n", program_name);
 
@@ -153,6 +159,9 @@ main (int argc, char **argv)
 	case 'k':
 	  temperature_unit = TEMP_KELVIN;
 	  break;
+	case 'l':
+	  sysfsparser_thermal_listall ();
+	  return STATE_UNKNOWN;
 	case 't':
 	  errno = 0;
 	  selected_thermal_zone = strtoul (optarg, &end, 10);

@@ -410,7 +410,7 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
   unsigned int thermal_zone;
   unsigned long max_temp = 0, temp = 0;
 
-  if (chdir (PATH_SYS_ACPI_THERMAL) < 0)
+  if (!sysfsparser_thermal_kernel_support ())
     plugin_error (STATE_UNKNOWN, 0, "no ACPI thermal support in kernel "
 		  "or incorrect path (\"%s\")", PATH_SYS_ACPI_THERMAL);
 
@@ -463,4 +463,43 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
     }
 
   return max_temp;
+}
+
+void
+sysfsparser_thermal_listall ()
+{
+  struct dirent **namelist;
+  unsigned int thermal_zone;
+  char *type;
+  int i, n;
+
+  if (!sysfsparser_thermal_kernel_support ())
+    plugin_error (STATE_UNKNOWN, errno,
+		  "no ACPI thermal support in kernel "
+		  "or incorrect path (\"%s\")", PATH_SYS_ACPI_THERMAL);
+
+  n = scandir (PATH_SYS_ACPI_THERMAL, &namelist, 0, alphasort);
+  if (-1 == n)
+    plugin_error (STATE_UNKNOWN, errno,
+		  "cannot scandir() " PATH_SYS_ACPI_THERMAL);
+
+  printf ("Thermal zones reported by the linux kernel (%s):\n",
+	  sysfsparser_thermal_sysfs_path ());
+
+  for (i = 0; i < n; i++)
+    {
+      if (STRPREFIX (namelist[i]->d_name, "thermal_zone"))
+	{
+	  thermal_zone = strtoul (namelist[i]->d_name + 12, NULL, 10);
+	  type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
+				      namelist[i]->d_name);
+	  printf (" - zone %2u [%s], type \"%s\"\n",
+		  thermal_zone, sysfsparser_thermal_get_device (thermal_zone),
+		  type ? type : "n/a");
+	}
+
+      free (namelist[i]);
+    }
+
+  free(namelist);
 }
