@@ -471,7 +471,7 @@ sysfsparser_thermal_listall ()
   struct dirent **namelist;
   unsigned int thermal_zone;
   char *type;
-  int i, n;
+  int i, n, crit_temp;
 
   if (!sysfsparser_thermal_kernel_support ())
     plugin_error (STATE_UNKNOWN, errno,
@@ -493,9 +493,16 @@ sysfsparser_thermal_listall ()
 	  thermal_zone = strtoul (namelist[i]->d_name + 12, NULL, 10);
 	  type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
 				      namelist[i]->d_name);
-	  printf (" - zone %2u [%s], type \"%s\"\n",
-		  thermal_zone, sysfsparser_thermal_get_device (thermal_zone),
-		  type ? type : "n/a");
+	  crit_temp =
+	    sysfsparser_thermal_get_critical_temperature (thermal_zone);
+
+	  fprintf (stdout, " - zone %2u [%s], type \"%s\""
+		   , thermal_zone
+		   , sysfsparser_thermal_get_device (thermal_zone)
+		   , type ? type : "n/a");
+	  if (crit_temp > 0)
+	    fprintf (stdout, ", critical trip point at %d°C", crit_temp / 1000);
+	  fputs ("\n", stdout);
 	}
 
       free (namelist[i]);
