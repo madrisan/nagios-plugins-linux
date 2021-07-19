@@ -1,7 +1,7 @@
 <a href='https://ko-fi.com/K3K57TH3' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi2.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 <a href='http://amzn.eu/8axPDQ1'><img height='36' src='http://png-1.findicons.com/files/icons/2229/social_media_mini/48/amazon.png' border='0' alt='Wish List at Amazon.fr' /></a>
 
-# Nagios Plugins for Linux
+# Nagios-compatible Plugins for Linux
 
 ![Release Status](https://img.shields.io/badge/status-stable-brightgreen.svg)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://spdx.org/licenses/GPL-3.0.html)
@@ -19,8 +19,7 @@
 
 ## About
 
-This package contains several `nagios plugins` for monitoring Linux boxes.
-Nagios is an open source computer system monitoring, network monitoring and infrastructure monitoring software application (see: http://www.nagios.org/).
+This package contains several binary plugins for monitoring (physical and virtual) Linux hosts with [Nagios](http://www.nagios.org/) and Nagios-compatible monitoring systems like [Icinga](https://icinga.com/learn/) and [Naemon](https://www.naemon.org/).
 
 Here is the list of the available plugins:
 
