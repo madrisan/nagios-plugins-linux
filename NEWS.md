@@ -1,3 +1,86 @@
+## Version 29 ("High Temperatures")
+### Jul 20th, 2021
+
+#### FIXES
+
+##### Plugin check_temperature
+
+ * Do not display thermal ranges if `-t|--thermal_zone` in not set at command-line.
+
+#### ENHANCEMENTS
+
+##### Plugin check_temperature
+
+ * Improve the output message by adding the thermal device when available;
+ * List also the devices that display a temperature of 0°C to be more consistent with the tool 'sensors';
+ * Improve the help message;
+ * New command-line option `-l|--list` for displyaing the all the thermal sensors reported by the kernel.
+
+##### Package creation
+
+ * Update the list of supported platforms by adding Alpine 3.13 and 3.14 and Fedora 34;
+ * Several improvements to the Debian packaging (thanks to [Vincent Olivert-Riera](https://github.com/vincent-olivert-riera) for the PR);
+ * Build Debian multi-packages instead of a single package providing all binary plugins.
+   This will permit these plugins to cohexist with the Nagios native ones.
+
+##### Test framework
+
+ * Switch to the latest stable OSes in GitHub workflow.
+
+##### Documentation
+
+ * Update the documentation for linking against procps-ng newlib;
+ * Thanks to [Christian Bryn (epleterte)](https://github.com/epleterte) for reporting and fixing a typo in the git clone command.
+
+### GIT DIFF
+```
+$ git diff --stat c57373a9 4e0d46e8
+ .github/workflows/build-checks.yml              |   6 ++--
+ DEVELOPERS.md                                   |   4 +--
+ NEWS.md                                         |  75 +++++++++++++++++++++++++++++++++++++++++++
+ README.md                                       |  23 +++++++-------
+ VERSION                                         |   1 +
+ configure.ac                                    |  22 ++++++++++++-
+ debian/changelog                                |   9 +++++-
+ debian/compat                                   |   2 +-
+ debian/control                                  | 262 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++----
+ debian/nagios-plugins-linux-clock.install       |   1 +
+ debian/nagios-plugins-linux-cpu.install         |   1 +
+ debian/nagios-plugins-linux-cpufreq.install     |   1 +
+ debian/nagios-plugins-linux-cswch.install       |   1 +
+ debian/nagios-plugins-linux-docker.install      |   1 +
+ debian/nagios-plugins-linux-fc.install          |   1 +
+ debian/nagios-plugins-linux-ifmountfs.install   |   1 +
+ debian/nagios-plugins-linux-intr.install        |   1 +
+ debian/nagios-plugins-linux-iowait.install      |   1 +
+ debian/nagios-plugins-linux-load.install        |   1 +
+ debian/nagios-plugins-linux-memory.install      |   1 +
+ debian/nagios-plugins-linux-multipath.install   |   1 +
+ debian/nagios-plugins-linux-nbprocs.install     |   1 +
+ debian/nagios-plugins-linux-network.install     |   1 +
+ debian/nagios-plugins-linux-paging.install      |   1 +
+ debian/nagios-plugins-linux-pressure.install    |   1 +
+ debian/nagios-plugins-linux-readonlyfs.install  |   1 +
+ debian/nagios-plugins-linux-swap.install        |   1 +
+ debian/nagios-plugins-linux-tcpcount.install    |   1 +
+ debian/nagios-plugins-linux-temperature.install |   1 +
+ debian/nagios-plugins-linux-uptime.install      |   1 +
+ debian/nagios-plugins-linux-users.install       |   1 +
+ debian/nagios-plugins-linux.dirs                |   1 +
+ debian/rules                                    |   2 +-
+ include/string-macros.h                         |   2 ++
+ include/sysfsparser.h                           |   3 ++
+ lib/meminfo_procps.c                            |   2 +-
+ lib/sysfsparser.c                               |  86 ++++++++++++++++++++++++++++++++++++++++++-------
+ lib/vminfo_procps.c                             |   2 +-
+ packages/Makefile.am                            |  10 +++---
+ packages/multibuild.sh                          |   2 +-
+ packages/specs/nagios-plugins-linux.spec.in     |  17 ++++++++--
+ plugins/Makefile.am                             |  11 ++++---
+ plugins/check_temperature.c                     |  32 ++++++++++++++-----
+ 43 files changed, 536 insertions(+), 60 deletions(-)
+```
+
 ## Version 28 ("Alpine Hike")
 ### Dec 12th, 2020
 
