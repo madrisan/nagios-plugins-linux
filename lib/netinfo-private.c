@@ -346,7 +346,7 @@ get_netinfo_snapshot (unsigned int options, const regex_t *if_regex)
   while (!msg_done)
     {
       /* parse reply */
-      unsigned int len;
+      ssize_t len;
       struct nlmsghdr *h;
       struct msghdr rtnl_reply;
       struct iovec io_reply;
