@@ -1,6 +1,12 @@
+nagios-plugins-linux (29-1) stable; urgency=low
+  * Release 29 "High Temperatures":
+     - Improvements and fixes in the plugin check_temperature
+     - Build a Debian multi-package
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Sun, 20 Jul 2021 11:11:52 +0200
+
 nagios-plugins-linux (28-2) stable; urgency=low
   * Rework packaging framework for Debian
-     - Build a Debian multi-package
      - Build the (optional) plugin check_docker
 
  -- Davide Madrisan <davide.madrisan@gmail.com>  Sun, 11 Jul 2021 12:44:55 +0200
