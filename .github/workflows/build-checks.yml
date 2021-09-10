@@ -18,7 +18,7 @@ jobs:
         container:
           - 'alpine:3.14'
           - 'centos:8'
-          - 'debian:buster'
+          - 'debian:11'
           - 'fedora:34'
           - 'ubuntu:21.04'
 
