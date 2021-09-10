@@ -1,0 +1,4 @@
+usr/lib/nagios/plugins/check_network usr/lib/nagios/plugins/check_network_collisions
+usr/lib/nagios/plugins/check_network usr/lib/nagios/plugins/check_network_dropped
+usr/lib/nagios/plugins/check_network usr/lib/nagios/plugins/check_network_errors
+usr/lib/nagios/plugins/check_network usr/lib/nagios/plugins/check_network_multicast
