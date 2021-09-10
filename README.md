@@ -96,7 +96,7 @@ _Note_: you can also pass the _experimental_ option `--enable-libprocps` to
 the API of the library `libprocps.so.5`
 ([procps newlib](https://gitlab.com/procps-ng/procps/tree/newlib)).
 This library is still under active development and no stable version has
-been released yet. 
+been released yet.
 
 ## Supported Platforms and Linux distributions
 
@@ -125,22 +125,22 @@ The Nagios Plugins Linux are regularly tested on
 
 The `.apk`, `.rpm` and `.deb` packages for Alpine, CentOS/RHEL, Debian, and Fedora can be built using the following commands
 
-Command            | Distribution
------------------- | ------------
-Alpine 3.14        | `make -C packages alpine-3.14`
-Alpine 3.13        | `make -C packages alpine-3.13`
-Alpine 3.12        | `make -C packages alpine-3.12`
-CentOS 5           | `make -C packages centos-5`
-CentOS 6           | `make -C packages centos-6`
-CentOS 7           | `make -C packages centos-7`
-CentOS 8           | `make -C packages centos-8`
-Debian 8 (Jessie)  | `make -C packages debian-jessie`
-Debian 9 (Stretch) | `make -C packages debian-stretch`
-Debian 10 (Buster) | `make -C packages debian-buster`
-Fedora 32          | `make -C packages fedora-32`
-Fedora 33          | `make -C packages fedora-33`
-Fedora 34          | `make -C packages fedora-34`
-Fedora Rawhide     | `make -C packages fedora-rawhide`
+Command              | Distribution
+-------------------- | ------------
+Alpine 3.14          | `make -C packages alpine-3.14`
+Alpine 3.13          | `make -C packages alpine-3.13`
+Alpine 3.12          | `make -C packages alpine-3.12`
+CentOS 5             | `make -C packages centos-5`
+CentOS 6             | `make -C packages centos-6`
+CentOS 7             | `make -C packages centos-7`
+CentOS 8             | `make -C packages centos-8`
+Debian 9 (Stretch)   | `make -C packages debian-stretch`
+Debian 10 (Buster)   | `make -C packages debian-buster`
+Debian 11 (Bullseye) | `make -C packages debian-bullseye`
+Fedora 32            | `make -C packages fedora-32`
+Fedora 33            | `make -C packages fedora-33`
+Fedora 34            | `make -C packages fedora-34`
+Fedora Rawhide       | `make -C packages fedora-rawhide`
 
 in the root source folder.
 The building process requires the _Docker_ software containerization platform running on your system, and an internet connection to download the Docker images of the operating systems you want to build the packages for.

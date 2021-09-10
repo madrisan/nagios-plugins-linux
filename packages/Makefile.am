@@ -39,11 +39,11 @@ TARGETS_ALPINE = \
 alpine-latest: alpine-3.14
 
 TARGETS_DEBIAN = \
-	debian-jessie debian-stretch debian-buster
-debian-8: debian-jessie
+	debian-stretch debian-buster debian-bullseye
 debian-9: debian-stretch
 debian-10: debian-buster
-debian-latest: debian-buster
+debian-11: debian-bullseye
+debian-latest: debian-bullseye
 
 TARGETS_REDHAT = \
 	centos-5 centos-6 centos-7 centos-8 \
