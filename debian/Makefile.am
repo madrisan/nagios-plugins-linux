@@ -16,4 +16,29 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 EXTRA_DIST = changelog compat control copyright rules \
-	source/format
+	source/format \
+	nagios-plugins-linux.dirs \
+	nagios-plugins-linux-clock.install \
+	nagios-plugins-linux-cpufreq.install \
+	nagios-plugins-linux-cpu.install \
+	nagios-plugins-linux-cswch.install \
+	nagios-plugins-linux.dirs \
+	nagios-plugins-linux-docker.install \
+	nagios-plugins-linux-fc.install \
+	nagios-plugins-linux-ifmountfs.install \
+	nagios-plugins-linux-intr.install \
+	nagios-plugins-linux-iowait.install \
+	nagios-plugins-linux-load.install \
+	nagios-plugins-linux-memory.install \
+	nagios-plugins-linux-multipath.install \
+	nagios-plugins-linux-nbprocs.install \
+	nagios-plugins-linux-network.install \
+	nagios-plugins-linux-network.links \
+	nagios-plugins-linux-paging.install \
+	nagios-plugins-linux-pressure.install \
+	nagios-plugins-linux-readonlyfs.install \
+	nagios-plugins-linux-swap.install \
+	nagios-plugins-linux-tcpcount.install \
+	nagios-plugins-linux-temperature.install \
+	nagios-plugins-linux-uptime.install \
+	nagios-plugins-linux-users.install
