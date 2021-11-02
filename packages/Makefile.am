@@ -47,10 +47,10 @@ debian-latest: debian-bullseye
 
 TARGETS_REDHAT = \
 	centos-5 centos-6 centos-7 centos-8 \
-	fedora-32 fedora-33 fedora-34 \
+	fedora-33 fedora-34 fedora-35 \
 	fedora-rawhide
 centos-latest: centos-8
-fedora-latest: fedora-34
+fedora-latest: fedora-35
 
 .PHONY: specfile
 specfile:
