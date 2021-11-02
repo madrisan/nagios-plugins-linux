@@ -34,8 +34,8 @@ Where:
 
 Supported distributions:
    CentOS 5/6/7/8
-   Debian jessie/stretch/buster
-   Fedora 31/32/33/rawhide
+   Debian 9/10/11
+   Fedora 33/34/35/rawhide
 
 Example:
        $0 -s $PROGPATH/../../nagios-plugins-linux:/shared:rw \\
@@ -50,7 +50,7 @@ __EOF
 help () {
    cat <<__EOF
 $PROGNAME v$REVISION - containerized software build checker
-Copyright (C) 2016-2020 Davide Madrisan <davide.madrisan@gmail.com>
+Copyright (C) 2016-2021 Davide Madrisan <davide.madrisan@gmail.com>
 
 __EOF
 
@@ -157,7 +157,7 @@ build-essential bzip2 debhelper devscripts fakeroot gcc make pkg-config xz-utils
       pck_format="rpm"
       pck_install="dnf install -y"
       pck_dist=".fc${os:7:2}"
-      pcks_dev="bzip2 make gcc libcurl-devel libvarlink-devel xz rpm-build"
+      pcks_dev="bzip2 make gcc libcurl-devel libvarlink-devel xz rpm-build util-linux"
       have_libcurl="1"
       have_libvarlink="1" ;;
    *) die "unsupported os: $os" ;;
