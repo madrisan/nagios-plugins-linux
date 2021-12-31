@@ -27,7 +27,7 @@ Here is the list of the available plugins:
 * **check_cpu** - checks the CPU (user mode) utilization
 * **check_cpufreq** - displays the CPU frequency characteristics
 * **check_cswch** - checks the total number of context switches across all CPUs
-* **check_docker** - checks the number of running docker containers (:warning: *alpha*, requires *libcurl* version 7.40.0+)
+* **check_docker** - checks the number of running docker containers (:warning: *pre-alpha*, requires *libcurl* version 7.40.0+)
 * **check_fc** - monitors the status of the fiber status ports
 * **check_ifmountfs** - checks whether the given filesystems are mounted
 * **check_intr** - monitors the total number of system interrupts
@@ -43,7 +43,7 @@ Here is the list of the available plugins:
   * check_network_multicast
 * **check_paging** - checks the memory and swap paging
 * **check_pressure** - checks Linux Pressure Stall Information (PSI) data :new:
-* **check_podman** - monitor the status of podman containers (:warning: *beta*, requires *libvarlink*)
+* **check_podman** - monitor the status of podman containers (:warning: *pre-alpha*, requires *libvarlink*)
 * **check_readonlyfs** - checks for readonly filesystems
 * **check_swap** - checks the swap usage
 * **check_tcpcount** - checks the tcp network usage
