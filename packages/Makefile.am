@@ -33,10 +33,10 @@ MULTIBUILD_OPTS = \
 	--pckver $(PACKAGE_VERSION)
 
 TARGETS_ALPINE = \
-	alpine-3.12 \
 	alpine-3.13 \
-	alpine-3.14
-alpine-latest: alpine-3.14
+	alpine-3.14 \
+	alpine-3.15
+alpine-latest: alpine-3.15
 
 TARGETS_DEBIAN = \
 	debian-stretch debian-buster debian-bullseye
@@ -60,7 +60,7 @@ specfile:
 source-archive:
 	@cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) dist
 
-$(TARGETS_ALPINE): source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
+$(TARGETS_ALPINE): specfile source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --spec $(multibuilddir)/specs/APKBUILD \
