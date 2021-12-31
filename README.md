@@ -115,7 +115,7 @@ List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,
 * 3.10, 3.14, 3.18,
 * 4.2, 4.4, 4,9, 4.14, 4.15, 4.16, 4.19
-* 5.6, 5.7, 5.8, 5.12, 5.13, 5.14
+* 5.6, 5.7, 5.8, 5.12-5.15
 
 The Nagios Plugins Linux are regularly tested on
  * Alpine Linux (musl libc),
@@ -127,9 +127,9 @@ The `.apk`, `.rpm` and `.deb` packages for Alpine, CentOS/RHEL, Debian, and Fedo
 
 Command              | Distribution
 -------------------- | ------------
+Alpine 3.15          | `make -C packages alpine-3.15`
 Alpine 3.14          | `make -C packages alpine-3.14`
 Alpine 3.13          | `make -C packages alpine-3.13`
-Alpine 3.12          | `make -C packages alpine-3.12`
 CentOS 5             | `make -C packages centos-5`
 CentOS 6             | `make -C packages centos-6`
 CentOS 7             | `make -C packages centos-7`
