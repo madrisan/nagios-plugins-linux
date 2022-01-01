@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-## Copyright (c) 2014-2016 Davide Madrisan <davide.madrisan@gmail.com>
+## Copyright (c) 2014-2016,2021 Davide Madrisan <davide.madrisan@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ AM_CPPFLAGS = \
 	-include $(top_builddir)/config.h \
 	-I$(top_srcdir)/include \
 	-DMULTIPATHD_SOCKET=\"$(MULTIPATHD_SOCKET)\" \
-        -DVARLINK_ADDRESS=\"$(VARLINK_ADDRESS)\"
+        -DPODMAN_SOCKET=\"$(PODMAN_SOCKET)\"
 
 AM_CFLAGS = $(LIBPROCPS_CFLAGS)
 AM_LDFLAGS = $(LIBPROCPS_LIBS)
@@ -58,16 +58,13 @@ libexec_PROGRAMS += \
 endif
 if HAVE_LIBCURL
 libexec_PROGRAMS += \
-	check_docker
+	check_docker \
+	check_podman
 endif
 if HAVE_PROC_MEMINFO
 libexec_PROGRAMS += \
 	check_memory      \
 	check_swap
-endif
-if HAVE_LIBVARLINK
-libexec_PROGRAMS += \
-	check_podman
 endif
 
 check_clock_SOURCES      = check_clock.c
@@ -82,6 +79,7 @@ check_load_SOURCES       = check_load.c
 endif
 if HAVE_LIBCURL
 check_docker_SOURCES     = check_docker.c
+check_podman_SOURCES     = check_podman.c
 endif
 if HAVE_PROC_MEMINFO
 check_memory_SOURCES     = check_memory.c
@@ -90,9 +88,6 @@ check_multipath_SOURCES  = check_multipath.c
 check_nbprocs_SOURCES    = check_nbprocs.c
 check_network_SOURCES    = check_network.c
 check_paging_SOURCES     = check_paging.c
-if HAVE_LIBVARLINK
-check_podman_SOURCES     = check_podman.c
-endif
 check_pressure_SOURCES   = check_pressure.c
 check_readonlyfs_SOURCES = check_readonlyfs.c
 if HAVE_PROC_MEMINFO
@@ -117,6 +112,7 @@ check_load_LDADD         = $(LDADD)
 endif
 if HAVE_LIBCURL
 check_docker_LDADD       = $(LDADD) $(LIBCURL) -lm
+check_podman_LDADD       = $(LDADD) $(LIBVARLINK_LIBS)
 endif
 if HAVE_PROC_MEMINFO
 check_memory_LDADD       = $(LDADD) $(LIBPROCPS_LIBS)
@@ -125,9 +121,6 @@ check_nbprocs_LDADD      = $(LDADD)
 check_network_LDADD      = $(LDADD) $(CEIL_LIBS)
 check_multipath_LDADD    = $(LDADD)
 check_paging_LDADD       = $(LDADD) $(LIBPROCPS_LIBS)
-if HAVE_LIBVARLINK
-check_podman_LDADD       = $(LDADD) $(LIBVARLINK_LIBS)
-endif
 check_readonlyfs_LDADD   = $(LDADD)
 if HAVE_PROC_MEMINFO
 check_swap_LDADD         = $(LDADD)

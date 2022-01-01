@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2020 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that returns some runtime metrics of Podman containers.
  *
@@ -47,7 +47,7 @@ static struct option const longopts[] = {
   {(char *) "net-out", no_argument, NULL, 'N'},
   {(char *) "pids", no_argument, NULL, 'p'},
   {(char *) "image", required_argument, NULL, 'i'},
-  {(char *) "varlink-address", required_argument, NULL, 'a'},
+  {(char *) "podman-socket", required_argument, NULL, 'p'},
   {(char *) "byte", no_argument, NULL, 'b'},
   {(char *) "kilobyte", no_argument, NULL, 'k'},
   {(char *) "megabyte", no_argument, NULL, 'm'},
@@ -81,7 +81,7 @@ usage (FILE * out)
   fprintf (out, "  %s --net-in [-b,-k,-m,-g] [--image IMAGE] "
 	   "[-w COUNTER] [-c COUNTER]\n", program_name);
   fprintf (out, "  %s --net-out [-b,-k,-m,-g] [--image IMAGE] "
-	    "[-w COUNTER] [-c COUNTER]\n", program_name);
+	   "[-w COUNTER] [-c COUNTER]\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs
     ("  -i, --image IMAGE   limit the investigation only to the containers "
@@ -97,8 +97,8 @@ usage (FILE * out)
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs ("  -%, --perc      return the percentages when possible\n", out);
   fputs
-    ("  -a, --varlink-address ADDRESS   varlink address "
-     "(default: " VARLINK_ADDRESS ")\n", out);
+    ("  -s, --podman-socket SOCKET   podman socket "
+     "(default: " PODMAN_SOCKET ")\n", out);
   fputs ("  -w, --warning COUNTER    warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs (USAGE_HELP, out);
@@ -111,6 +111,8 @@ usage (FILE * out)
   fputs ("  about their networking usage.\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -w 100 -c 120\n", program_name);
+  fprintf (out, "  %s -a unix:/run/user/1000/podman/podman.sock -w 100 -c 120\n",
+           program_name);
   fprintf (out, "  %s -i \"docker.io/library/nginx:latest\" -c 5:\n",
 	   program_name);
   fprintf (out, "  %s --block-out -m\n", program_name);
@@ -144,7 +146,7 @@ main (int argc, char **argv)
       shift = k_shift;
   bool report_perc = false;
   char *image = NULL;
-  char *varlink_address = NULL;
+  char *podman_socket = NULL;
   char *critical = NULL, *warning = NULL;
   char *status_msg, *perfdata_msg;
   nagstatus status = STATE_OK;
@@ -162,9 +164,6 @@ main (int argc, char **argv)
     {
       switch (c)
 	{
-	case 'a':
-	  varlink_address = optarg;
-	  break;
 	case 'i':
 	  image = optarg;
 	  break;
@@ -195,6 +194,9 @@ main (int argc, char **argv)
 	case 'p':
 	  which_stats = pids_stats;
 	  check_selected++;
+	  break;
+	case 's':
+	  podman_socket = optarg;
 	  break;
 	case 'b': shift = b_shift; break;
 	case 'k': shift = k_shift; break;

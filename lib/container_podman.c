@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2020 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2020,2021 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A library for checking for Podman metrics via varlink calls.
  *

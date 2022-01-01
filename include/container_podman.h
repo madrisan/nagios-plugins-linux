@@ -17,8 +17,6 @@
 #ifndef _CONTAINER_PODMAN_H
 #define _CONTAINER_PODMAN_H
 
-#include <varlink.h>
-
 #include "units.h"
 
 #ifdef __cplusplus
@@ -63,38 +61,6 @@ extern "C"
     pids_stats,
     last_stats = pids_stats
   } stats_type;
-
-#ifndef NPL_TESTING
-
-  typedef struct podman_varlink
-  {
-    int epoll_fd;
-    int signal_fd;
-    VarlinkConnection *connection;
-    VarlinkObject *parameters;
-  } podman_varlink_t;
-
-  long podman_varlink_callback (VarlinkConnection * connection,
-				const char *error, VarlinkObject * parameters,
-				uint64_t flags, void *userdata);
-  long podman_varlink_check_event (podman_varlink_t * pv);
-  long podman_varlink_list (podman_varlink_t *pv, VarlinkArray **list,
-			    char **err);
-  long podman_varlink_stats (podman_varlink_t *pv, const char *shortid,
-			     container_stats_t *stats, char **err);
-#else
-
-  struct podman_varlink;
-
-#endif
-
-  /* Allocates space for a new varlink object.
-   * Returns 0 if all went ok. Errors are returned as negative values.  */
-  int podman_varlink_new (podman_varlink_t **pv, char *varlinkaddr);
-
-  /* Drop a reference of the varlink library context. If the refcount of
-   * reaches zero, the resources of the context will be released.  */
-  podman_varlink_t *podman_varlink_unref (podman_varlink_t *pv);
 
   int podman_running_containers (podman_varlink_t *pv, unsigned int *count,
 				 const char *image, char **perfdata);

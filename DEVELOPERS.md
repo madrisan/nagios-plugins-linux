@@ -66,3 +66,18 @@ cd nagios-plugins-linux
     LIBPROCPS_LIBS="-L/tmp/procps-ng-newlib/usr/lib64/ -lproc-2"
 make
 ```
+
+## Podman Plugin
+
+Connect to systemd user service manager and start/enable podman socket:
+```
+systemctl --user start podman.socket
+systemctl --user enable podman.socket
+```
+Check for API output:
+```
+curl --unix-socket /run/user/1000/podman/podman.sock http://d/v3.0.0/libpod/info | jq
+curl --unix-socket /run/user/1000/podman/podman.sock -v 'http://d/v3.0.0/libpod/images/json' | jq
+```
+
+Podman API Reference: https://docs.podman.io/en/latest/Reference.html
