@@ -124,9 +124,9 @@ proc_psi_read_cpu (struct proc_psi_oneline **psi_cpu,
   sleep (delay);
 
   proc_psi_parser (&psi, procpath, "some");
-  *starvation = psi.total - total;
-  dbg ("delta (over %lusec): %llu (%llu - %llu)\n",
-       delay, *starvation, psi.total, total);
+  *starvation = (psi.total - total) / delay;
+  dbg ("delta (over %lusec): %llu ((%llu - %llu) / %lu)\n",
+       delay, *starvation, psi.total, total, delay);
 
   return 0;
 }
@@ -161,14 +161,14 @@ proc_psi_read (struct proc_psi_twolines **psi_io,
   sleep (delay);
 
   proc_psi_parser (&psi, procfile, "some");
-  *starvation = psi.total - total;
-  dbg ("delta (over %lusec) form some: %llu (%llu - %llu)\n",
-       delay, *starvation, psi.total, total);
+  *starvation = (psi.total - total) / delay;
+  dbg ("delta (over %lusec) for some: %llu ((%llu - %llu) / %lu)\n",
+       delay, *starvation, psi.total, total, delay);
 
   proc_psi_parser (&psi, procfile, "full");
-  *(starvation + 1) = psi.total - total;
-  dbg ("delta (over %lusec) for full: %llu (%llu - %llu)\n",
-       delay, *(starvation + 1), psi.total, total);
+  *(starvation + 1) = (psi.total - total) / delay;
+  dbg ("delta (over %lusec) for full: %llu ((%llu - %llu) / %lu)\n",
+       delay, *(starvation + 1), psi.total, total, delay);
 
   return 0;
 }
