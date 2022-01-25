@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2020 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2020,2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A library for checking 
+ * A library for checking the Linux Pressure Stall Information (PSI)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
