@@ -9,10 +9,19 @@ External libraries:
      * SPDX-License-Identifier: MIT
 
 Contributors:
-   flexdev - https://github.com/flexdev
-             Bug report and patch (several plugins)
-   chr15p  - https://github.com/chr15p
-             Bug report and patch (check_multipath)
+   flexdev               - https://github.com/flexdev
+                           Bug reports and patches (several plugins)
+   chr15p                - https://github.com/chr15p
+                           Bug report and patch (check_multipath)
+   sbraz                 - https://github.com/sbraz
+                           Bug reports and patches (musl, travis build)
+                           Packaging for Gentoo Linux
+   epleterte             - https://github.com/epleterte
+                           Patch for a documentation typo
+   vincent-olivert-riera - https://github.com/vincent-olivert-riera
+                           Debian packaging enhancements
+   roelvanmeer           - https://github.com/roelvanmeer
+                           Bug report and patch (check_pressure)
 
 Some code and coding styles/ideas belong to the following open source projects:
 
