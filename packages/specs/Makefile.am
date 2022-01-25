@@ -30,7 +30,7 @@ SUFFIXES = .in
 
 EXTRA_DIST = $(INFILES)
 
-all: $(OUTFILES)
+all: clean-local $(OUTFILES)
 
 clean-local:
 	rm -f $(OUTFILES)
