@@ -1,3 +1,47 @@
+## Version 30 ("Low Pressure")
+### Jan 25th, 2022
+
+#### FIXES
+
+##### Plugin check_pressure
+
+ * Display values per second regardless of the delay, and ensure the delta of "some" is calculated correctly.
+ * Thanks to [Christian Bryn (epleterte)](https://github.com/epleterte) for reporting and fixing a typo in the git clone command.
+
+##### Package creation
+
+ * Fix Debian packages creation.
+
+#### ENHANCEMENTS / CHANGES
+
+##### Libraries
+
+ * lib/netinfo: fix a LGTM static analyzer alert.
+
+##### Packages
+
+Release updates:
+
+ * Add Debian 11 and drop Debian 8,
+ * Add Fedora 35 and drop Fedora 32,
+ * Add Linux Alpine 3.15 and drop version 3.12.
+
+### GIT DIFF
+```
+$ git diff --stat 69770573 ce7d9f69
+ .github/workflows/build-checks.yml        |  2 +-
+ AUTHORS                                   | 17 +++++++++++++----
+ README.md                                 | 38 +++++++++++++++++++-------------------
+ debian/Makefile.am                        | 27 ++++++++++++++++++++++++++-
+ debian/changelog                          |  8 +++++++-
+ debian/copyright                          |  2 +-
+ debian/nagios-plugins-linux-network.links |  4 ++++
+ lib/pressure.c                            | 29 +++++++++++++++--------------
+ packages/Makefile.am                      | 18 +++++++++---------
+ packages/multibuild.sh                    |  8 ++++----
+ 10 files changed, 99 insertions(+), 54 deletions(-)
+```
+
 ## Version 29 ("High Temperatures")
 ### Jul 20th, 2021
 
