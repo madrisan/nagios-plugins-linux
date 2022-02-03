@@ -22,6 +22,8 @@ Contributors:
                            Debian packaging enhancements
    roelvanmeer           - https://github.com/roelvanmeer
                            Bug report and patch (check_pressure)
+   RincewindsHat         - https://github.com/RincewindsHat
+                           Configuration file for icinga2
 
 Some code and coding styles/ideas belong to the following open source projects:
 
