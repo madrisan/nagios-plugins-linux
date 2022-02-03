@@ -119,9 +119,9 @@ List of the Linux kernels that have been successfully tested:
 
 The Nagios Plugins Linux are regularly tested on
  * Alpine Linux (musl libc),
- * Debian, CentOS, Fedora, Gentoo, and Ubuntu (GNU C Library (glibc)).
+ * Debian, Fedora, Gentoo, and Ubuntu (GNU C Library (glibc)).
 
-## Alpine, CentOS/RHEL, Debian, and Fedora Packages
+## Alpine, CentOS Stream, Debian, and Fedora Packages
 
 The `.apk`, `.rpm` and `.deb` packages for Alpine, CentOS/RHEL, Debian, and Fedora can be built using the following commands
 
@@ -130,10 +130,8 @@ Command              | Distribution
 Alpine 3.15          | `make -C packages alpine-3.15`
 Alpine 3.14          | `make -C packages alpine-3.14`
 Alpine 3.13          | `make -C packages alpine-3.13`
-CentOS 5             | `make -C packages centos-5`
-CentOS 6             | `make -C packages centos-6`
-CentOS 7             | `make -C packages centos-7`
-CentOS 8             | `make -C packages centos-8`
+CentOS Stream 8      | `make -C packages centos-stream-8`
+CentOS Stream 9      | `make -C packages centos-stream-9`
 Debian 9 (Stretch)   | `make -C packages debian-stretch`
 Debian 10 (Buster)   | `make -C packages debian-buster`
 Debian 11 (Bullseye) | `make -C packages debian-bullseye`

@@ -139,10 +139,9 @@ case "$os" in
    centos-*)
       pck_format="rpm"
       pck_install="yum install -y"
-      pck_dist=".el${os:7:1}"
-      pcks_dev="bzip2 make gcc libcurl-devel xz rpm-build"
-      # requires libcurl-devel 7.40.0+ which is not available in < CentOS 8
-      case "$os" in centos-8.*) have_libcurl="1" ;; *) have_libcurl="0" ;; esac
+      pck_dist=".elr"
+      pcks_dev="bzip2 make gcc libcurl-devel rpm-build util-linux xz"
+      have_libcurl="1"
       have_libvarlink="0"
    ;;
    debian-*)
