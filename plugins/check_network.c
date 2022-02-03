@@ -121,7 +121,7 @@ usage (FILE * out)
   fputs ("  -p, --no-packets     omit the rx/tx packets counter from "
 	 "perfdata\n", out);
   fputs ("  -r, --rx-only        consider the received traffic only in "
-	 "the thresholods\n", out);
+	 "the thresholds\n", out);
   fputs ("  -t, --tx-only        consider the transmitted traffic only in "
 	 "the thresholds\n", out);
   fputs (USAGE_NOTE, out);
