@@ -38,6 +38,10 @@ TARGETS_ALPINE = \
 	alpine-3.15
 alpine-latest: alpine-3.15
 
+TARGETS_CENTOS_STREAM = \
+	centos-stream-8 centos-stream-9
+centos-stream-latest: centos-stream-9
+
 TARGETS_DEBIAN = \
 	debian-stretch debian-buster debian-bullseye
 debian-9: debian-stretch
@@ -46,10 +50,8 @@ debian-11: debian-bullseye
 debian-latest: debian-bullseye
 
 TARGETS_REDHAT = \
-	centos-5 centos-6 centos-7 centos-8 \
 	fedora-33 fedora-34 fedora-35 \
 	fedora-rawhide
-centos-latest: centos-8
 fedora-latest: fedora-35
 
 .PHONY: specfile
@@ -64,6 +66,12 @@ $(TARGETS_ALPINE): specfile source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --spec $(multibuilddir)/specs/APKBUILD \
+	   --os $$distr --target pcks/$@
+
+$(TARGETS_CENTOS_STREAM): specfile source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
+	@distr=`echo $@ | sed s/centos-stream-//\;s~^~docker.io/tgagor/centos:stream~`; \
+	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
+	   --spec $(multibuilddir)/specs/$(SPECFILE) \
 	   --os $$distr --target pcks/$@
 
 $(TARGETS_DEBIAN): source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
