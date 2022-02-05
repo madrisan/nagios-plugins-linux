@@ -23,7 +23,8 @@ Contributors:
    roelvanmeer           - https://github.com/roelvanmeer
                            Bug report and patch (check_pressure)
    RincewindsHat         - https://github.com/RincewindsHat
-                           Configuration file for icinga2
+                           Configuration file for icinga2;
+                           fix a typo in the check_network help message
 
 Some code and coding styles/ideas belong to the following open source projects:
 
