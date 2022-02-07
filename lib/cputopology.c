@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014-2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2015,2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A library for checking the CPU topology
  *
@@ -31,6 +31,7 @@
 #endif
 
 #include <sys/sysinfo.h>
+
 #include <ctype.h>
 #include <sched.h>
 #include <stdio.h>
@@ -41,7 +42,7 @@
 #include "cputopology.h"
 #include "sysfsparser.h"
 
-#define PATH_SYS_SYSTEM		"/sys/devices/system"
+#define PATH_SYS_SYSTEM		PATH_SYS "/devices/system"
 #define PATH_SYS_CPU		PATH_SYS_SYSTEM "/cpu"
 
 #if !HAVE_DECL_CPU_ALLOC

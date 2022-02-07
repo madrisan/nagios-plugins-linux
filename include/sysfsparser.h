@@ -21,6 +21,8 @@
 #include <limits.h>
 #include "system.h"
 
+#define PATH_SYS  "/sys"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -28,6 +30,7 @@ extern "C"
 
   /* generic functions */
 
+  void sysfsparser_check_for_sysfs(void);
   bool sysfsparser_path_exist (const char *path, ...)
        _attribute_format_printf_(1, 2);
   void sysfsparser_opendir(DIR **dirp, const char *path, ...)
