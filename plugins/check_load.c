@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014,2015,2017 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2015,2017,2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that tests the current system load average.
  *
@@ -24,16 +24,16 @@
 #include <stdlib.h>
 
 #include "common.h"
-//#include "cpudesc.h"
 #include "cputopology.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
+#include "sysfsparser.h"
 #include "system.h"
 #include "xasprintf.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014,2015,2017,2022 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "load1", required_argument, NULL, '1'},
@@ -171,6 +171,8 @@ main (int argc, char **argv)
 
 	}
     }
+
+  sysfsparser_check_for_sysfs ();
 
   if (getloadavg (&loadavg[0], 3) != 3)
     plugin_error (STATE_UNKNOWN, 0,

@@ -27,12 +27,13 @@
 #include "container_docker.h"
 #include "logging.h"
 #include "messages.h"
+#include "sysfsparser.h"
 #include "xasprintf.h"
 
 #ifndef NPL_TESTING
 
-#define PATH_SYS_CGROUP "/sys/fs/cgroup"
-#define PATH_SYS_DOCKER_MEM PATH_SYS_CGROUP "/memory/docker"
+#define PATH_SYS_CGROUP  PATH_SYS "/fs/cgroup"
+#define PATH_SYS_DOCKER_MEM PATH_SYS_CGROUP  "/memory/docker"
 
 static char *
 get_docker_memory_stat_path ()

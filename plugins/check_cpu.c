@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014,2015,2020 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2015,2020,2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check the CPU utilization.
  *
@@ -45,13 +45,14 @@
 #include "progversion.h"
 #include "thresholds.h"
 #include "string-macros.h"
+#include "sysfsparser.h"
 #include "system.h"
 #include "xalloc.h"
 #include "xasprintf.h"
 #include "xstrton.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014,2015,2020,2022 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static const char *program_shorthelp = NULL;
 
@@ -234,7 +235,7 @@ static void cpu_desc_summary (struct cpu_desc *cpudesc)
 	}
     }
 
-  char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc); 
+  char *cpu_virtflag = cpu_desc_get_virtualization_flag (cpudesc);
   if (cpu_virtflag)
     print_s("Virtualization:", cpu_virtflag);
 }
@@ -275,6 +276,8 @@ main (int argc, char **argv)
       program_shorthelp =
         xstrdup ("This plugin checks the CPU (user mode) utilization\n");
     }
+
+  sysfsparser_check_for_sysfs ();
 
   err = cpu_desc_new (&cpudesc);
   if (err < 0)

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014-2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2015,2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A library for checking the CPU features
  *
@@ -40,7 +40,7 @@
 
 #define PATH_PROC_CPUINFO	"/proc/cpuinfo"
 
-#define PATH_SYS_SYSTEM		"/sys/devices/system"
+#define PATH_SYS_SYSTEM		PATH_SYS "/devices/system"
 #define PATH_SYS_CPU		PATH_SYS_SYSTEM "/cpu"
 
 bool
