@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014-2021 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2021,2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that monitors the hardware's temperature.
  *
@@ -48,7 +48,7 @@ enum
 };
 
 static const char *program_copyright =
-  "Copyright (C) 2014-2021 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014-2021,2022 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "fahrenheit", required_argument, NULL, 'f'},
@@ -185,6 +185,8 @@ main (int argc, char **argv)
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
+
+  sysfsparser_check_for_sysfs ();
 
   int max_temp =
     sysfsparser_thermal_get_temperature (selected_thermal_zone,

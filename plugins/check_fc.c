@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2015,2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that monitors the status of the fiber channel ports
  *
@@ -41,7 +41,7 @@
 #include "xstrton.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2015,2022 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "fchostinfo", no_argument, NULL, 'i'},
@@ -92,7 +92,7 @@ print_version (void)
   exit (STATE_OK);
 }
 
-#define PATH_SYS_FC   "/sys/class"
+#define PATH_SYS_FC  PATH_SYS "/class"
 #define PATH_SYS_FC_HOST   PATH_SYS_FC "/fc_host"
 
 void
@@ -282,6 +282,7 @@ main (int argc, char **argv)
 
   if (summary)
     {
+      sysfsparser_check_for_sysfs ();
       fc_host_summary (verbose);
       return STATE_UNKNOWN;
     }
@@ -305,6 +306,8 @@ main (int argc, char **argv)
 	plugin_error (STATE_UNKNOWN, 0,
 		      "too large count value (greater than %d)", COUNT_MAX);
     }
+
+  sysfsparser_check_for_sysfs ();
 
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)

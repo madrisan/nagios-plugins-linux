@@ -34,7 +34,7 @@ extern "C"
    * Returns 0 if all went ok. Errors are returned as negative values.  */
   int cpu_desc_new (struct cpu_desc **cpudesc);
 
-  /* Fill the cpu_desc structure pointed with the values found in the 
+  /* Fill the cpu_desc structure pointed with the values found in the
    * proc filesystem */
   void cpu_desc_read (struct cpu_desc * __restrict cpudesc);
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014-2021 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A library for parsing the sysfs filesystem
  *
@@ -22,7 +22,12 @@
 # define _GNU_SOURCE	/* activate extra prototypes for glibc */
 #endif
 
+#include <linux/limits.h>
+#include <linux/magic.h>
+
 #include <sys/types.h>
+#include <sys/vfs.h>
+
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
@@ -39,7 +44,7 @@
 #include "sysfsparser.h"
 #include "xasprintf.h"
 
-#define PATH_SYS_SYSTEM		"/sys/devices/system"
+#define PATH_SYS_SYSTEM		PATH_SYS "/devices/system"
 #define PATH_SYS_CPU		PATH_SYS_SYSTEM "/cpu"
 
 enum sysfsparser_cpufreq_sysfile_numeric_id
@@ -81,6 +86,19 @@ static const char *
   [SCALING_AVAILABLE_GOVERNORS] = "scaling_available_governors",
   [SCALING_AVAILABLE_FREQS] = "scaling_available_frequencies"
 };
+
+void
+sysfsparser_check_for_sysfs (void)
+{
+  struct statfs statfsbuf;
+  char sysfs_mount[NAME_MAX];
+
+  snprintf (sysfs_mount, NAME_MAX, "%s", PATH_SYS);
+  if (statfs (sysfs_mount, &statfsbuf) < 0
+      || statfsbuf.f_type != SYSFS_MAGIC)
+    plugin_error (STATE_UNKNOWN, 0,
+		  "The sysfs filesystem (" PATH_SYS ") is not mounted");
+}
 
 bool
 sysfsparser_path_exist (const char *path, ...)
@@ -156,7 +174,7 @@ sysfsparser_getline (const char *format, ...)
 
   if ((fp = fopen (filename, "r")) == NULL)
     return NULL;
-  
+
   chread = getline (&line, &len, fp);
   fclose (fp);
 
@@ -246,7 +264,7 @@ sysfsparser_cpufreq_get_string (unsigned int cpunum,
   if (which >= MAX_STRING_FILES)
     return NULL;
 
-  line = 
+  line =
     sysfsparser_getline (PATH_SYS_CPU "/cpu%u/cpufreq/%s", cpunum,
 			 sysfsparser_devices_system_cpu_file_string[which]);
   if (NULL == line)
@@ -255,7 +273,7 @@ sysfsparser_cpufreq_get_string (unsigned int cpunum,
   len = strlen (line);
   if (line[len-1] == '\n')
     line[len-1] = '\0';
-  
+
   return line;
 }
 
@@ -318,7 +336,7 @@ sysfsparser_cpufreq_get_available_governors (unsigned int cpu)
 
 /* Thermal Sensors function  */
 
-#define PATH_SYS_ACPI   "/sys/class"
+#define PATH_SYS_ACPI   PATH_SYS "/class"
 #define PATH_SYS_ACPI_THERMAL   PATH_SYS_ACPI "/thermal"
 
 /* Thermal zone device sys I/F, created once it's registered:

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014,2015,2019 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2015,2019,2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check the CPU frequency characteristics.
  *
@@ -33,13 +33,14 @@
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
+#include "sysfsparser.h"
 #include "thresholds.h"
 #include "units.h"
 #include "xalloc.h"
 #include "xasprintf.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014,2015,2019 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014,2015,2019,2022 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "no-cpu-model", no_argument, NULL, 'm'},
@@ -101,6 +102,8 @@ main (int argc, char **argv)
   unsigned long freq_min, freq_max, freq_kernel;
 
   set_program_name (argv[0]);
+
+  sysfsparser_check_for_sysfs ();
 
   err = cpu_desc_new (&cpudesc);
   if (err < 0)
