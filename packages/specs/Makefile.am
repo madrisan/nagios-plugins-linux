@@ -19,12 +19,14 @@ INFILES := $(wildcard APKBUILD.in *.spec.in)
 OUTFILES := $(INFILES:.in=)
 
 PACKAGE_RELEASE = 1
+PACKAGE_SHA512SUM := `sha512sum $(top_srcdir)/$(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.xz | sed 's/ .*//'`
 
 SUFFIXES = .in
 .in:; @echo "Generating $@...";\
 	sed "s,@package@,$(PACKAGE_NAME),g;\
 	     s,@version@,$(PACKAGE_VERSION),g;\
 	     s,@release@,$(PACKAGE_RELEASE),g;\
+	     s,@sha512sum@,$(PACKAGE_SHA512SUM),g;\
 	     s,@plugindir@,$(PLUGINDIR),g;\
 	     s,@date@,`LC_ALL="C" date "+%a %b %d %Y"`," $< > $@
 
