@@ -28,9 +28,6 @@ Requires: nagios-plugins-linux-clock
 Requires: nagios-plugins-linux-cpu
 Requires: nagios-plugins-linux-cpufreq
 Requires: nagios-plugins-linux-cswch
-%if 0%{?!have_libcurl}
-Requires: nagios-plugins-linux-docker
-%endif
 Requires: nagios-plugins-linux-ifmountfs
 Requires: nagios-plugins-linux-intr
 Requires: nagios-plugins-linux-iowait
@@ -40,9 +37,6 @@ Requires: nagios-plugins-linux-multipath
 Requires: nagios-plugins-linux-nbprocs
 Requires: nagios-plugins-linux-network
 Requires: nagios-plugins-linux-paging
-%if 0%{?!have_libvarlink}
-Requires: nagios-plugins-linux-podman
-%endif
 Requires: nagios-plugins-linux-pressure
 Requires: nagios-plugins-linux-readonlyfs
 Requires: nagios-plugins-linux-swap
@@ -84,7 +78,7 @@ This Nagios plugin monitors the total number of context switches per second acro
 
 %if 0%{?have_libcurl}
 %package docker
-Summary: Nagios plugins for Linux - check_docker
+Summary: Nagios plugins for Linux - experimental plugin check_docker
 Group: Applications/System
 
 %description docker
@@ -163,7 +157,7 @@ This Nagios plugin checks the memory and swap paging.
 
 %if 0%{?have_libvarlink}
 %package podman
-Summary: Nagios plugins for Linux - check_podman
+Summary: Nagios plugins for Linux - experimental plugin check_podman
 Group: Applications/System
 
 %description podman
