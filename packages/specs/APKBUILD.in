@@ -41,4 +41,4 @@ package() {
         make DESTDIR="$pkgdir" install
 }
 
-sha512sums="129c696cee4b2638e6106289e398f6823caabb382ca8e1a867f8b35985f99d7dc69a14308eaeed0a6b788e244a13778c7cdf28b4ff70354b5620f7d646225a44 nagios-plugins-linux-27.tar.xz"
+sha512sums="@sha512sum@ @package@-@version@.tar.xz"
