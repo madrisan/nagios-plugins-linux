@@ -1,5 +1,3 @@
-# Nagios-compatible Plugins for Linux
-
 ![project logo](https://madrisan.files.wordpress.com/2015/11/nagios-plugins-linux-logo-256.png)
 
 [Nagios](http://www.nagios.org/) is an open source computer system monitoring, network monitoring and infrastructure monitoring software application.
@@ -13,9 +11,9 @@ These plugins have been reported to also work with
 
 ---
 
-### Web site
+### Web sites
 
- * **GitHub Site**: https://github.com/madrisan/nagios-plugins-linux
+ * **GitHub**: https://github.com/madrisan/nagios-plugins-linux
  * **Wiki**: https://github.com/madrisan/nagios-plugins-linux/wiki
 
 ---
