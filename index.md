@@ -13,8 +13,8 @@ These plugins have been reported to also work with
 
 ### Web sites
 
- * **GitHub**: https://github.com/madrisan/nagios-plugins-linux
- * **Wiki**: https://github.com/madrisan/nagios-plugins-linux/wiki
+ * **GitHub**: [https://github.com/madrisan/nagios-plugins-linux](https://github.com/madrisan/nagios-plugins-linux)
+ * **Wiki**: [https://github.com/madrisan/nagios-plugins-linux/wiki](https://github.com/madrisan/nagios-plugins-linux/wiki)
 
 ---
 
