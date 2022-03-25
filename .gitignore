@@ -27,9 +27,12 @@ stamp-h1
 **/Makefile.in
 **/Makefile
 # Build files
+**/APKBUILD
 *.spec
 *.tar.bz2
 *.tar.xz
+# Packages
+packages/pcks
 # Test-build files
 tests-build/pcks
 # Binary files created by make {,check}
