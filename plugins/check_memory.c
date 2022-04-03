@@ -239,11 +239,11 @@ main (int argc, char **argv)
 		   "vmem_pgmajfault/s=%lu", dpgpgin, dpgpgout, dpgmajfault);
     }
 
-  /* Note: we should perhaps implement the following tests instead: 
+  /* Note: we should perhaps implement the following tests instead:
    *  1. The Main Memory Test
    *     (MemFree + Buffers + Cached) / MemTotal < threshold
-   *  2. The Page Fault Test 
-   *     Major pagefaults > threshold 
+   *  2. The Page Fault Test
+   *     Major pagefaults > threshold
    *
    * See. http://doc.qt.digia.com/qtextended4.4/syscust-oom.html	*/
 

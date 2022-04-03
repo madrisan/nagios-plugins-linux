@@ -54,7 +54,7 @@ static struct option const longopts[] = {
   {NULL, 0, NULL, 0}
 };
 
-static _Noreturn void 
+static _Noreturn void
 usage (FILE * out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);

@@ -221,7 +221,7 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
 	  data->kb_main_available = (unsigned long) mem_available;
 	}
     }
-  
+
   /* derived values */
   data->kb_main_cached = data->kb_page_cache + data->kb_slab_reclaimable;
   data->kb_main_used =

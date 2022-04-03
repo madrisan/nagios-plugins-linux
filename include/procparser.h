@@ -31,7 +31,7 @@ extern "C"
   void procparser (const char *filename, const proc_table_struct * proc_table,
 		   int proc_table_count, char separator);
 
-  /* Lookup a pattern and get the value from line 
+  /* Lookup a pattern and get the value from line
    * Format is:
    *	 "<pattern>   : <key>"
    */
