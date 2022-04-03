@@ -78,7 +78,7 @@ proc_interrupts_get_nintr_per_cpu (unsigned int *ncpus)
 	  dbg (" --> cpu%u = %lu\n", cpu, value);
 	  vintr[cpu] += value;
 	  p = end + 1;
-	} 
+	}
       dbg ("\n");
     }
 

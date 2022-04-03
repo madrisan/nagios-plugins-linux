@@ -32,7 +32,7 @@
 #include "xalloc.h"
 
 /*
- * Returns TRUE if alert should be raised based on the range 
+ * Returns TRUE if alert should be raised based on the range
  */
 int
 check_range (double value, range * my_range)
@@ -113,7 +113,7 @@ parse_range_string (char *str)
   temp_range = (range *) xmalloc (sizeof (range));
 
   /*
-   * Set defaults 
+   * Set defaults
    */
   temp_range->start = 0;
   temp_range->start_infinity = false;

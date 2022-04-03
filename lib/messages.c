@@ -79,7 +79,7 @@ plugin_error (nagstatus status, int errnum, const char *message, ...)
   va_list args;
 
   flush_stdout ();
-  
+
   fprintf (stdout, "%s: ", program_name);
 
   va_start (args, message);

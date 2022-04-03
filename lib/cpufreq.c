@@ -137,7 +137,7 @@ cpufreq_freq_to_string (unsigned long freq)
   unsigned long tmp;
 
   if (freq > 1000000)
-    { 
+    {
       tmp = freq % 10000;
       if (tmp >= 5000)
 	freq += 10000;

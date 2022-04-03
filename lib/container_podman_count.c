@@ -49,7 +49,7 @@ podman_running_containers (struct podman_varlink *pv, unsigned int *count,
   ret = podman_varlink_list (pv, &list, &errmsg);
   if (ret < 0)
     plugin_error (STATE_UNKNOWN, 0, "varlink_varlink_list: %s", errmsg);
-  
+
   elements = varlink_array_get_n_elements (list);
   dbg ("varlink has detected %lu containers\n", elements);
 

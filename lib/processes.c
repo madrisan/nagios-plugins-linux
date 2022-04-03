@@ -110,7 +110,7 @@ void
 procs_list_node_init (struct procs_list_node **list)
 {
   struct procs_list_node *new = xmalloc (sizeof (struct procs_list_node));
-  
+
   /* The list's head points to itself if empty */
   new->uid = -1;
   new->nbr = 0;		/* will hold the total number of processes */
