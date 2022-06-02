@@ -18,7 +18,7 @@ jobs:
         container:
           - 'alpine:3.15'
           - 'debian:11'
-          - 'fedora:35'
+          - 'fedora:36'
           - 'ubuntu:21.10'
 
     steps:
