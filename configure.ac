@@ -49,7 +49,7 @@ m4_ifndef([LT_INIT], [
 # 'AC_PROG_CC_C99' unfortunately requires autoconf 2.60+
 #AC_PROG_CC_C99
 AM_PROG_CC_C_O
-AC_PROG_CC_STDC
+AC_PROG_CC
 
 if test "$cross_compiling" = no; then
   if test "x$ac_cv_prog_cc_c99" = "xno" || test "x$ac_cv_prog_cc_c99" = "x"; then
@@ -226,7 +226,6 @@ AC_DEFINE_UNQUOTED(
   [Define this if the compiler supports the format printf attribute])
 
 dnl Checks for header files
-AC_HEADER_STDC
 AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([ \
   arpa/inet.h \
