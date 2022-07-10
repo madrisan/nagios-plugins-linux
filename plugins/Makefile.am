@@ -39,6 +39,7 @@ libexec_PROGRAMS =        \
 	check_cpufreq     \
 	check_cswch       \
 	check_fc          \
+	check_filecount   \
 	check_ifmountfs   \
 	check_intr        \
 	check_multipath   \
@@ -75,6 +76,7 @@ check_cpu_SOURCES        = check_cpu.c
 check_cpufreq_SOURCES    = check_cpufreq.c
 check_cswch_SOURCES      = check_cswch.c
 check_fc_SOURCES         = check_fc.c
+check_filecount_SOURCES  = check_filecount.c
 check_ifmountfs_SOURCES  = check_ifmountfs.c
 check_intr_SOURCES       = check_intr.c
 if HAVE_GETLOADAVG
@@ -110,6 +112,7 @@ check_cpu_LDADD          = $(LDADD)
 check_cpufreq_LDADD      = $(LDADD)
 check_cswch_LDADD        = $(LDADD)
 check_fc_LDADD           = $(LDADD)
+check_filecount_LDADD    = $(LDADD)
 check_ifmountfs_LDADD    = $(LDADD)
 check_intr_LDADD         = $(LDADD)
 if HAVE_GETLOADAVG

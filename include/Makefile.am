@@ -26,6 +26,7 @@ noinst_HEADERS = \
 	cpufreq.h \
 	cpustats.h \
 	cputopology.h \
+	files.h \
 	getenv.h \
 	kernelver.h \
 	interrupts.h \
