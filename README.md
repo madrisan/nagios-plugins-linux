@@ -25,6 +25,7 @@ Here is the list of the available plugins:
 * **check_cswch** - checks the total number of context switches across all CPUs
 * **check_docker** - checks the number of running docker containers (:warning: *alpha*, requires *libcurl* version 7.40.0+)
 * **check_fc** - monitors the status of the fiber status ports
+* **check_filecount** - checks the number of files found in one or more directories :new:
 * **check_ifmountfs** - checks whether the given filesystems are mounted
 * **check_intr** - monitors the total number of system interrupts
 * **check_iowait** - monitors the I/O wait bottlenecks
