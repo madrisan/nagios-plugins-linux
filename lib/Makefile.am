@@ -32,6 +32,7 @@ libutils_a_SOURCES =  \
 	cpufreq.c     \
 	cpustats.c    \
 	cputopology.c \
+	files.c       \
 	kernelver.c   \
 	interrupts.c  \
 	json_helpers.c \
