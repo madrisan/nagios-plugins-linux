@@ -27,8 +27,9 @@ extern "C"
     READDIR_DIRECTORIES_ONLY   = (1 << 0),
     READDIR_IGNORE_SYMLINKS    = (1 << 1),
     READDIR_IGNORE_UNKNOWN     = (1 << 2),
-    READDIR_RECURSIVE          = (1 << 3),
-    READDIR_REGULAR_FILES_ONLY = (1 << 4)
+    READDIR_INCLUDE_HIDDEN     = (1 << 3),
+    READDIR_RECURSIVE          = (1 << 4),
+    READDIR_REGULAR_FILES_ONLY = (1 << 5)
   };
 
   int files_filecount (const char *folder, unsigned int flags);
