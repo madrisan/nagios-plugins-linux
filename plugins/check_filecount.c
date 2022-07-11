@@ -3,7 +3,8 @@
  * License: GPLv3+
  * Copyright (c) 2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A Nagios plugin that do something ....
+ * A Nagios plugin that returns the number of files found in one or more
+ * directories.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,8 +53,8 @@ static _Noreturn void
 usage (FILE * out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
-  fputs ("This plugin checks the number of files in the given directories.\n",
-	 out);
+  fputs ("This plugin returns the number of files found in one or more "
+	  "directories.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out,
