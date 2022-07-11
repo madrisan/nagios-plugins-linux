@@ -39,8 +39,9 @@ static const char *program_copyright =
 static struct option const longopts[] = {
   {(char *) "ignore-symlinks", required_argument, NULL, 'l'},
   {(char *) "ignore-unknown", required_argument, NULL, 'u'},
+  {(char *) "include-hidden", required_argument, NULL, 'H'},
   {(char *) "recursive", required_argument, NULL, 'r'},
-  {(char *) "regular-files", required_argument, NULL, 'f'},
+  {(char *) "regular-only", required_argument, NULL, 'f'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "verbose", no_argument, NULL, 'v'},
@@ -54,14 +55,15 @@ usage (FILE * out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
   fputs ("This plugin returns the number of files found in one or more "
-	  "directories.\n", out);
+	 "directories.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out,
-	   "  %s [-w COUNTER] [-c COUNTER DIR] [-f] [-l] [-r] [-u] "
+	   "  %s [-w COUNTER] [-c COUNTER DIR] [-f] [-H] [-l] [-r] [-u] "
 	   "DIR [DIR...]\n", program_name);
   fputs (USAGE_OPTIONS, out);
-  fputs ("  -f, --regular-files      count regular files only\n", out);
+  fputs ("  -f, --regular-only       count regular files only\n", out);
+  fputs ("  -H, --include-hidden     do not skip the hidden files\n", out);
   fputs ("  -l, --ignore-symlinks    ignore symlinks\n", out);
   fputs ("  -r, --recursive          check recursively each subdirectory\n",
 	 out);
@@ -119,7 +121,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "c:flruvw:" GETOPT_HELP_VERSION_STRING,
+			   "c:fHlruvw:" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -131,6 +133,9 @@ main (int argc, char **argv)
 	  break;
 	case 'f':
 	  filecount_flags |= READDIR_REGULAR_FILES_ONLY;
+	  break;
+	case 'H':
+	  filecount_flags |= READDIR_INCLUDE_HIDDEN;
 	  break;
 	case 'l':
 	  filecount_flags |= READDIR_IGNORE_SYMLINKS;

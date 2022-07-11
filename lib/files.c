@@ -64,6 +64,9 @@ files_filecount (const char *folder, unsigned int flags)
       if (STREQ (dp->d_name, ".") || STREQ (dp->d_name, ".."))
 	continue;
 
+      if (!(flags & READDIR_INCLUDE_HIDDEN) && (dp->d_name[0] == '.'))
+	continue;
+
       switch (dp->d_type)
 	{
 	default:
