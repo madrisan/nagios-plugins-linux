@@ -113,7 +113,7 @@ main (int argc, char **argv)
   bool verbose = false;
   char *bp, *critical = NULL, *warning = NULL;
   size_t size;
-  unsigned int filecount_flags = READDIR_DEFAULT;
+  unsigned int filecount_flags = FILES_DEFAULT;
   FILE *perfdata;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
@@ -132,19 +132,19 @@ main (int argc, char **argv)
 	  critical = optarg;
 	  break;
 	case 'f':
-	  filecount_flags |= READDIR_REGULAR_FILES_ONLY;
+	  filecount_flags |= FILES_REGULAR_ONLY;
 	  break;
 	case 'H':
-	  filecount_flags |= READDIR_INCLUDE_HIDDEN;
+	  filecount_flags |= FILES_INCLUDE_HIDDEN;
 	  break;
 	case 'l':
-	  filecount_flags |= READDIR_IGNORE_SYMLINKS;
+	  filecount_flags |= FILES_IGNORE_SYMLINKS;
 	  break;
 	case 'r':
-	  filecount_flags |= READDIR_RECURSIVE;
+	  filecount_flags |= FILES_RECURSIVE;
 	  break;
 	case 'u':
-	  filecount_flags |= READDIR_IGNORE_UNKNOWN;
+	  filecount_flags |= FILES_IGNORE_UNKNOWN;
 	  break;
 	case 'w':
 	  warning = optarg;
