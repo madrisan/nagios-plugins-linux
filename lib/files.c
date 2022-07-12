@@ -64,19 +64,22 @@ files_filecount (const char *folder, unsigned int flags)
       if (STREQ (dp->d_name, ".") || STREQ (dp->d_name, ".."))
 	continue;
 
+      if (!(flags & FILES_INCLUDE_HIDDEN) && (dp->d_name[0] == '.'))
+	continue;
+
       switch (dp->d_type)
 	{
 	default:
 	  dbg ("(%d) %s/%s (other)\n", deep, folder, dp->d_name);
-	  if (flags & READDIR_REGULAR_FILES_ONLY)
+	  if (flags & FILES_REGULAR_ONLY)
 	    continue;
 	  break;
 	case DT_DIR:
 	  dbg ("(%d) %s/%s (directory)\n", deep, folder, dp->d_name);
-	  if (flags & READDIR_RECURSIVE)
+	  if (flags & FILES_RECURSIVE)
 	    {
 	      char *subdir = xasprintf ("%s/%s", folder, dp->d_name);
-	      if (!(flags & READDIR_REGULAR_FILES_ONLY))
+	      if (!(flags & FILES_REGULAR_ONLY))
 		{
 		  filecount++;
 		  dbg ("(%d)  --> #%d\n", deep, filecount);
@@ -94,12 +97,12 @@ files_filecount (const char *folder, unsigned int flags)
 	      free (subdir);
 	      continue;
 	    }
-	  if (flags & READDIR_REGULAR_FILES_ONLY)
+	  if (flags & FILES_REGULAR_ONLY)
 	    continue;
 	  break;
 	case DT_LNK:
 	  dbg ("(%d) %s/%s (symlink)\n", deep, folder, dp->d_name);
-	  if (flags & (READDIR_IGNORE_SYMLINKS | READDIR_REGULAR_FILES_ONLY))
+	  if (flags & (FILES_IGNORE_SYMLINKS | FILES_REGULAR_ONLY))
 	    continue;
 	  break;
 	case DT_REG:
@@ -111,7 +114,7 @@ files_filecount (const char *folder, unsigned int flags)
 	   * returning the file type in d_type.  So we leave users to decide
 	   * whether these files must be counted or not  */
 	  dbg ("(%d) %s/%s (unknown file)\n", deep, folder, dp->d_name);
-	  if (flags & READDIR_IGNORE_UNKNOWN)
+	  if (flags & FILES_IGNORE_UNKNOWN)
 	    continue;
 	  break;
 	}
