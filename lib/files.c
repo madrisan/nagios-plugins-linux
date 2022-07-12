@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "files.h"
 #include "logging.h"
@@ -34,22 +35,24 @@
 static int deep = 0;
 
 int
-files_filecount (const char *folder, unsigned int flags)
+files_filecount (const char *dir, unsigned int flags)
 {
   int filecount = 0;
   DIR *dirp;
 
   errno = 0;
-  if ((dirp = opendir (folder)) == NULL)
+  if ((dirp = opendir (dir)) == NULL)
     {
-      dbg ("(e) cannot open %s (%s)\n", folder, strerror (errno));
+      dbg ("(e) cannot open %s (%s)\n", dir, strerror (errno));
       return -1;
     }
 
   /* Scan entries under the 'dirp' directory */
   for (;;)
     {
+      char abs_path[PATH_MAX];
       struct dirent *dp;
+      struct stat statbuf;
       errno = 0;
 
       if ((dp = readdir (dirp)) == NULL)
@@ -67,18 +70,31 @@ files_filecount (const char *folder, unsigned int flags)
       if (!(flags & FILES_INCLUDE_HIDDEN) && (dp->d_name[0] == '.'))
 	continue;
 
-      switch (dp->d_type)
+      snprintf (abs_path, sizeof (abs_path), "%s/%s", dir, dp->d_name);
+
+      int status = lstat (abs_path, &statbuf);
+      if (status != 0)
+	plugin_error (STATE_UNKNOWN, errno, "lstat (%s) failed", abs_path);
+
+      switch (statbuf.st_mode & S_IFMT)
 	{
 	default:
-	  dbg ("(%d) %s/%s (other)\n", deep, folder, dp->d_name);
+	  if (flags & FILES_IGNORE_UNKNOWN)
+	    continue;
+	  break;
+	case S_IFBLK:
+	case S_IFCHR:
+	case S_IFIFO:
+	case S_IFSOCK:
+	  dbg ("(%d) %s (special file)\n", deep, abs_path);
 	  if (flags & FILES_REGULAR_ONLY)
 	    continue;
 	  break;
-	case DT_DIR:
-	  dbg ("(%d) %s/%s (directory)\n", deep, folder, dp->d_name);
+	case S_IFDIR:
+	  dbg ("(%d) %s (directory)\n", deep, abs_path);
 	  if (flags & FILES_RECURSIVE)
 	    {
-	      char *subdir = xasprintf ("%s/%s", folder, dp->d_name);
+	      char *subdir = xasprintf ("%s/%s", dir, dp->d_name);
 	      if (!(flags & FILES_REGULAR_ONLY))
 		{
 		  filecount++;
@@ -100,30 +116,21 @@ files_filecount (const char *folder, unsigned int flags)
 	  if (flags & FILES_REGULAR_ONLY)
 	    continue;
 	  break;
-	case DT_LNK:
-	  dbg ("(%d) %s/%s (symlink)\n", deep, folder, dp->d_name);
+	case S_IFLNK:
+	  dbg ("(%d) %s (symlink)\n", deep, abs_path);
 	  if (flags & (FILES_IGNORE_SYMLINKS | FILES_REGULAR_ONLY))
 	    continue;
 	  break;
-	case DT_REG:
-	  dbg ("(%d) %s/%s (regular file)\n", deep, folder, dp->d_name);
-	  break;
-	case DT_UNKNOWN:
-	  /* NOTE: according to the readdir manpage, only some filesystems
-	   * (among them: Btrfs, ext2, ext3, and ext4) have full support for
-	   * returning the file type in d_type.  So we leave users to decide
-	   * whether these files must be counted or not  */
-	  dbg ("(%d) %s/%s (unknown file)\n", deep, folder, dp->d_name);
-	  if (flags & FILES_IGNORE_UNKNOWN)
-	    continue;
+	case S_IFREG:
+	  dbg ("(%d) %s (regular file)\n", deep, abs_path);
 	  break;
 	}
 
-	filecount++;
-	dbg ("(%d)  --> #%d\n", deep, filecount);
+      filecount++;
+      dbg ("(%d)  --> #%d\n", deep, filecount);
     }
 
-  dbg ("- return #%d (%s)\n", filecount, folder);
+  dbg ("- return #%d (%s)\n", filecount, dir);
   deep--;
   closedir (dirp);
   return filecount;

@@ -21,9 +21,10 @@
 extern "C"
 {
 #endif
+
   enum
   {
-    FILES_DEFAULT          = 0,
+    FILES_DEFAULT = 0,
     FILES_DIRECTORIES_ONLY = (1 << 0),
     FILES_IGNORE_SYMLINKS  = (1 << 1),
     FILES_IGNORE_UNKNOWN   = (1 << 2),
@@ -32,7 +33,7 @@ extern "C"
     FILES_REGULAR_ONLY     = (1 << 5)
   };
 
-  int files_filecount (const char *folder, unsigned int flags);
+  int files_filecount (const char *dir, unsigned int flags);
 
 #ifdef __cplusplus
 }
