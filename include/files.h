@@ -23,12 +23,13 @@ extern "C"
 #endif
   enum
   {
-    READDIR_DEFAULT            = 0,
-    READDIR_DIRECTORIES_ONLY   = (1 << 0),
-    READDIR_IGNORE_SYMLINKS    = (1 << 1),
-    READDIR_IGNORE_UNKNOWN     = (1 << 2),
-    READDIR_RECURSIVE          = (1 << 3),
-    READDIR_REGULAR_FILES_ONLY = (1 << 4)
+    FILES_DEFAULT          = 0,
+    FILES_DIRECTORIES_ONLY = (1 << 0),
+    FILES_IGNORE_SYMLINKS  = (1 << 1),
+    FILES_IGNORE_UNKNOWN   = (1 << 2),
+    FILES_INCLUDE_HIDDEN   = (1 << 3),
+    FILES_RECURSIVE        = (1 << 4),
+    FILES_REGULAR_ONLY     = (1 << 5)
   };
 
   int files_filecount (const char *folder, unsigned int flags);
