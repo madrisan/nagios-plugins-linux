@@ -75,18 +75,10 @@ usage (FILE * out)
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_NOTE, out);
-  fputs ("  By default, this plugin counts files and directories of DIR not"
-	 " recursively.\n", out);
-  fputs ("  If the filesystem does not provide the type of files and the"
-	 " --ignore-unknown\n"
-	 "  option has been selected, the file number will be zero."
-         "  If this option is not\n"
-	 "  specified, any file type restriction will be silently ignored"
-	 " and all files\n"
-	 "  counted.  Only some filesystems (among them: Btrfs, ext2, ext3,"
-	 " and ext4) have\n"
-	 "  full support for returning file types."
-	 "  See the readdir(3) manpage.\n",
+  fputs ("  By default, this plugin counts the directories and files"
+	 " (of every type)\n"
+	 "  found in DIR, in a non recursive way."
+	 "  The hidden files are ignored.\n",
 	 out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -l -r /tmp\n", program_name);
