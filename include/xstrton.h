@@ -21,7 +21,7 @@
 extern "C" {
 # endif
 
-  double strtod_or_err (const char *str, const char *errmesg);
+  long sizetol (const char *str);
   long strtol_or_err (const char *str, const char *errmesg);
 
 #ifdef __cplusplus

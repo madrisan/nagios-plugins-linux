@@ -28,6 +28,9 @@ Contributors:
 
 Some code and coding styles/ideas belong to the following open source projects:
 
+ * collectd        https://collectd.org
+                   SPDX-License-Identifier: GPL-2.1-only, BSD-1-Clause
+
  * cpufrequtils    https://www.kernel.org/pub/linux/utils/kernel/cpufreq/
                    SPDX-License-Identifier: GPL-2.0-only
 
