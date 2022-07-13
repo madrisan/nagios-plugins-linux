@@ -20,21 +20,56 @@
 #include "common.h"
 #include "messages.h"
 
-/* same as strtod(3) but exit on failure instead of returning crap */
-double
-strtod_or_err (const char *str, const char *errmesg)
+/* convert a string with an optional prefix b (byte), k (kilobyte),
+ * m (megabyte), g (gigabyte), t (terabyte), or p (petabyte);
+ * exit on failure instead of returning crap.   */
+long
+sizetol (const char *str)
 {
-  char *end = NULL;
-
   if (str != NULL && *str != '\0')
     {
+      char *end = NULL;
       errno = 0;
-      double num = strtod (str, &end);
-      if (errno == 0 && str != end && end != NULL && *end == '\0')
-	return num;
+      double temp = strtod (str, &end);
+      if ((errno == 0) && (end != NULL) && (end != str))
+	{
+	  switch (*end)
+	    {
+	    case 0:
+	    case 'b':
+	    case 'B':
+	      break;
+	    case 'k':
+	    case 'K':
+	      temp *= 1000.0;
+	      break;
+	    case 'm':
+	    case 'M':
+	      temp *= 1000.0 * 1000.0;
+	      break;
+	    case 'g':
+	    case 'G':
+	      temp *= 1000.0 * 1000.0 * 1000.0;
+	      break;
+	    case 't':
+	    case 'T':
+	      temp *= 1000.0 * 1000.0 * 1000.0 * 1000.0;
+	      break;
+	    case 'p':
+	    case 'P':
+	      temp *= 1000.0 * 1000.0 * 1000.0 * 1000.0 * 1000.0;
+	      break;
+	    default:
+	      plugin_error (STATE_UNKNOWN, errno,
+			    "invalid suffix `%c' in `%s'", *end, str);
+	    }
+
+	  return (long)temp;
+	}
     }
 
-  plugin_error (STATE_UNKNOWN, errno, "%s: '%s'", errmesg, str);
+  plugin_error (STATE_UNKNOWN, errno,
+		"converting `%s' to a number failed", str);
   return 0;
 }
 

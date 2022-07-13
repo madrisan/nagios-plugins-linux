@@ -36,7 +36,7 @@
 static int deep = 0;
 
 int
-files_filecount (const char *dir, unsigned int flags)
+files_filecount (const char *dir, unsigned int flags, long size)
 {
   int filecount = 0;
   DIR *dirp;
@@ -47,6 +47,11 @@ files_filecount (const char *dir, unsigned int flags)
       dbg ("(e) cannot open %s (%s)\n", dir, strerror (errno));
       return -1;
     }
+
+  if (size != 0)
+    dbg ("(i) looking for files %s %ld bytes...\n"
+	 , (size < 0) ? "<" : ">"
+	 , (size < 0) ? -size : size);
 
   /* Scan entries under the 'dirp' directory */
   for (;;)
@@ -104,7 +109,7 @@ files_filecount (const char *dir, unsigned int flags)
 
 	      deep++;
 	      dbg ("+ recursive call of files_filecount for %s\n", subdir);
-	      int partial = files_filecount (subdir, flags);
+	      int partial = files_filecount (subdir, flags, size);
 	      if (partial > 0)
 		{
 		  filecount += partial;
@@ -125,6 +130,24 @@ files_filecount (const char *dir, unsigned int flags)
 	case S_IFREG:
 	  dbg ("(%d) %s (regular file)\n", deep, abs_path);
 	  break;
+	}
+
+      if (size != 0)
+	{
+	  off_t abs_size;
+	  if (size < 0)
+	    abs_size = (off_t) ((-1) * size);
+	  else
+	    abs_size = (off_t) size;
+
+	  dbg ("(%d) %s file size: %ld bytes\n"
+	       , deep
+	       , abs_path
+	       , statbuf.st_size);
+
+	  if (((size < 0) && (statbuf.st_size > abs_size)) ||
+	      ((size > 0) && (statbuf.st_size < abs_size)))
+	    continue;
 	}
 
       filecount++;
