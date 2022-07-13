@@ -32,16 +32,18 @@
 #include "progname.h"
 #include "progversion.h"
 #include "thresholds.h"
+#include "xstrton.h"
 
 static const char *program_copyright =
   "Copyright (C) 2022 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
-  {(char *) "ignore-symlinks", required_argument, NULL, 'l'},
-  {(char *) "ignore-unknown", required_argument, NULL, 'u'},
-  {(char *) "include-hidden", required_argument, NULL, 'H'},
-  {(char *) "recursive", required_argument, NULL, 'r'},
-  {(char *) "regular-only", required_argument, NULL, 'f'},
+  {(char *) "ignore-symlinks", no_argument, NULL, 'l'},
+  {(char *) "ignore-unknown", no_argument, NULL, 'u'},
+  {(char *) "include-hidden", no_argument, NULL, 'H'},
+  {(char *) "recursive", no_argument, NULL, 'r'},
+  {(char *) "regular-only", no_argument, NULL, 'f'},
+  {(char *) "size", required_argument, NULL, 's'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
   {(char *) "verbose", no_argument, NULL, 'v'},
@@ -59,13 +61,15 @@ usage (FILE * out)
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out,
-	   "  %s [-w COUNTER] [-c COUNTER DIR] [-f] [-H] [-l] [-r] [-u] "
-	   "DIR [DIR...]\n", program_name);
+	   "  %s [-w COUNTER] [-c COUNTER DIR] [-fHlru] "
+	   "[-s SIZE] DIR [DIR...]\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -f, --regular-only       count regular files only\n", out);
   fputs ("  -H, --include-hidden     do not skip the hidden files\n", out);
   fputs ("  -l, --ignore-symlinks    ignore symlinks\n", out);
   fputs ("  -r, --recursive          check recursively each subdirectory\n",
+	 out);
+  fputs ("  -s, --size               count only files of a specific size\n",
 	 out);
   fputs ("  -u, --ignore-unknown     ignore file with type unknown\n", out);
   fputs ("  -w, --warning COUNTER    warning threshold\n", out);
@@ -80,9 +84,22 @@ usage (FILE * out)
 	 "  found in DIR, in a non recursive way."
 	 "  The hidden files are ignored.\n",
 	 out);
+  fputs ("  Option \"size\".\n"
+	 "    When SIZE is a positive number, only files that are at least"
+	 " this big\n"
+	 "    are counted.  If SIZE is a negative number, this is inversed,"
+	 " i. e.\n"
+	 "    only files smaller than the absolute value of SIZE are counted.\n"
+	 "    A \"multiplier\" may be added: b (byte), k (kilobyte),"
+	 " m (megabyte),\n"
+	 "    g (gigabyte), t (terabyte), and p (petabyte).  Please note that\n"
+	 "    there are 1000 bytes in a kilobyte, not 1024.\n",
+	 out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -l -r /tmp\n", program_name);
   fprintf (out, "  %s -w 150 -c 200 -f -r /var/log/myapp /tmp/myapp\n",
+	   program_name);
+  fprintf (out, "  %s -w 10 -c 15 -f -r -s -10.5k /tmp/myapp\n",
 	   program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
@@ -104,6 +121,7 @@ main (int argc, char **argv)
   int c, i;
   bool verbose = false;
   char *bp, *critical = NULL, *warning = NULL;
+  long filesize = 0;
   size_t size;
   unsigned int filecount_flags = FILES_DEFAULT;
   FILE *perfdata;
@@ -113,7 +131,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "c:fHlruvw:" GETOPT_HELP_VERSION_STRING,
+			   "c:fHlrs:uvw:" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -134,6 +152,9 @@ main (int argc, char **argv)
 	  break;
 	case 'r':
 	  filecount_flags |= FILES_RECURSIVE;
+	  break;
+	case 's':
+	  filesize = sizetol (optarg);
 	  break;
 	case 'u':
 	  filecount_flags |= FILES_IGNORE_UNKNOWN;
@@ -163,7 +184,7 @@ main (int argc, char **argv)
 	printf("checking directory %s with flags %u ...\n", argv[i],
 	       filecount_flags);
 
-      int partial = files_filecount(argv[i], filecount_flags);
+      int partial = files_filecount (argv[i], filecount_flags, filesize);
       if (partial < 0)
 	plugin_error (STATE_UNKNOWN, errno, "Cannot open %s", argv[i]);
 
