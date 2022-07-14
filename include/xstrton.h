@@ -15,17 +15,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifndef XSTRTON_H_
-# define XSTRTON_H_
+#define XSTRTON_H_
 
-# ifdef __cplusplus
-extern "C" {
-# endif
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-  long sizetol (const char *str);
+  int sizetoint64 (const char *str, int64_t *filesize, char **errmesg);
   long strtol_or_err (const char *str, const char *errmesg);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* XSTRTON_H_ */
+#endif				/* XSTRTON_H_ */

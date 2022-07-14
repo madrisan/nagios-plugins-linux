@@ -19,12 +19,14 @@
 
 #include "common.h"
 #include "messages.h"
+#include "xasprintf.h"
 
 /* convert a string with an optional prefix b (byte), k (kilobyte),
  * m (megabyte), g (gigabyte), t (terabyte), or p (petabyte);
- * exit on failure instead of returning crap.   */
-long
-sizetol (const char *str)
+ * return 0 on success, -1 otherwise (in this case errmesg will provide a
+ * human readable error message)  */
+int
+sizetoint64 (const char *str, int64_t * filesize, char **errmesg)
 {
   if (str != NULL && *str != '\0')
     {
@@ -60,17 +62,24 @@ sizetol (const char *str)
 	      temp *= 1000.0 * 1000.0 * 1000.0 * 1000.0 * 1000.0;
 	      break;
 	    default:
-	      plugin_error (STATE_UNKNOWN, errno,
-			    "invalid suffix `%c' in `%s'", *end, str);
+	      *errmesg = xasprintf ("invalid suffix `%c' in `%s'", *end, str);
+	      return -1;
 	    }
 
-	  return (long)temp;
+	  if (*(end + 1) != '\0')
+	    {
+	      *errmesg = xasprintf ("invalid trailing character `%c' in `%s'",
+				    *(end + 1), str);
+	      return -1;
+	    }
+
+	  *filesize = (int64_t) temp;
+	  return 0;
 	}
     }
 
-  plugin_error (STATE_UNKNOWN, errno,
-		"converting `%s' to a number failed", str);
-  return 0;
+  *errmesg = xasprintf ("converting `%s' to a number failed", str);
+  return -1;
 }
 
 /* same as strtol(3) but exit on failure instead of returning crap */
