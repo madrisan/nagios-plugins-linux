@@ -21,8 +21,10 @@
 #include <errno.h>
 #include <dirent.h>
 #include <limits.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -36,10 +38,12 @@
 static int deep = 0;
 
 int
-files_filecount (const char *dir, unsigned int flags, long size)
+files_filecount (const char *dir, unsigned int flags,
+		 int64_t age, int64_t size)
 {
   int filecount = 0;
   DIR *dirp;
+  time_t now;
 
   errno = 0;
   if ((dirp = opendir (dir)) == NULL)
@@ -48,9 +52,15 @@ files_filecount (const char *dir, unsigned int flags, long size)
       return -1;
     }
 
+  now = time (NULL);
+
+  if (age != 0)
+    dbg ("(i) looking for files that were touched %s %u seconds ago...\n"
+	 , (age < 0) ? "less than" : "more than"
+	 , (age < 0) ? (unsigned int)(-age) : (unsigned int)age);
   if (size != 0)
-    dbg ("(i) looking for files %s %ld bytes...\n"
-	 , (size < 0) ? "<" : ">"
+    dbg ("(i) looking for files with size %s than %ld bytes...\n"
+	 , (size < 0) ? "less" : "greater"
 	 , (size < 0) ? -size : size);
 
   /* Scan entries under the 'dirp' directory */
@@ -109,7 +119,7 @@ files_filecount (const char *dir, unsigned int flags, long size)
 
 	      deep++;
 	      dbg ("+ recursive call of files_filecount for %s\n", subdir);
-	      int partial = files_filecount (subdir, flags, size);
+	      int partial = files_filecount (subdir, flags, age, size);
 	      if (partial > 0)
 		{
 		  filecount += partial;
@@ -132,6 +142,23 @@ files_filecount (const char *dir, unsigned int flags, long size)
 	  break;
 	}
 
+      if (age != 0)
+	{
+	  time_t mtime = now;
+	  if (age < 0)
+	    mtime += age;
+	  else
+	    mtime -= age;
+
+	  dbg ("(%d) %s file touched %d seconds ago\n"
+	       , deep
+	       , abs_path
+	       , (int)(now - statbuf.st_mtime));
+
+	  if (((age < 0) && (statbuf.st_mtime < mtime)) ||
+	      ((age > 0) && (statbuf.st_mtime > mtime)))
+	    continue;
+	}
       if (size != 0)
 	{
 	  off_t abs_size;

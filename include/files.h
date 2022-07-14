@@ -33,7 +33,8 @@ extern "C"
     FILES_REGULAR_ONLY     = (1 << 5)
   };
 
-  int files_filecount (const char *dir, unsigned int flags, long size);
+  int files_filecount (const char *dir, unsigned int flags,
+		       int64_t age, int64_t size);
 
 #ifdef __cplusplus
 }
