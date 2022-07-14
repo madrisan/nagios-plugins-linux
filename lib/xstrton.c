@@ -15,18 +15,106 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "common.h"
 #include "messages.h"
 #include "xasprintf.h"
 
-/* convert a string with an optional prefix b (byte), k (kilobyte),
- * m (megabyte), g (gigabyte), t (terabyte), or p (petabyte);
- * return 0 on success, -1 otherwise (in this case errmesg will provide a
- * human readable error message)  */
-int
-sizetoint64 (const char *str, int64_t * filesize, char **errmesg)
+static int
+agemultiplier (double age, char mult, int64_t *result)
+{
+  double temp = age;
+
+  switch (mult)
+    {
+    case 0:
+    case 's':
+    case 'S':
+      break;
+
+    case 'm':
+    case 'M':
+      temp *= 60;
+      break;
+
+    case 'h':
+    case 'H':
+      temp *= 3600;
+      break;
+
+    case 'd':
+    case 'D':
+      temp *= 86400;
+      break;
+
+    case 'w':
+    case 'W':
+      temp *= 7 * 86400;
+      break;
+
+    case 'y':
+    case 'Y':
+      temp *= 31557600; /* == 365.25 * 86400 */
+      break;
+
+    default:
+      return -1;
+    }
+
+  *result = (int64_t) temp;
+  return 0;
+}
+
+static int
+sizemultiplier (double size, char mult, int64_t *result)
+{
+  double temp = size;
+
+  switch (mult)
+    {
+    case 0:
+    case 'b':
+    case 'B':
+      break;
+
+    case 'k':
+    case 'K':
+      temp *= 1000.0;
+      break;
+
+    case 'm':
+    case 'M':
+      temp *= 1000.0 * 1000.0;
+      break;
+
+    case 'g':
+    case 'G':
+      temp *= 1000.0 * 1000.0 * 1000.0;
+      break;
+
+    case 't':
+    case 'T':
+      temp *= 1000.0 * 1000.0 * 1000.0 * 1000.0;
+      break;
+
+    case 'p':
+    case 'P':
+      temp *= 1000.0 * 1000.0 * 1000.0 * 1000.0 * 1000.0;
+      break;
+
+    default:
+      return -1;
+    }
+
+  *result = (int64_t) temp;
+  return 0;
+}
+
+static int
+strtoint64 (const char *str, int64_t *result,
+	    int (*converter) (double, char, int64_t *), char **errmesg)
 {
   if (str != NULL && *str != '\0')
     {
@@ -35,33 +123,9 @@ sizetoint64 (const char *str, int64_t * filesize, char **errmesg)
       double temp = strtod (str, &end);
       if ((errno == 0) && (end != NULL) && (end != str))
 	{
-	  switch (*end)
+	  int res = converter (temp, *end, result);
+	  if (res < 0)
 	    {
-	    case 0:
-	    case 'b':
-	    case 'B':
-	      break;
-	    case 'k':
-	    case 'K':
-	      temp *= 1000.0;
-	      break;
-	    case 'm':
-	    case 'M':
-	      temp *= 1000.0 * 1000.0;
-	      break;
-	    case 'g':
-	    case 'G':
-	      temp *= 1000.0 * 1000.0 * 1000.0;
-	      break;
-	    case 't':
-	    case 'T':
-	      temp *= 1000.0 * 1000.0 * 1000.0 * 1000.0;
-	      break;
-	    case 'p':
-	    case 'P':
-	      temp *= 1000.0 * 1000.0 * 1000.0 * 1000.0 * 1000.0;
-	      break;
-	    default:
 	      *errmesg = xasprintf ("invalid suffix `%c' in `%s'", *end, str);
 	      return -1;
 	    }
@@ -73,13 +137,35 @@ sizetoint64 (const char *str, int64_t * filesize, char **errmesg)
 	      return -1;
 	    }
 
-	  *filesize = (int64_t) temp;
 	  return 0;
 	}
+
+      *errmesg = xasprintf ("converting `%s' to a number failed", str);
+      return -1;
     }
 
-  *errmesg = xasprintf ("converting `%s' to a number failed", str);
+  *errmesg = xasprintf ("no number to covert (empty string)");
   return -1;
+}
+
+/* convert a string with an optional prefix s (second), m (minute), h (hour),
+ * d (day), w (week), or y (year);
+ * return 0 on success, -1 otherwise (in this case errmesg will provide a
+ * human readable error message)  */
+int
+agetoint64 (const char *str, int64_t * age, char **errmesg)
+{
+  return strtoint64 (str, age, agemultiplier, errmesg);
+}
+
+/* convert a string with an optional prefix b (byte), k (kilobyte),
+ * m (megabyte), g (gigabyte), t (terabyte), or p (petabyte);
+ * return 0 on success, -1 otherwise (in this case errmesg will provide a
+ * human readable error message)  */
+int
+sizetoint64 (const char *str, int64_t *size, char **errmesg)
+{
+  return strtoint64 (str, size, sizemultiplier, errmesg);
 }
 
 /* same as strtol(3) but exit on failure instead of returning crap */

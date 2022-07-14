@@ -17,12 +17,15 @@
 #ifndef XSTRTON_H_
 #define XSTRTON_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-  int sizetoint64 (const char *str, int64_t *filesize, char **errmesg);
+  int agetoint64 (const char *str, int64_t *age, char **errmesg);
+  int sizetoint64 (const char *str, int64_t *size, char **errmesg);
   long strtol_or_err (const char *str, const char *errmesg);
 
 #ifdef __cplusplus

@@ -23,6 +23,7 @@
 
 #include <errno.h>
 #include <getopt.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -62,7 +63,7 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out,
 	   "  %s [-w COUNTER] [-c COUNTER DIR] [-fHlru] "
-	   "[-s SIZE] DIR [DIR...]\n", program_name);
+	   "[-s SIZE] [-t AGE] DIR [DIR...]\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -f, --regular-only       count regular files only\n", out);
   fputs ("  -H, --include-hidden     do not skip the hidden files\n", out);
@@ -70,6 +71,8 @@ usage (FILE * out)
   fputs ("  -r, --recursive          check recursively each subdirectory\n",
 	 out);
   fputs ("  -s, --size               count only files of a specific size\n",
+	 out);
+  fputs ("  -t, --time               count only files of a specific age\n",
 	 out);
   fputs ("  -u, --ignore-unknown     ignore file with type unknown\n", out);
   fputs ("  -w, --warning COUNTER    warning threshold\n", out);
@@ -95,12 +98,26 @@ usage (FILE * out)
 	 "    g (gigabyte), t (terabyte), and p (petabyte).  Please note that\n"
 	 "    there are 1000 bytes in a kilobyte, not 1024.\n",
 	 out);
+  fputs ("  Option \"time\".\n"
+         "    If Age is greater than zero, only files that haven't been"
+	 " touched in the\n"
+         "    last Age seconds are counted.  If Age is a negative number, this"
+	 " is\n"
+         "    inversed.  The number can also be followed by a \"multiplier\" to"
+	 " easily\n"
+	 "    specify a larger timespan.  Valid multipliers are s (second),"
+	 " m (minute),\n"
+	 "    h (hour), d (day), w (week), and y (year).\n",
+	 out);
+
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -l -r /tmp\n", program_name);
   fprintf (out, "  %s -w 150 -c 200 -f -r /var/log/myapp /tmp/myapp\n",
 	   program_name);
   fprintf (out, "  %s -w 10 -c 15 -f -r -s -10.5k /tmp/myapp\n",
 	   program_name);
+  fprintf (out, "  %s -r -t -1h /tmp/myapp  # files modified in the last"
+	   " hour\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -120,8 +137,9 @@ main (int argc, char **argv)
 {
   int c, i, ret;
   bool verbose = false;
-  char *bp, *critical = NULL, *warning = NULL, *errmesg = NULL;
-  int64_t filesize = 0;
+  char *bp, *critical = NULL, *warning = NULL,
+       *errmesg_fage = NULL, *errmesg_fsize = NULL;
+  int64_t fileage = 0, filesize = 0;
   size_t size;
   unsigned int filecount_flags = FILES_DEFAULT;
   FILE *perfdata;
@@ -131,7 +149,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "c:fHlrs:uvw:" GETOPT_HELP_VERSION_STRING,
+			   "c:fHlrs:t:uvw:" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -154,10 +172,18 @@ main (int argc, char **argv)
 	  filecount_flags |= FILES_RECURSIVE;
 	  break;
 	case 's':
-	  ret = sizetoint64 (optarg, &filesize, &errmesg);
+	  ret = sizetoint64 (optarg, &filesize, &errmesg_fsize);
 	  if (ret < 0)
-	    plugin_error (STATE_UNKNOWN, errno,
-			  "failed to parse file size argument: %s", errmesg);
+	    plugin_error (STATE_UNKNOWN, errno
+			  , "failed to parse file size argument: %s"
+			  , errmesg_fsize);
+	  break;
+	case 't':
+	  ret = agetoint64 (optarg, &fileage, &errmesg_fage);
+	  if (ret < 0)
+	    plugin_error (STATE_UNKNOWN, errno
+			  , "failed to parse file size argument: %s"
+			  , errmesg_fage);
 	  break;
 	case 'u':
 	  filecount_flags |= FILES_IGNORE_UNKNOWN;
@@ -187,7 +213,8 @@ main (int argc, char **argv)
 	printf("checking directory %s with flags %u ...\n", argv[i],
 	       filecount_flags);
 
-      int partial = files_filecount (argv[i], filecount_flags, filesize);
+      int partial = files_filecount (argv[i], filecount_flags,
+				     fileage, filesize);
       if (partial < 0)
 	plugin_error (STATE_UNKNOWN, errno, "Cannot open %s", argv[i]);
 
