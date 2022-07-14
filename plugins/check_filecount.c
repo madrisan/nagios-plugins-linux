@@ -118,10 +118,10 @@ print_version (void)
 int
 main (int argc, char **argv)
 {
-  int c, i;
+  int c, i, ret;
   bool verbose = false;
-  char *bp, *critical = NULL, *warning = NULL;
-  long filesize = 0;
+  char *bp, *critical = NULL, *warning = NULL, *errmesg = NULL;
+  int64_t filesize = 0;
   size_t size;
   unsigned int filecount_flags = FILES_DEFAULT;
   FILE *perfdata;
@@ -154,7 +154,10 @@ main (int argc, char **argv)
 	  filecount_flags |= FILES_RECURSIVE;
 	  break;
 	case 's':
-	  filesize = sizetol (optarg);
+	  ret = sizetoint64 (optarg, &filesize, &errmesg);
+	  if (ret < 0)
+	    plugin_error (STATE_UNKNOWN, errno,
+			  "failed to parse file size argument: %s", errmesg);
 	  break;
 	case 'u':
 	  filecount_flags |= FILES_IGNORE_UNKNOWN;
