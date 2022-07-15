@@ -20,6 +20,7 @@
 
 #include <errno.h>
 #include <dirent.h>
+#include <fnmatch.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -37,11 +38,30 @@
 
 static int deep = 0;
 
+static int
+files_filematch (const char *pattern, const char *name)
+{
+  if (pattern != NULL)
+    {
+      int status = fnmatch (pattern, name, /* flags = */ 0);
+      if (status != 0)
+	{
+	  dbg ("(i)    name `%s' does not match pattern `%s'\n",
+	       name, pattern);
+	  return FNM_NOMATCH;
+	}
+	dbg ("(i)    name `%s' does MATCH pattern `%s'\n",
+	     name, pattern);
+    }
+
+  return 0;
+}
+
 int
 files_filecount (const char *dir, unsigned int flags,
-		 int64_t age, int64_t size)
+		 int64_t age, int64_t size, const char *pattern)
 {
-  int filecount = 0;
+  int filecount = 0, status;
   DIR *dirp;
   time_t now;
 
@@ -62,6 +82,8 @@ files_filecount (const char *dir, unsigned int flags,
     dbg ("(i) looking for files with size %s than %ld bytes...\n"
 	 , (size < 0) ? "less" : "greater"
 	 , (size < 0) ? -size : size);
+  if (pattern != NULL)
+    dbg ("(i) looking for files that math the pattern `%s'...\n", pattern);
 
   /* Scan entries under the 'dirp' directory */
   for (;;)
@@ -88,7 +110,7 @@ files_filecount (const char *dir, unsigned int flags,
 
       snprintf (abs_path, sizeof (abs_path), "%s/%s", dir, dp->d_name);
 
-      int status = lstat (abs_path, &statbuf);
+      status = lstat (abs_path, &statbuf);
       if (status != 0)
 	plugin_error (STATE_UNKNOWN, errno, "lstat (%s) failed", abs_path);
 
@@ -113,13 +135,14 @@ files_filecount (const char *dir, unsigned int flags,
 	      char *subdir = xasprintf ("%s/%s", dir, dp->d_name);
 	      if (!(flags & FILES_REGULAR_ONLY))
 		{
-		  filecount++;
+		  if (0 == files_filematch (pattern, dp->d_name))
+		    filecount++;
 		  dbg ("(%d)  --> #%d\n", deep, filecount);
 		}
 
 	      deep++;
 	      dbg ("+ recursive call of files_filecount for %s\n", subdir);
-	      int partial = files_filecount (subdir, flags, age, size);
+	      int partial = files_filecount (subdir, flags, age, size, pattern);
 	      if (partial > 0)
 		{
 		  filecount += partial;
@@ -176,6 +199,9 @@ files_filecount (const char *dir, unsigned int flags,
 	      ((size > 0) && (statbuf.st_size < abs_size)))
 	    continue;
 	}
+
+      if (files_filematch (pattern, dp->d_name) != 0)
+	continue;
 
       filecount++;
       dbg ("(%d)  --> #%d\n", deep, filecount);
