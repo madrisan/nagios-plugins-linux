@@ -42,6 +42,7 @@ static struct option const longopts[] = {
   {(char *) "ignore-symlinks", no_argument, NULL, 'l'},
   {(char *) "ignore-unknown", no_argument, NULL, 'u'},
   {(char *) "include-hidden", no_argument, NULL, 'H'},
+  {(char *) "name", required_argument, NULL, 'n'},
   {(char *) "recursive", no_argument, NULL, 'r'},
   {(char *) "regular-only", no_argument, NULL, 'f'},
   {(char *) "size", required_argument, NULL, 's'},
@@ -62,12 +63,14 @@ usage (FILE * out)
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out,
-	   "  %s [-w COUNTER] [-c COUNTER DIR] [-fHlru] "
-	   "[-s SIZE] [-t AGE] DIR [DIR...]\n", program_name);
+	   "  %s [-w COUNTER] [-c COUNTER] [-f] [-H] [-l] [-r] [-u] \\\n"
+	   "\t[-s SIZE] [-t AGE] [-n PATTERN] DIR [DIR...]\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -f, --regular-only       count regular files only\n", out);
   fputs ("  -H, --include-hidden     do not skip the hidden files\n", out);
   fputs ("  -l, --ignore-symlinks    ignore symlinks\n", out);
+  fputs ("  -n, --name               only count files that match PATTERN\n",
+	 out);
   fputs ("  -r, --recursive          check recursively each subdirectory\n",
 	 out);
   fputs ("  -s, --size               count only files of a specific size\n",
@@ -86,6 +89,13 @@ usage (FILE * out)
 	 " (of every type)\n"
 	 "  found in DIR, in a non recursive way."
 	 "  The hidden files are ignored.\n",
+	 out);
+  fputs ("  Option \"name\".\n"
+	 "    Only count files that match PATTERN, where PATTERN is a shell-like"
+	 " wildcard\n"
+	 "    as understood by fnmatch(3).  Only the filename is checked against"
+	 " the\n"
+	 "    pattern, not the entire path.\n",
 	 out);
   fputs ("  Option \"size\".\n"
 	 "    When SIZE is a positive number, only files that are at least"
@@ -116,8 +126,9 @@ usage (FILE * out)
 	   program_name);
   fprintf (out, "  %s -w 10 -c 15 -f -r -s -10.5k /tmp/myapp\n",
 	   program_name);
-  fprintf (out, "  %s -r -t -1h /tmp/myapp  # files modified in the last"
+  fprintf (out, "  %s -r -t -1h /tmp/myapp   # files modified in the last"
 	   " hour\n", program_name);
+  fprintf (out, "  %s -f -n \"myapp-202207*.log\" /var/log/myapp\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -138,7 +149,8 @@ main (int argc, char **argv)
   int c, i, ret;
   bool verbose = false;
   char *bp, *critical = NULL, *warning = NULL,
-       *errmesg_fage = NULL, *errmesg_fsize = NULL;
+       *errmesg_fage = NULL, *errmesg_fsize = NULL,
+       *pattern = NULL;
   int64_t fileage = 0, filesize = 0;
   size_t size;
   unsigned int filecount_flags = FILES_DEFAULT;
@@ -149,7 +161,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "c:fHlrs:t:uvw:" GETOPT_HELP_VERSION_STRING,
+			   "c:fHln:rs:t:uvw:" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -167,6 +179,9 @@ main (int argc, char **argv)
 	  break;
 	case 'l':
 	  filecount_flags |= FILES_IGNORE_SYMLINKS;
+	  break;
+	case 'n':
+	  pattern = optarg;
 	  break;
 	case 'r':
 	  filecount_flags |= FILES_RECURSIVE;
@@ -214,7 +229,7 @@ main (int argc, char **argv)
 	       filecount_flags);
 
       int partial = files_filecount (argv[i], filecount_flags,
-				     fileage, filesize);
+				     fileage, filesize, pattern);
       if (partial < 0)
 	plugin_error (STATE_UNKNOWN, errno, "Cannot open %s", argv[i]);
 
