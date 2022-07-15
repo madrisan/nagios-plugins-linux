@@ -34,7 +34,7 @@ extern "C"
   };
 
   int files_filecount (const char *dir, unsigned int flags,
-		       int64_t age, int64_t size);
+		       int64_t age, int64_t size, const char *pattern);
 
 #ifdef __cplusplus
 }
