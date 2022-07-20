@@ -233,7 +233,7 @@ main (int argc, char **argv)
       if (partial < 0)
 	plugin_error (STATE_UNKNOWN, errno, "Cannot open %s", argv[i]);
 
-      fprintf (perfdata, "%s=%d ", argv[i], partial);
+      fprintf (perfdata, "%s_total=%d ", argv[i], partial);
       filecount += partial;
     }
 
