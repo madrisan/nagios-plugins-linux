@@ -219,8 +219,9 @@ main (int argc, char **argv)
   if (argc <= optind)
     usage (stderr);
 
-  int filecount = 0;
+  struct files_types *filecount;
   perfdata = open_memstream (&bp, &size);
+  int64_t total = 0;
 
   for (i = optind; i < argc; ++i)
     {
@@ -228,13 +229,43 @@ main (int argc, char **argv)
 	printf("checking directory %s with flags %u ...\n", argv[i],
 	       filecount_flags);
 
-      int partial = files_filecount (argv[i], filecount_flags,
-				     fileage, filesize, pattern);
-      if (partial < 0)
+      filecount = NULL;
+      ret = files_filecount (argv[i], filecount_flags,
+			     fileage, filesize, pattern, &filecount);
+      if (ret < 0)
 	plugin_error (STATE_UNKNOWN, errno, "Cannot open %s", argv[i]);
 
-      fprintf (perfdata, "%s_total=%d ", argv[i], partial);
-      filecount += partial;
+      fprintf (perfdata, "%s_total=%lu ", argv[i],
+	       (unsigned long)filecount->total);
+
+      if (!(filecount_flags & FILES_REGULAR_ONLY))
+	{
+	  fprintf (perfdata,
+		   "%s_block=%lu %s_character=%lu %s_fifo=%lu %s_socket=%lu "
+		   , argv[i], (unsigned long)filecount->block_device
+		   , argv[i], (unsigned long)filecount->character_device
+		   , argv[i], (unsigned long)filecount->named_fifo
+		   , argv[i], (unsigned long)filecount->unix_domain_socket);
+	  fprintf (perfdata, "%s_directory=%lu ", argv[i],
+		   (unsigned long)filecount->directory);
+	}
+
+      if (filecount_flags & FILES_INCLUDE_HIDDEN)
+	fprintf (perfdata, "%s_hidden=%lu ", argv[i],
+		 (unsigned long)filecount->hidden);
+
+      fprintf (perfdata, "%s_regular=%lu ", argv[i],
+	       (unsigned long)filecount->regular_file);
+
+      if (!(filecount_flags & (FILES_IGNORE_SYMLINKS | FILES_REGULAR_ONLY)))
+	fprintf (perfdata, "%s_symlink=%lu ", argv[i],
+		 (unsigned long)filecount->symlink);
+
+      fprintf (perfdata, "%s_unknown=%lu ", argv[i],
+	       (unsigned long)filecount->unknown);
+
+      total += filecount->total;
+      free (filecount);
     }
 
   fclose (perfdata);
@@ -243,11 +274,11 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  status = get_status (filecount, my_threshold);
+  status = get_status (total, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - total number of files: %d | %s\n",
-	  program_name_short, state_text (status), filecount, bp);
+  printf ("%s %s - total number of files: %lu | %s\n",
+	  program_name_short, state_text (status), (unsigned long)total, bp);
 
   return status;
 }

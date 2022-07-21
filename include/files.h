@@ -33,8 +33,23 @@ extern "C"
     FILES_REGULAR_ONLY     = (1 << 5)
   };
 
+  struct files_types
+  {
+    int64_t block_device;
+    int64_t character_device;
+    int64_t directory;
+    int64_t named_fifo;
+    int64_t hidden;
+    int64_t symlink;
+    int64_t regular_file;
+    int64_t unix_domain_socket;
+    int64_t total;
+    int64_t unknown;
+  };
+
   int files_filecount (const char *dir, unsigned int flags,
-		       int64_t age, int64_t size, const char *pattern);
+		       int64_t age, int64_t size, const char *pattern,
+		       struct files_types **filecount);
 
 #ifdef __cplusplus
 }

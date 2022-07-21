@@ -59,9 +59,10 @@ files_filematch (const char *pattern, const char *name)
 
 int
 files_filecount (const char *dir, unsigned int flags,
-		 int64_t age, int64_t size, const char *pattern)
+		 int64_t age, int64_t size, const char *pattern,
+		 struct files_types **filecount)
 {
-  int filecount = 0, status;
+  int status;
   DIR *dirp;
   time_t now;
 
@@ -70,6 +71,13 @@ files_filecount (const char *dir, unsigned int flags,
     {
       dbg ("(e) cannot open %s (%s)\n", dir, strerror (errno));
       return -1;
+    }
+
+  if (NULL == *filecount)
+    {
+      struct files_types *t;
+      t = xmalloc (sizeof (struct files_types));
+      *filecount = t;
     }
 
   now = time (NULL);
@@ -91,6 +99,7 @@ files_filecount (const char *dir, unsigned int flags,
       char abs_path[PATH_MAX];
       struct dirent *dp;
       struct stat statbuf;
+      bool is_hidden;
       errno = 0;
 
       if ((dp = readdir (dirp)) == NULL)
@@ -105,7 +114,8 @@ files_filecount (const char *dir, unsigned int flags,
       if (STREQ (dp->d_name, ".") || STREQ (dp->d_name, ".."))
 	continue;
 
-      if (!(flags & FILES_INCLUDE_HIDDEN) && (dp->d_name[0] == '.'))
+      is_hidden = (dp->d_name[0] == '.');
+      if (!(flags & FILES_INCLUDE_HIDDEN) && is_hidden)
 	continue;
 
       snprintf (abs_path, sizeof (abs_path), "%s/%s", dir, dp->d_name);
@@ -114,44 +124,71 @@ files_filecount (const char *dir, unsigned int flags,
       if (status != 0)
 	plugin_error (STATE_UNKNOWN, errno, "lstat (%s) failed", abs_path);
 
-      switch (statbuf.st_mode & S_IFMT)
+      if (S_IFDIR == (statbuf.st_mode & S_IFMT))
 	{
-	default:
-	  if (flags & FILES_IGNORE_UNKNOWN)
-	    continue;
-	  break;
-	case S_IFBLK:
-	case S_IFCHR:
-	case S_IFIFO:
-	case S_IFSOCK:
-	  dbg ("(%d) %s (special file)\n", deep, abs_path);
-	  if (flags & FILES_REGULAR_ONLY)
-	    continue;
-	  break;
-	case S_IFDIR:
-	  dbg ("(%d) %s (directory)\n", deep, abs_path);
+	  dbg ("(%d) %s (%sdirectory)\n", deep, abs_path,
+	       is_hidden ? "hidden " : "");
 	  if (flags & FILES_RECURSIVE)
 	    {
-	      char *subdir = xasprintf ("%s/%s", dir, dp->d_name);
+	     char *subdir = xasprintf ("%s/%s", dir, dp->d_name);
 	      if (!(flags & FILES_REGULAR_ONLY))
 		{
 		  if (0 == files_filematch (pattern, dp->d_name))
-		    filecount++;
-		  dbg ("(%d)  --> #%d\n", deep, filecount);
+		    {
+		      (*filecount)->directory++;
+		      (*filecount)->total++;
+		      if (is_hidden)
+			(*filecount)->hidden++;
+		    }
+		  dbg ("(%d)  --> #%lu\n", deep,
+		       (unsigned long)(*filecount)->total);
 		}
 
 	      deep++;
 	      dbg ("+ recursive call of files_filecount for %s\n", subdir);
-	      int partial = files_filecount (subdir, flags, age, size, pattern);
-	      if (partial > 0)
-		{
-		  filecount += partial;
-		  dbg ("(%d)  --> #%d\n", deep, filecount);
-		}
-
+	      files_filecount (subdir, flags, age, size,
+			       pattern, filecount);
+	      dbg ("(%d)  --> #%lu\n", deep,
+		   (unsigned long)(*filecount)->total);
 	      free (subdir);
 	      continue;
 	    }
+	  if (flags & FILES_REGULAR_ONLY)
+	    continue;
+	}
+
+      if (0 != files_filematch (pattern, dp->d_name))
+	continue;
+
+      switch (statbuf.st_mode & S_IFMT)
+	{
+	default:
+	  dbg ("(%d) %s (unknown file)\n", deep, abs_path);
+	  (*filecount)->unknown++;
+	  if (flags & FILES_IGNORE_UNKNOWN)
+	    continue;
+	  break;
+	case S_IFBLK:
+	  dbg ("(%d) %s (block device)\n", deep, abs_path);
+	  (*filecount)->block_device++;
+	  if (flags & FILES_REGULAR_ONLY)
+	    continue;
+	  break;
+	case S_IFCHR:
+	  dbg ("(%d) %s (character device)\n", deep, abs_path);
+	  (*filecount)->character_device++;
+	  if (flags & FILES_REGULAR_ONLY)
+	    continue;
+	  break;
+	case S_IFIFO:
+	  dbg ("(%d) %s (named fifo)\n", deep, abs_path);
+	  (*filecount)->named_fifo++;
+	  if (flags & FILES_REGULAR_ONLY)
+	    continue;
+	  break;
+	case S_IFSOCK:
+	  dbg ("(%d) %s (unix domain socket)\n", deep, abs_path);
+	  (*filecount)->unix_domain_socket++;
 	  if (flags & FILES_REGULAR_ONLY)
 	    continue;
 	  break;
@@ -159,9 +196,14 @@ files_filecount (const char *dir, unsigned int flags,
 	  dbg ("(%d) %s (symlink)\n", deep, abs_path);
 	  if (flags & (FILES_IGNORE_SYMLINKS | FILES_REGULAR_ONLY))
 	    continue;
+	  (*filecount)->symlink++;
 	  break;
 	case S_IFREG:
-	  dbg ("(%d) %s (regular file)\n", deep, abs_path);
+	  dbg ("(%d) %s (%s file)\n", deep, abs_path,
+	       is_hidden ? "hidden" : "regular");
+	  (*filecount)->regular_file++;
+	  if (is_hidden)
+	    (*filecount)->hidden++;
 	  break;
 	}
 
@@ -203,12 +245,12 @@ files_filecount (const char *dir, unsigned int flags,
       if (files_filematch (pattern, dp->d_name) != 0)
 	continue;
 
-      filecount++;
-      dbg ("(%d)  --> #%d\n", deep, filecount);
+      (*filecount)->total++;
+      dbg ("(%d)  --> #%lu\n", deep, (unsigned long)(*filecount)->total);
     }
 
-  dbg ("- return #%d (%s)\n", filecount, dir);
+  dbg ("- return #%lu (%s)\n", (unsigned long)(*filecount)->total, dir);
   deep--;
   closedir (dirp);
-  return filecount;
+  return 0;
 }
