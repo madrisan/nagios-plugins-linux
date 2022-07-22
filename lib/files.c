@@ -33,10 +33,22 @@
 #include "logging.h"
 #include "messages.h"
 #include "string-macros.h"
+#include "system.h"
 #include "xalloc.h"
 #include "xasprintf.h"
 
 static int deep = 0;
+
+static void
+files_data_init (struct files_types **filecount)
+{
+  if (NULL == *filecount)
+    {
+      struct files_types *t;
+      t = xmalloc (sizeof (struct files_types));
+      *filecount = t;
+    }
+}
 
 static int
 files_filematch (const char *pattern, const char *name)
@@ -45,23 +57,58 @@ files_filematch (const char *pattern, const char *name)
     {
       int status = fnmatch (pattern, name, /* flags = */ 0);
       if (status != 0)
-	{
-	  dbg ("(i)    name `%s' does not match pattern `%s'\n",
-	       name, pattern);
-	  return FNM_NOMATCH;
-	}
-	dbg ("(i)    name `%s' does MATCH pattern `%s'\n",
-	     name, pattern);
+	return FNM_NOMATCH;
     }
 
   return 0;
 }
 
+static bool
+files_is_hidden (const char *filename)
+{
+  return (filename[0] == '.');
+}
+
+static bool
+files_check_age (int64_t age, time_t now, time_t filemtime)
+{
+  time_t mtime = now;
+
+  if (age == 0)
+    return true;
+
+  if (age < 0)
+    mtime += age;
+  else
+    mtime -= age;
+
+  return (((age < 0) && (filemtime > mtime)) ||
+	  ((age > 0) && (filemtime < mtime)));
+}
+
+static bool
+files_check_size (int64_t size, off_t filesize)
+{
+  off_t abs_size;
+
+  if (size == 0)
+    return true;
+
+  if (size < 0)
+    abs_size = (off_t) ((-1) * size);
+  else
+   abs_size = (off_t) size;
+
+  return (((size < 0) && (filesize < abs_size)) ||
+	  ((size > 0) && (filesize > abs_size)));
+}
+
 int
 files_filecount (const char *dir, unsigned int flags,
-		 int64_t age, int64_t size, const char *pattern)
+		 int64_t age, int64_t size, const char *pattern,
+		 struct files_types **filecount)
 {
-  int filecount = 0, status;
+  int status;
   DIR *dirp;
   time_t now;
 
@@ -72,18 +119,8 @@ files_filecount (const char *dir, unsigned int flags,
       return -1;
     }
 
+  files_data_init (filecount);
   now = time (NULL);
-
-  if (age != 0)
-    dbg ("(i) looking for files that were touched %s %u seconds ago...\n"
-	 , (age < 0) ? "less than" : "more than"
-	 , (age < 0) ? (unsigned int)(-age) : (unsigned int)age);
-  if (size != 0)
-    dbg ("(i) looking for files with size %s than %ld bytes...\n"
-	 , (size < 0) ? "less" : "greater"
-	 , (size < 0) ? -size : size);
-  if (pattern != NULL)
-    dbg ("(i) looking for files that math the pattern `%s'...\n", pattern);
 
   /* Scan entries under the 'dirp' directory */
   for (;;)
@@ -91,6 +128,7 @@ files_filecount (const char *dir, unsigned int flags,
       char abs_path[PATH_MAX];
       struct dirent *dp;
       struct stat statbuf;
+      bool is_hidden, age_match, size_match;
       errno = 0;
 
       if ((dp = readdir (dirp)) == NULL)
@@ -105,7 +143,8 @@ files_filecount (const char *dir, unsigned int flags,
       if (STREQ (dp->d_name, ".") || STREQ (dp->d_name, ".."))
 	continue;
 
-      if (!(flags & FILES_INCLUDE_HIDDEN) && (dp->d_name[0] == '.'))
+      is_hidden = files_is_hidden (dp->d_name);
+      if (!(flags & FILES_INCLUDE_HIDDEN) && is_hidden)
 	continue;
 
       snprintf (abs_path, sizeof (abs_path), "%s/%s", dir, dp->d_name);
@@ -114,9 +153,50 @@ files_filecount (const char *dir, unsigned int flags,
       if (status != 0)
 	plugin_error (STATE_UNKNOWN, errno, "lstat (%s) failed", abs_path);
 
+      if (S_IFDIR == (statbuf.st_mode & S_IFMT))
+	{
+	  dbg ("(%d) %s (%sdirectory)\n", deep, abs_path,
+	       is_hidden ? "hidden " : "");
+	  if (flags & FILES_RECURSIVE)
+	    {
+	     char *subdir = xasprintf ("%s/%s", dir, dp->d_name);
+	      if (!(flags & FILES_REGULAR_ONLY))
+		{
+		  if (0 == files_filematch (pattern, dp->d_name))
+		    {
+		      (*filecount)->directory++;
+		      (*filecount)->total++;
+		      if (is_hidden)
+			(*filecount)->hidden++;
+		    }
+		  dbg ("(%d)  --> #%lu\n", deep,
+		       (unsigned long)(*filecount)->total);
+		}
+
+	      deep++;
+	      dbg ("+ recursive call of files_filecount for %s\n", subdir);
+	      files_filecount (subdir, flags, age, size,
+			       pattern, filecount);
+	      dbg ("(%d)  --> #%lu\n", deep,
+		   (unsigned long)(*filecount)->total);
+	      free (subdir);
+	      continue;
+	    }
+	  if (flags & FILES_REGULAR_ONLY)
+	    continue;
+	}
+
+      if (0 != files_filematch (pattern, dp->d_name))
+	{
+	  dbg ("(%d) %s does not match the pattern\n", deep, abs_path);
+	  continue;
+	}
+
       switch (statbuf.st_mode & S_IFMT)
 	{
 	default:
+	  dbg ("(%d) %s (unknown file)\n", deep, abs_path);
+	  (*filecount)->unknown++;
 	  if (flags & FILES_IGNORE_UNKNOWN)
 	    continue;
 	  break;
@@ -125,33 +205,7 @@ files_filecount (const char *dir, unsigned int flags,
 	case S_IFIFO:
 	case S_IFSOCK:
 	  dbg ("(%d) %s (special file)\n", deep, abs_path);
-	  if (flags & FILES_REGULAR_ONLY)
-	    continue;
-	  break;
-	case S_IFDIR:
-	  dbg ("(%d) %s (directory)\n", deep, abs_path);
-	  if (flags & FILES_RECURSIVE)
-	    {
-	      char *subdir = xasprintf ("%s/%s", dir, dp->d_name);
-	      if (!(flags & FILES_REGULAR_ONLY))
-		{
-		  if (0 == files_filematch (pattern, dp->d_name))
-		    filecount++;
-		  dbg ("(%d)  --> #%d\n", deep, filecount);
-		}
-
-	      deep++;
-	      dbg ("+ recursive call of files_filecount for %s\n", subdir);
-	      int partial = files_filecount (subdir, flags, age, size, pattern);
-	      if (partial > 0)
-		{
-		  filecount += partial;
-		  dbg ("(%d)  --> #%d\n", deep, filecount);
-		}
-
-	      free (subdir);
-	      continue;
-	    }
+	  (*filecount)->special_file++;
 	  if (flags & FILES_REGULAR_ONLY)
 	    continue;
 	  break;
@@ -159,56 +213,40 @@ files_filecount (const char *dir, unsigned int flags,
 	  dbg ("(%d) %s (symlink)\n", deep, abs_path);
 	  if (flags & (FILES_IGNORE_SYMLINKS | FILES_REGULAR_ONLY))
 	    continue;
+	  (*filecount)->symlink++;
 	  break;
 	case S_IFREG:
-	  dbg ("(%d) %s (regular file)\n", deep, abs_path);
+	  age_match = files_check_age (age, now, statbuf.st_mtime);
+	  size_match = files_check_size (size, statbuf.st_size);
+	  dbg ("(%d) %s (%s file), touched %.2f days ago (%s)"
+	       " with size %lu bytes (%s)\n"
+	       , deep
+	       , abs_path
+	       , is_hidden ? "hidden" : "regular"
+	       , (long)(now - statbuf.st_mtime) / 60.0 / 60.0 / 24.0
+	       , age_match ? "match" : "skip"
+	       , (unsigned long) statbuf.st_size
+	       , size_match ? "match" : "skip");
+	  if (!age_match)
+	    continue;
+	  if (!size_match)
+	    continue;
+
+	  (*filecount)->regular_file++;
+	  if (is_hidden)
+	    (*filecount)->hidden++;
 	  break;
-	}
-
-      if (age != 0)
-	{
-	  time_t mtime = now;
-	  if (age < 0)
-	    mtime += age;
-	  else
-	    mtime -= age;
-
-	  dbg ("(%d) %s file touched %d seconds ago\n"
-	       , deep
-	       , abs_path
-	       , (int)(now - statbuf.st_mtime));
-
-	  if (((age < 0) && (statbuf.st_mtime < mtime)) ||
-	      ((age > 0) && (statbuf.st_mtime > mtime)))
-	    continue;
-	}
-      if (size != 0)
-	{
-	  off_t abs_size;
-	  if (size < 0)
-	    abs_size = (off_t) ((-1) * size);
-	  else
-	    abs_size = (off_t) size;
-
-	  dbg ("(%d) %s file size: %ld bytes\n"
-	       , deep
-	       , abs_path
-	       , statbuf.st_size);
-
-	  if (((size < 0) && (statbuf.st_size > abs_size)) ||
-	      ((size > 0) && (statbuf.st_size < abs_size)))
-	    continue;
 	}
 
       if (files_filematch (pattern, dp->d_name) != 0)
 	continue;
 
-      filecount++;
-      dbg ("(%d)  --> #%d\n", deep, filecount);
+      (*filecount)->total++;
+      dbg ("(%d)  --> #%lu\n", deep, (unsigned long)(*filecount)->total);
     }
 
-  dbg ("- return #%d (%s)\n", filecount, dir);
+  dbg ("- return #%lu (%s)\n", (unsigned long)(*filecount)->total, dir);
   deep--;
   closedir (dirp);
-  return filecount;
+  return 0;
 }

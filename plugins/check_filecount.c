@@ -29,6 +29,7 @@
 
 #include "common.h"
 #include "files.h"
+#include "logging.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
@@ -109,9 +110,9 @@ usage (FILE * out)
 	 "    there are 1000 bytes in a kilobyte, not 1024.\n",
 	 out);
   fputs ("  Option \"time\".\n"
-         "    If Age is greater than zero, only files that haven't been"
+         "    If AGE is greater than zero, only files that haven't been"
 	 " touched in the\n"
-         "    last Age seconds are counted.  If Age is a negative number, this"
+         "    last AGE seconds are counted.  If AGE is a negative number, this"
 	 " is\n"
          "    inversed.  The number can also be followed by a \"multiplier\" to"
 	 " easily\n"
@@ -219,8 +220,9 @@ main (int argc, char **argv)
   if (argc <= optind)
     usage (stderr);
 
-  int filecount = 0;
+  struct files_types *filecount;
   perfdata = open_memstream (&bp, &size);
+  int64_t total = 0;
 
   for (i = optind; i < argc; ++i)
     {
@@ -228,13 +230,50 @@ main (int argc, char **argv)
 	printf("checking directory %s with flags %u ...\n", argv[i],
 	       filecount_flags);
 
-      int partial = files_filecount (argv[i], filecount_flags,
-				     fileage, filesize, pattern);
-      if (partial < 0)
+      if (fileage != 0)
+	dbg ("looking for files that were touched %s %u seconds ago...\n"
+	     , (fileage < 0) ? "less than" : "more than"
+	     , (fileage < 0) ? (unsigned int)(-fileage) : (unsigned int)fileage);
+      if (filesize != 0)
+	dbg ("looking for files with size %s than %ld bytes...\n"
+	     , (filesize < 0) ? "less" : "greater"
+	     , (filesize < 0) ? -filesize : filesize);
+      if (pattern != NULL)
+	dbg ("looking for files that math the pattern `%s'...\n", pattern);
+
+      filecount = NULL;
+      ret = files_filecount (argv[i], filecount_flags,
+			     fileage, filesize, pattern, &filecount);
+      if (ret < 0)
 	plugin_error (STATE_UNKNOWN, errno, "Cannot open %s", argv[i]);
 
-      fprintf (perfdata, "%s_total=%d ", argv[i], partial);
-      filecount += partial;
+      fprintf (perfdata, "%s_total=%lu ", argv[i],
+	       (unsigned long)filecount->total);
+
+      if (!(filecount_flags & FILES_REGULAR_ONLY))
+	fprintf (perfdata, "%s_directory=%lu ", argv[i],
+		 (unsigned long)filecount->directory);
+
+      if (filecount_flags & FILES_INCLUDE_HIDDEN)
+	fprintf (perfdata, "%s_hidden=%lu ", argv[i],
+		 (unsigned long)filecount->hidden);
+
+      fprintf (perfdata, "%s_regular=%lu ", argv[i],
+	       (unsigned long)filecount->regular_file);
+
+      if (!(filecount_flags & FILES_REGULAR_ONLY))
+	fprintf (perfdata, "%s_special=%lu ",
+		 argv[i], (unsigned long)filecount->special_file);
+
+      if (!(filecount_flags & (FILES_IGNORE_SYMLINKS | FILES_REGULAR_ONLY)))
+	fprintf (perfdata, "%s_symlink=%lu ", argv[i],
+		 (unsigned long)filecount->symlink);
+
+      fprintf (perfdata, "%s_unknown=%lu ", argv[i],
+	       (unsigned long)filecount->unknown);
+
+      total += filecount->total;
+      free (filecount);
     }
 
   fclose (perfdata);
@@ -243,11 +282,11 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  status = get_status (filecount, my_threshold);
+  status = get_status (total, my_threshold);
   free (my_threshold);
 
-  printf ("%s %s - total number of files: %d | %s\n",
-	  program_name_short, state_text (status), filecount, bp);
+  printf ("%s %s - total number of files: %lu | %s\n",
+	  program_name_short, state_text (status), (unsigned long)total, bp);
 
   return status;
 }
