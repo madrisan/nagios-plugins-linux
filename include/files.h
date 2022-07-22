@@ -35,14 +35,12 @@ extern "C"
 
   struct files_types
   {
-    int64_t block_device;
-    int64_t character_device;
     int64_t directory;
-    int64_t named_fifo;
     int64_t hidden;
+    /* block/character device, named fifo, socket */
+    int64_t special_file;
     int64_t symlink;
     int64_t regular_file;
-    int64_t unix_domain_socket;
     int64_t total;
     int64_t unknown;
   };

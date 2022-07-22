@@ -29,6 +29,7 @@
 
 #include "common.h"
 #include "files.h"
+#include "logging.h"
 #include "messages.h"
 #include "progname.h"
 #include "progversion.h"
@@ -109,9 +110,9 @@ usage (FILE * out)
 	 "    there are 1000 bytes in a kilobyte, not 1024.\n",
 	 out);
   fputs ("  Option \"time\".\n"
-         "    If Age is greater than zero, only files that haven't been"
+         "    If AGE is greater than zero, only files that haven't been"
 	 " touched in the\n"
-         "    last Age seconds are counted.  If Age is a negative number, this"
+         "    last AGE seconds are counted.  If AGE is a negative number, this"
 	 " is\n"
          "    inversed.  The number can also be followed by a \"multiplier\" to"
 	 " easily\n"
@@ -229,6 +230,17 @@ main (int argc, char **argv)
 	printf("checking directory %s with flags %u ...\n", argv[i],
 	       filecount_flags);
 
+      if (fileage != 0)
+	dbg ("looking for files that were touched %s %u seconds ago...\n"
+	     , (fileage < 0) ? "less than" : "more than"
+	     , (fileage < 0) ? (unsigned int)(-fileage) : (unsigned int)fileage);
+      if (filesize != 0)
+	dbg ("looking for files with size %s than %ld bytes...\n"
+	     , (filesize < 0) ? "less" : "greater"
+	     , (filesize < 0) ? -filesize : filesize);
+      if (pattern != NULL)
+	dbg ("looking for files that math the pattern `%s'...\n", pattern);
+
       filecount = NULL;
       ret = files_filecount (argv[i], filecount_flags,
 			     fileage, filesize, pattern, &filecount);
@@ -239,16 +251,8 @@ main (int argc, char **argv)
 	       (unsigned long)filecount->total);
 
       if (!(filecount_flags & FILES_REGULAR_ONLY))
-	{
-	  fprintf (perfdata,
-		   "%s_block=%lu %s_character=%lu %s_fifo=%lu %s_socket=%lu "
-		   , argv[i], (unsigned long)filecount->block_device
-		   , argv[i], (unsigned long)filecount->character_device
-		   , argv[i], (unsigned long)filecount->named_fifo
-		   , argv[i], (unsigned long)filecount->unix_domain_socket);
-	  fprintf (perfdata, "%s_directory=%lu ", argv[i],
-		   (unsigned long)filecount->directory);
-	}
+	fprintf (perfdata, "%s_directory=%lu ", argv[i],
+		 (unsigned long)filecount->directory);
 
       if (filecount_flags & FILES_INCLUDE_HIDDEN)
 	fprintf (perfdata, "%s_hidden=%lu ", argv[i],
@@ -256,6 +260,10 @@ main (int argc, char **argv)
 
       fprintf (perfdata, "%s_regular=%lu ", argv[i],
 	       (unsigned long)filecount->regular_file);
+
+      if (!(filecount_flags & FILES_REGULAR_ONLY))
+	fprintf (perfdata, "%s_special=%lu ",
+		 argv[i], (unsigned long)filecount->special_file);
 
       if (!(filecount_flags & (FILES_IGNORE_SYMLINKS | FILES_REGULAR_ONLY)))
 	fprintf (perfdata, "%s_symlink=%lu ", argv[i],
