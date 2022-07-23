@@ -47,6 +47,9 @@ AM_LDFLAGS = $(LIBPROCPS_LIBS)
 test_programs = \
 	tslibcontainer_docker_count \
 	tslibcontainer_docker_memory \
+	tslibfiles_age \
+	tslibfiles_hiddenfile \
+	tslibfiles_size \
 	tslibkernelver \
 	tslibmeminfo_conversions \
 	tslibmeminfo_interface \
@@ -85,6 +88,13 @@ tslibcontainer_docker_count_LDADD = $(LDADDS)
 
 tslibcontainer_docker_memory_SOURCES = $(test_utils) tslibcontainer_docker_memory.c
 tslibcontainer_docker_memory_LDADD = $(LDADDS)
+
+tslibfiles_age_SOURCES = $(test_utils) tslibfiles_age.c
+tslibfiles_age_LDADD = $(LDADDS)
+tslibfiles_hiddenfile_SOURCES = $(test_utils) tslibfiles_hiddenfile.c
+tslibfiles_hiddenfile_LDADD = $(LDADDS)
+tslibfiles_size_SOURCES = $(test_utils) tslibfiles_size.c
+tslibfiles_size_LDADD = $(LDADDS)
 
 tslibkernelver_SOURCES = $(test_utils) tslibkernelver.c
 tslibkernelver_LDADD = $(LDADDS)
