@@ -54,7 +54,7 @@ mymain (void)
     {                                                    \
       test_data data = {                                 \
         .size = SIZE,                                    \
-	.filesize = FILESIZE,                            \
+        .filesize = FILESIZE,                            \
         .expect_value = EXPECT_VALUE,                    \
       };                                                 \
       if (test_run("check function files_check_size",    \

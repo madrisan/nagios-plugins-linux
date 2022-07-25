@@ -55,8 +55,8 @@ mymain (void)
     {                                                    \
       test_data data = {                                 \
         .age = AGE,                                      \
-	.filemtime = FILEMTIME,                          \
-	.now = NOW,                                      \
+        .filemtime = FILEMTIME,                          \
+        .now = NOW,                                      \
         .expect_value = EXPECT_VALUE,                    \
       };                                                 \
       if (test_run("check function files_check_age",     \
