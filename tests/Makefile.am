@@ -48,6 +48,7 @@ test_programs = \
 	tslibcontainer_docker_count \
 	tslibcontainer_docker_memory \
 	tslibfiles_age \
+	tslibfiles_filecount \
 	tslibfiles_hiddenfile \
 	tslibfiles_size \
 	tslibkernelver \
@@ -92,6 +93,8 @@ tslibcontainer_docker_memory_LDADD = $(LDADDS)
 
 tslibfiles_age_SOURCES = $(test_utils) tslibfiles_age.c
 tslibfiles_age_LDADD = $(LDADDS)
+tslibfiles_filecount_SOURCES = $(test_utils) tslibfiles_filecount.c
+tslibfiles_filecount_LDADD = $(LDADDS)
 tslibfiles_hiddenfile_SOURCES = $(test_utils) tslibfiles_hiddenfile.c
 tslibfiles_hiddenfile_LDADD = $(LDADDS)
 tslibfiles_size_SOURCES = $(test_utils) tslibfiles_size.c
