@@ -103,7 +103,7 @@ test_main (int argc, char **argv, int (*func) (void), ...)
   int ret;
 
   va_start (ap, func);
- while ((lib = va_arg(ap, const char *)))
+  while ((lib = va_arg(ap, const char *)))
     TEST_PRELOAD (lib);
   va_end(ap);
 
