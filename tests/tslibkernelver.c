@@ -43,4 +43,4 @@ mymain (void)
 #endif
 }
 
-TEST_MAIN_PRELOAD (mymain, abs_builddir "/.libs/tslib_uname.so");
+TEST_MAIN_PRELOAD (mymain, abs_builddir "/.libs/tslibuname.so");
