@@ -15,7 +15,7 @@
 <a href='https://ko-fi.com/K3K57TH3' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi2.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 <a href='http://amzn.eu/8axPDQ1'><img height='36' src='http://png-1.findicons.com/files/icons/2229/social_media_mini/48/amazon.png' border='0' alt='Wish List at Amazon.fr' /></a>
 
-*This package contains several binary plugins for monitoring (physical and virtual) Linux hosts with [Nagios](http://www.nagios.org/) and Nagios-compatible monitoring systems like [Icinga](https://icinga.com/learn/) and [Naemon](https://www.naemon.org/).*
+*This project provides several plugins for monitoring physical and virtual Linux hosts with [Nagios](http://www.nagios.org/) and Nagios-compatible monitoring systems like [Icinga](https://icinga.com/learn/) and [Naemon](https://www.naemon.org/).*
 
 Here is the list of the available plugins:
 
@@ -23,7 +23,7 @@ Here is the list of the available plugins:
 * **check_cpu** - checks the CPU (user mode) utilization
 * **check_cpufreq** - displays the CPU frequency characteristics
 * **check_cswch** - checks the total number of context switches across all CPUs
-* **check_docker** - checks the number of running docker containers (:warning: *alpha*, requires *libcurl* version 7.40.0+)
+* **check_docker** - checks the number of running docker containers (:warning: *pre-alpha*, requires *libcurl* version 7.40.0+)
 * **check_fc** - monitors the status of the fiber status ports
 * **check_filecount** - checks the number of files found in one or more directories :new:
 * **check_ifmountfs** - checks whether the given filesystems are mounted
@@ -40,7 +40,7 @@ Here is the list of the available plugins:
   * check_network_multicast
 * **check_paging** - checks the memory and swap paging
 * **check_pressure** - checks Linux Pressure Stall Information (PSI) data :new:
-* **check_podman** - monitor the status of podman containers (:warning: *beta*, requires *libvarlink*)
+* **check_podman** - monitor the status of podman containers (:warning: *alpha*, requires *libvarlink*)
 * **check_readonlyfs** - checks for readonly filesystems
 * **check_swap** - checks the swap usage
 * **check_tcpcount** - checks the tcp network usage
