@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014-2019 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2022 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check system memory usage on Linux.
  *
@@ -34,6 +34,7 @@
 #include "perfdata.h"
 #include "progname.h"
 #include "progversion.h"
+#include "string-macros.h"
 #include "system.h"
 #include "thresholds.h"
 #include "units.h"
@@ -42,7 +43,7 @@
 #include "xasprintf.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014-2019 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014-2022 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "available", no_argument, NULL, 'a'},
@@ -54,6 +55,7 @@ static struct option const longopts[] = {
   {(char *) "kilobyte", no_argument, NULL, 'k'},
   {(char *) "megabyte", no_argument, NULL, 'm'},
   {(char *) "gigabyte", no_argument, NULL, 'g'},
+  {(char *) "units", required_argument, 0, 'u'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -66,7 +68,7 @@ usage (FILE * out)
   fputs ("This plugin checks the system memory utilization.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s [-a] [-b,-k,-m,-g] [-s] -w PERC -c PERC\n",
+  fprintf (out, "  %s [-a] [-b,-k,-m,-g] [-s] [-u UNIT] -w PERC -c PERC\n",
 	   program_name);
   fputs (USAGE_OPTIONS, out);
   fputs ("  -a, --available display the free/available memory\n",
@@ -74,6 +76,10 @@ usage (FILE * out)
   fputs ("  -b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);
   fputs ("  -s, --vmstats   display the virtual memory perfdata\n", out);
+  fputs ("  -u, --units     show output in the selected unit (default: KB),\n",
+	 out);
+  fputs ("                  choose B, kB, MB, GB, TB, KiB, MiB, GiB\n",
+	 out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs (USAGE_HELP, out);
@@ -86,11 +92,15 @@ usage (FILE * out)
 	 "information in\n"
 	 "  /proc/meminfo (see the parameter 'MemAvailable').\n", out);
   fputs ("  A MemAvailable fall-back code is implemented for "
-	  "kernels 2.6.27 and above.\n", out);
-  fputs ("  For older kernels 'MemFree' is returned instead.\n",
-	 out);
+	 "kernels 2.6.27 and above.\n", out);
+  fputs ("  For older kernels 'MemFree' is returned instead.\n", out);
+  fputs (USAGE_NOTE, out);
+  fputs ("  kB/MB/GB are still calculated as their respective binary units "
+	 "due to\n", out);
+  fputs ("  backward compatibility issues.\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s --available -w 20%%: -c 10%%:\n", program_name);
+  fprintf (out, "  %s --units MiB -w 20%%: -c 10%%:\n", program_name);
   fprintf (out, "  %s --vmstats -w 80%% -c90%%\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
@@ -147,7 +157,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-                           "aMSCsc:w:bkmg" GETOPT_HELP_VERSION_STRING,
+                           "aMSCsc:w:bkmgu:" GETOPT_HELP_VERSION_STRING,
                            longopts, NULL)) != -1)
     {
       switch (c)
@@ -173,6 +183,23 @@ main (int argc, char **argv)
         case 'k': shift = k_shift; units = xstrdup ("kB"); break;
         case 'm': shift = m_shift; units = xstrdup ("MB"); break;
         case 'g': shift = g_shift; units = xstrdup ("GB"); break;
+        case 'u':
+	  if (units)
+	    free (units);
+
+	  if (STREQ (optarg, "B"))
+	    shift = b_shift;
+	  else if (STREQ (optarg, "kB") || STREQ (optarg, "KiB"))
+	    shift = k_shift;
+	  else if (STREQ (optarg, "MB") || STREQ (optarg, "MiB"))
+	    shift = m_shift;
+	  else if (STREQ (optarg, "GB") || STREQ (optarg, "GiB"))
+	    shift = g_shift;
+	  else
+	    plugin_error (STATE_UNKNOWN, 0, "unit type %s not known", optarg);
+
+	  units = xstrdup (optarg);
+	  break;
 
         case_GETOPT_HELP_CHAR
         case_GETOPT_VERSION_CHAR
@@ -188,9 +215,10 @@ main (int argc, char **argv)
     usage (stderr);
 
   /* output in kilobytes by default */
-  if (units == NULL)
+  if (NULL == units)
     units = xstrdup ("kB");
 
+  printf ("DEBUG: %s\n", units); /* REMOVE ME! */
   err = proc_sysmem_new (&sysmem);
   if (err < 0)
     plugin_error (STATE_UNKNOWN, err, "memory exhausted");
