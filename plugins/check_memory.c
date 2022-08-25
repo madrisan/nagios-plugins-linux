@@ -78,13 +78,13 @@ usage (FILE * out)
   fputs ("  -s, --vmstats   display the virtual memory perfdata\n", out);
   fputs ("  -u, --units     show output in the selected unit (default: KB),\n",
 	 out);
-  fputs ("                  choose B, kB, MB, GB, TB, KiB, MiB, GiB\n",
+  fputs ("                  choose bytes, B, kB, MB, GB, KiB, MiB, GiB\n",
 	 out);
   fputs ("  -w, --warning PERCENT   warning threshold\n", out);
   fputs ("  -c, --critical PERCENT   critical threshold\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
-  fputs (USAGE_NOTE, out);
+  fputs (USAGE_NOTE_1, out);
   fputs ("  The option '-a|--available' gives an estimation of the "
 	 "available memory\n"
 	 "  for starting new applications without swapping.\n", out);
@@ -94,13 +94,13 @@ usage (FILE * out)
   fputs ("  A MemAvailable fall-back code is implemented for "
 	 "kernels 2.6.27 and above.\n", out);
   fputs ("  For older kernels 'MemFree' is returned instead.\n", out);
-  fputs (USAGE_NOTE, out);
+  fputs (USAGE_NOTE_2, out);
   fputs ("  kB/MB/GB are still calculated as their respective binary units "
 	 "due to\n", out);
   fputs ("  backward compatibility issues.\n", out);
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s --available -w 20%%: -c 10%%:\n", program_name);
-  fprintf (out, "  %s --units MiB -w 20%%: -c 10%%:\n", program_name);
+  fprintf (out, "  %s --available --units MiB -w 20%%: -c 10%%:\n", program_name);
   fprintf (out, "  %s --vmstats -w 80%% -c90%%\n", program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
@@ -187,7 +187,7 @@ main (int argc, char **argv)
 	  if (units)
 	    free (units);
 
-	  if (STREQ (optarg, "B"))
+	  if (STREQ (optarg, "B") || STREQ (optarg, "bytes"))
 	    shift = b_shift;
 	  else if (STREQ (optarg, "kB") || STREQ (optarg, "KiB"))
 	    shift = k_shift;
@@ -218,7 +218,6 @@ main (int argc, char **argv)
   if (NULL == units)
     units = xstrdup ("kB");
 
-  printf ("DEBUG: %s\n", units); /* REMOVE ME! */
   err = proc_sysmem_new (&sysmem);
   if (err < 0)
     plugin_error (STATE_UNKNOWN, err, "memory exhausted");
