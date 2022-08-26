@@ -4,7 +4,7 @@
 
 ![Release Status](https://img.shields.io/badge/status-stable-brightgreen.svg)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://spdx.org/licenses/GPL-3.0-only.html)
-[![Download Latest Release](https://img.shields.io/badge/download-latest--tarball-blue.svg)](https://github.com/madrisan/nagios-plugins-linux/releases/download/v30/nagios-plugins-linux-30.tar.xz)
+[![Download Latest Release](https://img.shields.io/badge/download-latest--tarball-blue.svg)](https://github.com/madrisan/nagios-plugins-linux/releases/download/v31/nagios-plugins-linux-31.tar.xz)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/madrisan)
 
 [![Build Status](https://travis-ci.org/madrisan/nagios-plugins-linux.svg?branch=master)](https://travis-ci.org/madrisan/nagios-plugins-linux)
@@ -106,14 +106,14 @@ This package is known to compile with:
 * gcc 4.1 (RHEL 5 / CentOS 5),
 * gcc 4.4 (RHEL6 / CentOS 6),
 * gcc 4.8 (RHEL7 / CentOS 7),
-* gcc 3.x, 5.1, 5.3, 6.3, 7, 8, 9, 10, 11 (openmamba GNU/Linux, Debian 8+, Fedora 25+),
-* clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10, 11, 12, 13 (openmamba GNU/Linux, Fedora 25+),
+* gcc 3.x, 5.1, 5.3, 6.3, 7-12 (openmamba GNU/Linux, Debian 8+, Fedora 25+),
+* clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10-14 (openmamba GNU/Linux, Fedora 25+),
 
 List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,
 * 3.10, 3.14, 3.18,
 * 4.2, 4.4, 4,9, 4.14, 4.15, 4.16, 4.19
-* 5.6, 5.7, 5.8, 5.12-5.16
+* 5.6, 5.7, 5.8, 5.12-5.18
 
 The Nagios Plugins Linux are regularly tested on
  * Alpine Linux (musl libc),

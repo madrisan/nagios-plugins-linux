@@ -1,3 +1,118 @@
+## Version 31 ("Counter-intuitive")
+### Aug 28th, 2022
+
+#### FIXES
+
+##### Libraries
+
+ * lib/container_docker_memory: fix an issue reported by clang-analyzer.
+ * Make sure sysfs is mounted in the plugins that require it.
+
+#### ENHANCEMENTS / CHANGES
+
+##### Plugin check_filecount
+
+ * New plugin `check_filecount` that returns the number of files found in one or more directories.
+
+##### Plugin check_memory
+
+ * check_memory: support new units kiB/MiB/GiB.
+   Feature asked by [mdicss](https://github.com/mdicss).
+   See the discussion [#120](https://github.com/madrisan/nagios-plugins-linux/discussions/120).
+
+##### contrib/icinga2/CheckCommands.conf
+
+ * Contribution from Lorenz [RincewindsHat](https://github.com/RincewindsHat): add icinga2 command configurations.
+
+##### Build
+
+ * configure: ensure libprocps is v4.0.0 or better if the experimental option `--enable-libprocps` is passed to `configure`.
+
+##### Test framework
+
+ * Add some unit tests for `lib/xstrton`.
+ * New unit tests `tslibfiles_{filecount,hiddenfile,size}`.
+
+##### Package creation
+
+ * Add Linux Alpine 3.16 and remove version 3.13.
+ * Do not package experimental plugins in the rpm `nagios-plugins-linux-all`.
+ * Add Fedora 36 and drop Fedora 33 support.
+ * CentOS 8 died a premature death at the end of 2021. Add packages for CentOS Stream 8 and 9.
+
+##### GitHub workflows
+
+ * Build the Nagios Plugins Linux on the LTS Ubuntu versions only. The version 21 seems dead.
+ * Add build tests for all the supported oses.
+ * Update the os versions used in tests.
+ * CentOS 8 died a premature death at the end of 2021. Remove it from the list of test oses.
+ * Add CodeQL analysis
+
+### GIT DIFF
+```
+$ git diff --stat db94dc16 6edcf3aa
+ .github/workflows/build-checks.yml          |   9 +-
+ .github/workflows/codeql-analysis.yml       |  59 ++++++++++
+ .gitignore                                  |   3 +
+ AUTHORS                                     |   6 ++
+ DEVELOPERS.md                               |  14 ++-
+ README.md                                   |  50 ++++-----
+ SECURITY.md                                 |  24 +++++
+ configure.ac                                |  15 ++-
+ contrib/README.md                           |   6 ++
+ contrib/icinga2/CheckCommands.conf          | 923 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ include/Makefile.am                         |   1 +
+ include/common.h                            |   2 +
+ include/cpudesc.h                           |   2 +-
+ include/files.h                             |  56 ++++++++++
+ include/procparser.h                        |   2 +-
+ include/sysfsparser.h                       |   3 +
+ include/xstrton.h                           |  16 +--
+ lib/Makefile.am                             |   1 +
+ lib/container_docker_memory.c               |   8 +-
+ lib/container_podman_count.c                |   2 +-
+ lib/cpudesc.c                               |   8 +-
+ lib/cpufreq.c                               |   2 +-
+ lib/cputopology.c                           |   5 +-
+ lib/files.c                                 | 252 +++++++++++++++++++++++++++++++++++++++++++
+ lib/interrupts.c                            |   2 +-
+ lib/meminfo.c                               |   2 +-
+ lib/messages.c                              |   2 +-
+ lib/processes.c                             |   2 +-
+ lib/sysfsparser.c                           |  30 ++++--
+ lib/thresholds.c                            |   4 +-
+ lib/xmalloc.c                               |   2 +-
+ lib/xstrton.c                               | 148 ++++++++++++++++++++++++--
+ nagios-plugins-linux-logo-128.png           | Bin 0 -> 10505 bytes
+ packages/Makefile.am                        |  22 ++--
+ packages/docker-shell-helpers               |   2 +-
+ packages/multibuild.sh                      |   7 +-
+ packages/specs/APKBUILD.in                  |   2 +-
+ packages/specs/Makefile.am                  |   2 +
+ packages/specs/nagios-plugins-linux.spec.in |  10 +-
+ plugins/Makefile.am                         |   3 +
+ plugins/check_cpu.c                         |   9 +-
+ plugins/check_cpufreq.c                     |   7 +-
+ plugins/check_fc.c                          |   9 +-
+ plugins/check_filecount.c                   | 292 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ plugins/check_load.c                        |   8 +-
+ plugins/check_memory.c                      |  51 ++++++---
+ plugins/check_network.c                     |   2 +-
+ plugins/check_swap.c                        |   2 +-
+ plugins/check_temperature.c                 |   6 +-
+ tests/Makefile.am                           |  34 ++++--
+ tests/testutils.c                           |   2 +-
+ tests/tslibfiles_age.c                      |  85 +++++++++++++++
+ tests/tslibfiles_filecount.c                | 227 +++++++++++++++++++++++++++++++++++++++
+ tests/tslibfiles_hiddenfile.c               |  72 +++++++++++++
+ tests/tslibfiles_size.c                     |  79 ++++++++++++++
+ tests/tslibkernelver.c                      |   2 +-
+ tests/{tslib_uname.c => tslibuname.c}       |   0
+ tests/tslibxstrton_agetoint64.c             |  92 ++++++++++++++++
+ tests/tslibxstrton_sizetoint64.c            |  91 ++++++++++++++++
+ 59 files changed, 2638 insertions(+), 141 deletions(-)
+```
+
 ## Version 30 ("Low Pressure")
 ### Jan 25th, 2022
 
