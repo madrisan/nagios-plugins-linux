@@ -1,10 +1,18 @@
+nagios-plugins-linux (31-1) stable; urgency=low
+  * Release 31 "Counter-intuitive":
+     - New plugin check_filecount
+     - Support new units kiB/MiB/GiB in check_memory
+     - Minor fixes
+
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Sun, 28 Aug 2022 22:44:00 +0200
+
 nagios-plugins-linux (30-1) stable; urgency=low
   * Release 30 "Low pressure":
      - Fixes in the plugin check_pressure
      - Fix a LGTM issue in lib/netinfo
      - Fix Debian multi-package creation
 
- -- Davide Madrisan <davide.madrisan@gmail.com>  Tue, 25 Jan 202Z 18:57:05 +0200
+ -- Davide Madrisan <davide.madrisan@gmail.com>  Tue, 25 Jan 2022 18:57:05 +0200
 
 nagios-plugins-linux (29-1) stable; urgency=low
   * Release 29 "High Temperatures":
