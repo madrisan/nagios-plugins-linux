@@ -53,6 +53,7 @@ The full documentation and the source code are available in the project
 [check_cswch]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_cswch
 [check_docker]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_docker
 [check_fc]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_fc
+[check_filecount]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_filecount
 [check_ifmountfs]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_ifmountfs
 [check_intr]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_intr
 [check_iowait]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_iowait
