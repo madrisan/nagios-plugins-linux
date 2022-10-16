@@ -52,7 +52,15 @@ jobs:
       - id: configure
         run: |
           autoreconf --install
-          ./configure --enable-debug
+          case "${{ matrix.container }}" in
+            alpine*|debian*|ubuntu*)
+              ./configure --enable-libcurl --enable-debug
+            ;;
+            # libvarlink is only available in Fedora
+            *)
+              ./configure --enable-libcurl --enable-libvarlink --enable-debug
+            ;;
+          esac
 
       - id: make
         run: |
