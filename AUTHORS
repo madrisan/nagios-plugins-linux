@@ -25,6 +25,9 @@ Contributors:
    RincewindsHat         - https://github.com/RincewindsHat
                            Configuration file for icinga2;
                            fix a typo in the check_network help message
+   nE0sIghT              - https://github.com/nE0sIghT
+                           Bug report and patch for fixing check_network
+                           when run in a containerized environment
 
 Some code and coding styles/ideas belong to the following open source projects:
 
