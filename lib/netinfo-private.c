@@ -260,7 +260,7 @@ get_rtnl_fd ()
   memset (&u.local, 0, sizeof (u.local));
   u.local.nl_family = AF_NETLINK;
   u.local.nl_groups = 0;
-  u.local.nl_pid = getpid ();
+  u.local.nl_pid = 0;
 
   if (bind (fd, &u.addr, sizeof (u.addr)) < 0)
     {
