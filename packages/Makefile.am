@@ -50,9 +50,9 @@ debian-11: debian-bullseye
 debian-latest: debian-bullseye
 
 TARGETS_REDHAT = \
-	fedora-34 fedora-35 fedora-36 \
+	fedora-35 fedora-36 fedora-37 \
 	fedora-rawhide
-fedora-latest: fedora-36
+fedora-latest: fedora-37
 
 .PHONY: specfile
 specfile:
