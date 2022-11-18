@@ -133,9 +133,9 @@ CentOS Stream 9      | `make -C packages centos-stream-9`
 Debian 9 (Stretch)   | `make -C packages debian-stretch`
 Debian 10 (Buster)   | `make -C packages debian-buster`
 Debian 11 (Bullseye) | `make -C packages debian-bullseye`
-Fedora 34            | `make -C packages fedora-34`
 Fedora 35            | `make -C packages fedora-35`
 Fedora 36            | `make -C packages fedora-36`
+Fedora 37            | `make -C packages fedora-37`
 Fedora Rawhide       | `make -C packages fedora-rawhide`
 
 in the root source folder.
