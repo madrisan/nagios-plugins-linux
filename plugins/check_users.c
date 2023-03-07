@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014,2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014,2015,2023 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that ckecks for the number of logged on users.
  *
@@ -24,7 +24,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#if !defined(WITH_SYSTEMD)
 #include <utmpx.h>
+#else
+#include <systemd/sd-login.h>
+#endif
 
 #include "common.h"
 #include "messages.h"
@@ -33,7 +37,7 @@
 #include "thresholds.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014,2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014,2015,2023 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "critical", required_argument, NULL, 'c'},
@@ -76,13 +80,45 @@ print_version (void)
   exit (STATE_OK);
 }
 
+static int
+count_users (bool verbose)
+{
+  int numuser = 0;
+
+#if defined(WITH_SYSTEMD)
+  numuser = sd_get_sessions (NULL);
+#else
+  struct utmpx *ut;
+
+  if (verbose)
+    printf ("user       PID line   host      date/time\n");
+  setutxent ();
+  while ((ut = getutxent ()))
+    {
+      if ((ut->ut_type == USER_PROCESS) && (ut->ut_user[0] != '\0'))
+	{
+	  numuser++;
+	  if (!verbose)
+	    continue;
+	  char buf[26];
+	  time_t timetmp = ut->ut_tv.tv_sec;
+	  printf ("%-8s %5ld %-6.6s %-9.9s %s", ut->ut_user,
+		  (long) ut->ut_pid, ut->ut_line, ut->ut_host,
+		  ctime_r (&timetmp, buf));
+	}
+    }
+  endutxent ();
+#endif
+
+  return numuser;
+}
+
 int
 main (int argc, char **argv)
 {
   int c, numuser;
   bool verbose = false;
   char *critical = NULL, *warning = NULL;
-  struct utmpx *ut;
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
 
@@ -116,25 +152,10 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  numuser = 0;
-  if (verbose)
-    printf ("user       PID line   host      date/time\n");
-  setutxent ();
-  while ((ut = getutxent ()))
-    {
-      if ((ut->ut_type == USER_PROCESS) && (ut->ut_user[0] != '\0'))
-	{
-	  numuser++;
-	  if (!verbose)
-	    continue;
-	  char buf[26];
-	  time_t timetmp = ut->ut_tv.tv_sec;
-	  printf ("%-8s %5ld %-6.6s %-9.9s %s", ut->ut_user,
-		  (long) ut->ut_pid, ut->ut_line, ut->ut_host,
-		  ctime_r (&timetmp, buf));
-	}
-    }
-  endutxent ();
+  numuser = count_users (verbose);
+  if (numuser < 0)
+    plugin_error (STATE_UNKNOWN, numuser,
+		  "cannot determine all current login sessions");
 
   status = get_status (numuser, my_threshold);
   free (my_threshold);

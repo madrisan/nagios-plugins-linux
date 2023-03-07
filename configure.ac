@@ -346,6 +346,24 @@ AS_IF([test "x$enable_libcurl" = "xyes"], [
   AM_CONDITIONAL(HAVE_LIBCURL, [test "$libcurl_cv_lib_curl_usable" = "yes"])
 ], [AM_CONDITIONAL(HAVE_LIBCURL, false)])
 
+dnl Check for systemd-login libraries
+AC_ARG_WITH([systemd],
+  AS_HELP_STRING([--without-systemd], [do not build with systemd support]),
+  [], [with_systemd=check]
+)
+have_systemd=no
+AS_IF([test "x$with_systemd" != "xno"], [
+  PKG_CHECK_MODULES([SYSTEMD], [libsystemd], [have_systemd=yes], [have_systemd=no])
+  AS_CASE([$with_systemd:$have_systemd],
+    [yes:no],
+      [AC_MSG_ERROR([systemd expected but libsystemd not found])],
+    [*:yes],
+       AC_DEFINE([HAVE_LIBSYSTEMD], [1], [Define if libsystemd is available])
+       AC_DEFINE([USE_SYSTEMD], [1], [Define if systemd support is wanted ])
+  )
+])
+AM_CONDITIONAL([HAVE_SYSTEMD], [test "x$have_systemd" = "xyes"])
+
 dnl Check for libvarlink
 AC_ARG_ENABLE([libvarlink],
   AS_HELP_STRING([--disable-libvarlink], [Disable libvarlink]))
