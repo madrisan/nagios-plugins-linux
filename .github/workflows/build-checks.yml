@@ -41,11 +41,11 @@ jobs:
             debian*|ubuntu*)
               export DEBIAN_FRONTEND=noninteractive
               apt-get update -q
-              apt-get install -q -y --no-install-recommends autoconf automake bzip2 gcc libcurl4-gnutls-dev libtool m4 make pkg-config xz-utils
+              apt-get install -q -y --no-install-recommends autoconf automake bzip2 gcc libcurl4-gnutls-dev libsystemd-dev libtool m4 make pkg-config xz-utils
             ;;
             fedora*)
               dnf -y update
-              dnf -y install autoconf automake bzip2 gcc glibc-devel libcurl-devel libvarlink-devel libtool make m4 xz
+              dnf -y install autoconf automake bzip2 diffutils gcc glibc-devel libcurl-devel libvarlink-devel libtool make m4 systemd-devel xz
             ;;
           esac
 
