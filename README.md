@@ -53,7 +53,7 @@ Here is the list of the available plugins:
 The full documentation of the `nagios-plugins-linux` is available online
 in the GitHub [wiki page](https://github.com/madrisan/nagios-plugins-linux/wiki).
 
-## Installation
+## Get and configure the source code
 
 This package uses `GNU autotools` for configuration and installation.
 
@@ -79,6 +79,13 @@ but can be modified at build time by using the option `--with-socketfile`.
 Example (RHEL5 and RHEL6 and other old distributions):
 
         ./configure --with-socketfile=/var/run/multipathd.sock
+
+If you want to compile the code with a C compiler different from the system default,
+you can set the environment variable CC accordingly. Here's an example:
+
+        CC=clang-15 ./configure --libexecdir=/usr/lib/nagios/plugins
+
+## Installation
 
 After `./configure` has completed successfully run `make install` and
 you're done!
@@ -107,13 +114,13 @@ This package is known to compile with:
 * gcc 4.4 (RHEL6 / CentOS 6),
 * gcc 4.8 (RHEL7 / CentOS 7),
 * gcc 3.x, 5.1, 5.3, 6.3, 7-12 (openmamba GNU/Linux, Debian 8+, Fedora 25+),
-* clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10-14 (openmamba GNU/Linux, Fedora 25+),
+* clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10-15 (openmamba GNU/Linux, Fedora 25+),
 
 List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,
 * 3.10, 3.14, 3.18,
 * 4.2, 4.4, 4,9, 4.14, 4.15, 4.16, 4.19
-* 5.6, 5.7, 5.8, 5.12-5.18
+* 5.6, 5.7, 5.8, 5.12-5.18, 6.1
 
 The Nagios Plugins Linux are regularly tested on
  * Alpine Linux (musl libc),
@@ -125,9 +132,9 @@ The `.apk`, `.rpm` and `.deb` packages for Alpine, CentOS/RHEL, Debian, and Fedo
 
 Command              | Distribution
 -------------------- | ------------
-Alpine 3.14          | `make -C packages alpine-3.14`
 Alpine 3.15          | `make -C packages alpine-3.15`
 Alpine 3.16          | `make -C packages alpine-3.16`
+Alpine 3.17          | `make -C packages alpine-3.17`
 CentOS Stream 8      | `make -C packages centos-stream-8`
 CentOS Stream 9      | `make -C packages centos-stream-9`
 Debian 9 (Stretch)   | `make -C packages debian-stretch`
