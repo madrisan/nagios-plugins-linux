@@ -132,9 +132,9 @@ The `.apk`, `.rpm` and `.deb` packages for Alpine, CentOS/RHEL, Debian, and Fedo
 
 Command              | Distribution
 -------------------- | ------------
-Alpine 3.14          | `make -C packages alpine-3.14`
 Alpine 3.15          | `make -C packages alpine-3.15`
 Alpine 3.16          | `make -C packages alpine-3.16`
+Alpine 3.17          | `make -C packages alpine-3.17`
 CentOS Stream 8      | `make -C packages centos-stream-8`
 CentOS Stream 9      | `make -C packages centos-stream-9`
 Debian 9 (Stretch)   | `make -C packages debian-stretch`
