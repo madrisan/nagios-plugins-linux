@@ -45,7 +45,7 @@ jobs:
             ;;
             fedora*)
               dnf -y update
-              dnf -y install autoconf automake bzip2 gcc glibc-devel libcurl-devel libvarlink-devel libtool make m4 systemd-devel xz
+              dnf -y install autoconf automake bzip2 diffutils gcc glibc-devel libcurl-devel libvarlink-devel libtool make m4 systemd-devel xz
             ;;
           esac
 
