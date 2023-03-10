@@ -49,10 +49,15 @@ debian-10: debian-buster
 debian-11: debian-bullseye
 debian-latest: debian-bullseye
 
-TARGETS_REDHAT = \
+TARGETS_FEDORA = \
 	fedora-35 fedora-36 fedora-37 \
 	fedora-rawhide
 fedora-latest: fedora-37
+
+TARGETS_ROCKY = \
+	rockylinux-8 \
+	rockylinux-9
+rockylinux-latest: rockylinux-9
 
 .PHONY: specfile
 specfile:
@@ -79,7 +84,13 @@ $(TARGETS_DEBIAN): source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --os $$distr --target pcks/$@
 
-$(TARGETS_REDHAT): specfile source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
+$(TARGETS_FEDORA): specfile source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
+	@distr=`echo $@ | sed s/-/:/`; \
+	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
+	   --spec $(multibuilddir)/specs/$(SPECFILE) \
+	   --os $$distr --target pcks/$@
+
+$(TARGETS_ROCKY): specfile source-archive $(DOCKER) $(MULTIBUILD_SCRIPT)
 	@distr=`echo $@ | sed s/-/:/`; \
 	$(SHELL) $(MULTIBUILD_SCRIPT) $(MULTIBUILD_OPTS) \
 	   --spec $(multibuilddir)/specs/$(SPECFILE) \
