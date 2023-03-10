@@ -228,7 +228,9 @@ This Nagios plugin displays the number of users that are currently logged on.
 %build
 %configure --libexecdir=%{_libdir}/nagios/plugins \
    --enable-libcurl \
+%if 0%{?have_libvarlink}
    --enable-libvarlink \
+%endif
 %if 0%{?rhel} < 7
    --with-socketfile=/var/run/multipathd.sock
 %endif

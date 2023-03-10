@@ -144,6 +144,8 @@ Fedora 35            | `make -C packages fedora-35`
 Fedora 36            | `make -C packages fedora-36`
 Fedora 37            | `make -C packages fedora-37`
 Fedora Rawhide       | `make -C packages fedora-rawhide`
+Rocky Linux 8        | `make -C packages rockylinux-8`
+Rocky Linux 9        | `make -C packages rockylinux-9`
 
 in the root source folder.
 The building process requires the _Docker_ software containerization platform running on your system, and an internet connection to download the Docker images of the operating systems you want to build the packages for.

@@ -159,6 +159,13 @@ build-essential bzip2 debhelper devscripts fakeroot gcc make pkg-config xz-utils
       pcks_dev="bzip2 make gcc libcurl-devel libvarlink-devel xz rpm-build util-linux"
       have_libcurl="1"
       have_libvarlink="1" ;;
+   rockylinux-*)
+      pck_format="rpm"
+      pck_install="dnf install -y"
+      pck_dist=".el${os:11:1}"
+      pcks_dev="bzip2 make gcc libcurl-devel xz rpm-build util-linux"
+      have_libcurl="1"
+      have_libvarlink="0" ;;
    *) die "unsupported os: $os" ;;
 esac
 pck_dist="${pck_dist}${usr_distro:+.$usr_distro}"
