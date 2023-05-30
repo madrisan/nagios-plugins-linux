@@ -86,8 +86,14 @@ count_users (bool verbose)
   int numuser = 0;
 
 #if defined(WITH_SYSTEMD)
-  numuser = sd_get_sessions (NULL);
-#else
+  /* sd_get_sessions() will not return ENOENT as error, as this only means
+   * that there is no session, not that systemd is not used.
+   * Use the recommended sd_booted() function for this.
+   */
+  if (sd_booted() > 0)
+    return sd_get_sessions(NULL);
+#endif
+
   struct utmpx *ut;
 
   if (verbose)
@@ -108,7 +114,6 @@ count_users (bool verbose)
 	}
     }
   endutxent ();
-#endif
 
   return numuser;
 }
