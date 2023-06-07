@@ -97,7 +97,7 @@ count_users (bool verbose)
   struct utmpx *ut;
 
   if (verbose)
-    printf ("user       PID line   host      date/time\n");
+    printf ("user         PID line   host      date/time\n");
   setutxent ();
   while ((ut = getutxent ()))
     {
@@ -108,7 +108,7 @@ count_users (bool verbose)
 	    continue;
 	  char buf[26];
 	  time_t timetmp = ut->ut_tv.tv_sec;
-	  printf ("%-8s %5ld %-6.6s %-9.9s %s", ut->ut_user,
+	  printf ("%-8s %6ld %-6.6s %-9.9s %s", ut->ut_user,
 		  (long) ut->ut_pid, ut->ut_line, ut->ut_host,
 		  ctime_r (&timetmp, buf));
 	}
