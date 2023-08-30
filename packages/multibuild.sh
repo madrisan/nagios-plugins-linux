@@ -1,6 +1,6 @@
 #!/bin/bash
 # Multi-platform build system
-# Copyright (C) 2016-2020 Davide Madrisan <davide.madrisan@gmail.com>
+# Copyright (C) 2016-2023 Davide Madrisan <davide.madrisan@gmail.com>
 
 PROGNAME="${0##*/}"
 PROGPATH="${0%/*}"
@@ -33,9 +33,11 @@ Where:
    -u|--uid    : user ID of the user 'developer' used for building the software
 
 Supported distributions:
-   CentOS 5/6/7/8
-   Debian 9/10/11
-   Fedora 33/34/35/rawhide
+   CentOS 5-8
+   CentOS Stream 8, 9
+   Debian 9-12
+   Fedora 33-38/rawhide
+   Rocky Linux 8, 9
 
 Example:
        $0 -s $PROGPATH/../../nagios-plugins-linux:/shared:rw \\
@@ -50,7 +52,7 @@ __EOF
 help () {
    cat <<__EOF
 $PROGNAME v$REVISION - containerized software build checker
-Copyright (C) 2016-2021 Davide Madrisan <davide.madrisan@gmail.com>
+Copyright (C) 2016-2023 Davide Madrisan <davide.madrisan@gmail.com>
 
 __EOF
 
