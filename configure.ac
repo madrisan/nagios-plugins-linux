@@ -337,7 +337,7 @@ AC_CHECK_DECLS([CPU_ALLOC], [], [],
 
 dnl Check for libcurl
 AC_ARG_ENABLE([libcurl],
-  AS_HELP_STRING([--disable-libcurl], [Disable libcurl]))
+  AS_HELP_STRING([--enable-libcurl], [Enable libcurl]))
 AS_IF([test "x$enable_libcurl" = "xyes"], [
   LIBCURL_CHECK_CONFIG([], [7.40.0], [],
     [AC_MSG_ERROR([Missing required libcurl >= 7.40.0])])
@@ -366,7 +366,7 @@ AM_CONDITIONAL([HAVE_SYSTEMD], [test "x$have_systemd" = "xyes"])
 
 dnl Check for libvarlink
 AC_ARG_ENABLE([libvarlink],
-  AS_HELP_STRING([--disable-libvarlink], [Disable libvarlink]))
+  AS_HELP_STRING([--enable-libvarlink], [Enable libvarlink]))
 AS_IF([test "x$enable_libvarlink" = "xyes"], [
   PKG_CHECK_EXISTS([libvarlink],
     [PKG_CHECK_MODULES(LIBVARLINK, [libvarlink >= 18],

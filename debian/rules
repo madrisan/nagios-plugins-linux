@@ -6,4 +6,4 @@ NP_LIBEXEC:=/usr/lib/nagios/plugins
 	dh $@ --with autoreconf
 
 override_dh_auto_configure:
-	dh_auto_configure -- --libexecdir=${NP_LIBEXEC}
+	dh_auto_configure -- --libexecdir=${NP_LIBEXEC} --enable-libcurl
