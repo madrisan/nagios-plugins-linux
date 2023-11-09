@@ -135,8 +135,8 @@ check_link_speed (const char *ifname, uint32_t *speed, uint8_t *duplex)
 #ifdef ETHTOOL_GLINKSETTINGS
 # define ETHTOOL_LINK_MODE_MASK_MAX_KERNEL_NU32  (SCHAR_MAX)
   struct elinkset {
-    struct ethtool_link_settings req;
     uint32_t link_mode_data[3 * ETHTOOL_LINK_MODE_MASK_MAX_KERNEL_NU32];
+    struct ethtool_link_settings req;
   } elinkset;
 #endif
 
