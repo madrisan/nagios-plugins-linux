@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-## Copyright (c) 2016-2019 Davide Madrisan <davide.madrisan@gmail.com>
+## Copyright (c) 2016-2024 Davide Madrisan <davide.madrisan@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -50,9 +50,9 @@ debian-12: debian-bookworm
 debian-latest: debian-bookworm
 
 TARGETS_FEDORA = \
-	fedora-36 fedora-37 fedora-38 \
+	fedora-37 fedora-38 fedora-39 \
 	fedora-rawhide
-fedora-latest: fedora-38
+fedora-latest: fedora-39
 
 TARGETS_ROCKY = \
 	rockylinux-8 \
