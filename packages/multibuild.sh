@@ -1,6 +1,6 @@
 #!/bin/bash
 # Multi-platform build system
-# Copyright (C) 2016-2023 Davide Madrisan <davide.madrisan@gmail.com>
+# Copyright (C) 2016-2024 Davide Madrisan <davide.madrisan@gmail.com>
 
 PROGNAME="${0##*/}"
 PROGPATH="${0%/*}"
@@ -33,6 +33,7 @@ Where:
    -u|--uid    : user ID of the user 'developer' used for building the software
 
 Supported distributions:
+   Alpine Linux 17-19
    CentOS 5-8
    CentOS Stream 8, 9
    Debian 9-12
