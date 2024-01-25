@@ -1,3 +1,55 @@
+## Version 32 ("Gematria")
+### Jan 25th, 2024
+
+#### FIXES
+
+##### Build
+
+ * configure: do not silently ignore missing libcurl and libvarlink.
+
+##### Libraries
+
+ * lib/netinfo-private: don't enforce nl_pid.
+   Thanks to [Yuri Konotopov (nE0sIghT)](https://github.com/nE0sIghT) for reporting and solving this problem in containerised environments.
+ * lib/netinfo-private: fix a Clang 17 warning.
+
+##### Plugin check_users
+
+ * check_users: fix an issue related to the Y2038 Unix bug.
+ * check_cpufreq: wrong factor in check_cpufreq for -G.
+   Thanks to [Grischa Zengel (ggzengel)](https://github.com/ggzengel) for the bug report.
+
+#### ENHANCEMENTS / CHANGES
+
+##### Package creation
+
+ * Add Fedora 39 and drop support for Fedora 36.
+ * Add Linux Alpine 3.18 and 3.19 and drop support for Linux Alpine 3.14-3.16.
+ * Add Rocky Linux distribution.
+ * Fix build of debian packages.
+
+##### Test framework
+
+ * Enable systemd library requirement in the GitHub workflow.
+ * Update Linux releases for tests execution in the GitHub workflows.
+
+### GIT DIFF
+```
+ .github/workflows/build-checks.yml          | 17 +++++++----------
+ AUTHORS                                     |  5 +++++
+ README.md                                   | 37 +++++++++++++++++++++----------------
+ configure.ac                                | 22 ++++++++++++++++++++--
+ debian/rules                                |  2 +-
+ lib/netinfo-private.c                       |  4 ++--
+ packages/Makefile.am                        | 35 +++++++++++++++++++++++------------
+ packages/docker-shell-helpers               |  2 +-
+ packages/multibuild.sh                      | 20 +++++++++++++++-----
+ packages/specs/nagios-plugins-linux.spec.in |  8 ++++++--
+ plugins/check_cpufreq.c                     |  2 +-
+ plugins/check_users.c                       | 70 ++++++++++++++++++++++++++++++++++++++++++++++++----------------------
+ 12 files changed, 150 insertions(+), 74 deletions(-)
+```
+
 ## Version 31 ("Counter-intuitive")
 ### Aug 28th, 2022
 
