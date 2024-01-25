@@ -132,7 +132,7 @@ main (int argc, char **argv)
 	case 'H': factor = 1000.0; break;
 	case 'K': factor = 1.0; break;
 	case 'M': factor = 1.0/1000; break;
-	case 'G': factor = 1.0/100000; break;
+	case 'G': factor = 1.0/1000000; break;
 
 	case_GETOPT_HELP_CHAR
 	case_GETOPT_VERSION_CHAR
