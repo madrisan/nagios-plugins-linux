@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014-2022 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2024 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check system memory usage on Linux.
  *
@@ -43,7 +43,7 @@
 #include "xasprintf.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2014-2022 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2014-2024 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "available", no_argument, NULL, 'a'},
@@ -262,7 +262,7 @@ main (int argc, char **argv)
       dpgmajfault = nr_vmem_pgmajfault[1] - nr_vmem_pgmajfault[0];
 
       perfdata_vmem_msg =
-	xasprintf (", vmem_pageins/s=%lu, vmem_pageouts/s=%lu, "
+	xasprintf (" vmem_pageins/s=%lu vmem_pageouts/s=%lu "
 		   "vmem_pgmajfault/s=%lu", dpgpgin, dpgpgout, dpgmajfault);
     }
 
