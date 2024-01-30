@@ -91,13 +91,9 @@ the command `make check` (or `VERBOSE=1 make check`) and, if the llvm tool
 `scan-build` is installed on your system, a `make -C tests check-clang-checker`
 to get a static code analysis report (for developers only).
 
-_Note_: you can also pass the _experimental_ option `--enable-libprocps` to
-`configure` for getting the informations about memory and swap usage through
-the API of the library `libproc-2.so`
-([procps newlib](https://gitlab.com/procps-ng/procps/tree/newlib)).
-This library, as stated in the official notes, is probably not ready for the
-main path of most distributions, but its first version (v4.0.0) has been
-released on 22 March 2022 as a sort of release preview.
+_Note_: you can also pass the option `--enable-libprocps` to `configure` for
+getting the informations about memory and swap usage through the API of the
+library `libproc2.so` [procps](https://gitlab.com/procps-ng/procps/)).
 
 ## Supported Platforms and Linux distributions
 

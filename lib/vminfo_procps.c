@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2017 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2017,2024 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A library for checking memory and swap usage on linux.
  * This library is a front-end for `procps-newlib':
@@ -23,7 +23,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
-#include <procps/vmstat.h>
+#include <libproc2/vmstat.h>
 
 typedef struct proc_vmem
 {
