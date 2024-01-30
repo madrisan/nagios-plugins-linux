@@ -29,7 +29,7 @@ Contributors:
                            Bug report and patch for fixing check_network
                            when run in a containerized environment
    ggzengel              - https://github.com/ggzengel
-                           Bug report (issues#137)
+                           Bug reports (issues#137, issues#140)
 
 Some code and coding styles/ideas belong to the following open source projects:
 
