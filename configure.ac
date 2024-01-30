@@ -379,18 +379,18 @@ AM_CONDITIONAL(HAVE_LIBVARLINK, [test "$have_libvarlink" = "yes"])
 dnl Check for the procps newlib
 have_libprocps=no
 AC_ARG_ENABLE([libprocps],
-  AS_HELP_STRING([--enable-libprocps], [enable optional LIBPROCPS >= 4.0.0 support]),
+  AS_HELP_STRING([--enable-libprocps], [enable optional LIBPROC2 support]),
     [enable_libprocps=$enableval],[enable_libprocps=no])
 AS_IF([test "x$enable_libprocps" = "xyes"], [
-  PKG_CHECK_EXISTS([libprocps],
-    [PKG_CHECK_MODULES(LIBPROCPS, [libprocps >= 4.0.0],
-      [AC_DEFINE(HAVE_LIBPROCPS, 1, [Define if libprocps >= 4.0.0 is available])
+  PKG_CHECK_EXISTS([libproc2],
+    [PKG_CHECK_MODULES(LIBPROCPS, [libproc2 >= 4.0.0],
+      [AC_DEFINE(HAVE_LIBPROCPS, 1, [Define if libproc2 (procps) is available])
        have_libprocps=yes],
-      AC_MSG_ERROR([*** libprocps version >= 4.0.0 not found]))])
+      AC_MSG_ERROR([*** libproc2 (procps) version >= 4.0.0 not found]))])
   AC_SUBST(LIBPROCPS_LIBS)
   AC_SUBST(LIBPROCPS_CFLAGS)
   AS_IF([test "x$have_libprocps" = "xno" -a "x$enable_libprocps" = "xyes"],
-        [AC_MSG_ERROR([*** LIBPROCPS >= 4.0.0 support requested, but libraries not found])])
+        [AC_MSG_ERROR([*** libproc2 (procps) >= 4.0.0 support requested, but libraries not found])])
 ])
 AM_CONDITIONAL(HAVE_LIBPROCPS, [test "$have_libprocps" = "yes"])
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2017 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2017,2014 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A library for checking memory and swap usage on linux.
  * This library is a front-end for `procps-newlib':
@@ -23,7 +23,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
-#include <procps/meminfo.h>
+#include <libproc2/meminfo.h>
 
 typedef struct proc_sysmem
 {
