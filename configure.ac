@@ -337,7 +337,7 @@ AC_CHECK_DECLS([CPU_ALLOC], [], [],
 
 dnl Check for libcurl
 AC_ARG_ENABLE([libcurl],
-  AS_HELP_STRING([--enable-libcurl], [Enable libcurl]))
+  AS_HELP_STRING([--enable-libcurl], [enable libcurl]))
 AS_IF([test "x$enable_libcurl" = "xyes"], [
   LIBCURL_CHECK_CONFIG([], [7.40.0], [],
     [AC_MSG_ERROR([Missing required libcurl >= 7.40.0])])
@@ -346,27 +346,9 @@ AS_IF([test "x$enable_libcurl" = "xyes"], [
   AM_CONDITIONAL(HAVE_LIBCURL, [test "$libcurl_cv_lib_curl_usable" = "yes"])
 ], [AM_CONDITIONAL(HAVE_LIBCURL, false)])
 
-dnl Check for systemd-login libraries
-AC_ARG_WITH([systemd],
-  AS_HELP_STRING([--without-systemd], [do not build with systemd support]),
-  [], [with_systemd=check]
-)
-have_systemd=no
-AS_IF([test "x$with_systemd" != "xno"], [
-  PKG_CHECK_MODULES([SYSTEMD], [libsystemd], [have_systemd=yes], [have_systemd=no])
-  AS_CASE([$with_systemd:$have_systemd],
-    [yes:no],
-      [AC_MSG_ERROR([systemd expected but libsystemd not found])],
-    [*:yes],
-       AC_DEFINE([HAVE_LIBSYSTEMD], [1], [Define if libsystemd is available])
-       AC_DEFINE([USE_SYSTEMD], [1], [Define if systemd support is wanted ])
-  )
-])
-AM_CONDITIONAL([HAVE_SYSTEMD], [test "x$have_systemd" = "xyes"])
-
 dnl Check for libvarlink
 AC_ARG_ENABLE([libvarlink],
-  AS_HELP_STRING([--enable-libvarlink], [Enable libvarlink]))
+  AS_HELP_STRING([--enable-libvarlink], [enable libvarlink]))
 AS_IF([test "x$enable_libvarlink" = "xyes"], [
   PKG_CHECK_EXISTS([libvarlink],
     [PKG_CHECK_MODULES(LIBVARLINK, [libvarlink >= 18],
@@ -393,6 +375,24 @@ AS_IF([test "x$enable_libprocps" = "xyes"], [
         [AC_MSG_ERROR([*** libproc2 (procps) >= 4.0.0 support requested, but libraries not found])])
 ])
 AM_CONDITIONAL(HAVE_LIBPROCPS, [test "$have_libprocps" = "yes"])
+
+dnl Check for systemd-login libraries
+AC_ARG_ENABLE([systemd],
+  AS_HELP_STRING([--enable-systemd], [enable systemd related features]),
+  [], [enable_systemd=check]
+)
+have_systemd=no
+AS_IF([test "x$enable_systemd" != "xno"], [
+  PKG_CHECK_MODULES([SYSTEMD], [libsystemd], [have_systemd=yes], [have_systemd=no])
+  AS_CASE([$enable_systemd:$have_systemd],
+    [yes:no],
+      [AC_MSG_ERROR([systemd expected but libsystemd not found])],
+    [*:yes],
+       AC_DEFINE([HAVE_LIBSYSTEMD], [1], [Define if libsystemd is available])
+       AC_DEFINE([USE_SYSTEMD], [1], [Define if systemd support is wanted])
+  )
+])
+AM_CONDITIONAL([HAVE_SYSTEMD], [test "x$have_systemd" = "xyes"])
 
 dnl Add the option '--with-proc-meminfo=PATH'
 AC_ARG_WITH(proc-meminfo,
@@ -603,4 +603,10 @@ if test "$have_libvarlink" = "yes"; then
   echo "  LIBVARLINK_LIBS    = -lvarlink"
   echo "  VARLINK_ADDRESS    = $VARLINK_ADDRESS"
   echo
+fi
+
+if test "$have_systemd" = "yes"; then
+  echo "Optional systemd library support is enabled:"
+  echo "  SYSTEMD_CFLAGS    = $SYSTEMD_CFLAGS"
+  echo "  SYSTEMD_LIBS      = $SYSTEMD_LIBS"
 fi
