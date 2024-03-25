@@ -36,11 +36,11 @@ static int
 test_agetoint64 (const void *tdata)
 {
   const struct test_data *data = tdata;
-  int64_t result;
+  long long int result;
   char *errmegs;
   int ret = 0;
 
-  agetoint64 (data->age, &result, &errmegs);
+  agetollint (data->age, &result, &errmegs);
   TEST_ASSERT_EQUAL_NUMERIC (result, data->expect_value);
   return ret;
 }
@@ -57,7 +57,7 @@ mymain (void)
         .age = AGE,                                             \
         .expect_value = EXPECT_VALUE,                           \
       };                                                        \
-      if (test_run("check function agetoint64 with arg " AGE,   \
+      if (test_run("check function agetollint with arg " AGE,   \
                    test_agetoint64, (&data)) < 0)               \
         ret = -1;                                               \
     }                                                           \

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2022 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2022,2024 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that returns the number of files found in one or more
  * directories.
@@ -152,7 +152,7 @@ main (int argc, char **argv)
   char *bp, *critical = NULL, *warning = NULL,
        *errmesg_fage = NULL, *errmesg_fsize = NULL,
        *pattern = NULL;
-  int64_t fileage = 0, filesize = 0;
+  long long int fileage = 0, filesize = 0;
   size_t size;
   unsigned int filecount_flags = FILES_DEFAULT;
   FILE *perfdata;
@@ -188,14 +188,14 @@ main (int argc, char **argv)
 	  filecount_flags |= FILES_RECURSIVE;
 	  break;
 	case 's':
-	  ret = sizetoint64 (optarg, &filesize, &errmesg_fsize);
+	  ret = sizetollint (optarg, &filesize, &errmesg_fsize);
 	  if (ret < 0)
 	    plugin_error (STATE_UNKNOWN, errno
 			  , "failed to parse file size argument: %s"
 			  , errmesg_fsize);
 	  break;
 	case 't':
-	  ret = agetoint64 (optarg, &fileage, &errmesg_fage);
+	  ret = agetollint (optarg, &fileage, &errmesg_fage);
 	  if (ret < 0)
 	    plugin_error (STATE_UNKNOWN, errno
 			  , "failed to parse file size argument: %s"
@@ -235,7 +235,7 @@ main (int argc, char **argv)
 	     , (fileage < 0) ? "less than" : "more than"
 	     , (fileage < 0) ? (unsigned int)(-fileage) : (unsigned int)fileage);
       if (filesize != 0)
-	dbg ("looking for files with size %s than %ld bytes...\n"
+	dbg ("looking for files with size %s than %lld bytes...\n"
 	     , (filesize < 0) ? "less" : "greater"
 	     , (filesize < 0) ? -filesize : filesize);
       if (pattern != NULL)
