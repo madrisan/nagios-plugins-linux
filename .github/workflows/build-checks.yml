@@ -22,6 +22,7 @@ jobs:
           - 'debian:12'
           - 'fedora:38'
           - 'fedora:39'
+          - 'gentoo/stage3:latest'
           - 'ubuntu:20.04'
           - 'ubuntu:22.04'
 
@@ -40,6 +41,9 @@ jobs:
               apt-get update -q
               apt-get install -q -y --no-install-recommends autoconf automake bzip2 gcc libcurl4-gnutls-dev libsystemd-dev libtool m4 make pkg-config xz-utils
             ;;
+            gentoo*)
+              :
+            ;;
             fedora*)
               dnf -y update
               dnf -y install autoconf automake bzip2 diffutils gcc glibc-devel libcurl-devel libvarlink-devel libtool make m4 systemd-devel xz
@@ -50,7 +54,7 @@ jobs:
         run: |
           autoreconf --install
           case "${{ matrix.container }}" in
-            alpine*|debian*|ubuntu*)
+            alpine*|debian*|gentoo*|ubuntu*)
               ./configure --enable-libcurl --enable-debug
             ;;
             # libvarlink is only available in Fedora
