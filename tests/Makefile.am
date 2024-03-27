@@ -59,8 +59,8 @@ test_programs = \
 	tslibperfdata \
 	tslibpressure \
 	tsliburlencode \
-	tslibxstrton_agetoint64 \
-	tslibxstrton_sizetoint64
+	tslibxstrton_agetollint \
+	tslibxstrton_sizetollint
 if !HAVE_LIBPROCPS
 test_programs += \
 	tslibvminfo
@@ -122,10 +122,10 @@ tslibpressure_LDADD = $(LDADDS)
 tsliburlencode_SOURCES = $(test_utils) tsliburlencode.c
 tsliburlencode_LDADD = $(LDADDS)
 
-tslibxstrton_agetoint64_SOURCES = $(test_utils) tslibxstrton_agetoint64.c
-tslibxstrton_agetoint64_LDADD = $(LDADDS)
-tslibxstrton_sizetoint64_SOURCES = $(test_utils) tslibxstrton_sizetoint64.c
-tslibxstrton_sizetoint64_LDADD = $(LDADDS)
+tslibxstrton_agetollint_SOURCES = $(test_utils) tslibxstrton_agetollint.c
+tslibxstrton_agetollint_LDADD = $(LDADDS)
+tslibxstrton_sizetollint_SOURCES = $(test_utils) tslibxstrton_sizetollint.c
+tslibxstrton_sizetollint_LDADD = $(LDADDS)
 
 tslibvminfo_SOURCES = $(test_utils) tslibvminfo.c
 tslibvminfo_LDADD = $(LDADDS)

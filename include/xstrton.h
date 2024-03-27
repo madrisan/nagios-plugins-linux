@@ -24,8 +24,8 @@ extern "C"
 {
 #endif
 
-  int agetoint64 (const char *str, int64_t *age, char **errmesg);
-  int sizetoint64 (const char *str, int64_t *size, char **errmesg);
+  int agetollint (const char *str, long long int *age, char **errmesg);
+  int sizetollint (const char *str, long long int *size, char **errmesg);
   long strtol_or_err (const char *str, const char *errmesg);
 
 #ifdef __cplusplus

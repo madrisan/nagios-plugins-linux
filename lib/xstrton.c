@@ -23,7 +23,7 @@
 #include "xasprintf.h"
 
 static int
-agemultiplier (double age, char mult, int64_t *result)
+agemultiplier (double age, char mult, long long int *result)
 {
   double temp = age;
 
@@ -63,12 +63,12 @@ agemultiplier (double age, char mult, int64_t *result)
       return -1;
     }
 
-  *result = (int64_t) temp;
+  *result = (long long int) temp;
   return 0;
 }
 
 static int
-sizemultiplier (double size, char mult, int64_t *result)
+sizemultiplier (double size, char mult, long long int *result)
 {
   double temp = size;
 
@@ -108,13 +108,13 @@ sizemultiplier (double size, char mult, int64_t *result)
       return -1;
     }
 
-  *result = (int64_t) temp;
+  *result = (long long int) temp;
   return 0;
 }
 
 static int
-strtoint64 (const char *str, int64_t *result,
-	    int (*converter) (double, char, int64_t *), char **errmesg)
+strtollint (const char *str, long long int *result,
+	    int (*converter) (double, char, long long int *), char **errmesg)
 {
   if (str != NULL && *str != '\0')
     {
@@ -153,9 +153,9 @@ strtoint64 (const char *str, int64_t *result,
  * return 0 on success, -1 otherwise (in this case errmesg will provide a
  * human readable error message)  */
 int
-agetoint64 (const char *str, int64_t * age, char **errmesg)
+agetollint (const char *str, long long int * age, char **errmesg)
 {
-  return strtoint64 (str, age, agemultiplier, errmesg);
+  return strtollint (str, age, agemultiplier, errmesg);
 }
 
 /* convert a string with an optional prefix b (byte), k (kilobyte),
@@ -163,9 +163,9 @@ agetoint64 (const char *str, int64_t * age, char **errmesg)
  * return 0 on success, -1 otherwise (in this case errmesg will provide a
  * human readable error message)  */
 int
-sizetoint64 (const char *str, int64_t *size, char **errmesg)
+sizetollint (const char *str, long long int *size, char **errmesg)
 {
-  return strtoint64 (str, size, sizemultiplier, errmesg);
+  return strtollint (str, size, sizemultiplier, errmesg);
 }
 
 /* same as strtol(3) but exit on failure instead of returning crap */

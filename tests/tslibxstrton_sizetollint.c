@@ -36,11 +36,11 @@ static int
 test_sizetoint64 (const void *tdata)
 {
   const struct test_data *data = tdata;
-  int64_t result;
+  long long int result;
   char *errmegs;
   int ret = 0;
 
-  sizetoint64 (data->size, &result, &errmegs);
+  sizetollint (data->size, &result, &errmegs);
   TEST_ASSERT_EQUAL_NUMERIC (result, data->expect_value);
   return ret;
 }
