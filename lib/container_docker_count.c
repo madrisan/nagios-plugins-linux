@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2018 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2018,2024 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A library for checking for Docker exposed metrics.
  *
@@ -210,7 +210,7 @@ docker_running_containers (unsigned int *count, const char *image,
 #endif /* NPL_TESTING */
 
   assert (chunk.memory);
-  dbg ("%lu bytes retrieved\n", chunk.size);
+  dbg ("%zu bytes retrieved\n", chunk.size);
   dbg ("json data: %s", chunk.memory);
 
   hashtable = docker_json_parser (chunk.memory, "Image", 1);

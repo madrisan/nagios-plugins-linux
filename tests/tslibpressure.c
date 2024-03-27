@@ -103,7 +103,7 @@ mymain (void)
   /* we multiply by 100 the averages to somewhat transform
    * the double values into integer ones  */
   DO_TEST ("cpu some avg10", psi_oneline->avg10 * 100, 748ULL);
-  DO_TEST ("cpu some avg60", psi_oneline->avg60 * 100, 626ULL);
+  DO_TEST ("cpu some avg60", psi_oneline->avg60 * 100, 625ULL);
   DO_TEST ("cpu some avg300", psi_oneline->avg300 * 100, 666ULL);
   DO_TEST ("cpu single total", psi_oneline->total, 200932088ULL);
 

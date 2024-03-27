@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2022 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2022,2024 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * Unit test for lib/xstrton.c
  *
@@ -29,11 +29,11 @@
 typedef struct test_data
 {
   char *size;
-  int64_t expect_value;
+  long long int expect_value;
 } test_data;
 
 static int
-test_sizetoint64 (const void *tdata)
+test_sizetollint (const void *tdata)
 {
   const struct test_data *data = tdata;
   long long int result;
@@ -57,19 +57,19 @@ mymain (void)
         .size = SIZE,                                             \
         .expect_value = EXPECT_VALUE,                             \
       };                                                          \
-      if (test_run("check function sizetoint64 with arg " SIZE,   \
-                   test_sizetoint64, (&data)) < 0)                \
+      if (test_run("check function sizetollint with arg " SIZE,   \
+                   test_sizetollint, (&data)) < 0)                \
         ret = -1;                                                 \
     }                                                             \
   while (0)
 
   /* test the function sizetoint64() */
 
-#define ONE_KILOBYTE 1000UL
-#define ONE_MEGABYTE (1000UL * ONE_KILOBYTE)
-#define ONE_GIGABYTE (1000UL * ONE_MEGABYTE)
-#define ONE_TERABYTE (1000UL * ONE_GIGABYTE)
-#define ONE_PETABYTE (1000UL * ONE_TERABYTE)
+#define ONE_KILOBYTE 1000ULL
+#define ONE_MEGABYTE (1000ULL * ONE_KILOBYTE)
+#define ONE_GIGABYTE (1000ULL * ONE_MEGABYTE)
+#define ONE_TERABYTE (1000ULL * ONE_GIGABYTE)
+#define ONE_PETABYTE (1000ULL * ONE_TERABYTE)
 
   DO_TEST ("1024b", 1024);
   DO_TEST ("8k", 8 * ONE_KILOBYTE);
