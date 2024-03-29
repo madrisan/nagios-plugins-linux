@@ -3,7 +3,7 @@
  * License: GPLv3+
  * Copyright (c) 2018,2024 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * Unit test for lib/container_docker_count.c
+ * Unit test for lib/container_count.c
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 
-#include "container_docker.h"
+#include "container.h"
 #include "testutils.h"
 
 #define NPL_TESTING
@@ -30,7 +30,7 @@
 static int docker_get (chunk_t * chunk, const int query);
 static void docker_close (chunk_t * chunk);
 
-#include "../lib/container_docker_count.c"
+#include "../lib/container_count.c"
 
 static int
 docker_get (chunk_t *chunk, const int query)
@@ -113,11 +113,11 @@ mymain (void)
     }                                                                \
   while (0)
 
-  DO_TEST ("check running docker containers with image set", "nginx",
+  DO_TEST ("check running containers with image set", "nginx",
 	   "containers_nginx=3", 3);
-  DO_TEST ("check running docker containers with image set", "redis",
+  DO_TEST ("check running containers with image set", "redis",
 	   "containers_redis=1", 1);
-  DO_TEST ("check running docker containers", NULL,
+  DO_TEST ("check running containers", NULL,
 	   "containers_redis=1 containers_nginx=3 containers_total=4", 4);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

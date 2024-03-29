@@ -55,7 +55,7 @@ libutils_a_SOURCES =  \
 
 if HAVE_LIBCURL
   libutils_a_SOURCES += \
-	container_docker_count.c
+	container_count.c
 endif
 
 if HAVE_LIBPROCPS

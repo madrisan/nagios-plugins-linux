@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 
-#include "container_docker.h"
+#include "container.h"
 #include "testutils.h"
 
 struct docker_memory_desc *dockermem = NULL;

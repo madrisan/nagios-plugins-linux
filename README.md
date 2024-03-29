@@ -16,10 +16,10 @@
 Here is the list of the available plugins:
 
 * **check_clock** - returns the number of seconds elapsed between local time and Nagios server time
+* **check_container** - checks the number of running docker/podman containers (:warning: *pre-alpha*, requires *libcurl* version 7.40.0+)
 * **check_cpu** - checks the CPU (user mode) utilization
 * **check_cpufreq** - displays the CPU frequency characteristics
 * **check_cswch** - checks the total number of context switches across all CPUs
-* **check_docker** - checks the number of running docker or podman containers (:warning: *pre-alpha*, requires *libcurl* version 7.40.0+)
 * **check_fc** - monitors the status of the fiber status ports
 * **check_filecount** - checks the number of files found in one or more directories :new:
 * **check_ifmountfs** - checks whether the given filesystems are mounted
@@ -155,7 +155,7 @@ The plugins are available [in the Gentoo tree](https://packages.gentoo.org/packa
 ```
 emerge -av net-analyzer/nagios-plugins-linux-madrisan
 ```
-The USE flag `curl` is required to build `check_docker`.
+The USE flag `curl` is required to build `check_container`.
 
 ## Bugs
 

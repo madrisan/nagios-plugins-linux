@@ -28,7 +28,7 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "container_docker.h"
+#include "container.h"
 #include "logging.h"
 #include "messages.h"
 #include "progname.h"

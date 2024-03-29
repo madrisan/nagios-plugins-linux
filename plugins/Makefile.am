@@ -60,7 +60,7 @@ libexec_PROGRAMS += \
 endif
 if HAVE_LIBCURL
 libexec_PROGRAMS += \
-	check_docker
+	check_container
 endif
 if HAVE_PROC_MEMINFO
 libexec_PROGRAMS += \
@@ -80,7 +80,7 @@ if HAVE_GETLOADAVG
 check_load_SOURCES       = check_load.c
 endif
 if HAVE_LIBCURL
-check_docker_SOURCES     = check_docker.c
+check_container_SOURCES  = check_container.c
 endif
 if HAVE_PROC_MEMINFO
 check_memory_SOURCES     = check_memory.c
@@ -113,7 +113,7 @@ if HAVE_GETLOADAVG
 check_load_LDADD         = $(LDADD)
 endif
 if HAVE_LIBCURL
-check_docker_LDADD       = $(LDADD) $(LIBCURL) -lm
+check_container_LDADD    = $(LDADD) $(LIBCURL) -lm
 endif
 if HAVE_PROC_MEMINFO
 check_memory_LDADD       = $(LDADD) $(LIBPROCPS_LIBS)

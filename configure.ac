@@ -580,7 +580,7 @@ if test "$have_libprocps" = "yes"; then
 fi
 
 if test "$libcurl_cv_lib_curl_usable" = "yes"; then
-  echo "Optional curl library support is enabled (required by check_docker):"
+  echo "Optional curl library support is enabled (required by check_container):"
   echo "  LIBCURL_CPPFLAGS   = $LIBCURL_CPPFLAGS"
   echo "  LIBCURL            = $LIBCURL"
   echo

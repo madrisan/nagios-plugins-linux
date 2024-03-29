@@ -35,7 +35,7 @@
 
 #include "common.h"
 #include "collection.h"
-#include "container_docker.h"
+#include "container.h"
 #include "json_helpers.h"
 #include "logging.h"
 #include "messages.h"
@@ -177,7 +177,7 @@ docker_close (CURL * curl_handle, chunk_t * chunk)
 /* Returns the number of running Docker containers  */
 
 int
-docker_running_containers (char *socket,  unsigned int *count,
+docker_running_containers (char *socket, unsigned int *count,
 			   const char *image, char **perfdata, bool verbose)
 {
   chunk_t chunk;
