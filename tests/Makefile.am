@@ -46,7 +46,6 @@ AM_LDFLAGS = $(LIBPROCPS_LIBS)
 
 test_programs = \
 	tslibcontainer_count \
-	tslibcontainer_docker_memory \
 	tslibfiles_age \
 	tslibfiles_filecount \
 	tslibfiles_hiddenfile \
@@ -88,8 +87,6 @@ TSLIBS_LDFLAGS = -module -avoid-version \
 
 tslibcontainer_count_SOURCES = $(test_utils) tslibcontainer_count.c
 tslibcontainer_count_LDADD = $(LDADDS)
-tslibcontainer_docker_memory_SOURCES = $(test_utils) tslibcontainer_docker_memory.c
-tslibcontainer_docker_memory_LDADD = $(LDADDS)
 
 tslibfiles_age_SOURCES = $(test_utils) tslibfiles_age.c
 tslibfiles_age_LDADD = $(LDADDS)

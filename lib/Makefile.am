@@ -27,7 +27,6 @@ noinst_LIBRARIES = libutils.a
 
 libutils_a_SOURCES =  \
 	collection.c  \
-	container_docker_memory.c \
 	cpudesc.c     \
 	cpufreq.c     \
 	cpustats.c    \

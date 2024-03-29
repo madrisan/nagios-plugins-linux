@@ -199,75 +199,75 @@ main (int argc, char **argv)
 
   if (check_memory)
     {
-      int err;
-      struct docker_memory_desc *memdesc = NULL;
+//      int err;
+//      struct docker_memory_desc *memdesc = NULL;
 
       /* output in kilobytes by default */
-      if (units == NULL)
-	units = xstrdup ("kB");
+//      if (units == NULL)
+//	units = xstrdup ("kB");
 
-      err = docker_memory_desc_new (&memdesc);
-      if (err < 0)
-	plugin_error (STATE_UNKNOWN, err, "memory exhausted");
+//      err = docker_memory_desc_new (&memdesc);
+//      if (err < 0)
+//	plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
-      long long pgfault[2];
-      long long pgmajfault[2];
-      long long pgpgin[2];
-      long long pgpgout[2];
+//      long long pgfault[2];
+//      long long pgmajfault[2];
+//      long long pgpgin[2];
+//      long long pgpgout[2];
 
-      docker_memory_desc_read (memdesc);
+//      docker_memory_desc_read (memdesc);
 
-      long long kb_total_cache =
-	docker_memory_get_total_cache (memdesc) / 1024;
-      long long kb_total_rss = docker_memory_get_total_rss (memdesc) / 1024;
-      long long kb_total_swap = docker_memory_get_total_swap (memdesc) / 1024;
-      long long kb_total_unevictable =
-	docker_memory_get_total_unevictable (memdesc) / 1024;
-      long long kb_memory_used_total =
-	kb_total_cache + kb_total_rss + kb_total_swap;
+//      long long kb_total_cache =
+//	docker_memory_get_total_cache (memdesc) / 1024;
+//      long long kb_total_rss = docker_memory_get_total_rss (memdesc) / 1024;
+//      long long kb_total_swap = docker_memory_get_total_swap (memdesc) / 1024;
+//      long long kb_total_unevictable =
+//	docker_memory_get_total_unevictable (memdesc) / 1024;
+//      long long kb_memory_used_total =
+//	kb_total_cache + kb_total_rss + kb_total_swap;
 
-      pgfault[0] = docker_memory_get_total_pgfault (memdesc);
-      pgmajfault[0] = docker_memory_get_total_pgmajfault (memdesc);
-      pgpgin[0] = docker_memory_get_total_pgpgin (memdesc);
-      pgpgout[0] = docker_memory_get_total_pgpgout (memdesc);
+//      pgfault[0] = docker_memory_get_total_pgfault (memdesc);
+//      pgmajfault[0] = docker_memory_get_total_pgmajfault (memdesc);
+//      pgpgin[0] = docker_memory_get_total_pgpgin (memdesc);
+//      pgpgout[0] = docker_memory_get_total_pgpgout (memdesc);
 
-      sleep (delay);
+//      sleep (delay);
 
-      docker_memory_desc_read (memdesc);
-      pgfault[1] = docker_memory_get_total_pgfault (memdesc);
-      pgmajfault[1] = docker_memory_get_total_pgmajfault (memdesc);
-      pgpgin[1] = docker_memory_get_total_pgpgin (memdesc);
-      pgpgout[1] = docker_memory_get_total_pgpgout (memdesc);
+//      docker_memory_desc_read (memdesc);
+//      pgfault[1] = docker_memory_get_total_pgfault (memdesc);
+//      pgmajfault[1] = docker_memory_get_total_pgmajfault (memdesc);
+//      pgpgin[1] = docker_memory_get_total_pgpgin (memdesc);
+//      pgpgout[1] = docker_memory_get_total_pgpgout (memdesc);
 
 #define __dbg__(arg) \
 	dbg ("delta (%lu sec) for %s: %lld == (%lld-%lld)\n", \
 	     delay, #arg, arg[1]-arg[0], arg[1], arg[0])
-      __dbg__ (pgfault);
-      __dbg__ (pgmajfault);
-      __dbg__ (pgpgin);
-      __dbg__ (pgpgout);
+//      __dbg__ (pgfault);
+//      __dbg__ (pgmajfault);
+//      __dbg__ (pgpgin);
+//      __dbg__ (pgpgout);
 #undef dbg__
 
-      status = get_status (UNIT_CONVERT (kb_memory_used_total, shift),
-			   my_threshold);
-      status_msg =
-	xasprintf ("%s: %llu %s memory used", state_text (status),
-		   UNIT_STR (kb_memory_used_total));
-
-      perfdata_msg =
-	xasprintf ("cache=%llu%s rss=%llu%s swap=%llu%s unevictable=%llu%s "
-		   "pgfault=%lld pgmajfault=%lld "
-		   "pgpgin=%lld pgpgout=%lld"
-		   , UNIT_STR (kb_total_cache)
-		   , UNIT_STR (kb_total_rss)
-		   , UNIT_STR (kb_total_swap)
-		   , UNIT_STR (kb_total_unevictable)
-		   , pgfault[1] - pgfault[0]
-		   , pgmajfault[1] - pgmajfault[0]
-		   , pgpgin[1] - pgpgin[0]
-		   , pgpgout[1] - pgpgout[0]);
-
-      docker_memory_desc_unref (memdesc);
+//      status = get_status (UNIT_CONVERT (kb_memory_used_total, shift),
+//			   my_threshold);
+//      status_msg =
+//	xasprintf ("%s: %llu %s memory used", state_text (status),
+//		   UNIT_STR (kb_memory_used_total));
+//
+//      perfdata_msg =
+//	xasprintf ("cache=%llu%s rss=%llu%s swap=%llu%s unevictable=%llu%s "
+//		   "pgfault=%lld pgmajfault=%lld "
+//		   "pgpgin=%lld pgpgout=%lld"
+//		   , UNIT_STR (kb_total_cache)
+//		   , UNIT_STR (kb_total_rss)
+//		   , UNIT_STR (kb_total_swap)
+//		   , UNIT_STR (kb_total_unevictable)
+//		   , pgfault[1] - pgfault[0]
+//		   , pgmajfault[1] - pgmajfault[0]
+//		   , pgpgin[1] - pgpgin[0]
+//		   , pgpgout[1] - pgpgout[0]);
+//
+//      docker_memory_desc_unref (memdesc);
     }
   else
     {
