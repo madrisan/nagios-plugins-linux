@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-## Copyright (c) 2014-2016 Davide Madrisan <davide.madrisan@gmail.com>
+## Copyright (c) 2014-2024 Davide Madrisan <davide.madrisan@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ noinst_HEADERS = \
 	collection.h \
 	common.h \
 	container_docker.h \
-	container_podman.h \
 	cpudesc.h \
 	cpufreq.h \
 	cpustats.h \

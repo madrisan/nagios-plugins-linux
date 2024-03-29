@@ -1,1 +1,0 @@
-{"container":{"block_input":20594688,"block_output":24576,"cpu":2.241186151818685828849e-09,"cpu_nano":35548000,"id":"fced2dbe15a84cfc6da72d9dd7e3bd104469862f173e42fc08588392740d6122","mem_limit":8232517632,"mem_perc":1.120458213675162573164e-01,"mem_usage":9224192,"name":"web-server-1","net_input":1118,"net_output":7222,"pids":2,"system_nano":1586124381999834484}}

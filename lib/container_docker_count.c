@@ -22,10 +22,6 @@
 #define _GNU_SOURCE		/* activate extra prototypes for glibc */
 #endif
 
-#ifndef NPL_TESTING
-static const char *docker_socket = DOCKER_SOCKET;
-#endif
-
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -107,7 +103,7 @@ write_memory_callback (void *contents, size_t size, size_t nmemb, void *userp)
 }
 
 static void
-docker_init (CURL ** curl_handle, chunk_t * chunk)
+docker_init (CURL ** curl_handle, chunk_t * chunk, char * socket)
 {
   chunk->memory = malloc (1);	/* will be grown as needed by the realloc above */
   chunk->size = 0;		/* no data at this point */
@@ -120,8 +116,8 @@ docker_init (CURL ** curl_handle, chunk_t * chunk)
     plugin_error (STATE_UNKNOWN, errno,
 		  "cannot start a libcurl easy session");
 
-  curl_easy_setopt (*curl_handle, CURLOPT_UNIX_SOCKET_PATH, docker_socket);
-  dbg ("CURLOPT_UNIX_SOCKET_PATH is set to \"%s\"\n", docker_socket);
+  curl_easy_setopt (*curl_handle, CURLOPT_UNIX_SOCKET_PATH, socket);
+  dbg ("CURLOPT_UNIX_SOCKET_PATH is set to \"%s\"\n", socket);
 
   /* send all data to this function */
   curl_easy_setopt (*curl_handle, CURLOPT_WRITEFUNCTION,
@@ -181,8 +177,8 @@ docker_close (CURL * curl_handle, chunk_t * chunk)
 /* Returns the number of running Docker containers  */
 
 int
-docker_running_containers (unsigned int *count, const char *image,
-			   char **perfdata, bool verbose)
+docker_running_containers (char *socket,  unsigned int *count,
+			   const char *image, char **perfdata, bool verbose)
 {
   chunk_t chunk;
   hashtable_t *hashtable;
@@ -193,7 +189,7 @@ docker_running_containers (unsigned int *count, const char *image,
   CURL *curl_handle = NULL;
   CURLcode res;
 
-  docker_init (&curl_handle, &chunk);
+  docker_init (&curl_handle, &chunk, socket);
   res = docker_get (curl_handle, DOCKER_CONTAINERS_JSON);
   if (CURLE_OK != res)
     {

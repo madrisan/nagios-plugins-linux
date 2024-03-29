@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2018 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2018,2024 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * Unit test for lib/container_docker_count.c
  *
@@ -33,18 +33,18 @@ static void docker_close (chunk_t * chunk);
 #include "../lib/container_docker_count.c"
 
 static int
-docker_get (chunk_t * chunk, const int query)
+docker_get (chunk_t *chunk, const int query)
 {
   char *filename = NULL;
 
   switch (query)
     {
-      default:
-	return EXIT_AM_HARDFAIL;
-	break;
-      case DOCKER_CONTAINERS_JSON:
-	filename = NPL_TEST_PATH_CONTAINER_JSON;
-	break;
+    default:
+      return EXIT_AM_HARDFAIL;
+      break;
+    case DOCKER_CONTAINERS_JSON:
+      filename = NPL_TEST_PATH_CONTAINER_JSON;
+      break;
     }
 
   chunk->memory = test_fstringify (filename);
@@ -57,16 +57,17 @@ docker_get (chunk_t * chunk, const int query)
 }
 
 static void
-docker_close (chunk_t * chunk)
+docker_close (chunk_t *chunk)
 {
   free (chunk->memory);
 }
+
 #undef NPL_TESTING
 
 typedef struct test_data
 {
-  char * image;
-  char * perfdata;
+  char *image;
+  char *perfdata;
   unsigned int expect_value;
 } test_data;
 
@@ -75,10 +76,12 @@ test_docker_running_containers (const void *tdata)
 {
   const struct test_data *data = tdata;
   int err, ret = 0;
-  char * perfdata = NULL;
+  char *perfdata = NULL;
   unsigned int containers;
 
-  err = docker_running_containers (&containers, data->image, &perfdata, false);
+  err =
+    docker_running_containers (NULL, &containers, data->image, &perfdata,
+			       false);
   if (err != 0)
     {
       free (perfdata);
