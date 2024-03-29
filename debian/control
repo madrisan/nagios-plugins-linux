@@ -50,13 +50,13 @@ Description: Linux plugins for nagios compatible monitoring systems
 Package: nagios-plugins-linux-experimental
 Architecture: any
 Depends: ${misc:Depends},
-         nagios-plugins-linux-docker
+         nagios-plugins-linux-container
 Suggests: nagios3 | icinga | icinga2
 Description: Linux plugins for nagios compatible monitoring systems
  Experimental plugins for nagios compatible monitoring systems like Naemon and
  Icinga. It contains the following plugins:
  .
-  check_docker
+  check_container
  .
  This package provides some experimental plugins that are most likely to be
  useful on a central monitoring host.
@@ -98,14 +98,14 @@ Description: Linux plugins for nagios compatible monitoring systems
  .
  This plugin monitors the total number of context switches per second across all CPUs.
 
-Package: nagios-plugins-linux-docker
+Package: nagios-plugins-linux-container
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: nagios3 | icinga | icinga2
 Description: Linux plugins for nagios compatible monitoring systems
  A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
  .
- This plugin checks the number of running docker containers.
+ This plugin performs basic monitoring for docker and podman containers.
 
 Package: nagios-plugins-linux-fc
 Architecture: any
