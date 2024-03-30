@@ -79,8 +79,7 @@ usage (FILE *out)
 /*
   fputs ("  -M, --memory    return the runtime memory metrics (alpha!)\n", out);  */
   fputs ("  -s, --socket SOCKET   the path of the docker or podman socket, usually\n"
-	 "                         - " DOCKER_SOCKET "\n"
-	 "                         - " PODMAN_SOCKET "\n", out);
+	 "                        " DOCKER_SOCKET " and " PODMAN_SOCKET "\n", out);
 /*
   fputs ("  -b,-k,-m,-g     "
 	 "show output in bytes, KB (the default), MB, or GB\n", out);  */
@@ -92,10 +91,13 @@ usage (FILE *out)
   fputs (USAGE_VERSION, out);
   fprintf (out, "  delay is the delay between updates in seconds "
 	   "(default: %dsec)\n", DELAY_DEFAULT);
+  fprintf (out, "  if no socket is specified, the value of the DOCKER_HOST"
+	   " environment variable will be used\n");
   fputs (USAGE_EXAMPLES, out);
+  fprintf (out, "  export DOCKER_HOST=\"" DOCKER_SOCKET "\"\n");
   fprintf (out, "  %s --socket /run/user/1000/podman/podman.sock\n",
 	   program_name);
-  fprintf (out, "  %s --socket " DOCKER_SOCKET " -w 100 -c 120\n", program_name);
+  fprintf (out, "  %s -w 100 -c 120\n", program_name);
 /*  fprintf (out, "  %s --socket " PODMAN_SOCKET " --image nginx -c 5:\n",
 	   program_name);
   fprintf (out,
@@ -121,7 +123,7 @@ main (int argc, char **argv)
 {
   int c;
 /*  int shift = k_shift;  */
-  bool check_memory = false, verbose = false;
+  bool /* check_memory = false,*/ verbose = false;
   char *image = NULL;
   char *socket = NULL;
   char *critical = NULL, *warning = NULL;
@@ -197,8 +199,8 @@ main (int argc, char **argv)
 		      "too large delay value (greater than %d)", DELAY_MAX);
     }
 
-  if (check_memory && image)
-    usage (stderr);
+/*  if (check_memory && image)
+    usage (stderr);  */
 
   status = set_thresholds (&my_threshold, warning, critical);
   if (status == NP_RANGE_UNPARSEABLE)

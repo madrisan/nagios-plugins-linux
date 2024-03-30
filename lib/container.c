@@ -36,6 +36,7 @@
 #include "common.h"
 #include "collection.h"
 #include "container.h"
+#include "getenv.h"
 #include "json_helpers.h"
 #include "logging.h"
 #include "messages.h"
@@ -119,10 +120,22 @@ write_memory_callback (void *contents, size_t size, size_t nmemb, void *userp)
 }
 
 static void
-docker_init (CURL ** curl_handle, chunk_t * chunk, char * socket)
+docker_init (CURL ** curl_handle, chunk_t * chunk, const char * socket)
 {
   chunk->memory = malloc (1);	/* will be grown as needed by the realloc above */
   chunk->size = 0;		/* no data at this point */
+
+  if (NULL == socket) {
+    const char *env_docker_host = secure_getenv ("DOCKER_HOST");
+    if (env_docker_host)
+      {
+	dbg ("socket set using DOCKER_HOST (\"%s\")\n", env_docker_host);
+	socket = env_docker_host;
+      }
+    else
+      plugin_error (STATE_UNKNOWN, 0,
+		    "unset socket path and DOCKER_HOST env variable");
+  }
 
   curl_global_init (CURL_GLOBAL_ALL);
 
