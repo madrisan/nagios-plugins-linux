@@ -64,6 +64,7 @@ counter_lookup (const hashtable_t * hashtable, const char *key)
 {
   hashable_t *np;
 
+  dbg ("hashtable lookup for key \"%s\"\n", key);
   for (np = hashtable->table[hash (key)]; np != NULL; np = np->next)
     if (STREQ (key, np->key))
       {

@@ -56,7 +56,8 @@
    example:
      "prom/prometheus:v2.39.0"  -->  "prometheus:v2.39.0"
    note that docker just removes the prefix "docker.io/".  */
-const char *image_shortname (const char *image)
+const char *
+image_shortname (const char *image)
 {
   const char *strip = strrchr (image, '/');
   if (NULL == strip)
@@ -73,7 +74,9 @@ const char *image_shortname (const char *image)
    return NULL if the data cannot be parsed.  */
 
 static hashtable_t *
-docker_json_parser (const char *json, const char *token, unsigned long increment)
+docker_json_parser_search (const char *json, const char *token,
+			   const char *(*convert) (const char *),
+			   unsigned long increment)
 {
   size_t i, ntoken;
   hashtable_t *hashtable = NULL;
@@ -91,7 +94,7 @@ docker_json_parser (const char *json, const char *token, unsigned long increment
 
 	  dbg ("found token \"%s\" with value \"%s\" at position %d\n",
 	       token, value, buffer[i].start);
-	  counter_put (hashtable, value, increment);
+	  counter_put (hashtable, convert (value), increment);
 	  free (value);
 	}
     }
@@ -120,22 +123,23 @@ write_memory_callback (void *contents, size_t size, size_t nmemb, void *userp)
 }
 
 static void
-docker_init (CURL ** curl_handle, chunk_t * chunk, const char * socket)
+docker_init (CURL **curl_handle, chunk_t *chunk, const char *socket)
 {
   chunk->memory = malloc (1);	/* will be grown as needed by the realloc above */
   chunk->size = 0;		/* no data at this point */
 
-  if (NULL == socket) {
-    const char *env_docker_host = secure_getenv ("DOCKER_HOST");
-    if (env_docker_host)
-      {
-	dbg ("socket set using DOCKER_HOST (\"%s\")\n", env_docker_host);
-	socket = env_docker_host;
-      }
-    else
-      plugin_error (STATE_UNKNOWN, 0,
-		    "unset socket path and DOCKER_HOST env variable");
-  }
+  if (NULL == socket)
+    {
+      const char *env_docker_host = secure_getenv ("DOCKER_HOST");
+      if (env_docker_host)
+	{
+	  dbg ("socket set using DOCKER_HOST (\"%s\")\n", env_docker_host);
+	  socket = env_docker_host;
+	}
+      else
+	plugin_error (STATE_UNKNOWN, 0,
+		      "unset socket path and DOCKER_HOST env variable");
+    }
 
   curl_global_init (CURL_GLOBAL_ALL);
 
@@ -159,7 +163,7 @@ docker_init (CURL ** curl_handle, chunk_t * chunk, const char * socket)
 }
 
 static CURLcode
-docker_get (CURL * curl_handle, const int query)
+docker_get (CURL *curl_handle, const int query)
 {
   CURLcode res;
   char *api_version, *class, *url, *filter = NULL;
@@ -173,15 +177,15 @@ docker_get (CURL * curl_handle, const int query)
 
   switch (query)
     {
-      default:
-	plugin_error (STATE_UNKNOWN, 0, "unknown docker query");
-      case DOCKER_CONTAINERS_JSON:
-	filter = url_encode ("{\"status\":{\"running\":true}}");
-	class = "containers/json";
-	url = filter ?
-	  xasprintf ("http://v%s/%s?filters=%s", api_version, class, filter) :
-	  xasprintf ("http://v%s/%s", api_version, class);
-	break;
+    default:
+      plugin_error (STATE_UNKNOWN, 0, "unknown docker query");
+    case DOCKER_CONTAINERS_JSON:
+      filter = url_encode ("{\"status\":{\"running\":true}}");
+      class = "containers/json";
+      url = filter ?
+	xasprintf ("http://v%s/%s?filters=%s", api_version, class, filter) :
+	xasprintf ("http://v%s/%s", api_version, class);
+      break;
     }
 
   dbg ("docker rest url: %s\n", url);
@@ -196,7 +200,7 @@ docker_get (CURL * curl_handle, const int query)
 }
 
 static void
-docker_close (CURL * curl_handle, chunk_t * chunk)
+docker_close (CURL *curl_handle, chunk_t *chunk)
 {
   /* cleanup curl stuff */
   curl_easy_cleanup (curl_handle);
@@ -244,7 +248,8 @@ docker_running_containers (char *socket, unsigned int *count,
   dbg ("%zu bytes retrieved\n", chunk.size);
   dbg ("json data: %s", chunk.memory);
 
-  hashtable = docker_json_parser (chunk.memory, "Image", 1);
+  hashtable =
+    docker_json_parser_search (chunk.memory, "Image", image_shortname, 1);
   if (NULL == hashtable)
     plugin_error (STATE_UNKNOWN, 0,
 		  "unable to parse the json data for \"Image\"s");
