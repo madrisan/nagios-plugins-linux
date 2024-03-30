@@ -51,6 +51,22 @@
 
 #define DOCKER_CONTAINERS_JSON  0x01
 
+/* returns the last portion of the given container image.
+   example:
+     "prom/prometheus:v2.39.0"  -->  "prometheus:v2.39.0"
+   note that docker just removes the prefix "docker.io/".  */
+const char *image_shortname (const char *image)
+{
+  const char *strip = strrchr (image, '/');
+  if (NULL == strip)
+    strip = image;
+  else
+    strip++;
+  dbg ("shortening of \"%s\" to \"%s\"\n", image, strip);
+
+  return strip;
+}
+
 /* parse the json stream returned by Docker and return a pointer to the
    hashtable containing the values of the discovered 'tokens'.
    return NULL if the data cannot be parsed.  */
@@ -221,7 +237,8 @@ docker_running_containers (char *socket, unsigned int *count,
       hashable_t *np = counter_lookup (hashtable, image);
       assert (NULL != np);
       running_containers = np ? np->count : 0;
-      *perfdata = xasprintf ("containers_%s=%u", image, running_containers);
+      *perfdata = xasprintf ("containers_%s=%u", image_shortname (image),
+			     running_containers);
     }
   else
     {
@@ -233,7 +250,7 @@ docker_running_containers (char *socket, unsigned int *count,
 	  hashable_t *np = counter_lookup (hashtable, hashtable->keys[j]);
 	  assert (NULL != np);
 	  fprintf (stream, "containers_%s=%lu ",
-		   hashtable->keys[j], np->count);
+		   image_shortname (hashtable->keys[j]), np->count);
 	}
       fprintf (stream, "containers_total=%u", hashtable->elements);
       fclose (stream);
