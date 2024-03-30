@@ -164,12 +164,18 @@ docker_get (CURL * curl_handle, const int query)
   CURLcode res;
   char *api_version, *class, *url, *filter = NULL;
 
+  api_version = secure_getenv ("DOCKER_API_VERSION");
+  if (NULL == api_version)
+    api_version = "1.18";
+  else
+    dbg ("setting Docker API version according to DOCKER_API_VERSION: %s\n",
+	 api_version);
+
   switch (query)
     {
       default:
 	plugin_error (STATE_UNKNOWN, 0, "unknown docker query");
       case DOCKER_CONTAINERS_JSON:
-	api_version = "1.18";
 	filter = url_encode ("{\"status\":{\"running\":true}}");
 	class = "containers/json";
 	url = filter ?
