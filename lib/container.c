@@ -235,7 +235,6 @@ docker_running_containers (char *socket, unsigned int *count,
   if (image)
     {
       hashable_t *np = counter_lookup (hashtable, image);
-      assert (NULL != np);
       running_containers = np ? np->count : 0;
       *perfdata = xasprintf ("containers_%s=%u", image_shortname (image),
 			     running_containers);
