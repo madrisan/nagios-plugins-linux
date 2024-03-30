@@ -68,20 +68,22 @@ usage (FILE *out)
   fprintf (out,
 	   "  %s --socket SOCKET [--image IMAGE] [-w COUNTER] [-c COUNTER]\n",
 	   program_name);
+/*
   fprintf (out,
 	   "  %s --socket SOCKET --memory [-b,-k,-m,-g] [-w COUNTER] [-c COUNTER] [delay]\n",
-	   program_name);
+	   program_name);  */
   fputs (USAGE_OPTIONS, out);
   fputs
     ("  -i, --image IMAGE   limit the investigation only to the containers "
      "running IMAGE\n", out);
-  fputs ("  -M, --memory    return the runtime memory metrics (alpha!)\n",
-	 out);
-  fputs ("  -s, --socket SOCKET   the path of the socket\n"
-	 "                  default for docker: " DOCKER_SOCKET "\n"
-	 "                  default for porman: " PODMAN_SOCKET "\n", out);
+/*
+  fputs ("  -M, --memory    return the runtime memory metrics (alpha!)\n", out);  */
+  fputs ("  -s, --socket SOCKET   the path of the docker or podman socket, usually\n"
+	 "                         - " DOCKER_SOCKET "\n"
+	 "                         - " PODMAN_SOCKET "\n", out);
+/*
   fputs ("  -b,-k,-m,-g     "
-	 "show output in bytes, KB (the default), MB, or GB\n", out);
+	 "show output in bytes, KB (the default), MB, or GB\n", out);  */
   fputs ("  -w, --warning COUNTER    warning threshold\n", out);
   fputs ("  -c, --critical COUNTER   critical threshold\n", out);
   fputs ("  -v, --verbose   show details for command-line debugging "
@@ -91,13 +93,15 @@ usage (FILE *out)
   fprintf (out, "  delay is the delay between updates in seconds "
 	   "(default: %dsec)\n", DELAY_DEFAULT);
   fputs (USAGE_EXAMPLES, out);
+  fprintf (out, "  %s --socket /run/user/1000/podman/podman.sock\n",
+	   program_name);
   fprintf (out, "  %s --socket " DOCKER_SOCKET " -w 100 -c 120\n", program_name);
-  fprintf (out, "  %s --socket " PODMAN_SOCKET " --image nginx -c 5:\n",
+/*  fprintf (out, "  %s --socket " PODMAN_SOCKET " --image nginx -c 5:\n",
 	   program_name);
   fprintf (out,
 	   "  %s -s /run/user/1000/podman/podman.sock --memory -m -w 512 -c 640 5\n",
 	   program_name);
-
+*/
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
 
@@ -116,13 +120,13 @@ int
 main (int argc, char **argv)
 {
   int c;
-  int shift = k_shift;
+/*  int shift = k_shift;  */
   bool check_memory = false, verbose = false;
   char *image = NULL;
   char *socket = NULL;
   char *critical = NULL, *warning = NULL;
   char *status_msg, *perfdata_msg;
-  char *units = NULL;
+/*  char *units = NULL;  */
   nagstatus status = STATE_OK;
   thresholds *my_threshold = NULL;
   unsigned long delay = DELAY_DEFAULT;
@@ -130,7 +134,8 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "i:s:Mbkmgc:w:v" GETOPT_HELP_VERSION_STRING,
+/*			   "i:s:Mbkmgc:w:v" GETOPT_HELP_VERSION_STRING,  */
+			   "i:s:c:w:v" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -144,6 +149,7 @@ main (int argc, char **argv)
 	case 's':
 	  socket = optarg;
 	  break;
+/*
 	case 'M':
 	  check_memory = true;
 	  break;
@@ -163,6 +169,7 @@ main (int argc, char **argv)
 	  shift = g_shift;
 	  units = xstrdup ("GB");
 	  break;
+*/
 	case 'c':
 	  critical = optarg;
 	  break;
@@ -197,80 +204,81 @@ main (int argc, char **argv)
   if (status == NP_RANGE_UNPARSEABLE)
     usage (stderr);
 
-  if (check_memory)
+/*  if (check_memory)
     {
-//      int err;
-//      struct docker_memory_desc *memdesc = NULL;
-
+      int err;
+      struct docker_memory_desc *memdesc = NULL;
+*/
       /* output in kilobytes by default */
-//      if (units == NULL)
-//	units = xstrdup ("kB");
+/*    if (units == NULL)
+	units = xstrdup ("kB");
 
-//      err = docker_memory_desc_new (&memdesc);
-//      if (err < 0)
-//	plugin_error (STATE_UNKNOWN, err, "memory exhausted");
+      err = docker_memory_desc_new (&memdesc);
+      if (err < 0)
+	plugin_error (STATE_UNKNOWN, err, "memory exhausted");
 
-//      long long pgfault[2];
-//      long long pgmajfault[2];
-//      long long pgpgin[2];
-//      long long pgpgout[2];
+      long long pgfault[2];
+      long long pgmajfault[2];
+      long long pgpgin[2];
+      long long pgpgout[2];
 
-//      docker_memory_desc_read (memdesc);
+      docker_memory_desc_read (memdesc);
 
-//      long long kb_total_cache =
-//	docker_memory_get_total_cache (memdesc) / 1024;
-//      long long kb_total_rss = docker_memory_get_total_rss (memdesc) / 1024;
-//      long long kb_total_swap = docker_memory_get_total_swap (memdesc) / 1024;
-//      long long kb_total_unevictable =
-//	docker_memory_get_total_unevictable (memdesc) / 1024;
-//      long long kb_memory_used_total =
-//	kb_total_cache + kb_total_rss + kb_total_swap;
+      long long kb_total_cache =
+	docker_memory_get_total_cache (memdesc) / 1024;
+      long long kb_total_rss = docker_memory_get_total_rss (memdesc) / 1024;
+      long long kb_total_swap = docker_memory_get_total_swap (memdesc) / 1024;
+      long long kb_total_unevictable =
+	docker_memory_get_total_unevictable (memdesc) / 1024;
+      long long kb_memory_used_total =
+	kb_total_cache + kb_total_rss + kb_total_swap;
 
-//      pgfault[0] = docker_memory_get_total_pgfault (memdesc);
-//      pgmajfault[0] = docker_memory_get_total_pgmajfault (memdesc);
-//      pgpgin[0] = docker_memory_get_total_pgpgin (memdesc);
-//      pgpgout[0] = docker_memory_get_total_pgpgout (memdesc);
+      pgfault[0] = docker_memory_get_total_pgfault (memdesc);
+      pgmajfault[0] = docker_memory_get_total_pgmajfault (memdesc);
+      pgpgin[0] = docker_memory_get_total_pgpgin (memdesc);
+      pgpgout[0] = docker_memory_get_total_pgpgout (memdesc);
 
-//      sleep (delay);
+      sleep (delay);
 
-//      docker_memory_desc_read (memdesc);
-//      pgfault[1] = docker_memory_get_total_pgfault (memdesc);
-//      pgmajfault[1] = docker_memory_get_total_pgmajfault (memdesc);
-//      pgpgin[1] = docker_memory_get_total_pgpgin (memdesc);
-//      pgpgout[1] = docker_memory_get_total_pgpgout (memdesc);
+      docker_memory_desc_read (memdesc);
+      pgfault[1] = docker_memory_get_total_pgfault (memdesc);
+      pgmajfault[1] = docker_memory_get_total_pgmajfault (memdesc);
+      pgpgin[1] = docker_memory_get_total_pgpgin (memdesc);
+      pgpgout[1] = docker_memory_get_total_pgpgout (memdesc);
 
 #define __dbg__(arg) \
 	dbg ("delta (%lu sec) for %s: %lld == (%lld-%lld)\n", \
 	     delay, #arg, arg[1]-arg[0], arg[1], arg[0])
-//      __dbg__ (pgfault);
-//      __dbg__ (pgmajfault);
-//      __dbg__ (pgpgin);
-//      __dbg__ (pgpgout);
+      __dbg__ (pgfault);
+      __dbg__ (pgmajfault);
+      __dbg__ (pgpgin);
+      __dbg__ (pgpgout);
 #undef dbg__
 
-//      status = get_status (UNIT_CONVERT (kb_memory_used_total, shift),
-//			   my_threshold);
-//      status_msg =
-//	xasprintf ("%s: %llu %s memory used", state_text (status),
-//		   UNIT_STR (kb_memory_used_total));
-//
-//      perfdata_msg =
-//	xasprintf ("cache=%llu%s rss=%llu%s swap=%llu%s unevictable=%llu%s "
-//		   "pgfault=%lld pgmajfault=%lld "
-//		   "pgpgin=%lld pgpgout=%lld"
-//		   , UNIT_STR (kb_total_cache)
-//		   , UNIT_STR (kb_total_rss)
-//		   , UNIT_STR (kb_total_swap)
-//		   , UNIT_STR (kb_total_unevictable)
-//		   , pgfault[1] - pgfault[0]
-//		   , pgmajfault[1] - pgmajfault[0]
-//		   , pgpgin[1] - pgpgin[0]
-//		   , pgpgout[1] - pgpgout[0]);
-//
-//      docker_memory_desc_unref (memdesc);
+      status = get_status (UNIT_CONVERT (kb_memory_used_total, shift),
+			   my_threshold);
+      status_msg =
+	xasprintf ("%s: %llu %s memory used", state_text (status),
+		   UNIT_STR (kb_memory_used_total));
+
+      perfdata_msg =
+	xasprintf ("cache=%llu%s rss=%llu%s swap=%llu%s unevictable=%llu%s "
+		   "pgfault=%lld pgmajfault=%lld "
+		   "pgpgin=%lld pgpgout=%lld"
+		   , UNIT_STR (kb_total_cache)
+		   , UNIT_STR (kb_total_rss)
+		   , UNIT_STR (kb_total_swap)
+		   , UNIT_STR (kb_total_unevictable)
+		   , pgfault[1] - pgfault[0]
+		   , pgmajfault[1] - pgmajfault[0]
+		   , pgpgin[1] - pgpgin[0]
+		   , pgpgout[1] - pgpgout[0]);
+
+      docker_memory_desc_unref (memdesc);
     }
   else
     {
+*/
       unsigned int containers;
       docker_running_containers (socket, &containers, image, &perfdata_msg,
 		 		 verbose);
@@ -280,10 +288,13 @@ main (int argc, char **argv)
 		   state_text (status), containers, image) :
 	xasprintf ("%s: %u running container(s)", state_text (status),
 		   containers);
+/*
     }
-
   printf ("%s%s %s | %s\n", program_name_short,
 	  check_memory ? " memory" : " containers", status_msg, perfdata_msg);
+*/
+  printf ("%s containers %s | %s\n", program_name_short,
+	  status_msg, perfdata_msg);
 
   free (my_threshold);
   return status;
