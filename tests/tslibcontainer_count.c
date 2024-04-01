@@ -27,13 +27,13 @@
 
 #define NPL_TESTING
 
-static int docker_get (chunk_t * chunk, const int query);
+static int docker_get (chunk_t * chunk, const int query, const char *id);
 static void docker_close (chunk_t * chunk);
 
 #include "../lib/container.c"
 
 static int
-docker_get (chunk_t *chunk, const int query)
+docker_get (chunk_t *chunk, const int query, const char *id)
 {
   char *filename = NULL;
 

@@ -80,11 +80,12 @@ extern "C"
   long long docker_memory_get_total_pgpgout (
     struct docker_memory_desc *memdesc);
 
-  const char *image_shortname (const char *image);
-
   int docker_running_containers (char *socket, unsigned int *count,
 		  		 const char *image, char **perfdata,
 				 bool verbose);
+  int docker_running_containers_memory (char *socket,
+					long long unsigned int *memory,
+					bool verbose);
 
 #ifdef __cplusplus
 }

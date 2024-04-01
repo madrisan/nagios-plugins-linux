@@ -133,7 +133,7 @@ json_dump (const char *json, jsmntok_t *t, size_t count, int indent,
 }
 
 void
-json_printf_pretty (const char *json, char **dump, int indent)
+json_dump_pretty (const char *json, char **dump, int indent)
 {
   size_t ntoken, size;
   FILE *stream = open_memstream (dump, &size);
@@ -142,4 +142,50 @@ json_printf_pretty (const char *json, char **dump, int indent)
   json_dump (json, tok, tok->size, indent, stream);
 
   fclose (stream);
+}
+
+int
+json_search (const char *json, const char *path, char **value)
+{
+  char *p, *object, *label, *saveptr;
+  size_t i, ntoken;
+  bool found_label = false, found_object = false;
+
+  dbg ("checking for %s in the json data...\n", path);
+  jsmntok_t *tok = json_tokenise (json, &ntoken);
+
+  p = xstrdup (path);
+  object = strtok_r (p, ".", &saveptr);
+  label = strtok_r (0, ".", &saveptr);
+
+  if (object == NULL || label == NULL)
+    return -1;
+
+  dbg ("ckeckin for label \"%s\" in the object \"%s\"\n", label, object);
+
+  /* FIXME: the search algorithm sucks :( */
+  for (i = 0; i < ntoken; i++)
+    {
+      if (0 == json_token_streq (json, &tok[i], object))
+	{
+	  dbg ("found object \"%s\"\n", object);
+	  found_object = true;
+	}
+      else if (found_object && (tok[i].type == JSMN_STRING)
+	  && (0 == json_token_streq (json, &tok[i], label)))
+	{
+	  dbg ("found label \"%s\"\n", label);
+	  found_label = true;
+	  /* get the associated value */
+	  size_t strsize = tok[i + 1].end - tok[i + 1].start;
+	  *value = xmalloc (strsize + 1);
+	  memcpy (*value, json + tok[i + 1].start, strsize);
+	  break;
+	}
+    }
+  if (found_label && found_object && NULL != *value)
+    dbg ("found label \"%s\" in the object \"%s\" with value \"%s\"\n", label,
+	 object, *value);
+
+  return 0;
 }
