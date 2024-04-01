@@ -46,22 +46,14 @@ jobs:
             ;;
             fedora*)
               dnf -y update
-              dnf -y install autoconf automake bzip2 diffutils gcc glibc-devel libcurl-devel libvarlink-devel libtool make m4 systemd-devel xz
+              dnf -y install autoconf automake bzip2 diffutils gcc glibc-devel libcurl-devel libtool make m4 systemd-devel xz
             ;;
           esac
 
       - id: configure
         run: |
           autoreconf --install
-          case "${{ matrix.container }}" in
-            alpine*|debian*|gentoo*|ubuntu*)
-              ./configure --enable-libcurl --enable-debug
-            ;;
-            # libvarlink is only available in Fedora
-            *)
-              ./configure --enable-libcurl --enable-libvarlink --enable-debug
-            ;;
-          esac
+          ./configure --enable-libcurl --enable-debug
 
       - id: make
         run: |

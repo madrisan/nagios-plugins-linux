@@ -45,8 +45,7 @@ AM_CFLAGS = $(LIBPROCPS_CFLAGS)
 AM_LDFLAGS = $(LIBPROCPS_LIBS)
 
 test_programs = \
-	tslibcontainer_docker_count \
-	tslibcontainer_docker_memory \
+	tslibcontainer_count \
 	tslibfiles_age \
 	tslibfiles_filecount \
 	tslibfiles_hiddenfile \
@@ -86,10 +85,8 @@ LDADDS = $(top_builddir)/lib/libutils.a
 TSLIBS_LDFLAGS = -module -avoid-version \
 	-rpath /evil/libtool/hack/to/force/shared/lib/creation
 
-tslibcontainer_docker_count_SOURCES = $(test_utils) tslibcontainer_docker_count.c
-tslibcontainer_docker_count_LDADD = $(LDADDS)
-tslibcontainer_docker_memory_SOURCES = $(test_utils) tslibcontainer_docker_memory.c
-tslibcontainer_docker_memory_LDADD = $(LDADDS)
+tslibcontainer_count_SOURCES = $(test_utils) tslibcontainer_count.c
+tslibcontainer_count_LDADD = $(LDADDS)
 
 tslibfiles_age_SOURCES = $(test_utils) tslibfiles_age.c
 tslibfiles_age_LDADD = $(LDADDS)
@@ -171,8 +168,6 @@ TESTS = $(test_programs)
 
 dist_noinst_DATA = \
 	ts_container_docker.data \
-	ts_container_podman_GetContainerStats.data \
-	ts_container_podman_ListContainers.data \
 	ts_procmeminfo.data \
 	ts_procpressurecpu.data \
 	ts_procpressureio.data \

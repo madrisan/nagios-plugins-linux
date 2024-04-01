@@ -19,11 +19,11 @@ EXTRA_DIST = changelog compat control copyright rules \
 	source/format \
 	nagios-plugins-linux.dirs \
 	nagios-plugins-linux-clock.install \
+	nagios-plugins-linux-container.install \
 	nagios-plugins-linux-cpufreq.install \
 	nagios-plugins-linux-cpu.install \
 	nagios-plugins-linux-cswch.install \
 	nagios-plugins-linux.dirs \
-	nagios-plugins-linux-docker.install \
 	nagios-plugins-linux-fc.install \
 	nagios-plugins-linux-ifmountfs.install \
 	nagios-plugins-linux-intr.install \

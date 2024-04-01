@@ -28,6 +28,8 @@ extern "C"
   int json_token_streq (const char *json, jsmntok_t * tok, const char *s);
   char *json_token_tostr (char *json, jsmntok_t * t);
   jsmntok_t *json_tokenise (const char *json, size_t *ntoken);
+  void json_dump_pretty (const char *json, char **dump, int indent);
+  int json_search (const char *json, const char *path, char **value);
 
 #ifdef __cplusplus
 }

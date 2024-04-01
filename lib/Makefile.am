@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-## Copyright (c) 2014-2016 Davide Madrisan <davide.madrisan@gmail.com>
+## Copyright (c) 2014-2024 Davide Madrisan <davide.madrisan@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ AM_CPPFLAGS = \
 	-include $(top_builddir)/config.h \
 	-I$(top_srcdir)/include \
 	-DDOCKER_SOCKET=\"$(DOCKER_SOCKET)\" \
-	-DVARLINK_ADDRESS=\"$(VARLINK_ADDRESS)\" \
+	-DPODMAN_SOCKET=\"$(PODMAN_SOCKET)\" \
 	$(LIBCURL_CPPFLAGS) \
 	$(LIBPROCPS_CPPFLAGS)
 
@@ -27,7 +27,6 @@ noinst_LIBRARIES = libutils.a
 
 libutils_a_SOURCES =  \
 	collection.c  \
-	container_docker_memory.c \
 	cpudesc.c     \
 	cpufreq.c     \
 	cpustats.c    \
@@ -55,14 +54,7 @@ libutils_a_SOURCES =  \
 
 if HAVE_LIBCURL
   libutils_a_SOURCES += \
-	container_docker_count.c
-endif
-
-if HAVE_LIBVARLINK
-  libutils_a_SOURCES += \
-	container_podman.c \
-	container_podman_count.c \
-	container_podman_stats.c
+	container.c
 endif
 
 if HAVE_LIBPROCPS

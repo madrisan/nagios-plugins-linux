@@ -23,6 +23,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "getenv.h"
 #include "logging.h"
 #include "messages.h"
 #include "pressure.h"

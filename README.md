@@ -16,10 +16,10 @@
 Here is the list of the available plugins:
 
 * **check_clock** - returns the number of seconds elapsed between local time and Nagios server time
+* **check_container** - checks the number of running docker/podman containers (:warning: *pre-alpha*, requires *libcurl* version 7.40.0+)
 * **check_cpu** - checks the CPU (user mode) utilization
 * **check_cpufreq** - displays the CPU frequency characteristics
 * **check_cswch** - checks the total number of context switches across all CPUs
-* **check_docker** - checks the number of running docker containers (:warning: *pre-alpha*, requires *libcurl* version 7.40.0+)
 * **check_fc** - monitors the status of the fiber status ports
 * **check_filecount** - checks the number of files found in one or more directories :new:
 * **check_ifmountfs** - checks whether the given filesystems are mounted
@@ -36,7 +36,6 @@ Here is the list of the available plugins:
   * check_network_multicast
 * **check_paging** - checks the memory and swap paging
 * **check_pressure** - checks Linux Pressure Stall Information (PSI) data :new:
-* **check_podman** - monitor the status of podman containers (:warning: *alpha*, requires *libvarlink*)
 * **check_readonlyfs** - checks for readonly filesystems
 * **check_swap** - checks the swap usage
 * **check_tcpcount** - checks the tcp network usage
@@ -156,7 +155,7 @@ The plugins are available [in the Gentoo tree](https://packages.gentoo.org/packa
 ```
 emerge -av net-analyzer/nagios-plugins-linux-madrisan
 ```
-The USE flags `curl` and `varlink` are required to respectively build `check_docker` and `check_podman`.
+The USE flag `curl` is required to build `check_container`.
 
 ## Bugs
 
