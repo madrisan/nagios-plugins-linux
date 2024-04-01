@@ -1,3 +1,85 @@
+## Version 33 ("Śmigus-Dyngus")
+### Apr 1st, 2024
+
+#### BREAKING CHANGES
+
+##### Build
+
+ * lib/container: Podman 3.0+ API support.
+   This library and the check_container plugin are to be considered a PoC, i.e. not production-ready code.
+   Note that now varlink is no more a build requirement.
+   The plugins `check_docker` and `check_podman` were merged into `check_container`.
+ * rename `--with-systemd` to `--enable-systemd` for consistency with the other optional boolean options.
+
+#### FIXES
+
+##### Plugins
+
+ * check_container: passing on non running `--image` no longer produces a program core dump.
+ * check_memory: remove comma from perfdata (issues#140).
+   Thanks to [Grischa Zengel (ggzengel)](https://github.com/ggzengel) for reporting this problem.
+
+##### Libraries
+
+ * lib/*info_procps: fix build with `--enable-libprocps`.
+
+##### Tests
+
+ * tests: fix tests tslibxstrton_sizetollint and tslibpressure on 32-bit architectures.
+   See: https://bugs.gentoo.org/927490
+
+#### ENHANCEMENTS / CHANGES
+
+ * check_container: print short container names in the plugin perfdata.
+   Example: `docker.io/traefik:v2.9.8` becomes `traefik:v2.9.8`.
+
+##### Test framework
+
+ * ci: add gentoo to os matrix in github workflows.
+
+### GIT DIFF
+```
+ .github/workflows/build-checks.yml                               |  16 ++---
+ DEVELOPERS.md                                                    |  74 --------------------
+ README.md                                                        |  15 ++---
+ configure.ac                                                     |  91 +++++++++++--------------
+ debian/Makefile.am                                               |   2 +-
+ debian/changelog                                                 |   6 ++
+ debian/control                                                   |   8 +--
+ debian/nagios-plugins-linux-container.install                    |   1 +
+ debian/nagios-plugins-linux-docker.install                       |   1 -
+ include/Makefile.am                                              |   5 +-
+ include/{container_docker.h => container.h}                      |   8 ++-
+ include/container_podman.h                                       | 118 --------------------------------
+ include/json_helpers.h                                           |   2 +
+ include/xstrton.h                                                |   4 +-
+ lib/Makefile.am                                                  |  14 +---
+ lib/collection.c                                                 |   1 +
+ lib/container.c                                                  | 428 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ lib/container_docker_count.c                                     | 256 ---------------------------------------------------------------------
+ lib/container_docker_memory.c                                    | 175 ------------------------------------------------
+ lib/container_podman.c                                           | 374 -----------------------------------------------------------------------------------------------------
+ lib/container_podman_count.c                                     | 115 -------------------------------
+ lib/container_podman_stats.c                                     | 180 -------------------------------------------------
+ lib/json_helpers.c                                               | 128 ++++++++++++++++++++++++++++++++++-
+ lib/meminfo_procps.c                                             |   4 +-
+ lib/pressure.c                                                   |   1 +
+ lib/vminfo_procps.c                                              |   4 +-
+ lib/xstrton.c                                                    |  20 +++---
+ packages/specs/nagios-plugins-linux.spec.in                      |  48 +++++--------
+ plugins/Makefile.am                                              |  21 ++----
+ plugins/{check_docker.c => check_container.c}                    | 150 +++++++++++++++++------------------------
+ plugins/check_filecount.c                                        |  10 +--
+ plugins/check_podman.c                                           | 262 -----------------------------------------------------------------------
+ tests/Makefile.am                                                |  23 +++----
+ tests/ts_container_podman_GetContainerStats.data                 |   1 -
+ tests/ts_container_podman_ListContainers.data                    |   1 -
+ tests/ts_procpressurecpu.data                                    |   2 +-
+ tests/{tslibcontainer_docker_count.c => tslibcontainer_count.c}  |  43 ++++++------
+ tests/tslibcontainer_docker_memory.c                             | 116 --------------------------------
+ tests/tslibpressure.c                                            |   2 +-
+```
+
 ## Version 32 ("Gematria")
 ### Jan 25th, 2024
 

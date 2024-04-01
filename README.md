@@ -16,7 +16,7 @@
 Here is the list of the available plugins:
 
 * **check_clock** - returns the number of seconds elapsed between local time and Nagios server time
-* **check_container** - checks the number of running docker/podman containers (:warning: *pre-alpha*, requires *libcurl* version 7.40.0+)
+* **check_container** - checks docker/podman containers :warning: *pre-alpha*, requires *libcurl* version 7.40.0+
 * **check_cpu** - checks the CPU (user mode) utilization
 * **check_cpufreq** - displays the CPU frequency characteristics
 * **check_cswch** - checks the total number of context switches across all CPUs

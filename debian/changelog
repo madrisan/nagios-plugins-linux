@@ -1,3 +1,13 @@
+nagios-plugins-linux (33-1) stable; urgency=low
+  * Release 33 "Śmigus-Dyngus":
+     - Podman 3.0+ API support in check_container and fixes
+     - build: rename --with-systemd to --enable-systemd.
+     - fix: remove comma from perfdata in check_memory
+     - fix build with --enable-libprocps
+     - tests: fix tests on 32-bit architectures
+
+ -- Davide Madrisan <d.madrisan@proton.me>  Mon,  1 Apr 2024 23:00:54 +0200
+
 nagios-plugins-linux (32-1) stable; urgency=low
   * Release 32 "Gematria":
      - Fixes in check_network, check_users, and check_cpufreq.
