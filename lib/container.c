@@ -142,7 +142,7 @@ docker_init (CURL **curl_handle, chunk_t *chunk, const char *socket)
 	}
       else
 	plugin_error (STATE_UNKNOWN, 0,
-		      "unset socket path and DOCKER_HOST env variable");
+		      "the socket path was not set, nor was the environment variable DOCKER_HOST");
     }
 
   curl_global_init (CURL_GLOBAL_ALL);
@@ -175,7 +175,7 @@ docker_get (CURL *curl_handle, const int query, const char *id)
 
   api_version = secure_getenv ("DOCKER_API_VERSION");
   if (NULL == api_version)
-    api_version = "1.18";
+    api_version = "1.24";  /* API versions before v1.24 are deprecated. */
   else
     dbg ("setting Docker API version according to DOCKER_API_VERSION: %s\n",
 	 api_version);
