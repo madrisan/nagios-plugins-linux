@@ -123,7 +123,10 @@ get_processor_number_online (void)
 int
 get_processor_number_kernel_max ()
 {
-  return sysfsparser_getvalue (PATH_SYS_CPU "/kernel_max") + 1;
+  unsigned long long value;
+
+  sysfsparser_getvalue (&value, PATH_SYS_CPU "/kernel_max");
+  return value + 1;
 }
 
 static inline int

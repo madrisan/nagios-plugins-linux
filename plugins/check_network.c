@@ -3,7 +3,7 @@
  * License: GPLv3+
  * Copyright (c) 2014,2015,2020 Davide Madrisan <davide.madrisan@gmail.com>
  *
- * A Nagios plugin that displays some network interfaces.statistics.
+ * A Nagios plugin that displays some network interfaces statistics.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -188,11 +188,11 @@ sysfsparser_getline (const char *format, ...)
   return line;
 }
 
-unsigned long long
-sysfsparser_getvalue (const char *format, ...)
+int
+sysfsparser_getvalue (unsigned long long *value, const char *format, ...)
 {
   char *line, *endptr, *filename;
-  unsigned long long value;
+  int retvalue = 0;
   va_list args;
 
   va_start (args, format);
@@ -201,15 +201,15 @@ sysfsparser_getvalue (const char *format, ...)
   va_end (args);
 
   if (NULL == (line = sysfsparser_getline ("%s", filename)))
-    return 0;
+    return -1;
 
   errno = 0;
-  value = strtoull (line, &endptr, 0);
+  *value = strtoull (line, &endptr, 0);
   if ((endptr == line) || (errno == ERANGE))
-    value = 0;
+    retvalue = -1;
 
   free (line);
-  return value;
+  return retvalue;
 }
 
 int

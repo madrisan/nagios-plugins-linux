@@ -58,7 +58,10 @@ get_processor_is_online (unsigned int cpu)
   if (false == path_exist)
     return -1;
 
-  return sysfsparser_getvalue (PATH_SYS_CPU "/cpu%u/online", cpu);
+  unsigned long long value;
+
+  sysfsparser_getvalue (&value, PATH_SYS_CPU "/cpu%u/online", cpu);
+  return value;
 }
 
 enum	/* CPU modes */

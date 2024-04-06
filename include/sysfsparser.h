@@ -40,8 +40,8 @@ extern "C"
 
   char *sysfsparser_getline (const char *filename, ...)
        _attribute_format_printf_(1, 2);
-  unsigned long long sysfsparser_getvalue (const char *filename, ...)
-       _attribute_format_printf_(1, 2);
+  int sysfsparser_getvalue (unsigned long long *value, const char *filename, ...)
+       _attribute_format_printf_(2, 3);
 
   /* Lookup a pattern and get the value from line
    * Format is:

@@ -195,3 +195,25 @@ free_then_fail:
     return NULL;
   }
 }
+
+int
+file_system_type_exists (char *fs_type, char **fs_mp)
+{
+  int exists = 0;
+  struct mount_entry *mount_list, *me;
+
+  if (NULL == fs_type)
+    return -1;
+
+  mount_list = read_file_system_list (false);
+
+  for (me = mount_list; me; me = me->me_next)
+    if (STREQ (me->me_type, fs_type))
+      {
+	*fs_mp = me->me_mountdir;
+        exists = 1;
+        break;
+      }
+
+  return exists;
+}

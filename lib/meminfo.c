@@ -203,8 +203,8 @@ void proc_sysmem_read (struct proc_sysmem *sysmem)
       else
 	{
 	  dbg ("...let's calculate the value...\n");
-	  unsigned long kb_min_free =
-	    sysfsparser_getvalue (PATH_VM_MIN_FREE_KB);
+	  unsigned long long kb_min_free;
+	  sysfsparser_getvalue (&kb_min_free, PATH_VM_MIN_FREE_KB);
 	  /* should be equal to sum of all 'low' fields in /proc/zoneinfo */
 	  unsigned long watermark_low = kb_min_free * 5 / 4;
 

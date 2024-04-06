@@ -39,6 +39,7 @@ libutils_a_SOURCES =  \
 	mountlist.c   \
 	netinfo.c     \
 	netinfo-private.c \
+	npl_selinux.c \
 	perfdata.c    \
 	pressure.c    \
 	processes.c   \

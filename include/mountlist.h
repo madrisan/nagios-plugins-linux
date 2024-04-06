@@ -37,5 +37,6 @@ struct mount_entry
 };
 
 struct mount_entry *read_file_system_list (bool need_fs_type);
+int file_system_type_exists (char *fs_type, char **fs_mp);
 
 #endif /* mountlist.h */

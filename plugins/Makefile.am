@@ -49,6 +49,7 @@ libexec_PROGRAMS =        \
 	check_paging      \
 	check_pressure    \
 	check_readonlyfs  \
+	check_selinux     \
 	check_temperature \
 	check_tcpcount    \
 	check_uptime      \
@@ -91,6 +92,7 @@ check_network_SOURCES    = check_network.c
 check_paging_SOURCES     = check_paging.c
 check_pressure_SOURCES   = check_pressure.c
 check_readonlyfs_SOURCES = check_readonlyfs.c
+check_selinux_SOURCES    = check_selinux.c
 if HAVE_PROC_MEMINFO
 check_swap_SOURCES       = check_swap.c
 endif
@@ -123,6 +125,7 @@ check_network_LDADD      = $(LDADD) $(CEIL_LIBS)
 check_multipath_LDADD    = $(LDADD)
 check_paging_LDADD       = $(LDADD) $(LIBPROCPS_LIBS)
 check_readonlyfs_LDADD   = $(LDADD)
+check_selinux_LDADD      = $(LDADD)
 if HAVE_PROC_MEMINFO
 check_swap_LDADD         = $(LDADD)
 endif
