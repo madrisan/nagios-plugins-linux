@@ -37,6 +37,7 @@ noinst_HEADERS = \
 	messages.h \
 	netinfo.h \
 	netinfo-private.h \
+	npl_selinux.h \
 	perfdata.h \
 	pressure.h \
 	processes.h \
