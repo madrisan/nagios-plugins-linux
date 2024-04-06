@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2013 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2013,2014,2024 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check for readonly filesystems.
  *
@@ -32,14 +32,16 @@
 #include "mountlist.h"
 #include "progname.h"
 #include "progversion.h"
+#include "system.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2013-2014 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2013,2014,2024 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 /* Linked list of mounted file systems. */
 static struct mount_entry *mount_list;
 
 static struct option const longopts[] = {
+  {(char *) "list", no_argument, NULL, 'l'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
   {(char *) "version", no_argument, NULL, GETOPT_VERSION_CHAR},
   {NULL, 0, NULL, 0}
@@ -55,6 +57,7 @@ usage (FILE * out)
   fputs (USAGE_HEADER, out);
   fprintf (out, "  %s [FILESYSTEM]...\n", program_name);
   fputs (USAGE_OPTIONS, out);
+  fputs ("  -l, --list      list the mounted filesystems and exit\n", out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
@@ -89,17 +92,21 @@ int
 main (int argc, char **argv)
 {
   int c, i;
+  bool just_list_fs = false;
   nagstatus status = STATE_OK;
 
   set_program_name (argv[0]);
 
-  while ((c = getopt_long (argc, argv, GETOPT_HELP_VERSION_STRING, longopts,
+  while ((c = getopt_long (argc, argv, "l" GETOPT_HELP_VERSION_STRING, longopts,
                            NULL)) != -1)
     {
       switch (c)
 	{
 	default:
 	  usage (stderr);
+	case 'l':
+	  just_list_fs = true;
+	  break;
 
 	case_GETOPT_HELP_CHAR
 	case_GETOPT_VERSION_CHAR
@@ -107,7 +114,7 @@ main (int argc, char **argv)
 	}
     }
 
-  if (argc <= optind)
+  if (argc <= optind && (false == just_list_fs))
     usage (stderr);
 
   mount_list = read_file_system_list (false);
@@ -116,6 +123,19 @@ main (int argc, char **argv)
     /* Couldn't read the table of mounted file systems. */
     plugin_error (STATE_UNKNOWN, 0,
                   "cannot read table of mounted file systems");
+
+  if (just_list_fs) {
+    struct mount_entry *me;
+    printf ("--- List of mounted filesystems ---\n");
+    for (me = mount_list; me; me = me->me_next)
+      printf ("%s on %s type %s (%s)\n"
+	      , me->me_devname
+	      , me->me_mountdir
+	      , me->me_type
+	      , me->me_opts);
+
+    return STATE_UNKNOWN;
+  }
 
   for (i = optind; i < argc; ++i)
     if (STATE_CRITICAL == check_entry (argv[i]))
