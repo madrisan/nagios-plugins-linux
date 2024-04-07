@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2014-2022 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2014-2024 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A library for parsing the sysfs filesystem
  *
@@ -172,8 +172,13 @@ sysfsparser_getline (const char *format, ...)
     plugin_error (STATE_UNKNOWN, errno, "vasprintf has failed");
   va_end (args);
 
+  //dbg ("reading sysfs data: %s: \"%s\"\n", filename, line);
+  dbg ("reading sysfs data: %s\n", filename);
   if ((fp = fopen (filename, "r")) == NULL)
-    return NULL;
+    {
+      dbg ("  \\ error: %s\n", strerror (errno));
+      return NULL;
+    }
 
   chread = getline (&line, &len, fp);
   fclose (fp);
@@ -185,6 +190,7 @@ sysfsparser_getline (const char *format, ...)
   if (line[len-1] == '\n')
     line[len-1] = '\0';
 
+  dbg ("  \\ \"%s\"\n", line);
   return line;
 }
 
@@ -458,8 +464,6 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
 
       /* temperatures are stored in the files
        *  /sys/class/thermal/thermal_zone[0-9]/temp	  */
-      dbg ("reading the valued from " PATH_SYS_ACPI_THERMAL "/%s/temp\n",
-	   de->d_name);
       sysfsparser_getvalue (&temp, PATH_SYS_ACPI_THERMAL "/%s/temp",
 				   de->d_name);
       *type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
