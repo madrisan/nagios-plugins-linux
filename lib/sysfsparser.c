@@ -370,7 +370,7 @@ int
 sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone)
 {
   int i, err;
-  unsigned long long crit_temp;
+  unsigned long long crit_temp = 0;
 
   /* as far as I can see, the only possible trip points are:
    *  'critical', 'passive', 'active0', and 'active1'
@@ -458,6 +458,8 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
 
       /* temperatures are stored in the files
        *  /sys/class/thermal/thermal_zone[0-9]/temp	  */
+      dbg ("reading the valued from " PATH_SYS_ACPI_THERMAL "/%s/temp\n",
+	   de->d_name);
       sysfsparser_getvalue (&temp, PATH_SYS_ACPI_THERMAL "/%s/temp",
 				   de->d_name);
       *type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
