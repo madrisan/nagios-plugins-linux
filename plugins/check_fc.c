@@ -145,11 +145,19 @@ fc_host_summary (bool verbose)
 static uint64_t
 fc_host_get_statistic (const char *which, const char *host)
 {
-  uint64_t value =
-    sysfsparser_getvalue (PATH_SYS_FC_HOST "/%s/statistics/%s", host, which);
+  unsigned long long value;
+  int err;
+
+  err = sysfsparser_getvalue (&value, PATH_SYS_FC_HOST "/%s/statistics/%s",
+			      host, which);
+  if (err < 0)
+    plugin_error (STATE_UNKNOWN, 0,
+		  "an error has occurred while reading "
+		  PATH_SYS_FC_HOST "/%s/statistics/%s",
+		  host, which);
 
   dbg (PATH_SYS_FC_HOST "/%s/statistics/%s = %llu\n",
-       host, which, (unsigned long long)value);
+       host, which, value);
 
   return value;
 }

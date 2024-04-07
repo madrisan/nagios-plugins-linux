@@ -369,7 +369,8 @@ sysfsparser_thermal_sysfs_path ()
 int
 sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone)
 {
-  int i, crit_temp = -1;
+  int i, err;
+  unsigned long long crit_temp;
 
   /* as far as I can see, the only possible trip points are:
    *  'critical', 'passive', 'active0', and 'active1'
@@ -390,9 +391,14 @@ sysfsparser_thermal_get_critical_temperature (unsigned int thermal_zone)
       if (!STRPREFIX (type, "critical"))
 	continue;
 
-      crit_temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL
-					"/thermal_zone%u/trip_point_%d_temp",
-					thermal_zone, i);
+      err = sysfsparser_getvalue (&crit_temp, PATH_SYS_ACPI_THERMAL
+				  "/thermal_zone%u/trip_point_%d_temp",
+				  thermal_zone, i);
+      if (err < 0)
+	plugin_error (STATE_UNKNOWN, 0,
+		      "an error has occurred while reading "
+		      PATH_SYS_ACPI_THERMAL
+		      "/thermal_zone%u/trip_point_%d_temp", thermal_zone, i);
 
       if (crit_temp > 0)
 	dbg ("a critical trip point has been found: %.2f degrees C\n",
@@ -426,7 +432,7 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
   struct dirent *de;
   bool found_data = false;
   unsigned int thermal_zone;
-  unsigned long max_temp = 0, temp = 0;
+  unsigned long long max_temp = 0, temp = 0;
 
   if (!sysfsparser_thermal_kernel_support ())
     plugin_error (STATE_UNKNOWN, 0, "no ACPI thermal support in kernel "
@@ -452,7 +458,7 @@ sysfsparser_thermal_get_temperature (unsigned int selected_zone,
 
       /* temperatures are stored in the files
        *  /sys/class/thermal/thermal_zone[0-9]/temp	  */
-      temp = sysfsparser_getvalue (PATH_SYS_ACPI_THERMAL "/%s/temp",
+      sysfsparser_getvalue (&temp, PATH_SYS_ACPI_THERMAL "/%s/temp",
 				   de->d_name);
       *type = sysfsparser_getline (PATH_SYS_ACPI_THERMAL "/%s/type",
 				   de->d_name);
