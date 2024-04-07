@@ -35,12 +35,12 @@ selinuxfs_exists ()
   int exists;
 
   exists = file_system_type_exists (SELINUXFS, &selinux_mnt);
-  if (exists < 0)
-    plugin_error (STATE_UNKNOWN, 0,
-		  "an error occurred while checking for a SELinux filesystem");
-  return exists;
+  return (exists > 0) ? 1 : 0;
 }
 
+/* Return 2 if we are running on a SELinux kernel in enhanced mode,
+ * 1 if SELinux is running in permissive mode, 0 otherwise.
+ */
 int
 is_selinux_enabled (void)
 {
@@ -54,7 +54,8 @@ is_selinux_enabled (void)
 
   if ((sysfsparser_getvalue (&value, "%s/enforce", selinux_mnt) < 0))
     plugin_error (STATE_UNKNOWN, 0,
-		  "an error occurred while checking for the SELinux status");
+		  "cannot read the SELinux status from %s/enforce",
+		  selinux_mnt);
 
-  return value;
+  return value + 1;
 }

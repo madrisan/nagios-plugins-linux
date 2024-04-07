@@ -17,12 +17,10 @@
 #ifndef _NPL_SELINUX_H
 #define _NPL_SELINUX_H        1
 
-#define SELINUXMNT "/sys/fs/selinux"
-#define OLDSELINUXMNT "/selinux"
 #define SELINUXFS "selinuxfs"
 
-/* Return 1 if we are running on a SELinux kernel, or 0 otherwise.
- * selinux_fs is set to the selinux filesystem mount point.
+/* Return 2 if we are running on a SELinux kernel in enhanced mode,
+ * 1 if SELinux is running in permissive mode, 0 otherwise.
  */
 int is_selinux_enabled (void);
 

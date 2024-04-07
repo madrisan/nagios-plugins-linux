@@ -21,7 +21,7 @@ Here is the list of the available plugins:
 * **check_cpufreq** - displays the CPU frequency characteristics
 * **check_cswch** - checks the total number of context switches across all CPUs
 * **check_fc** - monitors the status of the fiber status ports
-* **check_filecount** - checks the number of files found in one or more directories :new:
+* **check_filecount** - checks the number of files found in one or more directories
 * **check_ifmountfs** - checks whether the given filesystems are mounted
 * **check_intr** - monitors the total number of system interrupts
 * **check_iowait** - monitors the I/O wait bottlenecks
@@ -35,8 +35,9 @@ Here is the list of the available plugins:
   * check_network_errors
   * check_network_multicast
 * **check_paging** - checks the memory and swap paging
-* **check_pressure** - checks Linux Pressure Stall Information (PSI) data :new:
+* **check_pressure** - checks Linux Pressure Stall Information (PSI) data
 * **check_readonlyfs** - checks for readonly filesystems
+* **check_selinux** - checks if SELinux is enabled :new:
 * **check_swap** - checks the swap usage
 * **check_tcpcount** - checks the tcp network usage
 * **check_temperature** - monitors the hardware's temperature

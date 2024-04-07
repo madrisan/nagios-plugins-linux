@@ -50,12 +50,12 @@ usage (FILE * out)
   fputs ("This plugin checks if SELinux is enabled.\n", out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
-  fprintf (out, "  %s -w COUNTER|PERC -c COUNTER|PERC\n", program_name);
+  fprintf (out, "  %s\n", program_name);
   fputs (USAGE_OPTIONS, out);
   fputs (USAGE_HELP, out);
   fputs (USAGE_VERSION, out);
   fputs (USAGE_EXAMPLES, out);
-  fprintf (out, "  %s ...\n",
+  fprintf (out, "  %s\n",
 	   program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
@@ -95,14 +95,29 @@ main (int argc, char **argv)
     }
 
   is_enabled = is_selinux_enabled ();
-  status = is_enabled ? STATE_OK : STATE_CRITICAL;
+  char *status_str;
+  switch (is_enabled)
+    {
+    default:
+      status = STATE_CRITICAL;
+      status_str = "disabled";
+      break;
+    case 1:
+      status = STATE_WARNING;
+      status_str = "disabled (permissive)";
+      break;
+    case 2:
+      status = STATE_OK;
+      status_str = "enabled (enforced)";
+      break;
+    }
 
   printf ("%s %s - selinux %s%s | selinux_enabled=%d\n"
 	  , program_name_short
 	  , state_text (status)
-	  , status == STATE_OK ? "enabled" : "disabled"
+	  , status_str
 	  , selinux_mnt ? xasprintf (" (%s)", selinux_mnt) : ""
-	  , is_enabled);
+	  , status == STATE_OK ? 1 : 0);
 
   return status;
 }

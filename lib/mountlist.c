@@ -197,7 +197,7 @@ free_then_fail:
 }
 
 int
-file_system_type_exists (char *fs_type, char **fs_mp)
+file_system_type_exists (const char *fs_type, char **fs_mp)
 {
   int exists = 0;
   struct mount_entry *mount_list, *me;
@@ -206,6 +206,8 @@ file_system_type_exists (char *fs_type, char **fs_mp)
     return -1;
 
   mount_list = read_file_system_list (false);
+  if (NULL == mount_list)
+    return -1;
 
   for (me = mount_list; me; me = me->me_next)
     if (STREQ (me->me_type, fs_type))
