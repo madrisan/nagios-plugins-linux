@@ -41,6 +41,7 @@ Requires: nagios-plugins-linux-network
 Requires: nagios-plugins-linux-paging
 Requires: nagios-plugins-linux-pressure
 Requires: nagios-plugins-linux-readonlyfs
+Requires: nagios-plugins-linux-selinux
 Requires: nagios-plugins-linux-swap
 Requires: nagios-plugins-linux-tcpcount
 Requires: nagios-plugins-linux-temperature
@@ -178,6 +179,13 @@ Group: Applications/System
 %description readonlyfs
 This Nagios plugin checks for readonly filesystems.
 
+%package selinux
+Summary: Nagios plugins for Linux - check_selinux
+Group: Applications/System
+
+%description selinux
+This Nagios plugin checks if SELinux is enabled.
+
 %package swap
 Summary: Nagios plugins for Linux - check_swap
 Group: Applications/System
@@ -307,6 +315,10 @@ make DESTDIR=%{buildroot} install
 %files readonlyfs
 %defattr(-,root,root)
 %{_libdir}/nagios/plugins/check_readonlyfs
+
+%files selinux
+%defattr(-,root,root)
+%{_libdir}/nagios/plugins/check_selinux
 
 %files swap
 %defattr(-,root,root)

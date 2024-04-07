@@ -29,6 +29,7 @@ Depends: ${misc:Depends},
          nagios-plugins-linux-paging,
          nagios-plugins-linux-pressure,
          nagios-plugins-linux-readonlyfs,
+         nagios-plugins-linux-selinux,
          nagios-plugins-linux-swap,
          nagios-plugins-linux-tcpcount,
          nagios-plugins-linux-temperature,
@@ -42,7 +43,8 @@ Description: Linux plugins for nagios compatible monitoring systems
   check_clock, check_cpufreq, check_cpu, check_cswch, check_fc, check_ifmountfs,
   check_intr, check_iowait, check_load, check_memory, check_multipath,
   check_nbprocs, check_network, check_paging, check_pressure, check_readonlyfs,
-  check_swap, check_tcpcount, check_temperature, check_uptime, check_users
+  check_selinux, check_swap, check_tcpcount, check_temperature, check_uptime,
+  check_users
  .
  This package provides the suite of plugins that are most likely to be
  useful on a central monitoring host.
@@ -216,6 +218,15 @@ Description: Linux plugins for nagios compatible monitoring systems
  A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
  .
  This plugin checks for readonly filesystems.
+
+Package: nagios-plugins-linux-selinux
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: nagios3 | icinga | icinga2
+Description: Linux plugins for nagios compatible monitoring systems
+ A suite of Nagios/NRPE plugins for monitoring Linux servers and appliances.
+ .
+ This plugin checks is SELinux is enabled.
 
 Package: nagios-plugins-linux-swap
 Architecture: any

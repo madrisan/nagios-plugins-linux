@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-## Copyright (c) 2016 Davide Madrisan <davide.madrisan@gmail.com>
+## Copyright (c) 2016-2024 Davide Madrisan <davide.madrisan@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ EXTRA_DIST = changelog compat control copyright rules \
 	nagios-plugins-linux-paging.install \
 	nagios-plugins-linux-pressure.install \
 	nagios-plugins-linux-readonlyfs.install \
+	nagios-plugins-linux-selinux.install \
 	nagios-plugins-linux-swap.install \
 	nagios-plugins-linux-tcpcount.install \
 	nagios-plugins-linux-temperature.install \
