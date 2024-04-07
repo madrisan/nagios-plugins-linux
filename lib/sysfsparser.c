@@ -172,7 +172,6 @@ sysfsparser_getline (const char *format, ...)
     plugin_error (STATE_UNKNOWN, errno, "vasprintf has failed");
   va_end (args);
 
-  //dbg ("reading sysfs data: %s: \"%s\"\n", filename, line);
   dbg ("reading sysfs data: %s\n", filename);
   if ((fp = fopen (filename, "r")) == NULL)
     {

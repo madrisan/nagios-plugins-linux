@@ -41,7 +41,6 @@
 #define NPL_TEST_PATH_PROCSTAT abs_srcdir "/ts_procstat.data"
 #define NPL_TEST_PATH_PROCMEMINFO abs_srcdir "/ts_procmeminfo.data"
 #define NPL_TEST_PATH_PROCVMSTAT abs_srcdir "/ts_procvmstat.data"
-#define NPL_TEST_PATH_SYSDOCKERMEMSTAT abs_srcdir "/ts_sysdockermemstat.data"
 #define NPL_TEST_PATH_PROCPRESSURE_CPU abs_srcdir "/ts_procpressurecpu.data"
 #define NPL_TEST_PATH_PROCPRESSURE_IO abs_srcdir "/ts_procpressureio.data"
 
