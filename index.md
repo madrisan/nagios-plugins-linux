@@ -18,10 +18,10 @@ This project provides several plugins for monitoring physical and virtual Linux 
 | Plugin Name        | Detailed Informations   |
 |:------------------ |:----------------------- |
 |[check_clock]       | Returns the number of seconds elapsed between local time and Nagios server time |
+|[check_container]   | Checks docker/podman containers (:warning: *pre-alpha*, requires *libcurl* version 7.40.0+) |
 |[check_cpu]         | Checks the CPU (user mode) utilization |
 |[check_cpufreq]     | Displays the CPU frequency characteristics |
 |[check_cswch]       | Checks the total number of context switches across all CPUs |
-|[check_docker]      | Checks the number of running docker containers (:warning: *pre-alpha*, requires *libcurl* version 7.40.0+) |
 |[check_fc]          | Monitors the status of the fiber status ports |
 |[check_filecount]   | Checks the number of files found in one or more directories :new: |
 |[check_ifmountfs]   | Checks whether the given filesystems are mounted |
@@ -34,8 +34,8 @@ This project provides several plugins for monitoring physical and virtual Linux 
 |[check_network]     | Displays some network interfaces statistics |
 |[check_paging]      | Checks the memory and swap paging |
 |[check_pressure]    | Checks Linux Pressure Stall Information (PSI) data |
-|[check_podman]      | Monitor the status of podman containers (:warning: *alpha*, requires *libvarlink*) |
 |[check_readonlyfs]  | Checks for readonly filesystems |
+|[check_selinux]     | Checks if SELinux is enabled |
 |[check_swap]        | Checks the swap usage |
 |[check_tcpcount]    | Checks the tcp network usage |
 |[check_temperature] | Monitors the hardware's temperature |
@@ -48,10 +48,10 @@ The full documentation and the source code are available in the project
 [GitHub](https://github.com/madrisan/nagios-plugins-linux) site.
 
 [check_clock]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_clock
+[check_container]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_container
 [check_cpu]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_cpu
 [check_cpufreq]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_cpufreq
 [check_cswch]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_cswch
-[check_docker]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_docker
 [check_fc]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_fc
 [check_filecount]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_filecount
 [check_ifmountfs]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_ifmountfs
@@ -63,9 +63,9 @@ The full documentation and the source code are available in the project
 [check_nbprocs]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_nbprocs
 [check_network]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_network
 [check_paging]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_paging
-[check_podman]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_podman
 [check_pressure]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_pressure
 [check_readonlyfs]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_readonlyfs
+[check_selinux]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_selinux
 [check_swap]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_swap
 [check_tcpcount]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_tcpcount
 [check_temperature]: https://github.com/madrisan/nagios-plugins-linux/wiki/Nagios-Plugin-check_temperature
