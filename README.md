@@ -156,7 +156,7 @@ The `Nagios Plugin Linux` source code has been merged with the Debian package [`
 but only the `check_memory` plugin is provided by the binary package shipped by Debian,
 starting with the [Debian Bookworm](https://packages.debian.org/bookworm/nagios-plugins-contrib) version.
 
-For more details, see GutHub [discussion #147](https://github.com/madrisan/nagios-plugins-linux/discussions/147).
+For more details, see GitHub [discussion #147](https://github.com/madrisan/nagios-plugins-linux/discussions/147).
 
 ## Gentoo Package
 
