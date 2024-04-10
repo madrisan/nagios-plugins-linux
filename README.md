@@ -150,6 +150,11 @@ _Note_: the previous make commands can end with a `permission denied` error if *
 In this case you can temporarily disable *selinux* by executing as root the command `setenforce 0`
 (or maybe share a better solution!).
 
+## Debian Package `nagios-plugins-contrib`
+
+The `Nagios Plugin Linux` source code has been merged with the Debian package [`nagios-plugins-contrib`](https://sources.debian.org/src/nagios-plugins-contrib/)
+but only the `check_memory` plugin is provided by the package shipped by [Debian Bookworm](https://packages.debian.org/bookworm/nagios-plugins-contrib).
+
 ## Gentoo Package
 
 The plugins are available [in the Gentoo tree](https://packages.gentoo.org/packages/net-analyzer/nagios-plugins-linux-madrisan). They can be installed by running:
