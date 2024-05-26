@@ -105,14 +105,14 @@ This package is known to compile with:
 * gcc 4.1 (RHEL 5 / CentOS 5),
 * gcc 4.4 (RHEL6 / CentOS 6),
 * gcc 4.8 (RHEL7 / CentOS 7),
-* gcc 3.x, 5.1, 5.3, 6.3, 7-13 (openmamba GNU/Linux, Debian 8+, Fedora 25+),
+* gcc 3.x, 5.1, 5.3, 6.3, 7-14 (openmamba GNU/Linux, Debian 8+, Fedora 25+),
 * clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10-17 (openmamba GNU/Linux, Fedora 25+),
 
 List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,
 * 3.10, 3.14, 3.18,
 * 4.2, 4.4, 4,9, 4.14, 4.15, 4.16, 4.19
-* 5.6, 5.7, 5.8, 5.12-5.18, 6.1-6.5
+* 5.6, 5.7, 5.8, 5.12-5.18, 6.1-6.8
 
 The Nagios Plugins Linux are regularly tested on
  * Alpine Linux (musl libc),
@@ -132,9 +132,9 @@ CentOS Stream 9      | `make -C packages centos-stream-9`
 Debian 10 (Buster)   | `make -C packages debian-buster`
 Debian 11 (Bullseye) | `make -C packages debian-bullseye`
 Debian 12 (Bookworm) | `make -C packages debian-bookworm`
-Fedora 37            | `make -C packages fedora-37`
 Fedora 38            | `make -C packages fedora-38`
 Fedora 39            | `make -C packages fedora-39`
+Fedora 40            | `make -C packages fedora-40`
 Fedora Rawhide       | `make -C packages fedora-rawhide`
 Rocky Linux 8        | `make -C packages rockylinux-8`
 Rocky Linux 9        | `make -C packages rockylinux-9`
