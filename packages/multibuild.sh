@@ -135,7 +135,7 @@ case "$os" in
    alpine-*)
       pck_format="apk"
       pck_install="apk add"
-      pcks_dev="alpine-sdk curl-dev"
+      pcks_dev="alpine-sdk autoconf automake bzip2 curl-dev libtool linux-headers m4 xz"
       have_libcurl="1"
       have_libvarlink="0"
    ;;
@@ -203,7 +203,7 @@ case $os in
       addgroup -g 1000 developers
       adduser -D -G developers -u 1000 -s /bin/sh developer
       addgroup developer abuild
-      #abuild-keygen -a -i
+      #abuild-keygen -a -i -n
    ;;
    *) groupadd -g $usr_gid developers
       useradd -m -g $usr_gid -u $usr_uid -s /bin/bash developer
@@ -227,11 +227,13 @@ if [ \"'$pck_format'\" = apk ]; then
    echo
    find /home/developer/.abuild/ -name \"*rsa*\" -exec cat {} \\;
    echo
+   source .abuild/abuild.conf
+   export PACKAGER_PRIVKEY=\"\$PACKAGER_PRIVKEY\"
 
    msg \"creating the apk packages ...\"
    cd ~/${pckname}
    abuild checksum
-   abuild -r
+   abuild
 
    if [ \"'$targetdir'\" ]; then
       msg \"copying the apk packages to the target folder ...\"
