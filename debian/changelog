@@ -1,7 +1,16 @@
+nagios-plugins-linux (34-1) stable; urgency=low
+  * Release 34 "Heatwaves":
+     - New plugin check_selinux that checks if SELinux is enabled
+     - check_ifmount: add the cmdline switch -l|--list to list the mounted filesystems
+     - lib/container: docker API versions before v1.24 are deprecated, so 1.24 is set as the minimum version required
+     - lib/sysfsparser: fix gcc warning: crit_temp may be used uninitialized
+     - lib/sysfsparser: better signature for function sysfsparser_getvalue
+     - Minor fixes
+
 nagios-plugins-linux (33-1) stable; urgency=low
   * Release 33 "Śmigus-Dyngus":
      - Podman 3.0+ API support in check_container and fixes
-     - build: rename --with-systemd to --enable-systemd.
+     - build: rename --with-systemd to --enable-systemd
      - fix: remove comma from perfdata in check_memory
      - fix build with --enable-libprocps
      - tests: fix tests on 32-bit architectures
@@ -10,7 +19,7 @@ nagios-plugins-linux (33-1) stable; urgency=low
 
 nagios-plugins-linux (32-1) stable; urgency=low
   * Release 32 "Gematria":
-     - Fixes in check_network, check_users, and check_cpufreq.
+     - Fixes in check_network, check_users, and check_cpufreq
 
  -- Davide Madrisan <davide.madrisan@gmail.com>  Thu, 25 Jan 2024 22:44:00 +0200
 

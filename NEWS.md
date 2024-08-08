@@ -1,3 +1,81 @@
+## Version 34 ("Heatwaves")
+### Aug 8th, 2024
+
+#### FIXES
+
+##### Build
+
+ * Missing header `npl_selinux.h` in Makefile (`noinst_HEADERS`).
+
+##### Libraries
+
+ * `lib/container`: docker API versions before v1.24 are deprecated, so 1.24 is set as the minimum version required.
+ * `lib/sysfsparser`: fix gcc warning: ‘crit_temp’ may be used uninitialized.
+ * `lib/sysfsparser`: better signature for function `sysfsparser_getvalue`.
+
+##### Contrib (Icinga2)
+
+ * Fix Icinga2 config for check_clock by Lorenz Kästle.
+   Previously the time reference value was evaluated only during the startup of Icinga 2 and therefore a fixed point in time.
+   This change makes it a function which gets evaluated every time the check is executed.
+
+#### ENHANCEMENTS
+
+##### Plugin check_ifmount
+
+ * Add the cmdline switch -l|--list to list the mounted filesystems. Same output as the 'mount' command executed without options).
+
+##### Plugin check_selinux
+
+ * New plugin `check_selinux` that checks if SELinux is enabled.
+
+##### Package creation
+
+ * Add Linux Alpine 3.20 and drop version 3.17
+ * Add Fedora 40, drop Fedora 38
+
+##### Documentation
+
+ * Fix typo
+ * Add a link to discussion #147
+ * Add a note on the Debian package nagios-plugins-contrib
+
+### GIT DIFF
+```
+$ git diff --stat 366a9d745fb62ccd64e05ea5916eb4988ec55d2b HEAD
+ .github/workflows/build-checks.yml          |   4 ++--
+ README.md                                   |  21 +++++++++++++++------
+ contrib/icinga2/CheckCommands.conf          |   2 +-
+ debian/Makefile.am                          |   3 ++-
+ debian/control                              |  13 ++++++++++++-
+ debian/copyright                            |   2 +-
+ debian/nagios-plugins-linux-selinux.install |   1 +
+ include/Makefile.am                         |   1 +
+ include/mountlist.h                         |   1 +
+ include/npl_selinux.h                       |  27 +++++++++++++++++++++++++++
+ include/sysfsparser.h                       |   4 ++--
+ include/testutils.h                         |   1 -
+ lib/Makefile.am                             |   1 +
+ lib/cpudesc.c                               |   5 ++++-
+ lib/cputopology.c                           |   5 ++++-
+ lib/meminfo.c                               |   4 ++--
+ lib/mountlist.c                             |  24 ++++++++++++++++++++++++
+ lib/npl_selinux.c                           |  61 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ lib/sysfsparser.c                           |  41 ++++++++++++++++++++++++++---------------
+ packages/Makefile.am                        |  10 +++++-----
+ packages/multibuild.sh                      |   8 +++++---
+ packages/specs/nagios-plugins-linux.spec.in |  12 ++++++++++++
+ plugins/Makefile.am                         |   3 +++
+ plugins/check_fc.c                          |  14 +++++++++++---
+ plugins/check_ifmountfs.c                   |  28 ++++++++++++++++++++++++----
+ plugins/check_network.c                     |   2 +-
+ plugins/check_selinux.c                     | 142 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ plugins/check_temperature.c                 |   7 ++++---
+ tests/Makefile.am                           |   3 +--
+ tests/ts_sysdockermemstat.data              |  40 ----------------------------------------
+ 30 files changed, 395 insertions(+), 95 deletions(-)
+```
+
 ## Version 33 ("Śmigus-Dyngus")
 ### Apr 1st, 2024
 
