@@ -153,7 +153,7 @@ strtollint (const char *str, long long int *result,
  * return 0 on success, -1 otherwise (in this case errmesg will provide a
  * human readable error message)  */
 int
-agetollint (const char *str, long long int * age, char **errmesg)
+agetollint (const char *str, long long int *age, char **errmesg)
 {
   return strtollint (str, age, agemultiplier, errmesg);
 }

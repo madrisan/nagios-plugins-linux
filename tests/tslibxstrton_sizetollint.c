@@ -40,7 +40,8 @@ test_sizetollint (const void *tdata)
   char *errmegs;
   int ret = 0;
 
-  sizetollint (data->size, &result, &errmegs);
+  if (sizetollint (data->size, &result, &errmegs) < 0)
+    return EXIT_AM_HARDFAIL;
   TEST_ASSERT_EQUAL_NUMERIC (result, data->expect_value);
   return ret;
 }

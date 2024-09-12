@@ -40,7 +40,8 @@ test_agetoint64 (const void *tdata)
   char *errmegs;
   int ret = 0;
 
-  agetollint (data->age, &result, &errmegs);
+  if (agetollint (data->age, &result, &errmegs) < 0)
+    return EXIT_AM_HARDFAIL;
   TEST_ASSERT_EQUAL_NUMERIC (result, data->expect_value);
   return ret;
 }
