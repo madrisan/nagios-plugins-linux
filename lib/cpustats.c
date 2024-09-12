@@ -59,7 +59,6 @@ cpu_stats_get_time (struct cpu_time * __restrict cputime, unsigned int lines)
 {
   FILE *fp;
   size_t len = 0;
-  ssize_t chread;
   char *line = NULL;
   bool found;
   const char *procpath = get_path_proc_stat ();
@@ -70,7 +69,7 @@ cpu_stats_get_time (struct cpu_time * __restrict cputime, unsigned int lines)
   memset (cputime, '\0', lines * sizeof (struct cpu_time));
 
   found = false;
-  while ((chread = getline (&line, &len, fp)) != -1)
+  while (getline (&line, &len, fp) != -1)
     {
       if (!strncmp (line, "cpu ", 4))
 	{
@@ -125,7 +124,6 @@ cpu_stats_get_value_with_pattern (const char *pattern, bool mandatory)
 {
   FILE *fp;
   size_t len = 0;
-  ssize_t chread;
   char *line = NULL;
   bool found;
   unsigned long long value;
@@ -137,7 +135,7 @@ cpu_stats_get_value_with_pattern (const char *pattern, bool mandatory)
   value = 0;
   found = false;
 
-  while ((chread = getline (&line, &len, fp)) != -1)
+  while (getline (&line, &len, fp) != -1)
     {
       if (!strncmp (line, pattern, strlen (pattern)))
 	{

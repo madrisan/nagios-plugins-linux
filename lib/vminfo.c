@@ -258,8 +258,7 @@ proc_vmem_read (struct proc_vmem *vmem)
 
   if ((fp = fopen (PROC_STAT, "r")))
     {
-      ssize_t nread;
-      while ((nread = getline (&line, &len, fp)) != -1)
+      while (getline (&line, &len, fp) != -1)
         {
           if (2 == sscanf (line, "page %lu %lu",
                            &data->vm_pgpgin, &data->vm_pgpgout))

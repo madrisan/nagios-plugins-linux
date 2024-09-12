@@ -77,9 +77,10 @@ Example (RHEL5 and RHEL6 and other old distributions):
         ./configure --with-socketfile=/var/run/multipathd.sock
 
 If you want to compile the code with a C compiler different from the system default,
-you can set the environment variable CC accordingly. Here's an example:
+you can set the environment variable CC accordingly. Here are two examples:
 
         CC=clang-17 ./configure --libexecdir=/usr/lib/nagios/plugins
+        CC=clang-18 ./configure --libexecdir=/usr/lib/nagios/plugins
 
 ## Installation
 
@@ -106,7 +107,7 @@ This package is known to compile with:
 * gcc 4.4 (RHEL6 / CentOS 6),
 * gcc 4.8 (RHEL7 / CentOS 7),
 * gcc 3.x, 5.1, 5.3, 6.3, 7-14 (openmamba GNU/Linux, Debian 8+, Fedora 25+),
-* clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10-17 (openmamba GNU/Linux, Fedora 25+),
+* clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10-18 (openmamba GNU/Linux, Fedora 25+),
 
 List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,

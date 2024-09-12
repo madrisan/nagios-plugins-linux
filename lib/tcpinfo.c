@@ -106,7 +106,6 @@ procparser_tcp (const char *procfile, struct proc_tcptable_data *data,
   FILE *fp;
   char *line = NULL;
   size_t len = 0;
-  ssize_t nread;
 
   char local_addr_buf[128], rem_addr_buf[128];
   unsigned int slot, num, local_port, rem_port;
@@ -125,7 +124,7 @@ procparser_tcp (const char *procfile, struct proc_tcptable_data *data,
     plugin_error (STATE_UNKNOWN, errno, "error opening %s", procfile);
 
   /* sl local_addr:local_port rem_addr:rem_port st ... */
-  while ((nread = getline (&line, &len, fp)) != -1)
+  while (getline (&line, &len, fp) != -1)
     {
       if (++lnr == 1) /* Skip the heading line */
 	{

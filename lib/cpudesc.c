@@ -113,7 +113,6 @@ cpu_desc_read (struct cpu_desc *cpudesc)
   char *line = NULL;
   FILE *fp;
   size_t len = 0;
-  ssize_t chread;
   struct utsname utsbuf;
 
   if (cpudesc == NULL)
@@ -140,7 +139,7 @@ cpu_desc_read (struct cpu_desc *cpudesc)
   cpudesc->mode |= MODE_32BIT;
 #endif
 
-  while ((chread = getline (&line, &len, fp)) != -1)
+  while (getline (&line, &len, fp) != -1)
     {
       if (linelookup (line, "vendor", &cpudesc->vendor));
       else if (linelookup (line, "vendor_id", &cpudesc->vendor));

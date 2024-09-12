@@ -60,14 +60,13 @@ proc_psi_parser (struct proc_psi_oneline *psi_stat,
   FILE *fp;
   int rc = 0;
   size_t len = 0, label_len;
-  ssize_t chread;
   char *line = NULL;
 
   if ((fp = fopen (procpath, "r")) == NULL)
     plugin_error (STATE_UNKNOWN, errno, "error opening %s", procpath);
 
   dbg ("reading file %s\n", procpath);
-  while ((chread = getline (&line, &len, fp)) != -1)
+  while (getline (&line, &len, fp) != -1)
     {
       dbg ("line: %s", line);
       label_len = strlen (label);

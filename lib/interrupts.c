@@ -45,7 +45,6 @@ proc_interrupts_get_nintr_per_cpu (unsigned int *ncpus)
   FILE *fp;
   char *p, *end, *line = NULL;
   size_t len = 0;
-  ssize_t chread;
   bool header = true;
   unsigned int cpu;
 
@@ -56,7 +55,7 @@ proc_interrupts_get_nintr_per_cpu (unsigned int *ncpus)
   unsigned long value,
 		*vintr = xnmalloc (*ncpus, sizeof (unsigned long));
 
-  while ((chread = getline (&line, &len, fp)) != -1)
+  while (getline (&line, &len, fp) != -1)
     {
       /* skip the first line */
       if (header)

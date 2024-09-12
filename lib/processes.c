@@ -147,9 +147,8 @@ procs_list_node_add (uid_t uid, unsigned long inc,
   new->username = xstrdup (uid_to_username (uid));
 #ifdef RLIMIT_NPROC
   struct rlimit rlim;
-  int res;
 
-  if ((res = getrlimit (RLIMIT_NPROC, &rlim)) < 0)
+  if (getrlimit (RLIMIT_NPROC, &rlim) < 0)
     new->rlimit_nproc_soft = new->rlimit_nproc_hard = RLIM_INFINITY;
   else
     {
@@ -196,7 +195,6 @@ procs_list_getall (unsigned int flags)
   for (;;)
     {
       struct dirent *dp;
-      ssize_t chread;
       errno = 0;
 
       if ((dp = readdir (dirp)) == NULL)
@@ -221,7 +219,7 @@ procs_list_getall (unsigned int flags)
 
       gotname = gotuid = gotthreads = false;
       threads_nbr = 0;
-      while ((chread = getline (&line, &len, fp)) != -1)
+      while (getline (&line, &len, fp) != -1)
 	{
 	  /* The "Name:" line contains the name of the command that
 	     this process is running */

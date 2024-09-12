@@ -54,7 +54,6 @@ procparser (const char *filename, const proc_table_struct *proc_table,
   char *line = NULL;
   FILE *fp;
   size_t len = 0;
-  ssize_t chread;
 
 #if __SIZEOF_LONG__ == 4
   unsigned long long slotll;
@@ -63,7 +62,7 @@ procparser (const char *filename, const proc_table_struct *proc_table,
   if ((fp = fopen (filename,  "r")) == NULL)
     plugin_error (STATE_UNKNOWN, errno, "error: cannot read %s", filename);
 
-  while ((chread = getline (&line, &len, fp)) != -1)
+  while (getline (&line, &len, fp) != -1)
     {
       char *head = line;
       char *tail = strchr (line, separator);
