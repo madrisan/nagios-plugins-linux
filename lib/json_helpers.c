@@ -148,7 +148,7 @@ int
 json_search (const char *json, const char *path, char **value)
 {
   char *p, *object, *label, *saveptr;
-  size_t i, ntoken;
+  size_t i, ntoken = 0;
   bool found_label = false, found_object = false;
 
   dbg ("checking for %s in the json data...\n", path);
