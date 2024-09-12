@@ -127,8 +127,8 @@ main (int argc, char **argv)
   char *units = NULL;
   char *status_msg, *perfdata_mem_msg,
        *perfdata_vmem_msg = "",
-       *perfdata_memavailable_msg = "",
-       *perfdata_memused_msg = "";
+       *perfdata_memavailable_msg,
+       *perfdata_memused_msg;
   float mem_percent = 0;
   thresholds *my_threshold = NULL;
 
