@@ -50,9 +50,9 @@ debian-12: debian-bookworm
 debian-latest: debian-bookworm
 
 TARGETS_FEDORA = \
-	fedora-38 fedora-39 fedora-40 \
+	fedora-39 fedora-40 fedora-41 \
 	fedora-rawhide
-fedora-latest: fedora-40
+fedora-latest: fedora-41
 
 TARGETS_ROCKY = \
 	rockylinux-8 \
