@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2018,2024 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2018,2025 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin that returns some runtime metrics exposed by Docker.
  *
@@ -40,11 +40,12 @@
 #include "xstrton.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2018,2024 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2018,2025 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 static struct option const longopts[] = {
   {(char *) "image", required_argument, NULL, 'i'},
   {(char *) "memory", no_argument, NULL, 'M'},
+  {(char *) "name", required_argument, NULL, 'n'},
   {(char *) "socket", required_argument, NULL, 's'},
   {(char *) "critical", required_argument, NULL, 'c'},
   {(char *) "warning", required_argument, NULL, 'w'},
@@ -61,7 +62,8 @@ static _Noreturn void
 usage (FILE *out)
 {
   fprintf (out, "%s (" PACKAGE_NAME ") v%s\n", program_name, program_version);
-  fputs ("This plugin returns some runtime metrics exposed by Docker\n", out);
+  fputs ("This plugin returns some runtime metrics exposed by docker/podman containers\n",
+	 out);
   fputs (program_copyright, out);
   fputs (USAGE_HEADER, out);
   fprintf (out,
@@ -75,6 +77,9 @@ usage (FILE *out)
   fputs
     ("  -i, --image IMAGE   limit the investigation only to the containers "
      "running IMAGE\n", out);
+  fputs
+    ("  -n, --name CONTAINER_NAME   limit the investigation to a container with a given "
+     "name\n", out);
   fputs ("  -M, --memory    check memory utilisation for running containers\n",
 	 out);
   fputs ("  -s, --socket SOCKET   the path of the docker or podman socket, usually\n"
@@ -93,9 +98,9 @@ usage (FILE *out)
 	   " environment variable will be used\n");
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  export DOCKER_HOST=\"" DOCKER_SOCKET "\"\n");
+  fprintf (out, "  %s -w 100 -c 120\n", program_name);
   fprintf (out, "  %s --socket /run/user/1000/podman/podman.sock\n",
 	   program_name);
-  fprintf (out, "  %s -w 100 -c 120\n", program_name);
 /*  fprintf (out, "  %s --socket " PODMAN_SOCKET " --image nginx -c 5:\n",
 	   program_name);
   fprintf (out,
@@ -123,6 +128,7 @@ main (int argc, char **argv)
   int shift = k_shift;
   bool check_memory = false, verbose = false;
   char *image = NULL;
+  char *name = NULL;
   char *socket = NULL;
   char *critical = NULL, *warning = NULL;
   char *status_msg, *perfdata_msg;
@@ -134,7 +140,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-			   "i:s:Mkmgc:w:v" GETOPT_HELP_VERSION_STRING,
+			   "i:n:s:Mkmgc:w:v" GETOPT_HELP_VERSION_STRING,
 			   longopts, NULL)) != -1)
     {
       switch (c)
@@ -144,6 +150,9 @@ main (int argc, char **argv)
 	  break;
 	case 'i':
 	  image = optarg;
+	  break;
+	case 'n':
+	  name = optarg;
 	  break;
 	case 's':
 	  socket = optarg;
@@ -190,7 +199,7 @@ main (int argc, char **argv)
 		      "too large delay value (greater than %d)", DELAY_MAX);
     }
 
-  if (check_memory && image)
+  if (check_memory && (image || name))
     usage (stderr);
 
   status = set_thresholds (&my_threshold, warning, critical);
@@ -219,8 +228,8 @@ main (int argc, char **argv)
   else
     {
       unsigned int containers;
-      docker_running_containers (socket, &containers, image, &perfdata_msg,
-		 		 verbose);
+      docker_running_containers (socket, &containers, image, name,
+				 &perfdata_msg, verbose);
       status = get_status (containers, my_threshold);
       status_msg = image ?
 	xasprintf ("%s: %u running container(s) of type \"%s\"",
