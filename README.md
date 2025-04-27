@@ -107,8 +107,8 @@ This package is known to compile with:
 * gcc 4.1 (RHEL 5 / CentOS 5),
 * gcc 4.4 (RHEL6 / CentOS 6),
 * gcc 4.8 (RHEL7 / CentOS 7),
-* gcc 3.x, 5.1, 5.3, 6.3, 7-14 (openmamba GNU/Linux, Debian 8+, Fedora 25+),
-* clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10-19 (openmamba GNU/Linux, Fedora 25+),
+* gcc 3.x, 5.1, 5.3, 6.3, 7-15 (openmamba GNU/Linux, Debian 8+, Fedora 25+),
+* clang 3.7, 3.8, 4.9, 5, 6, 7, 8, 10-20 (openmamba GNU/Linux, Fedora 25+),
 
 List of the Linux kernels that have been successfully tested:
 * 2.6.18, 2.6.32,
