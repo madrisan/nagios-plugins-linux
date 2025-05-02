@@ -67,6 +67,7 @@ docker_close (chunk_t *chunk)
 typedef struct test_data
 {
   char *image;
+  char *name;
   char *perfdata;
   unsigned int expect_value;
 } test_data;
@@ -80,8 +81,8 @@ test_docker_running_containers (const void *tdata)
   unsigned int containers;
 
   err =
-    docker_running_containers (NULL, &containers, data->image, &perfdata,
-			       false);
+    docker_running_containers (NULL, &containers, data->image, data->name,
+			       &perfdata, false);
   if (err != 0)
     {
       free (perfdata);
@@ -100,11 +101,12 @@ mymain (void)
 {
   int ret = 0;
 
-#define DO_TEST(MSG, IMAGE, PERFDATA, EXPECT_VALUE)                  \
+#define DO_TEST(MSG, IMAGE, NAME, PERFDATA, EXPECT_VALUE)            \
   do                                                                 \
     {                                                                \
       test_data data = {                                             \
         .image = IMAGE,                                              \
+        .name = NAME,                                                \
         .perfdata = PERFDATA,                                        \
         .expect_value = EXPECT_VALUE                                 \
       };                                                             \
@@ -113,11 +115,11 @@ mymain (void)
     }                                                                \
   while (0)
 
-  DO_TEST ("check running containers with image set", "nginx",
+  DO_TEST ("check running containers with image set", "nginx", NULL,
 	   "containers_nginx=3", 3);
-  DO_TEST ("check running containers with image set", "redis",
+  DO_TEST ("check running containers with image set", "redis", NULL,
 	   "containers_redis=1", 1);
-  DO_TEST ("check running containers", NULL,
+  DO_TEST ("check running containers", NULL, NULL,
 	   "containers_redis=1 containers_nginx=3 containers_total=4", 4);
 
   return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

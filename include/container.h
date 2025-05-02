@@ -81,8 +81,8 @@ extern "C"
     struct docker_memory_desc *memdesc);
 
   int docker_running_containers (char *socket, unsigned int *count,
-		  		 const char *image, char **perfdata,
-				 bool verbose);
+				 const char *image, const char *name,
+				 char **perfdata, bool verbose);
   int docker_running_containers_memory (char *socket,
 					long long unsigned int *memory,
 					bool verbose);

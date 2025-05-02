@@ -269,8 +269,8 @@ docker_api_call (char *socket, chunk_t *chunk,
 /* Returns the number of running Docker/Podman containers grouped by images  */
 
 int
-docker_running_containers (char *socket, unsigned int *count,
-			   const char *image, char **perfdata, bool verbose)
+docker_running_containers (char *socket, unsigned int *count, const char *image,
+			   const char *name, char **perfdata, bool verbose)
 {
   chunk_t chunk;
 #ifndef NPL_TESTING
