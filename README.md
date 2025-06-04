@@ -126,9 +126,9 @@ The `.apk`, `.rpm` and `.deb` packages for Alpine, CentOS/RHEL, Debian, and Fedo
 
 Command              | Distribution
 -------------------- | ------------
-Alpine 3.19          | `make -C packages alpine-3.19`
 Alpine 3.20          | `make -C packages alpine-3.20`
 Alpine 3.21          | `make -C packages alpine-3.21`
+Alpine 3.22          | `make -C packages alpine-3.22`
 CentOS Stream 8      | `make -C packages centos-stream-8`
 CentOS Stream 9      | `make -C packages centos-stream-9`
 Debian 10 (Buster)   | `make -C packages debian-buster`

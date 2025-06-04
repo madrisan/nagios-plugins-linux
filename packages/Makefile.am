@@ -33,10 +33,10 @@ MULTIBUILD_OPTS = \
 	--pckver $(PACKAGE_VERSION)
 
 TARGETS_ALPINE = \
-	alpine-3.19 \
 	alpine-3.20 \
-	alpine-3.21
-alpine-latest: alpine-3.21
+	alpine-3.21 \
+	alpine-3.22
+alpine-latest: alpine-3.22
 
 TARGETS_CENTOS_STREAM = \
 	centos-stream-8 centos-stream-9
