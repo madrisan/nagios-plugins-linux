@@ -16,8 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         container:
-          - 'alpine:3.20'
           - 'alpine:3.21'
+          - 'alpine:3.22'
           - 'debian:11'
           - 'debian:12'
           - 'fedora:41'
