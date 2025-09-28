@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2013-2015 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2013-2015,2025 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check for readonly filesystems.
  *
@@ -38,7 +38,7 @@
 #include "progversion.h"
 
 static const char *program_copyright =
-  "Copyright (C) 2013-2015 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
+  "Copyright (C) 2013-2015,2025 Davide Madrisan <" PACKAGE_BUGREPORT ">\n";
 
 /* A file system type to display. */
 
@@ -83,6 +83,7 @@ static struct option const longopts[] = {
   {(char *) "all", no_argument, NULL, 'a'},
   {(char *) "local", no_argument, NULL, 'l'},
   {(char *) "type", required_argument, NULL, 'T'},
+  {(char *) "exclude", no_argument, NULL, 'x'},
   {(char *) "exclude-type", required_argument, NULL, 'X'},
   {(char *) "verbose", no_argument, NULL, 'v'},
   {(char *) "help", no_argument, NULL, GETOPT_HELP_CHAR},
@@ -104,6 +105,8 @@ usage (FILE * out)
 	 out);
   fputs ("  -T, --type=TYPE   limit listing to file systems of type TYPE\n",
 	 out);
+  fputs ("  -x, --exclude   "
+	 "check all but file systems passed as arguments\n", out);
   fputs ("  -X, --exclude-type=TYPE   "
 	 "limit listing to file systems not of type TYPE\n", out);
   fputs ("  -v, --verbose   show details for command-line debugging "
@@ -113,6 +116,8 @@ usage (FILE * out)
   fputs (USAGE_EXAMPLES, out);
   fprintf (out, "  %s -l -T ext3 -T ext4\n", program_name);
   fprintf (out, "  %s -l -X vfat\n", program_name);
+  fprintf (out, "  %s -x /run/credentials/systemd-journald.service /dev/sr0\n",
+	   program_name);
 
   exit (out == stderr ? STATE_UNKNOWN : STATE_OK);
 }
@@ -199,15 +204,28 @@ skip_mount_entry (struct mount_entry *me)
 }
 
 static int
-check_all_entries (char **ro_filesystems)
+check_all_entries (char **ro_filesystems, char **fs_exclude)
 {
   struct mount_entry *me;
   int status = STATE_OK;
+  bool ignore;
   char *p;
+  char **fs;
   size_t len;
 
   for (me = mount_list; me; me = me->me_next)
     {
+      ignore = false;
+      if (fs_exclude)
+	for (fs = fs_exclude; *fs; fs++)
+	  if (STREQ(*fs, me->me_devname) || STREQ(*fs, me->me_mountdir))
+	    {
+	      ignore = true;
+	      break;
+	    }
+      if (ignore)
+	continue;
+
       if (skip_mount_entry (me))
 	continue;
 
@@ -215,6 +233,7 @@ check_all_entries (char **ro_filesystems)
 	printf ("%-10s %s type %s (%s) %s\n",
 		me->me_devname, me->me_mountdir, me->me_type, me->me_opts,
 		(me->me_readonly) ? "<< read-only" : "");
+
       if (me->me_readonly)
 	{
 	  if (*ro_filesystems == NULL)
@@ -262,6 +281,7 @@ check_entry (char const *name)
 int
 main (int argc, char **argv)
 {
+  bool exclude_mode = false;
   int c, i;
   int status = STATE_OK;
   char *ro_filesystems = NULL;
@@ -289,6 +309,9 @@ main (int argc, char **argv)
 	  break;
 	case 'T':
 	  add_fs_type (optarg);
+	  break;
+	case 'x':
+	  exclude_mode = true;
 	  break;
 	case 'X':
 	  add_excluded_fs_type (optarg);
@@ -320,7 +343,7 @@ main (int argc, char **argv)
       }
   }
 
-  if (optind < argc)
+  if (optind < argc && !exclude_mode)
     {
       /* Open each of the given entries to make sure any corresponding
        * partition is automounted.  This must be done before reading the
@@ -333,6 +356,9 @@ main (int argc, char **argv)
 	  close (fd);
 	}
     }
+  else if (optind == argc && exclude_mode)
+    plugin_error (STATE_UNKNOWN, 0,
+		  "the --exclude option requires a list of file systems");
 
   mount_list =
     read_file_system_list ((fs_select_list != NULL
@@ -341,9 +367,9 @@ main (int argc, char **argv)
   if (NULL == mount_list)
     /* Couldn't read the table of mounted file systems. */
     plugin_error (STATE_UNKNOWN, 0,
-                  "cannot read table of mounted file systems");
+		  "cannot read table of mounted file systems");
 
-  if (optind < argc)
+  if (!exclude_mode && optind < argc)
     {
       for (i = optind; i < argc; ++i)
 	{
@@ -365,8 +391,15 @@ main (int argc, char **argv)
       putchar ('\n');
       return status;
     }
-
-  status = check_all_entries (&ro_filesystems);
+  else if (exclude_mode)
+    {
+      char **arg;
+      for (arg = argv + optind; *arg; arg++)
+        printf("remaining argv = %s\n", *arg);
+      status = check_all_entries (&ro_filesystems, argv + optind);
+    }
+  else
+    status = check_all_entries (&ro_filesystems, NULL);
 
   if (STATE_CRITICAL == status)
     {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * License: GPLv3+
- * Copyright (c) 2013 Davide Madrisan <davide.madrisan@gmail.com>
+ * Copyright (c) 2013,2025 Davide Madrisan <davide.madrisan@gmail.com>
  *
  * A Nagios plugin to check for readonly filesystems
  *
@@ -45,25 +45,45 @@
 # endif
 #endif
 
+/*
+ * filesystem     mountpoint
+ * -----------------------------------------
+ * efivarfs       /sys/firmware/efi/efivars
+ * fusectl        /sys/fs/fuse/connections
+ * gvfsd-fuse     /run/user/1000/gvfs
+ * portal         /run/user/1000/doc
+ * systemd-1      /proc/sys/fs/binfmt_misc
+ */
 #ifndef ME_DUMMY
 # define ME_DUMMY(Fs_name, Fs_type)     \
-    (STREQ (Fs_type, "autofs")          \
-     || STREQ (Fs_type, "proc")         \
+   /* for Linux 4.5 */                  \
+    (STREQ (Fs_type, "cgroup2")         \
+   /* for Linux 4.4 */                  \
+     || STREQ (Fs_type, "bfs")          \
+   /* for Linux 4.1 */                  \
+     || STREQ (Fs_type, "tracefs")      \
    /* for Linux 2.6/3.x */              \
      || STREQ (Fs_type, "cgroup")       \
+     || STREQ (Fs_type, "configfs")     \
      || STREQ (Fs_type, "debugfs")      \
      || STREQ (Fs_type, "devpts")       \
+     || STREQ (Fs_type, "devtmpfs")     \
      || STREQ (Fs_type, "fusectl")      \
      || STREQ (Fs_type, "hugetlbfs")    \
      || STREQ (Fs_type, "mqueue")       \
      || STREQ (Fs_type, "pstore")       \
      || STREQ (Fs_type, "rpc_pipefs")   \
      || STREQ (Fs_type, "securityfs")   \
+     || STREQ (Fs_type, "selinuxfs")    \
      || STREQ (Fs_type, "sysfs")        \
    /* Linux 2.4 */                      \
      || STREQ (Fs_type, "devfs")        \
      || STREQ (Fs_type, "binfmt_misc")  \
-     || STREQ (Fs_type, "none"))
+     || STREQ (Fs_type, "none")         \
+   /* Linux 2.1 */                      \
+     || STREQ (Fs_type, "autofs")       \
+   /* Linux 1.3 */                      \
+     || STREQ (Fs_type, "proc"))
 #endif
 
 #ifndef ME_REMOTE
