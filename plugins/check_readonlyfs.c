@@ -295,7 +295,7 @@ main (int argc, char **argv)
   set_program_name (argv[0]);
 
   while ((c = getopt_long (argc, argv,
-          "alT:X:v" GETOPT_HELP_VERSION_STRING, longopts, NULL)) != -1)
+          "alT:xX:v" GETOPT_HELP_VERSION_STRING, longopts, NULL)) != -1)
     {
       switch (c)
 	{
@@ -391,15 +391,10 @@ main (int argc, char **argv)
       putchar ('\n');
       return status;
     }
-  else if (exclude_mode)
-    {
-      char **arg;
-      for (arg = argv + optind; *arg; arg++)
-        printf("remaining argv = %s\n", *arg);
-      status = check_all_entries (&ro_filesystems, argv + optind);
-    }
   else
-    status = check_all_entries (&ro_filesystems, NULL);
+      status =
+	check_all_entries (&ro_filesystems,
+			   exclude_mode ? argv + optind : NULL);
 
   if (STATE_CRITICAL == status)
     {
