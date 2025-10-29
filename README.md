@@ -134,9 +134,9 @@ CentOS Stream 9      | `make -C packages centos-stream-9`
 Debian 10 (Buster)   | `make -C packages debian-buster`
 Debian 11 (Bullseye) | `make -C packages debian-bullseye`
 Debian 12 (Bookworm) | `make -C packages debian-bookworm`
-Fedora 40            | `make -C packages fedora-40`
 Fedora 41            | `make -C packages fedora-41`
 Fedora 42            | `make -C packages fedora-42`
+Fedora 43            | `make -C packages fedora-43`
 Fedora Rawhide       | `make -C packages fedora-rawhide`
 Rocky Linux 8        | `make -C packages rockylinux-8`
 Rocky Linux 9        | `make -C packages rockylinux-9`
