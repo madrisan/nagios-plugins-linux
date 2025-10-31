@@ -43,11 +43,11 @@ TARGETS_CENTOS_STREAM = \
 centos-stream-latest: centos-stream-9
 
 TARGETS_DEBIAN = \
-	debian-buster debian-bullseye debian-bookworm
-debian-10: debian-buster
+	debian-bullseye debian-bookworm debian-trixie
 debian-11: debian-bullseye
 debian-12: debian-bookworm
-debian-latest: debian-bookworm
+debian-13: debian-trixie
+debian-latest: debian-trixie
 
 TARGETS_FEDORA = \
 	fedora-41 fedora-42 fedora-43 \

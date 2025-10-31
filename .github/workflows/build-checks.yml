@@ -18,8 +18,8 @@ jobs:
         container:
           - 'alpine:3.21'
           - 'alpine:3.22'
-          - 'debian:11'
           - 'debian:12'
+          - 'debian:13'
           - 'fedora:42'
           - 'fedora:43'
           - 'gentoo/stage3:latest'

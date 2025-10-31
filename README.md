@@ -131,9 +131,9 @@ Alpine 3.21          | `make -C packages alpine-3.21`
 Alpine 3.22          | `make -C packages alpine-3.22`
 CentOS Stream 8      | `make -C packages centos-stream-8`
 CentOS Stream 9      | `make -C packages centos-stream-9`
-Debian 10 (Buster)   | `make -C packages debian-buster`
 Debian 11 (Bullseye) | `make -C packages debian-bullseye`
 Debian 12 (Bookworm) | `make -C packages debian-bookworm`
+Debian 13 (Trixie)   | `make -C packages debian-trixie`
 Fedora 41            | `make -C packages fedora-41`
 Fedora 42            | `make -C packages fedora-42`
 Fedora 43            | `make -C packages fedora-43`
