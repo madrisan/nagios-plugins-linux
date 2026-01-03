@@ -1,6 +1,6 @@
 #!/bin/bash
 # Multi-platform build system
-# Copyright (C) 2016-2024 Davide Madrisan <davide.madrisan@gmail.com>
+# Copyright (C) 2016-2026 Davide Madrisan <davide.madrisan@gmail.com>
 
 PROGNAME="${0##*/}"
 PROGPATH="${0%/*}"
@@ -8,6 +8,7 @@ REVISION=3
 
 die () { echo -e "$PROGNAME: error: $1" 1>&2; exit 1; }
 msg () { echo "*** info: $1"; }
+msg_debug () { echo "*** debug: $1"; }
 
 docker_helpers="$PROGPATH/docker-shell-helpers/docker-shell-helpers.sh"
 
@@ -33,11 +34,10 @@ Where:
    -u|--uid    : user ID of the user 'developer' used for building the software
 
 Supported distributions:
-   Alpine Linux 17-19
-   CentOS 5-8
+   Alpine Linux 21-23
    CentOS Stream 8, 9
-   Debian 9-12
-   Fedora 33-38/rawhide
+   Debian 11-13
+   Fedora 41-43/rawhide
    Rocky Linux 8, 9
 
 Example:
@@ -53,7 +53,7 @@ __EOF
 help () {
    cat <<__EOF
 $PROGNAME v$REVISION - containerized software build checker
-Copyright (C) 2016-2023 Davide Madrisan <davide.madrisan@gmail.com>
+Copyright (C) 2016-2026 Davide Madrisan <davide.madrisan@gmail.com>
 
 __EOF
 
@@ -104,6 +104,9 @@ IFS="$IFS_save"
 ([ "$shared_disk_host" ] && [ "$shared_disk_container" ]) ||
    die "bad syntax for --shared"
 
+msg_debug "shared_disk_host is $shared_disk_host"
+msg_debug "shared_disk_container is $shared_disk_container"
+
 if [ "$usr_specfile" ]; then
    specfile="$(readlink -f "$usr_specfile")"
    case "$specfile" in
@@ -122,6 +125,9 @@ if [ "$usr_targetdir" ]; then
 fi
 
 msg "instantiating a new container based on $usr_os ..."
+msg_debug "\
+executing: container_create --random-name --os $usr_os \
+--disk $shared_disk_host:$shared_disk_container"
 container="$(container_create --random-name --os "$usr_os" \
                 --disk "$shared_disk_host:$shared_disk_container")" ||
    die "failed to create a new container with os $usr_os"
