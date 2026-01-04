@@ -1,3 +1,60 @@
+## Version 35
+### Jan 3rd, 2026
+
+#### FIXES
+
+##### Build
+
+ * Fix configure on Fedora 42 (missing gawk).
+
+##### Libraries
+
+ * Fix warnings spotted out by scan-build.
+
+##### Plugins
+
+ * `check_memory`: fix warnings reported by clang.
+
+##### Test framework
+
+ * Fix warnings reported by scan-build (clang).
+
+#### ENHANCEMENTS
+
+##### Documentation
+
+ * Tested with gcc 15.0.1 and clang 20.1.3
+ * Add a badge with the total number of downloads.
+
+##### Package creation
+
+ * Add Linux Alpine 3.23, 3.22 and drop version 3.18, 3.19, 3.20
+ * Add Debian 13, drop Debian 10
+ * Add Fedora 41, 42 and Fedora 43, drop Fedora 38, 39, and 40
+
+##### Plugin check_readonlyfs
+
+ * New option -x/--explude to check all but file systems passed as arguments.
+   Feature asked by [Michael Wolf ((michaeldcwolf)](https://github.com/michaeldcwolf)
+
+### GIT DIFF
+```
+ .github/workflows/build-checks.yml | 23 +++++++++++++++--------
+ NEWS.md                            | 56 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ README.md                          | 21 +++++++++++----------
+ VERSION                            |  2 +-
+ lib/json_helpers.c                 |  2 +-
+ lib/mountlist.c                    | 28 ++++++++++++++++++++++++----
+ lib/xstrton.c                      |  2 +-
+ packages/Makefile.am               | 20 ++++++++++----------
+ packages/multibuild.sh             | 18 ++++++++++++------
+ plugins/check_memory.c             |  4 ++--
+ plugins/check_readonlyfs.c         | 46 +++++++++++++++++++++++++++++++++++++---------
+ tests/tslibxstrton_agetollint.c    |  3 ++-
+ tests/tslibxstrton_sizetollint.c   |  3 ++-
+ 13 files changed, 174 insertions(+), 54 deletions(-)
+```
+
 ## Version 34 ("Heatwaves")
 ### Aug 8th, 2024
 
