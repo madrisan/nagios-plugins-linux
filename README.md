@@ -9,7 +9,7 @@
 [![Coverity Scan Build Status](https://img.shields.io/coverity/scan/3779.svg)](https://scan.coverity.com/projects/madrisan-nagios-plugins-linux)
 ![GitHub All Releases](https://img.shields.io/github/downloads/madrisan/nagios-plugins-linux/total.svg?style=flat-square)
 
-<a href='https://ko-fi.com/K3K57TH3' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi2.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+<a href='https://ko-fi.com/K3K57TH3' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.buymeacoffee.com/buttons/default-orange.png' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 <a href='http://amzn.eu/8axPDQ1'><img height='36' src='https://images.freeimages.com/fic/images/icons/2229/social_media_mini/48/amazon.png' border='0' alt='Wish List at Amazon.fr' /></a>
 
 *This project provides several plugins for monitoring physical and virtual Linux hosts with [Nagios](http://www.nagios.org/) and Nagios-compatible monitoring systems like [Icinga](https://icinga.com/learn/) and [Naemon](https://www.naemon.org/).*
