@@ -22,6 +22,7 @@
 
 #include <errno.h>
 #include <ifaddrs.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
