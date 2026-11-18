@@ -1,3 +1,13 @@
+## Version 36
+### Unreleased
+
+#### FIXES
+
+##### Plugins
+
+ * `check_readonlyfs`: fix a use-after-free when more than one read-only
+   filesystem is found.
+
 ## Version 35
 ### Jan 3rd, 2026
 
