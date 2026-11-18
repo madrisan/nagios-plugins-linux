@@ -241,8 +241,11 @@ check_all_entries (char **ro_filesystems, char **fs_exclude)
 	  else
 	    {
 	      len = strlen (*ro_filesystems) + strlen (me->me_mountdir) + 2;
+	      /* append in place: after xrealloc() the old pointer may have
+	         been freed, and must not be used as a sprintf() source */
 	      p = xrealloc (*ro_filesystems, len);
-	      sprintf (p, "%s %s", *ro_filesystems, me->me_mountdir);
+	      strcat (p, " ");
+	      strcat (p, me->me_mountdir);
 	      *ro_filesystems = p;
 	    }
 	  status = STATE_CRITICAL;
